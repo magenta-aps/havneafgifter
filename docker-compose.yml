@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+version: "3.4"
+services:
+
+  havneafgifter:
+    user: "75130:1000"  # Override in docker-compose.override.yml if your local user is different
+    container_name: havneafgifter
+    image: havneafgifter:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    env_file:
+      - ./dev-environment/havneafgifter.env
+    depends_on:
+      - havneafgifter-db
+    volumes:
+      - ./havneafgifter/:/app
+      - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
+      - ./log/havneafgifter.log:/log/havneafgifter.log:rw
+    environment:
+      - MAKE_MIGRATIONS=true
+      - MIGRATE=true
+      - TEST=false
+    network_mode: "host"
+    command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
+
+  havneafgifter-db:
+    # Do not set `user` here
+    container_name: havneafgifter-db
+    image: postgres:16
+    env_file:
+      - ./dev-environment/havneafgifter.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    network_mode: "host"
+
+volumes:
+  postgres-data:
+  file-data:
