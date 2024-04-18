@@ -1,5 +1,7 @@
-from django.urls import include, path
+from typing import List
 
-urlpatterns = [
+from django.urls import URLPattern, URLResolver, include, path
+
+urlpatterns: List[URLResolver | URLPattern] = [
     path("havneafgifter/", include("havneafgifter.urls")),
 ]

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-05 10:48-0200\n"
+"POT-Creation-Date: 2024-04-18 07:53-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,3 +17,259 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: havneafgifter/models.py
+msgid "Name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Email address"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Port authority company name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Port authority contact email"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Port name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Denmark"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Freighter"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Fishing ship"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Passenger ship"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Cruise ship"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Form submission date"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Port of call"
+msgstr "Umiarsualivik nunaliffik"
+
+#: havneafgifter/models.py
+msgid "Vessel nationality"
+msgstr "Sumiuussuseq"
+
+#: havneafgifter/models.py
+msgid "Vessel name"
+msgstr "Angallat"
+
+#: havneafgifter/models.py
+msgid "IMO-number"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Vessel owner"
+msgstr "Piginnittoq"
+
+#: havneafgifter/models.py
+msgid "Vessel captain"
+msgstr "Umiarsuup naalagaa"
+
+#: havneafgifter/models.py
+msgid "Shipping agent"
+msgstr "Umiarsuaatileqatigiiffik"
+
+#: havneafgifter/models.py
+msgid "Arrival date"
+msgstr "Piffisasaq nunaliffik"
+
+#: havneafgifter/models.py
+msgid "Departure date"
+msgstr "Piffissaq aallarfissaq"
+
+#: havneafgifter/models.py
+msgid "Gross tonnage"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Vessel type"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Calculated harbour tax"
+msgstr "Umiarsualivimmiinner mut akitsuut"
+
+#: havneafgifter/models.py
+msgid "Number of passengers"
+msgstr "Ilaasut amerlassusaat"
+
+#: havneafgifter/models.py
+msgid "Calculated passenger tax"
+msgstr "Illasunut akitsuut"
+
+#: havneafgifter/models.py
+msgid "Australia"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Austria"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Belgium"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Canada"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "China"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Czech Republic"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Finland"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "France"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Germany"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "United Kingdom"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Greenland"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Hong Kong"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Iceland"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Indonesia"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Italy"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Japan"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Luxembourg"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Malaysia"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Netherlands"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "New Zealand"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Norway"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Poland"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Russia"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Singapore"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "South Korea"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Spain"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Sweden"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Switzerland"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Taiwan"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "United States of America"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Other asian country"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Other European country"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Other"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Nationality"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Number of passengers from nationality"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Northeast Greenland National Park"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Disembarkment site"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Municipality"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Number of passengers disembarking"
+msgstr ""

@@ -20,11 +20,11 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Name"
-msgstr "Navn"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Email address"
-msgstr "Email-adresse"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Port authority company name"
@@ -40,95 +40,95 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Denmark"
-msgstr "Danmark"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Freighter"
-msgstr "Fragtskib"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Fishing ship"
-msgstr "Fiskerbåd"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Passenger ship"
-msgstr "Passagerskib"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Cruise ship"
-msgstr "Krydstogtskib"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Form submission date"
-msgstr "Indberetningsdato"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Port of call"
-msgstr "Ankomsthavn"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Vessel nationality"
-msgstr "Skibets nationalitet"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Vessel name"
-msgstr "Skibets navn"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "IMO-number"
-msgstr "IMO-nummer"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Vessel owner"
-msgstr "Skibets ejer"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Vessel captain"
-msgstr "Skibets kaptajn"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Shipping agent"
-msgstr "Shippingagent"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Arrival date"
-msgstr "Ankomstdato"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Departure date"
-msgstr "Afgangsdato"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Gross tonnage"
-msgstr "Bruttotonnage"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Vessel type"
-msgstr "Skibets type"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Calculated harbour tax"
-msgstr "Beregnet havneafgift"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Number of passengers"
-msgstr "Antal passagerer"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Calculated passenger tax"
-msgstr "Beregnet passagerafgift"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Australia"
-msgstr "Australien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Austria"
-msgstr "Østrig"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Belgium"
-msgstr "Belgien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Canada"
@@ -136,11 +136,11 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "China"
-msgstr "Kina"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Czech Republic"
-msgstr "Tjekkiet"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Finland"
@@ -148,19 +148,19 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "France"
-msgstr "Frankrig"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Germany"
-msgstr "Tyskland"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "United Kingdom"
-msgstr "Storbritannien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Greenland"
-msgstr "Grønland"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Hong Kong"
@@ -168,15 +168,15 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Iceland"
-msgstr "Island"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Indonesia"
-msgstr "Indonesien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Italy"
-msgstr "Italien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Japan"
@@ -188,11 +188,11 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Malaysia"
-msgstr "Malaysien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Netherlands"
-msgstr "Nederlandene"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "New Zealand"
@@ -200,15 +200,15 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Norway"
-msgstr "Norge"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Poland"
-msgstr "Polen"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Russia"
-msgstr "Rusland"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Singapore"
@@ -216,19 +216,19 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "South Korea"
-msgstr "Sydkorea"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Spain"
-msgstr "Spanien"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Sweden"
-msgstr "Sverige"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Switzerland"
-msgstr "Schweiz"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Taiwan"
@@ -236,40 +236,40 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "United States of America"
-msgstr "USA"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Other asian country"
-msgstr "Andet asiatisk land"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Other European country"
-msgstr "Andet europæisk land"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Other"
-msgstr "Andet land"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Nationality"
-msgstr "Nationalitet"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Number of passengers from nationality"
-msgstr "Antal passagerer fra nationaliteten"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Northeast Greenland National Park"
-msgstr "Nordøstgrønlands nationalpark"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Disembarkment site"
-msgstr "Landingssted"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Municipality"
-msgstr "Kommune"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Number of passengers disembarking"
-msgstr "Antal passagerer afskibet"
+msgstr ""
