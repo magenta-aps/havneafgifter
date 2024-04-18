@@ -23,8 +23,10 @@ services:
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
+      - LOAD_FIXTURES=true
       - TEST=false
-    network_mode: "host"
+    ports:
+      - "8000:8000"
     command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   havneafgifter-db:
@@ -35,7 +37,8 @@ services:
       - ./dev-environment/havneafgifter.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    network_mode: "host"
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres-data:
