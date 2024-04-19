@@ -206,3 +206,25 @@ Django check:
   script:
     - cd /app
     - python manage.py check havneafgifter
+
+
+# Release stage
+###############
+
+Release image:
+  stage: release
+  image: alpine
+  needs: ["Unittest"]
+  variables:
+    GIT_STRATEGY: none # We do not need the source code
+  dependencies: []
+  extends:
+    - .rules:semver-all
+  before_script:
+    - apk add skopeo
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${IMAGE_SHA}"
+      "docker://${IMAGE_TAG}"
