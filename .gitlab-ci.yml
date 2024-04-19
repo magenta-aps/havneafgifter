@@ -168,9 +168,7 @@ Build image:
     POSTGRES_DB: havneafgifter
     POSTGRES_HOST: havneafgifter-db
     ENVIRONMENT: development
-    DJANGO_LANGUAGE_COOKIE_DOMAIN: localhost
   image: ${IMAGE_SHA}
-
   before_script:
     - mkdir "${CI_PROJECT_DIR}/coverage_output"
   artifacts:
@@ -183,10 +181,19 @@ Unittest:
   <<: *test-default
   script:
     - cd /app
+    - echo "CI_PROJECT_DIR = ${CI_PROJECT_DIR}"
+    - echo "${PWD}"
+    - ls -al
     - coverage run manage.py test
-    - coverage report --show-missing
-    - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
-    - cp -r ./havneafgifter ./project "${CI_PROJECT_DIR}/coverage_output/"
+    - coverage combine
+    - coverage report --show-missing --fail-under=100
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: /app/coverage.xml
 
 Mypy:
   <<: *test-default
@@ -199,23 +206,3 @@ Django check:
   script:
     - cd /app
     - python manage.py check havneafgifter
-
-.coverage-default: &coverage-default
-  stage: coverage
-  needs: ["Unittest"]
-  image: ${IMAGE_SHA}
-
-Check coverage:
-  <<: *coverage-default
-  before_script:
-    - cd "${CI_PROJECT_DIR}/coverage_output/"
-    - coverage combine
-  script:
-    - coverage report -i --show-missing --fail-under=86
-    - coverage xml
-  coverage: '/^TOTAL.+?(\d+\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: "${CI_PROJECT_DIR}/coverage_output/coverage.xml"

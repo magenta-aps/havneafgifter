@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from havneafgifter.models import Port, PortAuthority
+from havneafgifter.models import Port, PortAuthority, PortTaxRate, ShipType, TaxRates
 
 
 class Command(BaseCommand):
@@ -45,4 +45,52 @@ class Command(BaseCommand):
             )
             Port.objects.get_or_create(
                 name=port_name, defaults={"portauthority": authority}
+            )
+
+    def load_rates(self):
+        if not TaxRates.objects.exists():
+            tax_rates = TaxRates.objects.create(
+                pax_tax_rate=0,
+                start_date=None,
+                end_date=None,
+            )
+            PortTaxRate.objects.create(
+                tax_rates=tax_rates,
+                port=None,
+                vessel_type=None,
+                gt_start=0,
+                gt_end=None,
+                port_tax_rate=70,
+            )
+            PortTaxRate.objects.create(
+                tax_rates=tax_rates,
+                port=None,
+                vessel_type=ShipType.CRUISE,
+                gt_start=0,
+                gt_end=30_000,
+                port_tax_rate=110,
+            )
+            PortTaxRate.objects.create(
+                tax_rates=tax_rates,
+                port=None,
+                vessel_type=ShipType.CRUISE,
+                gt_start=30_000,
+                gt_end=None,
+                port_tax_rate=220,
+            )
+            PortTaxRate.objects.create(
+                tax_rates=tax_rates,
+                port=Port.objects.get(name="Nuuk"),
+                vessel_type=ShipType.CRUISE,
+                gt_start=0,
+                gt_end=30_000,
+                port_tax_rate=0,
+            )
+            PortTaxRate.objects.create(
+                tax_rates=tax_rates,
+                port=Port.objects.get(name="Nuuk"),
+                vessel_type=ShipType.CRUISE,
+                gt_start=30_000,
+                gt_end=None,
+                port_tax_rate=110,
             )

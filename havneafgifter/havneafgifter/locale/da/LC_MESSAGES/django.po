@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-18 07:53-0100\n"
+"POT-Creation-Date: 2024-04-18 10:51-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,30 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: havneafgifter/models.py
-msgid "Name"
-msgstr "Navn"
-
-#: havneafgifter/models.py
-msgid "Email address"
-msgstr "Email-adresse"
-
-#: havneafgifter/models.py
-msgid "Port authority company name"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Port authority contact email"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Port name"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Denmark"
-msgstr "Danmark"
 
 #: havneafgifter/models.py
 msgid "Freighter"
@@ -57,66 +33,6 @@ msgstr "Passagerskib"
 #: havneafgifter/models.py
 msgid "Cruise ship"
 msgstr "Krydstogtskib"
-
-#: havneafgifter/models.py
-msgid "Form submission date"
-msgstr "Indberetningsdato"
-
-#: havneafgifter/models.py
-msgid "Port of call"
-msgstr "Ankomsthavn"
-
-#: havneafgifter/models.py
-msgid "Vessel nationality"
-msgstr "Skibets nationalitet"
-
-#: havneafgifter/models.py
-msgid "Vessel name"
-msgstr "Skibets navn"
-
-#: havneafgifter/models.py
-msgid "IMO-number"
-msgstr "IMO-nummer"
-
-#: havneafgifter/models.py
-msgid "Vessel owner"
-msgstr "Skibets ejer"
-
-#: havneafgifter/models.py
-msgid "Vessel captain"
-msgstr "Skibets kaptajn"
-
-#: havneafgifter/models.py
-msgid "Shipping agent"
-msgstr "Shippingagent"
-
-#: havneafgifter/models.py
-msgid "Arrival date"
-msgstr "Ankomstdato"
-
-#: havneafgifter/models.py
-msgid "Departure date"
-msgstr "Afgangsdato"
-
-#: havneafgifter/models.py
-msgid "Gross tonnage"
-msgstr "Bruttotonnage"
-
-#: havneafgifter/models.py
-msgid "Vessel type"
-msgstr "Skibets type"
-
-#: havneafgifter/models.py
-msgid "Calculated harbour tax"
-msgstr "Beregnet havneafgift"
-
-#: havneafgifter/models.py
-msgid "Number of passengers"
-msgstr "Antal passagerer"
-
-#: havneafgifter/models.py
-msgid "Calculated passenger tax"
-msgstr "Beregnet passagerafgift"
 
 #: havneafgifter/models.py
 msgid "Australia"
@@ -141,6 +57,10 @@ msgstr "Kina"
 #: havneafgifter/models.py
 msgid "Czech Republic"
 msgstr "Tjekkiet"
+
+#: havneafgifter/models.py
+msgid "Denmark"
+msgstr "Danmark"
 
 #: havneafgifter/models.py
 msgid "Finland"
@@ -251,16 +171,96 @@ msgid "Other"
 msgstr "Andet land"
 
 #: havneafgifter/models.py
+msgid "Northeast Greenland National Park"
+msgstr "Nordøstgrønlands nationalpark"
+
+#: havneafgifter/models.py
+msgid "Name"
+msgstr "Navn"
+
+#: havneafgifter/models.py
+msgid "Email address"
+msgstr "Email-adresse"
+
+#: havneafgifter/models.py
+msgid "Port authority company name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Port authority contact email"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Port name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Form submission date"
+msgstr "Indberetningsdato"
+
+#: havneafgifter/models.py
+msgid "Port of call"
+msgstr "Ankomsthavn"
+
+#: havneafgifter/models.py
+msgid "Vessel nationality"
+msgstr "Skibets nationalitet"
+
+#: havneafgifter/models.py
+msgid "Vessel name"
+msgstr "Skibets navn"
+
+#: havneafgifter/models.py
+msgid "IMO-number"
+msgstr "IMO-nummer"
+
+#: havneafgifter/models.py
+msgid "Vessel owner"
+msgstr "Skibets ejer"
+
+#: havneafgifter/models.py
+msgid "Vessel captain"
+msgstr "Skibets kaptajn"
+
+#: havneafgifter/models.py
+msgid "Shipping agent"
+msgstr "Shippingagent"
+
+#: havneafgifter/models.py
+msgid "Arrival date"
+msgstr "Ankomstdato"
+
+#: havneafgifter/models.py
+msgid "Departure date"
+msgstr "Afgangsdato"
+
+#: havneafgifter/models.py
+msgid "Gross tonnage"
+msgstr "Bruttotonnage"
+
+#: havneafgifter/models.py
+msgid "Vessel type"
+msgstr "Skibets type"
+
+#: havneafgifter/models.py
+msgid "Calculated harbour tax"
+msgstr "Beregnet havneafgift"
+
+#: havneafgifter/models.py
+msgid "Number of passengers"
+msgstr "Antal passagerer"
+
+#: havneafgifter/models.py
+msgid "Calculated passenger tax"
+msgstr "Beregnet passagerafgift"
+
+#: havneafgifter/models.py
 msgid "Nationality"
 msgstr "Nationalitet"
 
 #: havneafgifter/models.py
 msgid "Number of passengers from nationality"
 msgstr "Antal passagerer fra nationaliteten"
-
-#: havneafgifter/models.py
-msgid "Northeast Greenland National Park"
-msgstr "Nordøstgrønlands nationalpark"
 
 #: havneafgifter/models.py
 msgid "Disembarkment site"
@@ -273,3 +273,31 @@ msgstr "Kommune"
 #: havneafgifter/models.py
 msgid "Number of passengers disembarking"
 msgstr "Antal passagerer afskibet"
+
+#: havneafgifter/models.py
+#, fuzzy
+#| msgid "Number of passengers"
+msgid "Tax per passenger"
+msgstr "Antal passagerer"
+
+#: havneafgifter/models.py
+msgid "Harbour"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Vessel gross tonnage (lower)"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Vessel gross tonnage (upper)"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Tax per gross ton"
+msgstr ""
+
+#: havneafgifter/models.py
+#, fuzzy
+#| msgid "Disembarkment site"
+msgid "Disembarkment tax rate"
+msgstr "Landingssted"

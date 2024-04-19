@@ -6,7 +6,7 @@ version: "3.4"
 services:
 
   havneafgifter:
-    user: "75130:1000"  # Override in docker-compose.override.yml if your local user is different
+    user: "75170:1000"  # Override in docker-compose.override.yml if your local user is different
     container_name: havneafgifter
     image: havneafgifter:latest
     build:
@@ -24,7 +24,7 @@ services:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - LOAD_FIXTURES=true
-      - TEST=false
+      - TEST=true
     ports:
       - "8000:8000"
     command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
