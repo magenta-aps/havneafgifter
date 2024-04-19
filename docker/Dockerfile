@@ -8,10 +8,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
     mkdir /static && \
     #gid/uid from salt
-    groupadd -g 75130 -r havneafgifter && \
+    groupadd -g 75170 -r havneafgifter && \
     groupadd -g 75100 -r certificate_exporter && \
-    useradd -u 75130 --no-log-init -r -g havneafgifter -G certificate_exporter havneafgifter && \
-    chown havneafgifter:havneafgifter /static
+    useradd -u 75170 --no-log-init -r -g havneafgifter -G certificate_exporter havneafgifter && \
+    chown -R havneafgifter:havneafgifter /static
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
