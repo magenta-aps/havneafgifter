@@ -5,7 +5,12 @@ from django.test import TestCase
 
 from havneafgifter.data import DateRange
 from havneafgifter.models import (
+    CruiseTaxForm,
+    Disembarkment,
+    DisembarkmentSite,
+    DisembarkmentTaxRate,
     HarborDuesForm,
+    Municipality,
     Nationality,
     Port,
     PortTaxRate,
@@ -20,6 +25,12 @@ class CalculationTest(TestCase):
     def setUpTestData(cls):
         Port.objects.create(name="Test1")
         Port.objects.create(name="Test2")
+        DisembarkmentSite.objects.create(
+            name="Klippeskær 5", municipality=Municipality.AVANNAATA
+        )
+        DisembarkmentSite.objects.create(
+            name="Mågeø", municipality=Municipality.QEQQATA
+        )
         cls.tax_rates1 = TaxRates.objects.create(
             pax_tax_rate=0,
             start_date=None,
@@ -160,8 +171,18 @@ class CalculationTest(TestCase):
             gt_end=None,
             port_tax_rate=110,
         )
+        cls.disembarkment_tax1 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rates1,
+            municipality=Municipality.AVANNAATA,
+            disembarkment_tax_rate=Decimal(40),
+        )
+        cls.disembarkment_tax2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rates1,
+            municipality=Municipality.QEQQATA,
+            disembarkment_tax_rate=Decimal(30),
+        )
         ShippingAgent.objects.create(name="Birgers Bodega", email="birger@hotmail.com")
-        cls.harborduesform1 = HarborDuesForm.objects.create(
+        cls.harborduesform1 = CruiseTaxForm.objects.create(
             port_of_call=Port.objects.get(name="Test1"),
             nationality=Nationality.DENMARK,
             vessel_name="Dødssejler of Luxury",
@@ -172,9 +193,10 @@ class CalculationTest(TestCase):
             date_of_departure=date(2025, 2, 15),
             gross_tonnage=40_000,
             vessel_type=ShipType.CRUISE,
+            number_of_passengers=100,
         )
 
-        cls.harborduesform2 = HarborDuesForm.objects.create(
+        cls.harborduesform2 = CruiseTaxForm.objects.create(
             port_of_call=Port.objects.get(name="Test2"),
             nationality=Nationality.DENMARK,
             vessel_name="Dødssejler of Luxury",
@@ -185,6 +207,7 @@ class CalculationTest(TestCase):
             date_of_departure=date(2025, 2, 15),
             gross_tonnage=40_000,
             vessel_type=ShipType.CRUISE,
+            number_of_passengers=100,
         )
 
         cls.harborduesform3 = HarborDuesForm.objects.create(
@@ -198,6 +221,17 @@ class CalculationTest(TestCase):
             date_of_departure=date(2025, 2, 15),
             gross_tonnage=50_000,
             vessel_type=ShipType.FREIGHTER,
+        )
+
+        cls.disembarkment1 = Disembarkment.objects.create(
+            cruise_tax_form=cls.harborduesform1,
+            number_of_passengers=10,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Klippeskær 5"),
+        )
+        cls.disembarkment2 = Disembarkment.objects.create(
+            cruise_tax_form=cls.harborduesform1,
+            number_of_passengers=20,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Mågeø"),
         )
 
     def test_taxrates_overlap(self):
@@ -272,6 +306,8 @@ class CalculationTest(TestCase):
                 "harbour_tax": Decimal("1650.00"),  # 15 days * 110 kr
             },
         )
+        self.harborduesform1.refresh_from_db()
+        self.assertEqual(self.harborduesform1.harbour_tax, Decimal("10340.00"))
 
     def test_calculate_harbour_tax_2(self):
         calculation: dict = self.harborduesform2.calculate_harbour_tax()
@@ -303,6 +339,8 @@ class CalculationTest(TestCase):
                 "harbour_tax": Decimal("3300.00"),  # 15 days * 220 kr
             },
         )
+        self.harborduesform2.refresh_from_db()
+        self.assertEqual(self.harborduesform2.harbour_tax, Decimal("20680.00"))
 
     def test_calculate_harbour_tax_3(self):
         calculation: dict = self.harborduesform3.calculate_harbour_tax()
@@ -334,3 +372,30 @@ class CalculationTest(TestCase):
                 "harbour_tax": Decimal("1050.00"),  # 15 days * 70 kr
             },
         )
+        self.harborduesform3.refresh_from_db()
+        self.assertEqual(self.harborduesform3.harbour_tax, Decimal("6580.00"))
+
+    def test_calculate_disembarkment_tax(self):
+        calculation = self.harborduesform1.calculate_disembarkment_tax()
+        self.assertEqual(calculation["disembarkment_tax"], Decimal("1000.00"))
+        self.assertEqual(len(calculation["details"]), 2)
+        self.assertDictEqual(
+            calculation["details"][0],
+            {
+                "disembarkment": self.disembarkment1,
+                "date": date(2024, 12, 15),
+                "taxrate": self.disembarkment_tax1,
+                "tax": Decimal("400.00"),  # 100 people * 40 kr
+            },
+        )
+        self.assertDictEqual(
+            calculation["details"][1],
+            {
+                "disembarkment": self.disembarkment2,
+                "date": date(2024, 12, 15),
+                "taxrate": self.disembarkment_tax2,
+                "tax": Decimal("600.00"),  # 20 people * 30 kr
+            },
+        )
+        self.harborduesform1.refresh_from_db()
+        self.assertEqual(self.harborduesform1.disembarkment_tax, Decimal("1000.00"))
