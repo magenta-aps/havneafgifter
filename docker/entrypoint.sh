@@ -33,7 +33,9 @@ python manage.py collectstatic --no-input --clear
 
 if [ "${TEST,,}" = true ]; then
   echo 'running tests'
-  python manage.py test
+  coverage run manage.py test
+  coverage combine
+  coverage report --show-missing
 fi
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'

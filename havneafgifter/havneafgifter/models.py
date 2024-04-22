@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import re
+from datetime import date, timedelta
+from decimal import Decimal
+from typing import Dict, List
 
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -9,9 +12,11 @@ from django.core.validators import (
     RegexValidator,
 )
 from django.db import models
-from django.db.models import F, Q, QuerySet
+from django.db.models import F, Q
 from django.db.models.signals import post_save
 from django.utils.translation import gettext as _
+
+from havneafgifter.data import DateRange
 
 
 class ShipType(models.TextChoices):
@@ -211,6 +216,44 @@ class HarborDuesForm(models.Model):
         verbose_name=_("Calculated harbour tax"),
     )
 
+    def calculate_harbour_tax(
+        self, save: bool = True
+    ) -> Dict[str, Decimal | List[dict]]:
+        taxrates = TaxRates.objects.filter(
+            Q(start_date__isnull=True) | Q(start_date__lte=self.date_of_departure),
+            Q(end_date__isnull=True) | Q(end_date__gte=self.date_of_arrival),
+        )
+        harbour_tax = Decimal(0)
+        details = []
+        for taxrate in taxrates:
+            date_range = taxrate.get_overlap(
+                self.date_of_arrival,
+                # Afrejsedagen er inkluderet i range.
+                # TaxRates beregner overlap af datoer fra midnat til midnat,
+                # så for at beregne korrekt overlap skal vi frem til den
+                # efterfølgende midnat for afrejsen
+                self.date_of_departure + timedelta(days=1),
+            )
+            port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
+                port=self.port_of_call,
+                vessel_type=self.vessel_type,
+                gross_ton=self.gross_tonnage,
+            )
+            range_port_tax = Decimal(0)
+            if port_taxrate is not None:
+                range_port_tax = date_range.days * port_taxrate.port_tax_rate
+                harbour_tax += range_port_tax
+            details.append(
+                {
+                    "port_taxrate": port_taxrate,
+                    "date_range": date_range,
+                    "harbour_tax": range_port_tax,
+                }
+            )
+        if save:
+            self.harbour_tax = harbour_tax
+        return {"harbour_tax": harbour_tax, "details": details}
+
 
 class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
@@ -296,18 +339,25 @@ class TaxRates(models.Model):
     )
 
     start_date = models.DateField(
-        null=True,
-        blank=True,
+        null=True, blank=True, verbose_name=_("First day of taking effect")
     )
 
     end_date = models.DateField(
-        null=True,
-        blank=True,
+        null=True, blank=True, verbose_name=_("First day of no longer taking effect")
     )
+
+    @property
+    def last_date(self) -> date | None:
+        if self.end_date is None:
+            return None
+        last_date = self.end_date - timedelta(days=1)
+        if self.start_date is not None and self.start_date > last_date:
+            return self.start_date
+        return last_date
 
     def get_port_tax_rate(
         self, port: Port, vessel_type: str, gross_ton: int
-    ) -> QuerySet:
+    ) -> PortTaxRate | None:
         qs = self.port_tax_rates.filter(gt_start__lte=gross_ton).filter(
             Q(gt_end__gte=gross_ton) | Q(gt_end__isnull=True)
         )
@@ -317,7 +367,14 @@ class TaxRates(models.Model):
                 qs = qs1
             else:
                 qs = qs.filter(**{f"{key}__isnull": True})
-        return qs
+        return qs.first()
+
+    def get_overlap(self, rangestart: date, rangeend: date) -> DateRange:
+        if self.end_date is not None and self.end_date < rangeend:
+            rangeend = self.end_date
+        if self.start_date is not None and self.start_date > rangestart:
+            rangestart = self.start_date
+        return DateRange(rangestart, rangeend)
 
     def save(self, *args, **kwargs):
         super().full_clean()
@@ -386,10 +443,11 @@ class PortTaxRate(models.Model):
     )
 
     port_tax_rate = models.DecimalField(
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         decimal_places=2,
         max_digits=12,
+        default=Decimal(0),
         verbose_name=_("Tax per gross ton"),
     )
 

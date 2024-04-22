@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-18 10:51-0100\n"
+"POT-Creation-Date: 2024-04-22 08:36-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -276,6 +276,14 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Tax per passenger"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "First day of taking effect"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "First day of no longer taking effect"
 msgstr ""
 
 #: havneafgifter/models.py
