@@ -5,3 +5,4 @@ whitenoise==6.0.0
 mypy==1.7.0
 django-stubs[compatible-mypy]==4.2.7
 coverage==7.3.0
+django-bootstrap5==24.1
