@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.forms import ChoiceField, Form, IntegerField, ModelForm, widgets
 from django.utils.translation import gettext_lazy as _
 
-from .models import HarborDuesForm, Nationality
+from .models import DisembarkmentSite, HarborDuesForm, Nationality
 
 
 class HTML5DateWidget(widgets.Input):
@@ -49,3 +49,18 @@ class HarborDuesFormForm(ModelForm):
 class PassengersByCountryForm(Form):
     nationality = ChoiceField(choices=Nationality, disabled=True)
     number_of_passengers = IntegerField()
+
+
+class PassengersByDisembarkmentSiteForm(Form):
+    disembarkment_site = ChoiceField(choices=[], disabled=True)
+    number_of_passengers = IntegerField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["disembarkment_site"].choices = [
+            (ds.pk, str(ds)) for ds in DisembarkmentSite.objects.all()
+        ]
+
+    def clean_disembarkment_site(self):
+        disembarkment_site_pk = self.cleaned_data.get("disembarkment_site")
+        return DisembarkmentSite.objects.get(pk=disembarkment_site_pk)

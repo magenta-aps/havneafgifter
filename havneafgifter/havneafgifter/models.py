@@ -376,6 +376,9 @@ class PassengersByCountry(models.Model):
 
 
 class DisembarkmentSite(models.Model):
+    class Meta:
+        ordering = ["municipality", "name"]
+
     name = models.CharField(
         max_length=100,
         null=False,
@@ -389,6 +392,9 @@ class DisembarkmentSite(models.Model):
         blank=False,
         verbose_name=_("Municipality"),
     )
+
+    def __str__(self) -> str:
+        return f"{self.get_municipality_display()} - {self.name}"
 
 
 class Disembarkment(models.Model):
