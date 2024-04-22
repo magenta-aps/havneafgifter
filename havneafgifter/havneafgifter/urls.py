@@ -1,8 +1,8 @@
 from typing import List
 
 from django.urls import URLPattern, URLResolver, path
-from .views import HarborDuesFormCreateView, PassengerTaxCreateView
 
+from .views import HarborDuesFormCreateView, PassengerTaxCreateView
 
 app_name = "havneafgifter"
 

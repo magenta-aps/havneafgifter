@@ -2,12 +2,17 @@ from django.contrib import messages
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic.edit import CreateView, FormView
 from django.utils.translation import gettext_lazy as _
+from django.views.generic.edit import CreateView, FormView
 
 from .forms import HarborDuesFormForm, PassengersByCountryForm
-from .models import CruiseTaxForm, HarborDuesForm, PassengersByCountry, ShipType
-from .models import Nationality
+from .models import (
+    CruiseTaxForm,
+    HarborDuesForm,
+    Nationality,
+    PassengersByCountry,
+    ShipType,
+)
 
 
 class HarborDuesFormCreateView(CreateView):

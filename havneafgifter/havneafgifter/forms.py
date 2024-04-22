@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.forms import ChoiceField, Form, ModelForm, IntegerField, widgets
+from django.forms import ChoiceField, Form, IntegerField, ModelForm, widgets
 from django.utils.translation import gettext_lazy as _
 
 from .models import HarborDuesForm, Nationality

@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import CruiseTaxForm, HarborDuesForm
-from .models import PassengersByCountry
+from .models import CruiseTaxForm, HarborDuesForm, PassengersByCountry
 
 
 @admin.register(HarborDuesForm)
