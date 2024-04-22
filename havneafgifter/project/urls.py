@@ -12,5 +12,4 @@ urlpatterns: List[URLResolver | URLPattern] = [
             namespace="havneafgifter",
         ),
     ),
-
 ]

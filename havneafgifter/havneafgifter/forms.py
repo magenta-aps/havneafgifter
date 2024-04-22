@@ -1,8 +1,8 @@
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, widgets
+from django.forms import ChoiceField, Form, ModelForm, IntegerField, widgets
 from django.utils.translation import gettext_lazy as _
 
-from .models import HarborDuesForm
+from .models import HarborDuesForm, Nationality
 
 
 class HTML5DateWidget(widgets.Input):
@@ -44,3 +44,8 @@ class HarborDuesFormForm(ModelForm):
                 _("Date of departure cannot be before date of arrival"),
                 code="date_of_departure_before_date_of_arrival",
             )
+
+
+class PassengersByCountryForm(Form):
+    nationality = ChoiceField(choices=Nationality, disabled=True)
+    number_of_passengers = IntegerField()

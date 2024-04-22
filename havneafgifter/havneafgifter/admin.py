@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import HarborDuesForm
+from .models import CruiseTaxForm, HarborDuesForm
+from .models import PassengersByCountry
 
 
 @admin.register(HarborDuesForm)
@@ -25,3 +26,13 @@ class HarborDuesFormAdmin(admin.ModelAdmin):
         "date_of_arrival",
         "date_of_departure",
     ]
+
+
+class PassengersByCountryInlineAdmin(admin.StackedInline):
+    model = PassengersByCountry
+    extra = 0
+
+
+@admin.register(CruiseTaxForm)
+class CruiseTaxFormAdmin(HarborDuesFormAdmin):
+    inlines = [PassengersByCountryInlineAdmin]
