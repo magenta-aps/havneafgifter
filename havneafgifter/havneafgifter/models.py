@@ -252,6 +252,7 @@ class HarborDuesForm(models.Model):
             )
         if save:
             self.harbour_tax = harbour_tax
+            self.save(update_fields=("harbour_tax",))
         return {"harbour_tax": harbour_tax, "details": details}
 
 
@@ -269,6 +270,53 @@ class CruiseTaxForm(HarborDuesForm):
         max_digits=12,
         verbose_name=_("Calculated passenger tax"),
     )
+
+    disembarkment_tax = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=12,
+        verbose_name=_("Calculated disembarkment tax"),
+    )
+
+    def calculate_disembarkment_tax(self, save: bool = True):
+        disembarkment_date = self.date_of_arrival
+        taxrate = TaxRates.objects.filter(
+            Q(start_date__isnull=True) | Q(start_date__lte=disembarkment_date),
+            Q(end_date__isnull=True) | Q(end_date__gte=disembarkment_date),
+        ).first()
+        disembarkment_tax = Decimal(0)
+        details = []
+        for disembarkment in self.disembarkment_set.all():
+            disembarkment_site = disembarkment.disembarkment_site
+            disembarkment_tax_rate: DisembarkmentTaxRate | None = (
+                (
+                    taxrate.disembarkment_tax_rates.filter(
+                        municipality=disembarkment_site.municipality
+                    ).first()
+                )
+                if taxrate
+                else None
+            )
+            tax = Decimal(0)
+            if disembarkment_tax_rate is not None:
+                tax = (
+                    disembarkment.number_of_passengers
+                    * disembarkment_tax_rate.disembarkment_tax_rate
+                )
+                disembarkment_tax += tax
+            details.append(
+                {
+                    "disembarkment": disembarkment,
+                    "date": disembarkment_date,
+                    "taxrate": disembarkment_tax_rate,
+                    "tax": tax,
+                }
+            )
+        if save:
+            self.disembarkment_tax = disembarkment_tax
+            self.save(update_fields=("disembarkment_tax",))
+        return {"disembarkment_tax": disembarkment_tax, "details": details}
 
 
 class PassengersByCountry(models.Model):
