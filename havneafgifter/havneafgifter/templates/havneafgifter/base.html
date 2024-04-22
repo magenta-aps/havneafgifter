@@ -1,0 +1,35 @@
+{% comment %}
+SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+
+SPDX-License-Identifier: MPL-2.0
+{% endcomment %}
+
+{% load static %}
+{% load i18n %}
+{% load django_bootstrap5 %}
+
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>{% block title %}{% translate "Havneafgifter" %}{% endblock %}</title>
+    {% block extra_headers %}
+    {% endblock %}
+</head>
+<body>
+    {% block header %}
+    <header>
+    </header>
+    {% endblock %}
+
+    <div class="container">
+        {% bootstrap_messages %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
