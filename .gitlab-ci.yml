@@ -245,3 +245,24 @@ Release image:
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
       "docker://${IMAGE_SHA}"
       "docker://${IMAGE_TAG}"
+
+# Configure stage
+#################
+
+Configure Test:
+  stage: configure
+  extends:
+    - .rules:semver-all
+    - .config:endpoint-with-tag
+  needs: ["Release image"]
+  variables:
+    ENDPOINT: havneafgifter/salt/update-test
+
+Configure Production:
+  stage: configure
+  extends:
+    - .rules:semver-core
+    - .config:endpoint-with-tag
+  needs: ["Release image"]
+  variables:
+    ENDPOINT: havneafgifter/salt/update-production
