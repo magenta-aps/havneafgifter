@@ -21,6 +21,8 @@ class ModelTest(TestCase):
             start_date=date(2025, 1, 1),
             end_date=None,
         )
+        cls.tax_rates.refresh_from_db()
+        cls.tax_rates2.refresh_from_db()
         PortTaxRate.objects.create(
             tax_rates=cls.tax_rates,
             port=None,
@@ -81,57 +83,54 @@ class ModelTest(TestCase):
         self.assertEqual(
             tax_rates.get_port_tax_rate(
                 Port.objects.get(name="Test1"), ShipType.FREIGHTER, 40_000
-            )
-            .first()
-            .port_tax_rate,
+            ).port_tax_rate,
             70,
         )
 
         self.assertEqual(
             tax_rates.get_port_tax_rate(
                 Port.objects.get(name="Test1"), ShipType.CRUISE, 20_000
-            )
-            .first()
-            .port_tax_rate,
+            ).port_tax_rate,
             110,
         )
 
         self.assertEqual(
             tax_rates.get_port_tax_rate(
                 Port.objects.get(name="Test1"), ShipType.CRUISE, 40_000
-            )
-            .first()
-            .port_tax_rate,
+            ).port_tax_rate,
             220,
         )
 
         self.assertEqual(
             tax_rates.get_port_tax_rate(
                 Port.objects.get(name="Test2"), ShipType.CRUISE, 20_000
-            )
-            .first()
-            .port_tax_rate,
+            ).port_tax_rate,
             0,
         )
 
         self.assertEqual(
             tax_rates.get_port_tax_rate(
                 Port.objects.get(name="Test2"), ShipType.CRUISE, 40_000
-            )
-            .first()
-            .port_tax_rate,
+            ).port_tax_rate,
             110,
         )
 
         self.assertEqual(
             tax_rates.get_port_tax_rate(
                 Port.objects.get(name="Test2"), ShipType.PASSENGER, 40_000
-            )
-            .first()
-            .port_tax_rate,
+            ).port_tax_rate,
             70,
         )
 
     def test_tax_rates_time_update(self):
-        self.tax_rates.refresh_from_db()
         self.assertEqual(self.tax_rates.end_date, date(2025, 1, 1))
+
+    def test_tax_rates_last_date(self):
+        self.assertEqual(self.tax_rates.last_date, date(2024, 12, 31))
+        self.assertIsNone(
+            self.tax_rates2.last_date,
+        )
+        self.assertEqual(
+            TaxRates(start_date=date(2025, 1, 1), end_date=date(2025, 1, 1)).last_date,
+            date(2025, 1, 1),
+        )
