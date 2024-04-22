@@ -62,5 +62,7 @@ class PassengersByDisembarkmentSiteForm(Form):
         ]
 
     def clean_disembarkment_site(self):
-        disembarkment_site_pk = self.cleaned_data.get("disembarkment_site")
-        return DisembarkmentSite.objects.get(pk=disembarkment_site_pk)
+        disembarkment_site = self.cleaned_data.get("disembarkment_site")
+        if isinstance(disembarkment_site, DisembarkmentSite):
+            return disembarkment_site
+        return DisembarkmentSite.objects.get(pk=disembarkment_site)
