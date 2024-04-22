@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_bootstrap5",
     "havneafgifter",
 ]
 
@@ -194,3 +195,9 @@ if os.path.isfile(log_filename) and ENVIRONMENT != "development":
         "level": "INFO",
     }
     LOGGING["loggers"]["django"]["handlers"].append("file")
+
+# django-bootstrap5 configuration
+BOOTSTRAP5 = {
+    "css_url": "/static/bootstrap/bootstrap.min.css",
+    "javascript_url": "/static/bootstrap/bootstrap.bundle.min.js",
+}
