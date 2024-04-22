@@ -140,7 +140,6 @@ class Port(models.Model):
             return self.name
 
 
-
 class HarborDuesForm(models.Model):
     class Country(models.TextChoices):
         DENMARK = "DK", _("Denmark")
