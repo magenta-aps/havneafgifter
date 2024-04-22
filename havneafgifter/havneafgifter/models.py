@@ -74,6 +74,9 @@ class Municipality(models.IntegerChoices):
 
 
 class ShippingAgent(models.Model):
+    class Meta:
+        ordering = ["name"]
+
     name = models.CharField(
         max_length=100,
         null=False,
@@ -87,6 +90,9 @@ class ShippingAgent(models.Model):
         verbose_name=_("Email address"),
     )
 
+    def __str__(self) -> str:
+        return self.name
+
 
 def imo_validator(value: str):
     if len(value) != 7:
@@ -99,6 +105,9 @@ def imo_validator(value: str):
 
 
 class PortAuthority(models.Model):
+    class Meta:
+        ordering = ["name"]
+
     name = models.CharField(
         max_length=32,
         null=False,
@@ -109,14 +118,27 @@ class PortAuthority(models.Model):
         null=False, blank=False, verbose_name=_("Port authority contact email")
     )
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Port(models.Model):
+    class Meta:
+        ordering = ["portauthority__name", "name"]
+
     name = models.CharField(
         max_length=16, null=False, blank=False, verbose_name=_("Port name")
     )
     portauthority = models.ForeignKey(
         PortAuthority, null=True, blank=True, on_delete=models.SET_NULL
     )
+
+    def __str__(self) -> str:
+        if self.portauthority:
+            return f"{self.portauthority} - {self.name}"
+        else:
+            return self.name
+
 
 
 class HarborDuesForm(models.Model):
@@ -215,6 +237,12 @@ class HarborDuesForm(models.Model):
         max_digits=12,
         verbose_name=_("Calculated harbour tax"),
     )
+
+    def __str__(self) -> str:
+        return (
+            f"{self.vessel_name}, {self.port_of_call} "
+            f"({self.date_of_arrival}-{self.date_of_departure})"
+        )
 
     def calculate_harbour_tax(
         self, save: bool = True
