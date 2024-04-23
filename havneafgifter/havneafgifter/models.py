@@ -289,12 +289,8 @@ class CruiseTaxForm(HarborDuesForm):
         details = []
         for disembarkment in self.disembarkment_set.all():
             disembarkment_site = disembarkment.disembarkment_site
-            disembarkment_tax_rate: DisembarkmentTaxRate | None = (
-                (
-                    taxrate.disembarkment_tax_rates.filter(
-                        municipality=disembarkment_site.municipality
-                    ).first()
-                )
+            disembarkment_tax_rate = (
+                taxrate.get_disembarkment_tax_rate(disembarkment_site)
                 if taxrate
                 else None
             )
@@ -424,6 +420,18 @@ class TaxRates(models.Model):
             rangestart = self.start_date
         return DateRange(rangestart, rangeend)
 
+    def get_disembarkment_tax_rate(
+        self, disembarkment_site: DisembarkmentSite
+    ) -> DisembarkmentTaxRate | None:
+        qs = DisembarkmentTaxRate.objects.filter(
+            tax_rates=self, disembarkment_site=disembarkment_site
+        )
+        if not qs.exists():
+            qs = DisembarkmentTaxRate.objects.filter(
+                tax_rates=self, municipality=disembarkment_site.municipality
+            )
+        return qs.first()
+
     def save(self, *args, **kwargs):
         super().full_clean()
         super().save(*args, **kwargs)
@@ -501,12 +509,24 @@ class PortTaxRate(models.Model):
 
 
 class DisembarkmentTaxRate(models.Model):
+    class Meta:
+        unique_together = ("tax_rates", "municipality", "disembarkment_site")
+
     tax_rates = models.ForeignKey(
         TaxRates,
         null=False,
         blank=False,
         on_delete=models.CASCADE,
         related_name="disembarkment_tax_rates",
+    )
+
+    disembarkment_site = models.ForeignKey(
+        DisembarkmentSite,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="disembarkment_tax_rates",
+        verbose_name=_("Disembarkment site"),
     )
 
     municipality = models.PositiveSmallIntegerField(

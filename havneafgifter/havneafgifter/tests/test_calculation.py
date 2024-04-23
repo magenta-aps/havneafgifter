@@ -175,11 +175,13 @@ class CalculationTest(TestCase):
             tax_rates=cls.tax_rates1,
             municipality=Municipality.AVANNAATA,
             disembarkment_tax_rate=Decimal(40),
+            disembarkment_site=DisembarkmentSite.objects.get(name="Klippeskær 5"),
         )
         cls.disembarkment_tax2 = DisembarkmentTaxRate.objects.create(
             tax_rates=cls.tax_rates1,
             municipality=Municipality.QEQQATA,
             disembarkment_tax_rate=Decimal(30),
+            disembarkment_site=None,
         )
         ShippingAgent.objects.create(name="Birgers Bodega", email="birger@hotmail.com")
         cls.harborduesform1 = CruiseTaxForm.objects.create(
