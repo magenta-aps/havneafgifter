@@ -32,17 +32,17 @@ class CalculationTest(TestCase):
             name="Mågeø", municipality=Municipality.QEQQATA
         )
         cls.tax_rates1 = TaxRates.objects.create(
-            pax_tax_rate=0,
+            pax_tax_rate=50,
             start_date=None,
             end_date=None,
         )
         cls.tax_rates2 = TaxRates.objects.create(
-            pax_tax_rate=0,
+            pax_tax_rate=70,
             start_date=date(2025, 1, 1),
             end_date=None,
         )
         cls.tax_rates3 = TaxRates.objects.create(
-            pax_tax_rate=0,
+            pax_tax_rate=90,
             start_date=date(2025, 2, 1),
             end_date=None,
         )
@@ -401,3 +401,8 @@ class CalculationTest(TestCase):
         )
         self.harborduesform1.refresh_from_db()
         self.assertEqual(self.harborduesform1.disembarkment_tax, Decimal("1000.00"))
+
+    def test_calculate_passenger_tax(self):
+        calculation = self.harborduesform1.calculate_passenger_tax()
+        self.assertEqual(calculation["passenger_tax"], Decimal("5000.00"))
+        self.assertEqual(calculation["taxrate"], Decimal("50.00"))
