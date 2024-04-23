@@ -174,7 +174,7 @@ class TestPort(TestCase):
             name=port_name,
             portauthority=PortAuthority(name=authority_name),
         )
-        self.assertEqual(str(instance), f"{authority_name} - {port_name}")
+        self.assertEqual(str(instance), f"{port_name} ({authority_name})")
 
 
 class TestHarborDuesForm(TestCase):
@@ -194,4 +194,4 @@ class TestDisembarkmentSite(TestCase):
             name="Naturen",
             municipality=Municipality.AVANNAATA,
         )
-        self.assertEqual(str(instance), "Avannaata - Naturen")
+        self.assertEqual(str(instance), "Naturen (Avannaata)")
