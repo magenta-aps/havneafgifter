@@ -6,6 +6,7 @@ from .models import (
     DisembarkmentSite,
     HarborDuesForm,
     PassengersByCountry,
+    ShippingAgent,
 )
 
 
@@ -50,4 +51,9 @@ class CruiseTaxFormAdmin(HarborDuesFormAdmin):
 
 @admin.register(DisembarkmentSite)
 class DisembarkmentSiteAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ShippingAgent)
+class ShippingAgentAdmin(admin.ModelAdmin):
     pass
