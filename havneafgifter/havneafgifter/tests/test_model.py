@@ -1,10 +1,13 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+from unittest.mock import patch
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from havneafgifter.models import (
     DisembarkmentSite,
+    EmailMessage,
     HarborDuesForm,
     Municipality,
     Port,
@@ -15,6 +18,8 @@ from havneafgifter.models import (
     TaxRates,
     imo_validator,
 )
+
+from .mixins import HarborDuesFormMixin
 
 
 class ModelTest(TestCase):
@@ -170,7 +175,7 @@ class TestPort(TestCase):
         self.assertEqual(str(instance), f"{port_name} ({authority_name})")
 
 
-class TestHarborDuesForm(TestCase):
+class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
     def test_str(self):
         instance = HarborDuesForm(
             vessel_name="Mary",
@@ -182,6 +187,69 @@ class TestHarborDuesForm(TestCase):
             str(instance),
             "Mary, Nordhavn (2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
         )
+
+    def test_send_email(self):
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        with patch.object(EmailMessage, "send") as mock_send:
+            msg, status = instance.send_email()
+            self.assertEqual(msg.subject, instance.mail_subject)
+            self.assertEqual(msg.body, instance.mail_body)
+            self.assertEqual(msg.bcc, instance.mail_recipients)
+            self.assertEqual(msg.from_email, settings.EMAIL_SENDER)
+            mock_send.assert_called_once_with(fail_silently=False)
+
+    def test_mail_body(self):
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        instance.date = date(2020, 1, 1)
+        self.assertEqual(
+            instance.mail_body,
+            "On 1. januar 2020, Agent has reported harbor dues, cruise tax, "
+            "and environmental and maintenance fees related to the entry of Mary "
+            "in Nordhavn",
+        )
+
+    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
+    def test_mail_recipients(self):
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        self.assertListEqual(
+            instance.mail_recipients,
+            [
+                instance.port_of_call.portauthority.email,
+                instance.shipping_agent.email,
+                settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
+            ],
+        )
+
+    def test_mail_recipients_excludes_missing_port_authority(self):
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        instance.port_of_call.portauthority = None
+        self._assert_mail_recipients_property_logs_message(
+            instance,
+            "is not linked to a port authority, excluding from mail recipients",
+        )
+
+    def test_mail_recipients_excludes_missing_shipping_agent(self):
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        instance.shipping_agent = None
+        self._assert_mail_recipients_property_logs_message(
+            instance,
+            "is not linked to a shipping agent, excluding from mail recipients",
+        )
+
+    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN=None)
+    def test_mail_recipients_excludes_missing_skattestyrelsen_email(self):
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        self._assert_mail_recipients_property_logs_message(
+            instance,
+            "Skattestyrelsen email not configured, excluding from mail recipients",
+        )
+
+    def _assert_mail_recipients_property_logs_message(self, instance, message):
+        with self.assertLogs() as logged:
+            instance.mail_recipients
+            self.assertTrue(
+                any(record.message.endswith(message) for record in logged.records)
+            )
 
 
 class TestDisembarkmentSite(TestCase):

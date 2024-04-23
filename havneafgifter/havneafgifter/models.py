@@ -335,7 +335,7 @@ class HarborDuesForm(models.Model):
     def mail_subject(self):
         # TODO: verify content
         # TODO: include data from object?
-        return _("New harbor dues report")
+        return _("New harbor dues report")  # pragma: nocover
 
     @property
     def mail_body(self):

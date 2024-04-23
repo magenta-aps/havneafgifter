@@ -2,7 +2,14 @@ import os
 
 from django.core.management import call_command
 
-from ..models import CruiseTaxForm, HarborDuesForm, Port, ShippingAgent, ShipType
+from ..models import (
+    CruiseTaxForm,
+    HarborDuesForm,
+    Port,
+    PortAuthority,
+    ShippingAgent,
+    ShipType,
+)
 
 
 class HarborDuesFormMixin:
@@ -12,7 +19,12 @@ class HarborDuesFormMixin:
 
         cls._load_initial_disembarkment_sites()
 
-        cls.port = Port.objects.create(name="Nordhavn")
+        cls.port_authority = PortAuthority.objects.create(
+            email="portauthority@example.org"
+        )
+        cls.port = Port.objects.create(
+            name="Nordhavn", portauthority=cls.port_authority
+        )
         cls.shipping_agent = ShippingAgent.objects.create(name="Agent")
 
         # Valid data for creating a `HarborDuesForm` (or `CruiseTaxForm`) instance
