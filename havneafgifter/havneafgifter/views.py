@@ -6,11 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, FormView
 
-from .forms import (
-    HarborDuesFormForm,
-    PassengersByCountryForm,
-    PassengersByDisembarkmentSiteForm,
-)
+from .forms import DisembarkmentForm, HarborDuesFormForm, PassengersByCountryForm
 from .models import (
     CruiseTaxForm,
     Disembarkment,
@@ -58,8 +54,10 @@ class HarborDuesFormCreateView(CreateView):
             )
 
 
-class PassengerTaxCreateView(FormView):
-    template_name = "havneafgifter/passenger_tax_create.html"
+class _CruiseTaxFormSetView(FormView):
+    """Shared base class for views that create a set of model objects related
+    to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
+    """
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -67,12 +65,17 @@ class PassengerTaxCreateView(FormView):
 
     def get_form(self, form_class=None):
         factory = formset_factory(
-            PassengersByCountryForm,
+            self.form_class,
             can_order=False,
             can_delete=False,
             extra=0,
         )
         return factory(**self.get_form_kwargs())
+
+
+class PassengerTaxCreateView(_CruiseTaxFormSetView):
+    template_name = "havneafgifter/passenger_tax_create.html"
+    form_class = PassengersByCountryForm
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -104,21 +107,9 @@ class PassengerTaxCreateView(FormView):
         )
 
 
-class EnvironmentalTaxCreateView(FormView):
+class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
     template_name = "havneafgifter/environmental_tax_create.html"
-
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
-        self._cruise_tax_form = CruiseTaxForm.objects.get(pk=kwargs["pk"])
-
-    def get_form(self, form_class=None):
-        factory = formset_factory(
-            PassengersByDisembarkmentSiteForm,
-            can_order=False,
-            can_delete=False,
-            extra=0,
-        )
-        return factory(**self.get_form_kwargs())
+    form_class = DisembarkmentForm
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()

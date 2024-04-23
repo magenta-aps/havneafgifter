@@ -51,7 +51,7 @@ class PassengersByCountryForm(Form):
     number_of_passengers = IntegerField()
 
 
-class PassengersByDisembarkmentSiteForm(Form):
+class DisembarkmentForm(Form):
     disembarkment_site = ChoiceField(choices=[], disabled=True)
     number_of_passengers = IntegerField()
 

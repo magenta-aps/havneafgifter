@@ -3,7 +3,7 @@ import copy
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from ..forms import HarborDuesFormForm, PassengersByDisembarkmentSiteForm
+from ..forms import DisembarkmentForm, HarborDuesFormForm
 from ..models import DisembarkmentSite
 from .mixins import HarborDuesFormMixin
 
@@ -26,7 +26,7 @@ class TestHarborDuesFormForm(HarborDuesFormMixin, TestCase):
 
 class TestPassengersByDisembarkmentSiteForm(TestCase):
     def test_disembarkment_site_choices(self):
-        form = PassengersByDisembarkmentSiteForm()
+        form = DisembarkmentForm()
         self.assertListEqual(
             form.fields["disembarkment_site"].choices,
             [(ds.pk, str(ds)) for ds in DisembarkmentSite.objects.all()],
@@ -34,7 +34,7 @@ class TestPassengersByDisembarkmentSiteForm(TestCase):
 
     def test_clean_disembarkment_site(self):
         ds = DisembarkmentSite.objects.first()
-        form = PassengersByDisembarkmentSiteForm(
+        form = DisembarkmentForm(
             initial={"disembarkment_site": ds.pk},
             data={"disembarkment_site": ds.pk, "number_of_passengers": 0},
         )
