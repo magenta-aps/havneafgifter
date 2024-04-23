@@ -1,3 +1,7 @@
+import os
+
+from django.core.management import call_command
+
 from ..models import CruiseTaxForm, HarborDuesForm, Port, ShippingAgent, ShipType
 
 
@@ -5,6 +9,8 @@ class HarborDuesFormMixin:
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
+
+        cls._load_initial_disembarkment_sites()
 
         cls.port = Port.objects.create(name="Nordhavn")
         cls.shipping_agent = ShippingAgent.objects.create(name="Agent")
@@ -35,3 +41,13 @@ class HarborDuesFormMixin:
         }
 
         cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.harbor_dues_form_data)
+
+    @classmethod
+    def _load_initial_disembarkment_sites(cls):
+        # Load 73 disembarkment sites
+        path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "../fixtures",
+            "initial_disembarkment_sites.json",
+        )
+        call_command("loaddata", path, verbosity=0)

@@ -1,3 +1,6 @@
+import os
+
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from havneafgifter.models import Port, PortAuthority, PortTaxRate, ShipType, TaxRates
@@ -6,6 +9,7 @@ from havneafgifter.models import Port, PortAuthority, PortTaxRate, ShipType, Tax
 class Command(BaseCommand):
     def handle(self, *args, **options):
         self.load_ports()
+        self.load_disembarkment_sites()
 
     def load_ports(self):
         for authority_name, authority_email in (
@@ -94,3 +98,12 @@ class Command(BaseCommand):
                 gt_end=None,
                 port_tax_rate=110,
             )
+
+    def load_disembarkment_sites(self):
+        # Load 73 disembarkment sites
+        path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "../../fixtures",
+            "initial_disembarkment_sites.json",
+        )
+        call_command("loaddata", path, verbosity=1)

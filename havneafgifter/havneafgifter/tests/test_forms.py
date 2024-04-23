@@ -24,7 +24,7 @@ class TestHarborDuesFormForm(HarborDuesFormMixin, TestCase):
             form.clean()
 
 
-class TestPassengersByDisembarkmentSiteForm(TestCase):
+class TestPassengersByDisembarkmentSiteForm(HarborDuesFormMixin, TestCase):
     def test_disembarkment_site_choices(self):
         form = DisembarkmentForm()
         self.assertListEqual(
