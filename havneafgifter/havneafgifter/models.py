@@ -135,7 +135,7 @@ class Port(models.Model):
 
     def __str__(self) -> str:
         if self.portauthority:
-            return f"{self.portauthority} - {self.name}"
+            return f"{self.name} ({self.portauthority})"
         else:
             return self.name
 
@@ -394,7 +394,7 @@ class DisembarkmentSite(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.get_municipality_display()} - {self.name}"
+        return f"{self.name} ({self.get_municipality_display()})"
 
 
 class Disembarkment(models.Model):
