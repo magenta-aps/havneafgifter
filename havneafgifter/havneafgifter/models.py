@@ -258,8 +258,9 @@ class HarborDuesForm(models.Model):
 
 class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
+        default=0,
         verbose_name=_("Number of passengers"),
     )
 
@@ -313,6 +314,15 @@ class CruiseTaxForm(HarborDuesForm):
             self.disembarkment_tax = disembarkment_tax
             self.save(update_fields=("disembarkment_tax",))
         return {"disembarkment_tax": disembarkment_tax, "details": details}
+
+    def calculate_passenger_tax(self) -> Dict[str, Decimal]:
+        arrival_date = self.date_of_arrival
+        taxrate = TaxRates.objects.filter(
+            Q(start_date__isnull=True) | Q(start_date__lte=arrival_date),
+            Q(end_date__isnull=True) | Q(end_date__gte=arrival_date),
+        ).first()
+        rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
+        return {"passenger_tax": self.number_of_passengers * rate, "taxrate": rate}
 
 
 class PassengersByCountry(models.Model):
