@@ -208,3 +208,14 @@ BOOTSTRAP5 = {
     "css_url": "/static/bootstrap/bootstrap.min.css",
     "javascript_url": "/static/bootstrap/bootstrap.bundle.min.js",
 }
+
+# Email configuration
+# Ref: https://docs.djangoproject.com/en/5.0/ref/settings/#email-backend
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", None)
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", None)
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", None)
+EMAIL_USE_TLS = bool(strtobool(os.environ.get("EMAIL_USE_TLS", "False")))
+EMAIL_USE_SSL = bool(strtobool(os.environ.get("EMAIL_USE_SSL", "False")))
+EMAIL_SENDER = os.environ.get("EMAIL_SENDER", "noreply@nanoq.gl")
