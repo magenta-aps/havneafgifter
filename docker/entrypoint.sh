@@ -12,6 +12,7 @@ MAKEMESSAGES=${MAKEMESSAGES:=false}
 COMPILEMESSAGES=${COMPILEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 LOAD_FIXTURES=${LOAD_FIXTURES:=false}
+CREATE_DUMMY_ADMIN=${CREATE_DUMMY_ADMIN:=false}
 
 python manage.py wait_for_db
 
@@ -24,8 +25,14 @@ if [ "${MIGRATE,,}" = true ]; then
   python manage.py migrate
 fi
 
+
 if [ "${LOAD_FIXTURES}" = true ]; then
   python manage.py load_fixtures
+fi
+
+if [ "${CREATE_DUMMY_ADMIN}" = true ]; then
+  echo 'creating superuser'
+  DJANGO_SUPERUSER_PASSWORD=admin DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@admin.admin ./manage.py createsuperuser --noinput
 fi
 
 echo 'collecting static files'
