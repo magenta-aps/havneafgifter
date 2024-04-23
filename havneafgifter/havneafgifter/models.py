@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import logging
 import re
 from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List
 
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.mail import EmailMessage
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -15,9 +18,12 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q
 from django.db.models.signals import post_save
+from django.templatetags.l10n import localize
 from django.utils.translation import gettext as _
 
 from havneafgifter.data import DateTimeRange
+
+logger = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
@@ -313,6 +319,65 @@ class HarborDuesForm(models.Model):
             self.harbour_tax = harbour_tax
             self.save(update_fields=("harbour_tax",))
         return {"harbour_tax": harbour_tax, "details": details}
+
+    def send_email(self) -> tuple[EmailMessage, int]:
+        logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
+        msg = EmailMessage(
+            self.mail_subject,
+            self.mail_body,
+            from_email=settings.EMAIL_SENDER,
+            bcc=self.mail_recipients,
+        )
+        result = msg.send(fail_silently=False)
+        return msg, result
+
+    @property
+    def mail_subject(self):
+        # TODO: verify content
+        # TODO: include data from object?
+        return _("New harbor dues report")
+
+    @property
+    def mail_body(self):
+        return _(
+            "On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
+            "environmental and maintenance fees related to the entry of %(vessel)s "
+            "in %(port)s"
+        ) % {
+            "date": localize(self.date),
+            "agent": self.shipping_agent.name,
+            "vessel": self.vessel_name,
+            "port": self.port_of_call.name,
+        }
+
+    @property
+    def mail_recipients(self) -> list[str]:
+        recipients: list[str] = []
+
+        if self.port_of_call.portauthority:
+            recipients.append(self.port_of_call.portauthority.email)
+        else:
+            logger.info(
+                "%r is not linked to a port authority, excluding from mail recipients",
+                self,
+            )
+
+        if self.shipping_agent:
+            recipients.append(self.shipping_agent.email)
+        else:
+            logger.info(
+                "%r is not linked to a shipping agent, excluding from mail recipients",
+                self,
+            )
+
+        if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
+            recipients.append(settings.EMAIL_ADDRESS_SKATTESTYRELSEN)
+        else:
+            logger.info(
+                "Skattestyrelsen email not configured, excluding from mail recipients",
+            )
+
+        return recipients
 
 
 class CruiseTaxForm(HarborDuesForm):

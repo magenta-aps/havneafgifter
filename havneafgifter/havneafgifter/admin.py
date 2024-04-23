@@ -38,6 +38,12 @@ class HarborDuesFormAdmin(admin.ModelAdmin):
         "datetime_of_arrival",
         "datetime_of_departure",
     ]
+    actions = ["send_email"]
+
+    @admin.action(description=_("Send email"))
+    def send_email(self, request, queryset):
+        for obj in queryset:
+            obj.send_email()
 
 
 class PassengersByCountryInlineAdmin(admin.TabularInline):
