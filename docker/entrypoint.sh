@@ -31,7 +31,7 @@ if [ "${LOAD_FIXTURES}" = true ]; then
 fi
 
 if [ "${CREATE_DUMMY_ADMIN}" = true ]; then
-    echo 'creating superuser'
+  echo 'creating superuser'
   DJANGO_SUPERUSER_PASSWORD=admin DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@admin.admin ./manage.py createsuperuser --noinput
 fi
 
