@@ -1,0 +1,203 @@
+[
+{
+    "model": "havneafgifter.shippingagent",
+    "pk": 1,
+    "fields": {
+        "name": "Agenten",
+        "email": "agent@example.org"
+    }
+},
+{
+    "model": "havneafgifter.harborduesform",
+    "pk": 1,
+    "fields": {
+        "date": "2024-04-23",
+        "port_of_call": 12,
+        "nationality": "DK",
+        "vessel_name": "Mary",
+        "vessel_imo": "9074729",
+        "vessel_owner": "Ejeren",
+        "vessel_master": "Kaptajnen",
+        "shipping_agent": 1,
+        "date_of_arrival": "2024-04-01",
+        "date_of_departure": "2024-04-08",
+        "gross_tonnage": 125,
+        "vessel_type": "FISHER",
+        "harbour_tax": null
+    }
+},
+{
+    "model": "havneafgifter.harborduesform",
+    "pk": 2,
+    "fields": {
+        "date": "2024-04-23",
+        "port_of_call": 9,
+        "nationality": "DK",
+        "vessel_name": "Gøglerbåden",
+        "vessel_imo": "9074729",
+        "vessel_owner": "Ejer Navnesen",
+        "vessel_master": "Kaptajn Efternavnsen",
+        "shipping_agent": 1,
+        "date_of_arrival": "2024-04-08",
+        "date_of_departure": "2024-04-15",
+        "gross_tonnage": 250,
+        "vessel_type": "FREIGHTER",
+        "harbour_tax": null
+    }
+},
+{
+    "model": "havneafgifter.harborduesform",
+    "pk": 3,
+    "fields": {
+        "date": "2024-04-23",
+        "port_of_call": 12,
+        "nationality": "DK",
+        "vessel_name": "Skibsnavn",
+        "vessel_imo": "1234567",
+        "vessel_owner": "Ejer Navnesen",
+        "vessel_master": "Kaptajn Efternavnsen",
+        "shipping_agent": 1,
+        "date_of_arrival": "2024-04-01",
+        "date_of_departure": "2024-04-05",
+        "gross_tonnage": 200,
+        "vessel_type": "CRUISE",
+        "harbour_tax": null
+    }
+},
+{
+    "model": "havneafgifter.harborduesform",
+    "pk": 4,
+    "fields": {
+        "date": "2024-04-23",
+        "port_of_call": 18,
+        "nationality": "DK",
+        "vessel_name": "SkibSkib",
+        "vessel_imo": "1234567",
+        "vessel_owner": "Ejeren",
+        "vessel_master": "Kaptajnen",
+        "shipping_agent": 1,
+        "date_of_arrival": "2024-04-01",
+        "date_of_departure": "2024-04-02",
+        "gross_tonnage": 1337,
+        "vessel_type": "CRUISE",
+        "harbour_tax": null
+    }
+},
+{
+    "model": "havneafgifter.cruisetaxform",
+    "pk": 3,
+    "fields": {
+        "number_of_passengers": null,
+        "pax_tax": null,
+        "disembarkment_tax": null
+    }
+},
+{
+    "model": "havneafgifter.cruisetaxform",
+    "pk": 4,
+    "fields": {
+        "number_of_passengers": null,
+        "pax_tax": null,
+        "disembarkment_tax": null
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 1,
+    "fields": {
+        "cruise_tax_form": 3,
+        "nationality": "AU",
+        "number_of_passengers": 147
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 2,
+    "fields": {
+        "cruise_tax_form": 3,
+        "nationality": "CA",
+        "number_of_passengers": 321
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 3,
+    "fields": {
+        "cruise_tax_form": 3,
+        "nationality": "DK",
+        "number_of_passengers": 4
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 4,
+    "fields": {
+        "cruise_tax_form": 4,
+        "nationality": "CA",
+        "number_of_passengers": 800
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 5,
+    "fields": {
+        "cruise_tax_form": 4,
+        "nationality": "AS",
+        "number_of_passengers": 300
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 6,
+    "fields": {
+        "cruise_tax_form": 4,
+        "nationality": "EU",
+        "number_of_passengers": 200
+    }
+},
+{
+    "model": "havneafgifter.passengersbycountry",
+    "pk": 7,
+    "fields": {
+        "cruise_tax_form": 4,
+        "nationality": "OT",
+        "number_of_passengers": 100
+    }
+},
+{
+    "model": "havneafgifter.disembarkment",
+    "pk": 1,
+    "fields": {
+        "cruise_tax_form": 3,
+        "number_of_passengers": 125,
+        "disembarkment_site": 171
+    }
+},
+{
+    "model": "havneafgifter.disembarkment",
+    "pk": 2,
+    "fields": {
+        "cruise_tax_form": 3,
+        "number_of_passengers": 250,
+        "disembarkment_site": 172
+    }
+},
+{
+    "model": "havneafgifter.disembarkment",
+    "pk": 3,
+    "fields": {
+        "cruise_tax_form": 4,
+        "number_of_passengers": 1200,
+        "disembarkment_site": 111
+    }
+},
+{
+    "model": "havneafgifter.disembarkment",
+    "pk": 4,
+    "fields": {
+        "cruise_tax_form": 4,
+        "number_of_passengers": 1000,
+        "disembarkment_site": 118
+    }
+}
+]

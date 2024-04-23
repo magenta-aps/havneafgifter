@@ -3,7 +3,18 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from havneafgifter.models import Port, PortTaxRate, ShipType, TaxRates, imo_validator
+from havneafgifter.models import (
+    DisembarkmentSite,
+    HarborDuesForm,
+    Municipality,
+    Port,
+    PortAuthority,
+    PortTaxRate,
+    ShippingAgent,
+    ShipType,
+    TaxRates,
+    imo_validator,
+)
 
 
 class ModelTest(TestCase):
@@ -134,3 +145,53 @@ class ModelTest(TestCase):
             TaxRates(start_date=date(2025, 1, 1), end_date=date(2025, 1, 1)).last_date,
             date(2025, 1, 1),
         )
+
+
+class TestShippingAgent(TestCase):
+    def test_str(self):
+        name = "Some name"
+        instance = ShippingAgent(name=name)
+        self.assertEqual(str(instance), name)
+
+
+class TestPortAuthority(TestCase):
+    def test_str(self):
+        name = "Some name"
+        instance = PortAuthority(name=name)
+        self.assertEqual(str(instance), name)
+
+
+class TestPort(TestCase):
+    def test_str_simple(self):
+        name = "Some name"
+        instance = Port(name=name)
+        self.assertEqual(str(instance), name)
+
+    def test_str_complex(self):
+        authority_name = "Authority name"
+        port_name = "Port name"
+        instance = Port(
+            name=port_name,
+            portauthority=PortAuthority(name=authority_name),
+        )
+        self.assertEqual(str(instance), f"{authority_name} - {port_name}")
+
+
+class TestHarborDuesForm(TestCase):
+    def test_str(self):
+        instance = HarborDuesForm(
+            vessel_name="Mary",
+            port_of_call=Port(name="Nordhavn"),
+            date_of_arrival=date(2020, 1, 1),
+            date_of_departure=date(2020, 1, 31),
+        )
+        self.assertEqual(str(instance), "Mary, Nordhavn (2020-01-01-2020-01-31)")
+
+
+class TestDisembarkmentSite(TestCase):
+    def test_str(self):
+        instance = DisembarkmentSite(
+            name="Naturen",
+            municipality=Municipality.AVANNAATA,
+        )
+        self.assertEqual(str(instance), "Avannaata - Naturen")

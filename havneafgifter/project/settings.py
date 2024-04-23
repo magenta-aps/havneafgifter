@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_bootstrap5",
     "havneafgifter",
 ]
 
@@ -60,11 +61,17 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "project.urls"
 
+default_loaders = [
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
+]
+
+cached_loaders = [("django.template.loaders.cached.Loader", default_loaders)]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -72,6 +79,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            "loaders": default_loaders if DEBUG else cached_loaders,
         },
     },
 ]
@@ -194,3 +202,9 @@ if os.path.isfile(log_filename) and ENVIRONMENT != "development":
         "level": "INFO",
     }
     LOGGING["loggers"]["django"]["handlers"].append("file")
+
+# django-bootstrap5 configuration
+BOOTSTRAP5 = {
+    "css_url": "/static/bootstrap/bootstrap.min.css",
+    "javascript_url": "/static/bootstrap/bootstrap.bundle.min.js",
+}

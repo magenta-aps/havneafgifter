@@ -1,0 +1,14 @@
+{% extends "havneafgifter/base.html" %}
+
+{% load i18n %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<h1>{% translate "Environmental and maintenance fee" %}</h1>
+<form action="." method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_formset disembarkment_formset layout="horizontal" %}
+    {% bootstrap_button button_type="submit" content=_("Continue") %}
+    {% bootstrap_button button_type="reset" content=_("Cancel") %}
+</form>
+{% endblock content %}
