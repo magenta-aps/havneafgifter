@@ -225,6 +225,19 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.FREIGHTER,
         )
 
+        cls.harborduesform4 = HarborDuesForm.objects.create(
+            port_of_call=Port.objects.get(name="Test2"),
+            nationality=Nationality.DENMARK,
+            vessel_name="M/S Baljen",
+            vessel_owner="Kaj Fisher",
+            vessel_master="Kaj Fisher",
+            shipping_agent=None,
+            date_of_arrival=date(2025, 4, 17),
+            date_of_departure=date(2025, 4, 24),
+            gross_tonnage=10,
+            vessel_type=ShipType.FISHER,
+        )
+
         cls.disembarkment1 = Disembarkment.objects.create(
             cruise_tax_form=cls.harborduesform1,
             number_of_passengers=10,
@@ -376,6 +389,21 @@ class CalculationTest(TestCase):
         )
         self.harborduesform3.refresh_from_db()
         self.assertEqual(self.harborduesform3.harbour_tax, Decimal("6580.00"))
+
+    def test_calculate_harbor_tax4(self):
+        calculation: dict = self.harborduesform4.calculate_harbour_tax()
+        self.assertEqual(calculation["harbour_tax"], Decimal("980.00"))  # 2 * 7 * 70
+        self.assertEqual(len(calculation["details"]), 1)
+        self.assertEqual(
+            calculation["details"][0],
+            {
+                "port_taxrate": self.port_tax11,
+                "date_range": DateRange(
+                    start_date=date(2025, 4, 17), end_date=date(2025, 4, 25)
+                ),
+                "harbour_tax": Decimal("980.00"),
+            },
+        )
 
     def test_calculate_disembarkment_tax(self):
         calculation = self.harborduesform1.calculate_disembarkment_tax()
