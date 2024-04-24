@@ -6,8 +6,8 @@ from .models import DisembarkmentSite, HarborDuesForm, Nationality
 
 
 class HTML5DateWidget(widgets.Input):
-    input_type = "date"
-    template_name = "django/forms/widgets/date.html"
+    input_type = "datetime-local"
+    template_name = "django/forms/widgets/datetime.html"
 
 
 class HarborDuesFormForm(ModelForm):
@@ -21,28 +21,28 @@ class HarborDuesFormForm(ModelForm):
             "vessel_owner",
             "vessel_master",
             "shipping_agent",
-            "date_of_arrival",
-            "date_of_departure",
+            "datetime_of_arrival",
+            "datetime_of_departure",
             "gross_tonnage",
             "vessel_type",
         ]
         localized_fields = [
-            "date_of_arrival",
-            "date_of_departure",
+            "datetime_of_arrival",
+            "datetime_of_departure",
         ]
         widgets = {
-            "date_of_arrival": HTML5DateWidget(),
-            "date_of_departure": HTML5DateWidget(),
+            "datetime_of_arrival": HTML5DateWidget(),
+            "datetime_of_departure": HTML5DateWidget(),
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        date_of_arrival = cleaned_data.get("date_of_arrival")
-        date_of_departure = cleaned_data.get("date_of_departure")
-        if date_of_arrival > date_of_departure:
+        datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
+        datetime_of_departure = cleaned_data.get("datetime_of_departure")
+        if datetime_of_arrival > datetime_of_departure:
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
-                code="date_of_departure_before_date_of_arrival",
+                code="datetime_of_departure_before_datetime_of_arrival",
             )
 
 

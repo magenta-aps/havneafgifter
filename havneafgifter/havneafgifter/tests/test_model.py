@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, timezone
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -24,13 +24,13 @@ class ModelTest(TestCase):
         Port.objects.create(name="Test2")
         cls.tax_rates = TaxRates.objects.create(
             pax_tax_rate=0,
-            start_date=None,
-            end_date=None,
+            start_datetime=None,
+            end_datetime=None,
         )
         cls.tax_rates2 = TaxRates.objects.create(
             pax_tax_rate=0,
-            start_date=date(2025, 1, 1),
-            end_date=None,
+            start_datetime=datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            end_datetime=None,
         )
         cls.tax_rates.refresh_from_db()
         cls.tax_rates2.refresh_from_db()
@@ -134,16 +134,9 @@ class ModelTest(TestCase):
         )
 
     def test_tax_rates_time_update(self):
-        self.assertEqual(self.tax_rates.end_date, date(2025, 1, 1))
-
-    def test_tax_rates_last_date(self):
-        self.assertEqual(self.tax_rates.last_date, date(2024, 12, 31))
-        self.assertIsNone(
-            self.tax_rates2.last_date,
-        )
         self.assertEqual(
-            TaxRates(start_date=date(2025, 1, 1), end_date=date(2025, 1, 1)).last_date,
-            date(2025, 1, 1),
+            self.tax_rates.end_datetime,
+            datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
         )
 
 
@@ -182,10 +175,13 @@ class TestHarborDuesForm(TestCase):
         instance = HarborDuesForm(
             vessel_name="Mary",
             port_of_call=Port(name="Nordhavn"),
-            date_of_arrival=date(2020, 1, 1),
-            date_of_departure=date(2020, 1, 31),
+            datetime_of_arrival=datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            datetime_of_departure=datetime(2020, 1, 31, 0, 0, 0, tzinfo=timezone.utc),
         )
-        self.assertEqual(str(instance), "Mary, Nordhavn (2020-01-01-2020-01-31)")
+        self.assertEqual(
+            str(instance),
+            "Mary, Nordhavn (2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
+        )
 
 
 class TestDisembarkmentSite(TestCase):

@@ -12,9 +12,9 @@ class TestHarborDuesFormForm(HarborDuesFormMixin, TestCase):
     def test_date_validation(self):
         data = copy.copy(self.harbor_dues_form_data)
         # Swap date of arrival with date of departure
-        data["date_of_arrival"], data["date_of_departure"] = (
-            data["date_of_departure"],
-            data["date_of_arrival"],
+        data["datetime_of_arrival"], data["datetime_of_departure"] = (
+            data["datetime_of_departure"],
+            data["datetime_of_arrival"],
         )
         form = HarborDuesFormForm(data=data)
         # Trigger form validation

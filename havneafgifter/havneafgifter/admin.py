@@ -29,8 +29,8 @@ class HarborDuesFormAdmin(admin.ModelAdmin):
         "vessel_imo",
         "vessel_type",
         "port_of_call",
-        "date_of_arrival",
-        "date_of_departure",
+        "datetime_of_arrival",
+        "datetime_of_departure",
     ]
 
 

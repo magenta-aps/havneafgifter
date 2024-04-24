@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import re
-from datetime import date, timedelta
+from datetime import datetime
 from decimal import Decimal
-from math import ceil
 from typing import Dict, List
 
 from django.core.exceptions import ValidationError
@@ -17,7 +16,7 @@ from django.db.models import F, Q
 from django.db.models.signals import post_save
 from django.utils.translation import gettext as _
 
-from havneafgifter.data import DateRange
+from havneafgifter.data import DateTimeRange
 
 
 class ShipType(models.TextChoices):
@@ -211,12 +210,12 @@ class HarborDuesForm(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    date_of_arrival = models.DateField(
-        null=False, blank=False, verbose_name=_("Arrival date")
+    datetime_of_arrival = models.DateTimeField(
+        null=False, blank=False, verbose_name=_("Arrival date/time")
     )
 
-    date_of_departure = models.DateField(
-        null=False, blank=False, verbose_name=_("Departure date")
+    datetime_of_departure = models.DateTimeField(
+        null=False, blank=False, verbose_name=_("Departure date/time")
     )
 
     gross_tonnage = models.PositiveIntegerField(
@@ -242,26 +241,24 @@ class HarborDuesForm(models.Model):
     def __str__(self) -> str:
         return (
             f"{self.vessel_name}, {self.port_of_call} "
-            f"({self.date_of_arrival}-{self.date_of_departure})"
+            f"({self.datetime_of_arrival} - {self.datetime_of_departure})"
         )
 
     def calculate_harbour_tax(
         self, save: bool = True
     ) -> Dict[str, Decimal | List[dict]]:
         taxrates = TaxRates.objects.filter(
-            Q(start_date__isnull=True) | Q(start_date__lte=self.date_of_departure),
-            Q(end_date__isnull=True) | Q(end_date__gte=self.date_of_arrival),
+            Q(start_datetime__isnull=True)
+            | Q(start_datetime__lte=self.datetime_of_departure),
+            Q(end_datetime__isnull=True)
+            | Q(end_datetime__gte=self.datetime_of_arrival),
         )
         harbour_tax = Decimal(0)
         details = []
         for taxrate in taxrates:
-            date_range = taxrate.get_overlap(
-                self.date_of_arrival,
-                # Afrejsedagen er inkluderet i range.
-                # TaxRates beregner overlap af datoer fra midnat til midnat,
-                # så for at beregne korrekt overlap skal vi frem til den
-                # efterfølgende midnat for afrejsen
-                self.date_of_departure + timedelta(days=1),
+            datetime_range = taxrate.get_overlap(
+                self.datetime_of_arrival,
+                self.datetime_of_departure,
             )
             port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
                 port=self.port_of_call,
@@ -270,15 +267,16 @@ class HarborDuesForm(models.Model):
             )
             range_port_tax = Decimal(0)
             if port_taxrate is not None:
-                payments = date_range.days
                 if self.vessel_type in (ShipType.FISHER, ShipType.OTHER):
-                    payments = 7 * ceil(date_range.days / 7)
+                    payments = datetime_range.started_weeks
+                else:
+                    payments = datetime_range.started_days
                 range_port_tax = payments * port_taxrate.port_tax_rate
                 harbour_tax += range_port_tax
             details.append(
                 {
                     "port_taxrate": port_taxrate,
-                    "date_range": date_range,
+                    "date_range": datetime_range,
                     "harbour_tax": range_port_tax,
                 }
             )
@@ -313,10 +311,10 @@ class CruiseTaxForm(HarborDuesForm):
     )
 
     def calculate_disembarkment_tax(self, save: bool = True):
-        disembarkment_date = self.date_of_arrival
+        disembarkment_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
-            Q(start_date__isnull=True) | Q(start_date__lte=disembarkment_date),
-            Q(end_date__isnull=True) | Q(end_date__gte=disembarkment_date),
+            Q(start_datetime__isnull=True) | Q(start_datetime__lte=disembarkment_date),
+            Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
         ).first()
         disembarkment_tax = Decimal(0)
         details = []
@@ -348,10 +346,10 @@ class CruiseTaxForm(HarborDuesForm):
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
     def calculate_passenger_tax(self) -> Dict[str, Decimal]:
-        arrival_date = self.date_of_arrival
+        arrival_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
-            Q(start_date__isnull=True) | Q(start_date__lte=arrival_date),
-            Q(end_date__isnull=True) | Q(end_date__gte=arrival_date),
+            Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
+            Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
         ).first()
         rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
         return {"passenger_tax": self.number_of_passengers * rate, "taxrate": rate}
@@ -420,7 +418,7 @@ class Disembarkment(models.Model):
 
 class TaxRates(models.Model):
     class Meta:
-        ordering = [F("start_date").asc(nulls_first=True)]
+        ordering = [F("start_datetime").asc(nulls_first=True)]
 
     pax_tax_rate = models.DecimalField(
         null=True,
@@ -430,22 +428,9 @@ class TaxRates(models.Model):
         verbose_name=_("Tax per passenger"),
     )
 
-    start_date = models.DateField(
-        null=True, blank=True, verbose_name=_("First day of taking effect")
-    )
+    start_datetime = models.DateTimeField(null=True, blank=True)
 
-    end_date = models.DateField(
-        null=True, blank=True, verbose_name=_("First day of no longer taking effect")
-    )
-
-    @property
-    def last_date(self) -> date | None:
-        if self.end_date is None:
-            return None
-        last_date = self.end_date - timedelta(days=1)
-        if self.start_date is not None and self.start_date > last_date:
-            return self.start_date
-        return last_date
+    end_datetime = models.DateTimeField(null=True, blank=True)
 
     def get_port_tax_rate(
         self, port: Port, vessel_type: str, gross_ton: int
@@ -461,12 +446,12 @@ class TaxRates(models.Model):
                 qs = qs.filter(**{f"{key}__isnull": True})
         return qs.first()
 
-    def get_overlap(self, rangestart: date, rangeend: date) -> DateRange:
-        if self.end_date is not None and self.end_date < rangeend:
-            rangeend = self.end_date
-        if self.start_date is not None and self.start_date > rangestart:
-            rangestart = self.start_date
-        return DateRange(rangestart, rangeend)
+    def get_overlap(self, rangestart: datetime, rangeend: datetime) -> DateTimeRange:
+        if self.end_datetime is not None and self.end_datetime < rangeend:
+            rangeend = self.end_datetime
+        if self.start_datetime is not None and self.start_datetime > rangestart:
+            rangestart = self.start_datetime
+        return DateTimeRange(rangestart, rangeend)
 
     def get_disembarkment_tax_rate(
         self, disembarkment_site: DisembarkmentSite
@@ -486,24 +471,24 @@ class TaxRates(models.Model):
 
     @staticmethod
     def on_update(sender, instance: TaxRates, **kwargs):
-        # En TaxRates-tabel har (måske) fået ændret sin `start_date`
-        # Opdatér `end_date` på alle tabeller som er påvirkede
+        # En TaxRates-tabel har (måske) fået ændret sin `start_datetime`
+        # Opdatér `end_datetime` på alle tabeller som er påvirkede
         # (tidl. prev, ny prev, tabellen selv)
         # Det er nemmest og sikrest at loope over hele banden,
         # så vi er sikre på at ramme alle
         update_fields = kwargs.get("update_fields")
-        if not update_fields or "start_date" in update_fields:
-            end_date = None
+        if not update_fields or "start_datetime" in update_fields:
+            end_datetime = None
             for item in TaxRates.objects.all().order_by(
-                F("start_date").desc(nulls_last=True)
+                F("start_datetime").desc(nulls_last=True)
             ):
                 # Loop over alle tabeller fra sidste til første
                 # (reverse af default ordering)
-                if item.end_date != end_date:
-                    item.end_date = end_date
-                    # Sæt kun `end_date`, så vi forhindrer rekursion
-                    item.save(update_fields=("end_date",))
-                end_date = item.start_date
+                if item.end_datetime != end_datetime:
+                    item.end_datetime = end_datetime
+                    # Sæt kun `end_datetime`, så vi forhindrer rekursion
+                    item.save(update_fields=("end_datetime",))
+                end_datetime = item.start_datetime
 
 
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
