@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from datetime import date, timedelta
 from decimal import Decimal
+from math import ceil
 from typing import Dict, List
 
 from django.core.exceptions import ValidationError
@@ -24,6 +25,7 @@ class ShipType(models.TextChoices):
     FISHER = "FISHER", _("Fishing ship")
     PASSENGER = "PASSENGER", _("Passenger ship")
     CRUISE = "CRUISE", _("Cruise ship")
+    OTHER = "OTHER", _("Other vessel")
 
 
 class Nationality(models.TextChoices):
@@ -268,7 +270,10 @@ class HarborDuesForm(models.Model):
             )
             range_port_tax = Decimal(0)
             if port_taxrate is not None:
-                range_port_tax = date_range.days * port_taxrate.port_tax_rate
+                payments = date_range.days
+                if self.vessel_type in (ShipType.FISHER, ShipType.OTHER):
+                    payments = 7 * ceil(date_range.days / 7)
+                range_port_tax = payments * port_taxrate.port_tax_rate
                 harbour_tax += range_port_tax
             details.append(
                 {
