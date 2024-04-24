@@ -25,8 +25,8 @@ class HarborDuesFormMixin:
             "shipping_agent": cls.shipping_agent,
             "gross_tonnage": 0,
             "vessel_type": ShipType.FREIGHTER,
-            "date_of_arrival": "2020-01-01",
-            "date_of_departure": "2020-02-01",
+            "datetime_of_arrival": "2020-01-01",
+            "datetime_of_departure": "2020-02-01",
         }
         # The same data, but with related objects replaced by their primary keys.
         # Suitable for testing form POSTs.

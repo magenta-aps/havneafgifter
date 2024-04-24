@@ -1,9 +1,9 @@
-from datetime import date
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from django.test import TestCase
 
-from havneafgifter.data import DateRange
+from havneafgifter.data import DateTimeRange
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -33,18 +33,18 @@ class CalculationTest(TestCase):
         )
         cls.tax_rates1 = TaxRates.objects.create(
             pax_tax_rate=50,
-            start_date=None,
-            end_date=None,
+            start_datetime=None,
+            end_datetime=None,
         )
         cls.tax_rates2 = TaxRates.objects.create(
             pax_tax_rate=70,
-            start_date=date(2025, 1, 1),
-            end_date=None,
+            start_datetime=datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            end_datetime=None,
         )
         cls.tax_rates3 = TaxRates.objects.create(
             pax_tax_rate=90,
-            start_date=date(2025, 2, 1),
-            end_date=None,
+            start_datetime=datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+            end_datetime=None,
         )
         cls.tax_rates1.refresh_from_db()
         cls.tax_rates2.refresh_from_db()
@@ -191,8 +191,8 @@ class CalculationTest(TestCase):
             vessel_owner="Cruises 'R' Us",
             vessel_master="Bjarne Drukkenbolt",
             shipping_agent=ShippingAgent.objects.get(name="Birgers Bodega"),
-            date_of_arrival=date(2024, 12, 15),
-            date_of_departure=date(2025, 2, 15),
+            datetime_of_arrival=datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
+            datetime_of_departure=datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
             gross_tonnage=40_000,
             vessel_type=ShipType.CRUISE,
             number_of_passengers=100,
@@ -205,8 +205,8 @@ class CalculationTest(TestCase):
             vessel_owner="Cruises 'R' Us",
             vessel_master="Bjarne Drukkenbolt",
             shipping_agent=ShippingAgent.objects.get(name="Birgers Bodega"),
-            date_of_arrival=date(2024, 12, 15),
-            date_of_departure=date(2025, 2, 15),
+            datetime_of_arrival=datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
+            datetime_of_departure=datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
             gross_tonnage=40_000,
             vessel_type=ShipType.CRUISE,
             number_of_passengers=100,
@@ -219,8 +219,8 @@ class CalculationTest(TestCase):
             vessel_owner="Ærlige Judas",
             vessel_master="Bjarne Drukkenbolt",
             shipping_agent=ShippingAgent.objects.get(name="Birgers Bodega"),
-            date_of_arrival=date(2024, 12, 15),
-            date_of_departure=date(2025, 2, 15),
+            datetime_of_arrival=datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
+            datetime_of_departure=datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
             gross_tonnage=50_000,
             vessel_type=ShipType.FREIGHTER,
         )
@@ -232,8 +232,9 @@ class CalculationTest(TestCase):
             vessel_owner="Kaj Fisher",
             vessel_master="Kaj Fisher",
             shipping_agent=None,
-            date_of_arrival=date(2025, 4, 17),
-            date_of_departure=date(2025, 4, 24),
+            # Lige lidt over en uge
+            datetime_of_arrival=datetime(2025, 4, 17, 8, 0, 0, tzinfo=timezone.utc),
+            datetime_of_departure=datetime(2025, 4, 24, 16, 0, 0, tzinfo=timezone.utc),
             gross_tonnage=10,
             vessel_type=ShipType.FISHER,
         )
@@ -252,43 +253,66 @@ class CalculationTest(TestCase):
     def test_taxrates_overlap(self):
         self.assertEqual(
             self.tax_rates1.get_overlap(
-                date(2024, 12, 15), date(2024, 12, 24)
+                datetime(2024, 12, 15, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2024, 12, 24, 0, 0, 0, tzinfo=timezone.utc),
             ),  # 15. dec to 23. dec, both inclusive
-            DateRange(date(2024, 12, 15), date(2024, 12, 24)),
+            DateTimeRange(
+                datetime(2024, 12, 15, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2024, 12, 24, 0, 0, 0, tzinfo=timezone.utc),
+            ),
         )
         self.assertEqual(
             self.tax_rates1.get_overlap(
-                date(2024, 12, 15), date(2025, 1, 1)
+                datetime(2024, 12, 15, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
             ),  # 15. dec to 31. dec, both inclusive
-            DateRange(date(2024, 12, 15), date(2025, 1, 1)),
+            DateTimeRange(
+                datetime(2024, 12, 15, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            ),
         )
         self.assertEqual(
             self.tax_rates2.get_overlap(
-                date(2024, 12, 15),
-                date(
-                    2025, 1, 15
+                datetime(2024, 12, 15, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(
+                    2025, 1, 15, 0, 0, 0, tzinfo=timezone.utc
                 ),  # Midnight, so 14 whole days. The 15th day is not included
             ),  # 1. jan to 14. jan, both inclusive
-            DateRange(date(2025, 1, 1), date(2025, 1, 15)),
+            DateTimeRange(
+                datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 1, 15, 0, 0, 0, tzinfo=timezone.utc),
+            ),
         )
 
         self.assertEqual(
             self.tax_rates2.get_overlap(
-                date(2025, 1, 1), date(2025, 1, 10)
+                datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 1, 10, 0, 0, 0, tzinfo=timezone.utc),
             ),  # 1. jan to 9. jan, both inclusive
-            DateRange(date(2025, 1, 1), date(2025, 1, 10)),
+            DateTimeRange(
+                datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 1, 10, 0, 0, 0, tzinfo=timezone.utc),
+            ),
         )
         self.assertEqual(
             self.tax_rates2.get_overlap(
-                date(2025, 1, 20), date(2025, 2, 10)
+                datetime(2025, 1, 20, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 2, 10, 0, 0, 0, tzinfo=timezone.utc),
             ),  # 20. jan to 31. jan, both inclusive
-            DateRange(date(2025, 1, 20), date(2025, 2, 1)),
+            DateTimeRange(
+                datetime(2025, 1, 20, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+            ),
         )
         self.assertEqual(
             self.tax_rates2.get_overlap(
-                date(2024, 12, 20), date(2025, 2, 10)
+                datetime(2024, 12, 20, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 2, 10, 0, 0, 0, tzinfo=timezone.utc),
             ),  # 1. jan to 31. jan, both inclusive
-            DateRange(date(2025, 1, 1), date(2025, 2, 1)),
+            DateTimeRange(
+                datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+            ),
         )
 
     def test_calculate_harbour_tax_1(self):
@@ -299,8 +323,9 @@ class CalculationTest(TestCase):
             calculation["details"][0],
             {
                 "port_taxrate": self.port_tax5,
-                "date_range": DateRange(
-                    date(2024, 12, 15), date(2025, 1, 1)
+                "date_range": DateTimeRange(
+                    datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),  # end_date not included in range
                 "harbour_tax": Decimal("1870.00"),  # 17 days * 110 kr
             },
@@ -309,7 +334,10 @@ class CalculationTest(TestCase):
             calculation["details"][1],
             {
                 "port_taxrate": self.port_tax10,
-                "date_range": DateRange(date(2025, 1, 1), date(2025, 2, 1)),
+                "date_range": DateTimeRange(
+                    datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+                ),
                 "harbour_tax": Decimal("6820.00"),  # 31 days * 220 kr
             },
         )
@@ -317,7 +345,10 @@ class CalculationTest(TestCase):
             calculation["details"][2],
             {
                 "port_taxrate": self.port_tax15,
-                "date_range": DateRange(date(2025, 2, 1), date(2025, 2, 16)),
+                "date_range": DateTimeRange(
+                    datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
+                ),
                 "harbour_tax": Decimal("1650.00"),  # 15 days * 110 kr
             },
         )
@@ -332,8 +363,9 @@ class CalculationTest(TestCase):
             calculation["details"][0],
             {
                 "port_taxrate": self.port_tax3,
-                "date_range": DateRange(
-                    date(2024, 12, 15), date(2025, 1, 1)
+                "date_range": DateTimeRange(
+                    datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),  # end_date not included in range
                 "harbour_tax": Decimal("3740.00"),  # 17 days * 220 kr
             },
@@ -342,7 +374,10 @@ class CalculationTest(TestCase):
             calculation["details"][1],
             {
                 "port_taxrate": self.port_tax8,
-                "date_range": DateRange(date(2025, 1, 1), date(2025, 2, 1)),
+                "date_range": DateTimeRange(
+                    datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+                ),
                 "harbour_tax": Decimal("13640.00"),  # 31 days * 440 kr
             },
         )
@@ -350,7 +385,10 @@ class CalculationTest(TestCase):
             calculation["details"][2],
             {
                 "port_taxrate": self.port_tax13,
-                "date_range": DateRange(date(2025, 2, 1), date(2025, 2, 16)),
+                "date_range": DateTimeRange(
+                    datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
+                ),
                 "harbour_tax": Decimal("3300.00"),  # 15 days * 220 kr
             },
         )
@@ -365,8 +403,9 @@ class CalculationTest(TestCase):
             calculation["details"][0],
             {
                 "port_taxrate": self.port_tax1,
-                "date_range": DateRange(
-                    date(2024, 12, 15), date(2025, 1, 1)
+                "date_range": DateTimeRange(
+                    datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),  # end_date not included in range
                 "harbour_tax": Decimal("1190.00"),  # 17 days * 70 kr
             },
@@ -375,7 +414,10 @@ class CalculationTest(TestCase):
             calculation["details"][1],
             {
                 "port_taxrate": self.port_tax6,
-                "date_range": DateRange(date(2025, 1, 1), date(2025, 2, 1)),
+                "date_range": DateTimeRange(
+                    datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+                ),
                 "harbour_tax": Decimal("4340.00"),  # 31 days * 140 kr
             },
         )
@@ -383,7 +425,10 @@ class CalculationTest(TestCase):
             calculation["details"][2],
             {
                 "port_taxrate": self.port_tax11,
-                "date_range": DateRange(date(2025, 2, 1), date(2025, 2, 16)),
+                "date_range": DateTimeRange(
+                    datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+                    datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
+                ),
                 "harbour_tax": Decimal("1050.00"),  # 15 days * 70 kr
             },
         )
@@ -392,16 +437,17 @@ class CalculationTest(TestCase):
 
     def test_calculate_harbor_tax4(self):
         calculation: dict = self.harborduesform4.calculate_harbour_tax()
-        self.assertEqual(calculation["harbour_tax"], Decimal("980.00"))  # 2 * 7 * 70
+        self.assertEqual(calculation["harbour_tax"], Decimal("140.00"))  # 2 weeks * 70
         self.assertEqual(len(calculation["details"]), 1)
         self.assertEqual(
             calculation["details"][0],
             {
                 "port_taxrate": self.port_tax11,
-                "date_range": DateRange(
-                    start_date=date(2025, 4, 17), end_date=date(2025, 4, 25)
+                "date_range": DateTimeRange(
+                    start_datetime=datetime(2025, 4, 17, 8, 0, 0, tzinfo=timezone.utc),
+                    end_datetime=datetime(2025, 4, 24, 16, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("980.00"),
+                "harbour_tax": Decimal("140.00"),
             },
         )
 
@@ -413,7 +459,7 @@ class CalculationTest(TestCase):
             calculation["details"][0],
             {
                 "disembarkment": self.disembarkment1,
-                "date": date(2024, 12, 15),
+                "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
                 "taxrate": self.disembarkment_tax1,
                 "tax": Decimal("400.00"),  # 100 people * 40 kr
             },
@@ -422,7 +468,7 @@ class CalculationTest(TestCase):
             calculation["details"][1],
             {
                 "disembarkment": self.disembarkment2,
-                "date": date(2024, 12, 15),
+                "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
                 "taxrate": self.disembarkment_tax2,
                 "tax": Decimal("600.00"),  # 20 people * 30 kr
             },
