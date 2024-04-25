@@ -2,7 +2,7 @@ import os
 
 from django.core.management import call_command
 
-from ..models import (
+from havneafgifter.models import (
     CruiseTaxForm,
     HarborDuesForm,
     Port,

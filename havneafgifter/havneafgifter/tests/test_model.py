@@ -18,8 +18,7 @@ from havneafgifter.models import (
     TaxRates,
     imo_validator,
 )
-
-from .mixins import HarborDuesFormMixin
+from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
 class ModelTest(TestCase):

@@ -3,9 +3,9 @@ import copy
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from ..forms import DisembarkmentForm, HarborDuesFormForm
-from ..models import DisembarkmentSite
-from .mixins import HarborDuesFormMixin
+from havneafgifter.forms import DisembarkmentForm, HarborDuesFormForm
+from havneafgifter.models import DisembarkmentSite
+from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
 class TestHarborDuesFormForm(HarborDuesFormMixin, TestCase):

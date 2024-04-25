@@ -3,7 +3,7 @@ from typing import List
 from django.urls import URLPattern, URLResolver, path
 from django.views.generic import TemplateView
 
-from .views import (
+from havneafgifter.views import (
     CruiseTaxFormDetailView,
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,

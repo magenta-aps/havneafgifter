@@ -15,8 +15,7 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
 )
-
-from .models import (
+from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,

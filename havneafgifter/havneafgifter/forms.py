@@ -13,8 +13,8 @@ from django.forms import (
 )
 from django.utils.translation import gettext_lazy as _
 
-from .form_mixins import BootstrapForm
-from .models import DisembarkmentSite, HarborDuesForm, Nationality
+from havneafgifter.form_mixins import BootstrapForm
+from havneafgifter.models import DisembarkmentSite, HarborDuesForm, Nationality
 
 
 class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):

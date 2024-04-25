@@ -8,19 +8,19 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
-from ..models import (
+from havneafgifter.models import (
     CruiseTaxForm,
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
     ShipType,
 )
-from ..views import (
+from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     PassengerTaxCreateView,
     _CruiseTaxFormSetView,
 )
-from .mixins import HarborDuesFormMixin
 
 
 class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
