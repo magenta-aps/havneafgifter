@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-22 13:13-0100\n"
+"POT-Creation-Date: 2024-04-26 10:43-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: havneafgifter/forms.py
+msgid "Date of departure cannot be before date of arrival"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Freighter"
@@ -33,6 +37,10 @@ msgstr "Passagerskib"
 #: havneafgifter/models.py
 msgid "Cruise ship"
 msgstr "Krydstogtskib"
+
+#: havneafgifter/models.py
+msgid "Other vessel"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Australia"
@@ -227,11 +235,15 @@ msgid "Shipping agent"
 msgstr "Shippingagent"
 
 #: havneafgifter/models.py
-msgid "Arrival date"
+#, fuzzy
+#| msgid "Arrival date"
+msgid "Arrival date/time"
 msgstr "Ankomstdato"
 
 #: havneafgifter/models.py
-msgid "Departure date"
+#, fuzzy
+#| msgid "Departure date"
+msgid "Departure date/time"
 msgstr "Afgangsdato"
 
 #: havneafgifter/models.py
@@ -287,14 +299,6 @@ msgid "Tax per passenger"
 msgstr "Antal passagerer"
 
 #: havneafgifter/models.py
-msgid "First day of taking effect"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "First day of no longer taking effect"
-msgstr ""
-
-#: havneafgifter/models.py
 msgid "Harbour"
 msgstr ""
 
@@ -315,3 +319,50 @@ msgstr ""
 #| msgid "Disembarkment site"
 msgid "Disembarkment tax rate"
 msgstr "Landingssted"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Havneafgifter"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/cruisetaxform_detail.html
+msgid "Cruise tax summary"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+msgid "Environmental and maintenance fee"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+msgid "Continue"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+#, fuzzy
+#| msgid "France"
+msgid "Cancel"
+msgstr "Frankrig"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_detail.html
+msgid "Harbor dues summary"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "New report"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Create"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+#, fuzzy
+#| msgid "Passenger ship"
+msgid "Passenger tax"
+msgstr "Passagerskib"
+
+#: havneafgifter/tests/test_views.py havneafgifter/views.py
+msgid "Thanks"
+msgstr ""
