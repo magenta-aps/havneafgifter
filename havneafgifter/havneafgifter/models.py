@@ -107,7 +107,7 @@ class PermissionsMixin(models.Model):
     ) -> QuerySet | None:
         return qs.none()
 
-    def has_permission(self, user: User, action: str, from_group: bool) -> bool:
+    def has_permission(self, user: User, action: str, from_group: bool = False) -> bool:
         if user.is_anonymous or not user.is_active:
             return False
         if user.is_superuser:
