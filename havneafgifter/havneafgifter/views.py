@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.contrib import messages
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView
+from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
 
 from .forms import DisembarkmentForm, HarborDuesFormForm, PassengersByCountryForm
@@ -16,6 +17,16 @@ from .models import (
     PassengersByCountry,
     ShipType,
 )
+
+
+class LogoutView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if self.request.COOKIES.get(settings.SAML_SESSION_COOKIE_NAME):
+            # Logged in with saml2, redirect to saml2 logout
+            return reverse("saml2_logout")
+        else:
+            # Redirect to django logout
+            return reverse("logout")
 
 
 class HarborDuesFormCreateView(CreateView):

@@ -1,18 +1,34 @@
 from typing import List
 
 from django.urls import URLPattern, URLResolver, path
+from django.views.generic import TemplateView
 
 from .views import (
     CruiseTaxFormDetailView,
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormDetailView,
-    PassengerTaxCreateView,
+    PassengerTaxCreateView, LogoutView,
 )
 
 app_name = "havneafgifter"
 
 urlpatterns: List[URLResolver | URLPattern] = [
+    path(
+        "login",
+        TemplateView.as_view(template_name="havneafgifter/login.html"),
+        name="login",
+    ),
+    path(
+        "logout",
+        LogoutView.as_view(),
+        name="logout",
+    ),
+    path(
+        "logged_out",
+        TemplateView.as_view(template_name="havneafgifter/logged_out.html"),
+        name="logged_out",
+    ),
     path(
         "blanket/opret/",
         HarborDuesFormCreateView.as_view(),

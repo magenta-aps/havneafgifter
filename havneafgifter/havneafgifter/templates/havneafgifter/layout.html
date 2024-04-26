@@ -1,0 +1,24 @@
+{% extends "havneafgifter/base.html" %}
+{% load i18n %}
+
+{% block header %}
+<header>
+    <nav class="nav flex-column flex-sm-row p-1">
+        <span class="m-2 pt-2">
+            {{user.first_name}} {{user.last_name}}
+        </span>
+        {% if user.indberetter_data.api_key and not hide_api_key_btn %}
+        <button type="button" class="mx-1 my-2 btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#apikey_modal">
+            API-nøgle
+        </button>
+        {% endif %}
+        {{user}}
+        {% if user.is_authenticated %}
+            <a href="{% url 'havneafgifter:logout' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
+        {% endif %}
+        <button type="button" class="btn btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
+            Om
+        </button>
+    </nav>
+</header>
+{% endblock %}

@@ -20,6 +20,7 @@ AUTHENTICATION_BACKENDS = (
     'djangosaml2.backends.Saml2Backend',
 )
 LOGIN_URL = '/saml2/login/'
+LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SAML_DEFAULT_BINDING = saml2.BINDING_HTTP_REDIRECT
 SAML_ATTRIBUTE_MAPPING = {
@@ -51,13 +52,13 @@ SAML_CONFIG = {
                 "assertion_consumer_service": [
                     (
                         'http://localhost:8000/saml2/acs/',
-                        "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+                        saml2.BINDING_HTTP_POST,
                     )
                 ],
                 "single_logout_service": [
                     (
-                        os.environ.get("SAML_SP_LOGOUT_CALLBACK_URI"),
-                        "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                        ('http://localhost:8000/saml2/ls/', saml2.BINDING_HTTP_REDIRECT),
+                        ('http://localhost:8000/saml2/ls/post', saml2.BINDING_HTTP_POST),
                     ),
                 ],
             },
