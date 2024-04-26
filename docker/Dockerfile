@@ -7,11 +7,15 @@ ENV PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
     mkdir /static && \
+    mkdir -p /var/cache/havneafgifter && \
     #gid/uid from salt
     groupadd -g 75170 -r havneafgifter && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75170 --no-log-init -r -g havneafgifter -G certificate_exporter havneafgifter && \
-    chown -R havneafgifter:havneafgifter /static
+    chown -R havneafgifter:havneafgifter /static && \
+    chown -R havneafgifter:havneafgifter /var/cache/havneafgifter && \
+    chmod a+w /var/cache/havneafgifter
+
 
 # hadolint ignore=DL3008
 RUN apt-get update && \

@@ -38,4 +38,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
         CruiseTaxFormDetailView.as_view(),
         name="cruise_tax_form_detail",
     ),
+
 ]

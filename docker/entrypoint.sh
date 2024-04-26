@@ -47,6 +47,10 @@ if [ "${CREATE_DUMMY_STAFF}" = true ]; then
   ./manage.py createuser staff staff -s -g Editors
 fi
 
+
+python manage.py createcachetable
+python manage.py update_mitid_idp_metadata
+
 echo 'collecting static files'
 python manage.py collectstatic --no-input --clear
 
