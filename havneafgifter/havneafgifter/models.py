@@ -419,6 +419,7 @@ class Disembarkment(models.Model):
 class TaxRates(models.Model):
     class Meta:
         ordering = [F("start_datetime").asc(nulls_first=True)]
+        verbose_name_plural = "TaxRates objects"
 
     pax_tax_rate = models.DecimalField(
         null=True,
