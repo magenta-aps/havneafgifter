@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
-from havneafgifter.models import DisembarkmentSite, Port, PortAuthority, ShippingAgent
+from havneafgifter.models import DisembarkmentSite, Port, PortAuthority, ShippingAgent, User
 
 
 class Command(BaseCommand):

@@ -6,16 +6,19 @@ FROM python:3.12
 ENV PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
+    mkdir -p /var/cache/told && \
     mkdir /static && \
     #gid/uid from salt
     groupadd -g 75170 -r havneafgifter && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75170 --no-log-init -r -g havneafgifter -G certificate_exporter havneafgifter && \
-    chown -R havneafgifter:havneafgifter /static
+    chown -R havneafgifter:havneafgifter /static && \
+    chown -R havneafgifter:havneafgifter /var/cache/told && \
+    chmod a+w /var/cache/told
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext python3-distutils libxmlsec1-dev xmlsec1 && \
+    apt-get install -y --no-install-recommends gettext python3-distutils libxmlsec1-dev xmlsec1 libssl-dev libsasl2-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt

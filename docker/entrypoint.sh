@@ -15,6 +15,7 @@ LOAD_FIXTURES=${LOAD_FIXTURES:=false}
 CREATE_GROUPS=${CREATE_GROUPS:=false}
 CREATE_DUMMY_ADMIN=${CREATE_DUMMY_ADMIN:=false}
 CREATE_DUMMY_STAFF=${CREATE_DUMMY_STAFF:=false}
+SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
 
 python manage.py wait_for_db
 
@@ -45,6 +46,11 @@ fi
 if [ "${CREATE_DUMMY_STAFF}" = true ]; then
   echo 'creating staff user'
   ./manage.py createuser staff staff -s -g Editors
+fi
+
+python manage.py createcachetable
+if [ "${SKIP_IDP_METADATA,,}" = false ]; then
+  python manage.py update_mitid_idp_metadata
 fi
 
 echo 'collecting static files'
