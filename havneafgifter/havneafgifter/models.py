@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict, List
 
@@ -279,6 +279,22 @@ class HarborDuesForm(models.Model):
             f"({self.datetime_of_arrival} - {self.datetime_of_departure})"
         )
 
+    def _get_num_periods_in_duration(self, period: int) -> int:
+        duration: timedelta = self.datetime_of_departure - self.datetime_of_arrival
+        num: int = int(round(duration.total_seconds() / period))
+        return num
+
+    @property
+    def duration_in_days(self) -> int:
+        return self._get_num_periods_in_duration(24 * 60 * 60)
+
+    @property
+    def duration_in_weeks(self) -> int:
+        # This assumes that we are counting the number of 7-day periods, rather than the
+        # number of calendar weeks (e.g. 7-day periods starting on Monday or Sunday,
+        # depending on the local convention.)
+        return self._get_num_periods_in_duration(7 * 24 * 60 * 60)
+
     def calculate_harbour_tax(
         self, save: bool = True
     ) -> Dict[str, Decimal | List[dict]]:
@@ -447,6 +463,17 @@ class CruiseTaxForm(HarborDuesForm):
         ).first()
         rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
         return {"passenger_tax": self.number_of_passengers * rate, "taxrate": rate}
+
+    @property
+    def total_tax(self) -> Decimal:
+        def value_or_zero(val: Decimal | None) -> Decimal:
+            return val or Decimal("0")
+
+        return (
+            value_or_zero(self.harbour_tax)
+            + value_or_zero(self.pax_tax)
+            + value_or_zero(self.disembarkment_tax)
+        )
 
 
 class PassengersByCountry(models.Model):

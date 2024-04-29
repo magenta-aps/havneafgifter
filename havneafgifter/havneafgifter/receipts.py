@@ -3,7 +3,7 @@ from django.template import Context, Engine, Template
 from django.utils.safestring import SafeString
 from django_weasyprint.utils import django_url_fetcher
 
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType
 
 
 class Receipt:
@@ -44,3 +44,24 @@ class Receipt:
 
     def get_context_data(self) -> dict:
         return {}
+
+
+class HarborDuesFormReceipt(Receipt):
+    template = "havneafgifter/pdf/harbor_dues_form_receipt.html"
+
+    def get_context_data(self) -> dict:
+        return {
+            "ShipType": ShipType,
+            "PASSENGER_OR_FISHER": (ShipType.PASSENGER, ShipType.FISHER),
+            "FREIGHTER_OR_OTHER": (ShipType.FREIGHTER, ShipType.OTHER),
+        }
+
+
+class CruiseTaxFormReceipt(Receipt):
+    template = "havneafgifter/pdf/cruise_tax_form_receipt.html"
+
+    def get_context_data(self) -> dict:
+        disembarkment_tax: dict = self.form.calculate_disembarkment_tax(save=False)
+        return {
+            "disembarkment_tax_items": disembarkment_tax["details"],
+        }
