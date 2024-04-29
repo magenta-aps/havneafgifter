@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from havneafgifter.models import User
 
+from bs4 import BeautifulSoup
 
 class LoginTest(TestCase):
 
@@ -13,6 +14,26 @@ class LoginTest(TestCase):
         cls.user = User.objects.create(username="test")
         cls.user.set_password("test")
         cls.user.save()
+
+    def test_login_form(self):
+        self.client.get(reverse("havneafgifter:login"))
+        response = self.client.post(reverse("havneafgifter:login"), {
+            "username": "test",
+            "password": "test"
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], settings.LOGIN_REDIRECT_URL)
+
+    def test_login_form_incorrect(self):
+        self.client.get(reverse("havneafgifter:login"))
+        response = self.client.post(reverse("havneafgifter:login"), {
+            "username": "test",
+            "password": "incorrect"
+        })
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, "html.parser")
+        alert = soup.find(class_="alert")
+        self.assertIsNotNone(alert)
 
     def test_logout_redirect_saml(self):
         self.client.login(username="test", password="test")

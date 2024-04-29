@@ -8,3 +8,4 @@ coverage==7.3.0
 django-bootstrap5==24.1
 unittest-parametrize==1.4.0
 djangosaml2==1.9.2
+beautifulsoup4==4.12.2

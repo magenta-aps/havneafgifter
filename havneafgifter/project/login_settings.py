@@ -17,6 +17,7 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "djangosaml2.backends.Saml2Backend",
 )
+LOGIN_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
 LOGIN_URL = "/saml2/login/"
 LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

@@ -21,16 +21,16 @@ class BootstrapForm(forms.Form):
     def set_field_classes(self, name, field, check_for_errors=False):
         classes = self.split_class(field.widget.attrs.get("class"))
         classes.append("mr-2")
-        if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
-            pass
-        else:
-            classes.append("form-control")
-            if isinstance(field.widget, forms.Select):
-                classes.append("form-select")
+        # if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
+        #     pass
+        # else:
+        classes.append("form-control")
+            # if isinstance(field.widget, forms.Select):
+            #     classes.append("form-select")
 
-        if check_for_errors:
-            if self.has_error(name) is True:
-                classes.append("is-invalid")
+        # if check_for_errors:
+        #     if self.has_error(name) is True:
+        #         classes.append("is-invalid")
         field.widget.attrs["class"] = " ".join(set(classes))
 
     @staticmethod
@@ -38,8 +38,9 @@ class BootstrapForm(forms.Form):
         return class_string.split(" ") if class_string else []
 
     def update_field(self, name, field):
-        if isinstance(field.widget, forms.FileInput):
-            field.widget.template_name = "told_common/widgets/file.html"
-            if "class" not in field.widget.attrs:
-                field.widget.attrs["class"] = ""
-            field.widget.attrs["class"] += " custom-file-input"
+        pass
+        # if isinstance(field.widget, forms.FileInput):
+        #     field.widget.template_name = "told_common/widgets/file.html"
+        #     if "class" not in field.widget.attrs:
+        #         field.widget.attrs["class"] = ""
+        #     field.widget.attrs["class"] += " custom-file-input"
