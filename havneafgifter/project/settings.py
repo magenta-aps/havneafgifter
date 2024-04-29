@@ -85,6 +85,7 @@ TEMPLATES = [
         },
     },
 ]
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -170,13 +171,14 @@ LOGGING: dict = {
     },
     "formatters": {
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "{levelname} {name}: {message}",
             "style": "{",
         },
     },
     "handlers": {
         "gunicorn": {
             "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
     },
     "root": {
@@ -187,6 +189,14 @@ LOGGING: dict = {
         "django": {
             "handlers": ["gunicorn"],
             "level": "INFO",
+            "propagate": False,
+        },
+        "fontTools": {
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "weasyprint": {
+            "level": "ERROR",
             "propagate": False,
         },
     },
