@@ -19,6 +19,7 @@ from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     PassengerTaxCreateView,
+    PreviewPDFView,
     _CruiseTaxFormSetView,
 )
 
@@ -192,3 +193,33 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             )
             # Assert: verify that we displayed a "thank you" message
             mock_add_message.assert_called_once_with(ANY, messages.SUCCESS, _("Thanks"))
+
+
+class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.view = PreviewPDFView()
+
+    def test_get_object_returns_harbor_dues_form(self):
+        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
+        self.view.get(self.request_factory.get(""))
+        self.assertEqual(self.view.get_object(), self.harbor_dues_form)
+
+    def test_get_object_returns_cruise_tax_form(self):
+        self.view.kwargs = {"pk": self.cruise_tax_form.pk}
+        self.view.get(self.request_factory.get(""))
+        self.assertEqual(self.view.get_object(), self.cruise_tax_form)
+
+    def test_get_object_returns_none(self):
+        self.view.kwargs = {"pk": -1}
+        self.view.get(self.request_factory.get(""))
+        self.assertIsNone(self.view.get_object())
+
+    def test_get_returns_pdf(self):
+        for obj in (self.harbor_dues_form, self.cruise_tax_form):
+            with self.subTest(obj=obj):
+                self.view.kwargs = {"pk": obj.pk}
+                response = self.view.get(self.request_factory.get(""))
+                self.assertEqual(response["Content-Type"], "application/pdf")
