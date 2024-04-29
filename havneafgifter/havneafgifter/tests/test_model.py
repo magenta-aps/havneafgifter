@@ -1,5 +1,5 @@
 from datetime import date, datetime, timezone
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -191,10 +191,21 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         with patch.object(EmailMessage, "send") as mock_send:
             msg, status = instance.send_email()
+            # Assert the basic email fields are populated
             self.assertEqual(msg.subject, instance.mail_subject)
             self.assertEqual(msg.body, instance.mail_body)
             self.assertEqual(msg.bcc, instance.mail_recipients)
             self.assertEqual(msg.from_email, settings.EMAIL_SENDER)
+            # Assert that the receipt is attached as Receipt
+            self.assertListEqual(
+                msg.attachments,
+                [(f"{instance.pk}.pdf", ANY, "application/pdf")],
+            )
+            pdf_content: bytes = msg.attachments[0][1]
+            self.assertIsInstance(pdf_content, bytes)
+            self.assertGreater(len(pdf_content), 0)
+            # Assert that `HarborDuesForm.send_mail` calls `EmailMessage.send` as
+            # expected.
             mock_send.assert_called_once_with(fail_silently=False)
 
     def test_mail_body(self):

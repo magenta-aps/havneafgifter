@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -182,3 +182,26 @@ class HarborDuesFormDetailView(HavneafgiftView, DetailView):
 
 class CruiseTaxFormDetailView(HavneafgiftView, DetailView):
     model = CruiseTaxForm
+
+
+class PreviewPDFView(DetailView):
+    def get(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound("No form found")
+        else:
+            receipt = form.get_receipt_pdf()
+        return HttpResponse(
+            receipt.pdf,
+            content_type="application/pdf",
+        )
+
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            return CruiseTaxForm.objects.get(pk=pk)
+        except CruiseTaxForm.DoesNotExist:
+            try:
+                return HarborDuesForm.objects.get(pk=pk)
+            except HarborDuesForm.DoesNotExist:
+                return None

@@ -11,6 +11,7 @@ from havneafgifter.views import (
     LoginView,
     LogoutView,
     PassengerTaxCreateView,
+    PreviewPDFView,
 )
 
 app_name = "havneafgifter"
@@ -55,5 +56,10 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/krydstogt/<int:pk>/",
         CruiseTaxFormDetailView.as_view(),
         name="cruise_tax_form_detail",
+    ),
+    path(
+        "pdf/<int:pk>/",
+        PreviewPDFView.as_view(),
+        name="pdf_detail",
     ),
 ]

@@ -336,6 +336,11 @@ class HarborDuesForm(models.Model):
             self.save(update_fields=("harbour_tax",))
         return {"harbour_tax": harbour_tax, "details": details}
 
+    def get_receipt_pdf(self):
+        from havneafgifter.receipts import HarborDuesFormReceipt
+
+        return HarborDuesFormReceipt(self)
+
     def send_email(self) -> tuple[EmailMessage, int]:
         logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
         msg = EmailMessage(
@@ -343,6 +348,12 @@ class HarborDuesForm(models.Model):
             self.mail_body,
             from_email=settings.EMAIL_SENDER,
             bcc=self.mail_recipients,
+        )
+        receipt = self.get_receipt_pdf()
+        msg.attach(
+            filename=f"{self.pk}.pdf",
+            content=receipt.pdf,
+            mimetype="application/pdf",
         )
         result = msg.send(fail_silently=False)
         return msg, result
@@ -474,6 +485,11 @@ class CruiseTaxForm(HarborDuesForm):
             + value_or_zero(self.pax_tax)
             + value_or_zero(self.disembarkment_tax)
         )
+
+    def get_receipt_pdf(self):
+        from havneafgifter.receipts import CruiseTaxFormReceipt
+
+        return CruiseTaxFormReceipt(self)
 
 
 class PassengersByCountry(models.Model):
