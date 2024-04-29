@@ -18,6 +18,7 @@ from havneafgifter.models import (
     TaxRates,
     imo_validator,
 )
+from havneafgifter.receipts import CruiseTaxFormReceipt, HarborDuesFormReceipt
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
@@ -187,6 +188,17 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
             "Mary, Nordhavn (2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
         )
 
+    def test_duration_in_days(self):
+        self.assertEqual(self.harbor_dues_form.duration_in_days, 31)
+
+    def test_duration_in_weeks(self):
+        self.assertEqual(self.harbor_dues_form.duration_in_weeks, 4)
+
+    def test_get_receipt_pdf(self):
+        self.assertIsInstance(
+            self.harbor_dues_form.get_receipt_pdf(), HarborDuesFormReceipt
+        )
+
     def test_send_email(self):
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         with patch.object(EmailMessage, "send") as mock_send:
@@ -260,6 +272,28 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
             self.assertTrue(
                 any(record.message.endswith(message) for record in logged.records)
             )
+
+
+class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
+    def test_total_tax(self):
+        self.assertEqual(self.cruise_tax_form.total_tax, 0)
+        # Calculate the three different sub-totals, and compare their sum to `total_tax`
+        harbour_tax = self.cruise_tax_form.calculate_harbour_tax(save=False)[
+            "harbour_tax"
+        ]
+        passenger_tax = self.cruise_tax_form.calculate_passenger_tax()["passenger_tax"]
+        disembarkment_tax = self.cruise_tax_form.calculate_disembarkment_tax(
+            save=False
+        )["disembarkment_tax"]
+        self.assertEqual(
+            self.cruise_tax_form.total_tax,
+            harbour_tax + passenger_tax + disembarkment_tax,
+        )
+
+    def test_get_receipt_pdf(self):
+        self.assertIsInstance(
+            self.cruise_tax_form.get_receipt_pdf(), CruiseTaxFormReceipt
+        )
 
 
 class TestDisembarkmentSite(TestCase):
