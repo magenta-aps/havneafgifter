@@ -28,10 +28,12 @@ from .models import (
 
 class HavneafgiftView:
     def get_context_data(self, **context):
-        return super().get_context_data(**{
-            **context,
-            "version": settings.VERSION,
-        })
+        return super().get_context_data(
+            **{
+                **context,
+                "version": settings.VERSION,
+            }
+        )
 
 
 class LoginView(HavneafgiftView, DjangoLoginView):
