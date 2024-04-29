@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
@@ -47,8 +48,8 @@ class LogoutView(RedirectView):
             # Logged in with saml2, redirect to saml2 logout
             return reverse("saml2_logout")
         else:
-            # Redirect to django logout
-            return reverse("logout")
+            logout(self.request)
+            return settings.LOGOUT_REDIRECT_URL
 
 
 class HarborDuesFormCreateView(HavneafgiftView, CreateView):
