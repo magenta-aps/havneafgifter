@@ -5,22 +5,26 @@ from django_weasyprint.utils import django_url_fetcher
 
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType
 
+_PDF_BASE_TEMPLATE: str = "havneafgifter/pdf/base.html"
+
 
 class Receipt:
     """Receipt classes take a `HarborDuesForm` or `CruiseTaxForm` as input
     and render their data to HTML or PDF.
     """
 
-    template = None
-    """HTML template to use (for both HTML and PDF output.)"""
+    template: str = ""
+    """HTML template to use (for both HTML and PDF output.)
+    Must be set by any class inheriting from `Receipt`.
+    """
 
     def __init__(
         self,
-        form: HarborDuesForm | CruiseTaxForm,
-        base: str = "havneafgifter/pdf/base.html",
+        form,
+        base: str = _PDF_BASE_TEMPLATE,
     ) -> None:
         super().__init__()
-        self.form: HarborDuesForm | CruiseTaxForm = form
+        self.form = form
         self._engine: Engine = Engine.get_default()
         self._template: Template = self._engine.get_template(self.template)
         self._context: Context = Context({"form": form, **self.get_context_data()})
@@ -47,7 +51,14 @@ class Receipt:
 
 
 class HarborDuesFormReceipt(Receipt):
-    template = "havneafgifter/pdf/harbor_dues_form_receipt.html"
+    template: str = "havneafgifter/pdf/harbor_dues_form_receipt.html"
+
+    def __init__(
+        self,
+        form: HarborDuesForm,
+        base: str = _PDF_BASE_TEMPLATE,
+    ) -> None:
+        super().__init__(form, base=base)
 
     def get_context_data(self) -> dict:
         return {
@@ -58,7 +69,14 @@ class HarborDuesFormReceipt(Receipt):
 
 
 class CruiseTaxFormReceipt(Receipt):
-    template = "havneafgifter/pdf/cruise_tax_form_receipt.html"
+    template: str = "havneafgifter/pdf/cruise_tax_form_receipt.html"
+
+    def __init__(
+        self,
+        form: CruiseTaxForm,
+        base: str = _PDF_BASE_TEMPLATE,
+    ) -> None:
+        super().__init__(form, base=base)
 
     def get_context_data(self) -> dict:
         disembarkment_tax: dict = self.form.calculate_disembarkment_tax(save=False)
