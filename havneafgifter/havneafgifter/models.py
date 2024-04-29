@@ -493,6 +493,12 @@ class CruiseTaxForm(HarborDuesForm):
 
 
 class PassengersByCountry(models.Model):
+    class Meta:
+        ordering = [
+            "cruise_tax_form",
+            "nationality",
+        ]
+
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm,
         null=False,
@@ -538,6 +544,13 @@ class DisembarkmentSite(models.Model):
 
 
 class Disembarkment(models.Model):
+    class Meta:
+        ordering = [
+            "cruise_tax_form",
+            "disembarkment_site__municipality",
+            "disembarkment_site__name",
+        ]
+
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm, null=False, blank=False, on_delete=models.CASCADE
     )
