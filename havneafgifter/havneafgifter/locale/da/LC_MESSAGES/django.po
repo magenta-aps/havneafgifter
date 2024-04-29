@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-29 12:00-0100\n"
+"POT-Creation-Date: 2024-04-29 12:30-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,16 @@ msgstr ""
 
 #: havneafgifter/admin.py
 msgid "Important dates"
+msgstr ""
+
+#: havneafgifter/forms.py
+#, fuzzy
+#| msgid "Vessel name"
+msgid "Username"
+msgstr "Skibets navn"
+
+#: havneafgifter/forms.py
+msgid "Password"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -372,6 +382,14 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Create"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/layout.html
+msgid "Version"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/layout.html
+msgid "Kildekode"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html

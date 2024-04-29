@@ -26,7 +26,15 @@ from .models import (
 )
 
 
-class LoginView(DjangoLoginView):
+class HavneafgiftView:
+    def get_context_data(self, **context):
+        return super().get_context_data(**{
+            **context,
+            "version": settings.VERSION,
+        })
+
+
+class LoginView(HavneafgiftView, DjangoLoginView):
     template_name = "havneafgifter/login.html"
     form_class = AuthenticationForm
 
@@ -41,7 +49,7 @@ class LogoutView(RedirectView):
             return reverse("logout")
 
 
-class HarborDuesFormCreateView(CreateView):
+class HarborDuesFormCreateView(HavneafgiftView, CreateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
@@ -77,7 +85,7 @@ class HarborDuesFormCreateView(CreateView):
             )
 
 
-class _CruiseTaxFormSetView(FormView):
+class _CruiseTaxFormSetView(HavneafgiftView, FormView):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """
@@ -166,9 +174,9 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         )
 
 
-class HarborDuesFormDetailView(DetailView):
+class HarborDuesFormDetailView(HavneafgiftView, DetailView):
     model = HarborDuesForm
 
 
-class CruiseTaxFormDetailView(DetailView):
+class CruiseTaxFormDetailView(HavneafgiftView, DetailView):
     model = CruiseTaxForm
