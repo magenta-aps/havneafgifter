@@ -3,12 +3,10 @@ from pathlib import Path
 
 import saml2
 from django.urls import reverse_lazy
-
 from project.util import strtobool
 
-
 SAML_SESSION_COOKIE_NAME = "saml_session"
-SAML_SESSION_COOKIE_SAMESITE = 'Lax'
+SAML_SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = True
 SAML_CREATE_UNKNOWN_USER = True
 SAML_ACS_FAILURE_RESPONSE_FUNCTION = "project.util.template_failure"
@@ -16,10 +14,10 @@ ACS_DEFAULT_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'djangosaml2.backends.Saml2Backend',
+    "django.contrib.auth.backends.ModelBackend",
+    "djangosaml2.backends.Saml2Backend",
 )
-LOGIN_URL = '/saml2/login/'
+LOGIN_URL = "/saml2/login/"
 LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SAML_DEFAULT_BINDING = saml2.BINDING_HTTP_REDIRECT
@@ -29,7 +27,7 @@ SAML_ATTRIBUTE_MAPPING = {
     "https://data.gov.dk/model/core/eid/lastName": ("last_name",),
     "https://data.gov.dk/model/core/eid/email": ("email",),
     "https://data.gov.dk/model/core/eid/professional/cvr": ("cvr",),
-    "https://data.gov.dk/model/core/eid/professional/orgName": ("organization")
+    "https://data.gov.dk/model/core/eid/professional/orgName": ("organization"),
 }
 
 SAML_CONFIG = {
@@ -51,14 +49,20 @@ SAML_CONFIG = {
             "endpoints": {
                 "assertion_consumer_service": [
                     (
-                        'http://localhost:8000/saml2/acs/',
+                        "http://localhost:8000/saml2/acs/",
                         saml2.BINDING_HTTP_POST,
                     )
                 ],
                 "single_logout_service": [
                     (
-                        ('http://localhost:8000/saml2/ls/', saml2.BINDING_HTTP_REDIRECT),
-                        ('http://localhost:8000/saml2/ls/post', saml2.BINDING_HTTP_POST),
+                        (
+                            "http://localhost:8000/saml2/ls/",
+                            saml2.BINDING_HTTP_REDIRECT,
+                        ),
+                        (
+                            "http://localhost:8000/saml2/ls/post",
+                            saml2.BINDING_HTTP_POST,
+                        ),
                     ),
                 ],
             },
@@ -78,8 +82,7 @@ SAML_CONFIG = {
                 "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
             ],
             "signing_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-
-            'digest_algorithm':  "http://www.w3.org/2000/09/xmldsig#sha1",
+            "digest_algorithm": "http://www.w3.org/2000/09/xmldsig#sha1",
             "authn_requests_signed": True,
             "want_assertions_signed": True,
             "want_response_signed": False,
@@ -124,5 +127,4 @@ SAML_CONFIG = {
             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
         ],
     },
-
 }

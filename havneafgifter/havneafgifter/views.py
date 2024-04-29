@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -7,7 +8,13 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
 
-from .forms import DisembarkmentForm, HarborDuesFormForm, PassengersByCountryForm
+from havneafgifter.forms import (
+    AuthenticationForm,
+    DisembarkmentForm,
+    HarborDuesFormForm,
+    PassengersByCountryForm,
+)
+
 from .models import (
     CruiseTaxForm,
     Disembarkment,
@@ -17,6 +24,11 @@ from .models import (
     PassengersByCountry,
     ShipType,
 )
+
+
+class LoginView(DjangoLoginView):
+    template_name = "havneafgifter/login.html"
+    form_class = AuthenticationForm
 
 
 class LogoutView(RedirectView):

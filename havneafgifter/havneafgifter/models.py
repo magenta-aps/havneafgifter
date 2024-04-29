@@ -28,8 +28,8 @@ class User(AbstractUser):
         validators=[
             MinLengthValidator(10),
             MaxLengthValidator(10),
-            RegexValidator(r"\d{10}")
-        ]
+            RegexValidator(r"\d{10}"),
+        ],
     )
     cvr = models.CharField(
         max_length=8,
@@ -38,8 +38,8 @@ class User(AbstractUser):
         validators=[
             MinLengthValidator(8),
             MaxLengthValidator(8),
-            RegexValidator(r"\d{8}")
-        ]
+            RegexValidator(r"\d{8}"),
+        ],
     )
     organization = models.CharField(
         max_length=100,

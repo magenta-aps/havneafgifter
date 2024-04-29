@@ -15,4 +15,6 @@ def strtobool(val):
 def template_failure(request, exception=None, status=403, **kwargs):
     print(exception)
     """ Renders a simple template with an error message. """
-    return render(request, 'djangosaml2/login_error.html', {'exception': exception}, status=status)
+    return render(
+        request, "djangosaml2/login_error.html", {"exception": exception}, status=status
+    )

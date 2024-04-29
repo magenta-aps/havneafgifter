@@ -1,8 +1,8 @@
 from typing import List
 
+import djangosaml2
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
-import djangosaml2
 
 urlpatterns: List[URLResolver | URLPattern] = [
     path("django-admin/", admin.site.urls),
@@ -13,5 +13,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
             namespace="havneafgifter",
         ),
     ),
-    path('saml2/', include('djangosaml2.urls')),
+    path("saml2/", include("djangosaml2.urls")),
 ]

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
 from django.utils.translation import gettext_lazy as _
+
 from .models import (
     CruiseTaxForm,
     Disembarkment,
@@ -11,7 +11,8 @@ from .models import (
     PassengersByCountry,
     PortTaxRate,
     ShippingAgent,
-    TaxRates, User,
+    TaxRates,
+    User,
 )
 
 
@@ -79,14 +80,24 @@ class DisembarkmentTaxRateAdmin(admin.ModelAdmin):
     pass
 
 
-
 # Register out own model admin, based on the default UserAdmin
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name", "email", "cpr", "cvr", "organization")}),
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "cpr",
+                    "cvr",
+                    "organization",
+                )
+            },
+        ),
         (
             _("Permissions"),
             {
@@ -101,7 +112,6 @@ class CustomUserAdmin(UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)

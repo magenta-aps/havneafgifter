@@ -8,7 +8,9 @@ from .views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormDetailView,
-    PassengerTaxCreateView, LogoutView,
+    LoginView,
+    LogoutView,
+    PassengerTaxCreateView,
 )
 
 app_name = "havneafgifter"
@@ -16,7 +18,7 @@ app_name = "havneafgifter"
 urlpatterns: List[URLResolver | URLPattern] = [
     path(
         "login",
-        TemplateView.as_view(template_name="havneafgifter/login.html"),
+        LoginView.as_view(),
         name="login",
     ),
     path(

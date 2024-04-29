@@ -58,7 +58,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    'djangosaml2.middleware.SamlSessionMiddleware',
+    "djangosaml2.middleware.SamlSessionMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
