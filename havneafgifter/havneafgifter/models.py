@@ -295,6 +295,9 @@ class HarborDuesForm(models.Model):
         # depending on the local convention.)
         return self._get_num_periods_in_duration(7 * 24 * 60 * 60)
 
+    def calculate_tax(self, save: bool = True):
+        self.calculate_harbour_tax(save=save)
+
     def calculate_harbour_tax(
         self, save: bool = True
     ) -> Dict[str, Decimal | List[dict]]:
@@ -431,6 +434,11 @@ class CruiseTaxForm(HarborDuesForm):
         verbose_name=_("Calculated disembarkment tax"),
     )
 
+    def calculate_tax(self, save: bool = True):
+        super().calculate_tax(save=save)  # calculates harbour tax
+        self.calculate_passenger_tax(save=save)
+        self.calculate_disembarkment_tax(save=save)
+
     def calculate_disembarkment_tax(self, save: bool = True):
         disembarkment_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
@@ -466,14 +474,18 @@ class CruiseTaxForm(HarborDuesForm):
             self.save(update_fields=("disembarkment_tax",))
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
-    def calculate_passenger_tax(self) -> Dict[str, Decimal]:
+    def calculate_passenger_tax(self, save: bool = True) -> Dict[str, Decimal]:
         arrival_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
             Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
             Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
         ).first()
         rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
-        return {"passenger_tax": self.number_of_passengers * rate, "taxrate": rate}
+        pax_tax: Decimal = self.number_of_passengers * rate
+        if save:
+            self.pax_tax = pax_tax
+            self.save(update_fields=("pax_tax",))
+        return {"passenger_tax": pax_tax, "taxrate": rate}
 
     @property
     def total_tax(self) -> Decimal:
