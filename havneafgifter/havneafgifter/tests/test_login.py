@@ -1,13 +1,12 @@
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
 from havneafgifter.models import User
 
-from bs4 import BeautifulSoup
 
 class LoginTest(TestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -17,19 +16,18 @@ class LoginTest(TestCase):
 
     def test_login_form(self):
         self.client.get(reverse("havneafgifter:login"))
-        response = self.client.post(reverse("havneafgifter:login"), {
-            "username": "test",
-            "password": "test"
-        })
+        response = self.client.post(
+            reverse("havneafgifter:login"), {"username": "test", "password": "test"}
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], settings.LOGIN_REDIRECT_URL)
 
     def test_login_form_incorrect(self):
         self.client.get(reverse("havneafgifter:login"))
-        response = self.client.post(reverse("havneafgifter:login"), {
-            "username": "test",
-            "password": "incorrect"
-        })
+        response = self.client.post(
+            reverse("havneafgifter:login"),
+            {"username": "test", "password": "incorrect"},
+        )
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, "html.parser")
         alert = soup.find(class_="alert")

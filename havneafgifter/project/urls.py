@@ -1,6 +1,5 @@
 from typing import List
 
-import djangosaml2
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
 
