@@ -194,6 +194,10 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
     def test_duration_in_weeks(self):
         self.assertEqual(self.harbor_dues_form.duration_in_weeks, 4)
 
+    def test_calculate_tax(self):
+        self.harbor_dues_form.calculate_tax(save=True)
+        self.assertIsNotNone(self.harbor_dues_form.harbour_tax)
+
     def test_get_receipt(self):
         self.assertIsInstance(
             self.harbor_dues_form.get_receipt(), HarborDuesFormReceipt
@@ -275,6 +279,12 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
 
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
+    def test_calculate_tax(self):
+        self.cruise_tax_form.calculate_tax(save=True)
+        self.assertIsNotNone(self.cruise_tax_form.harbour_tax)
+        self.assertIsNotNone(self.cruise_tax_form.pax_tax)
+        self.assertIsNotNone(self.cruise_tax_form.disembarkment_tax)
+
     def test_total_tax(self):
         self.assertEqual(self.cruise_tax_form.total_tax, 0)
         # Calculate the three different sub-totals, and compare their sum to `total_tax`

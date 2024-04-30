@@ -32,11 +32,12 @@ class Receipt:
 
         # Use `RequestContext` if `request` is passed. This is necessary when rendering
         # HTML output that also contains a `{% csrf_token %}`.
+        self._context: Context | RequestContext
         context_args: dict = {"form": form, **self.get_context_data()}
         if request is not None:
-            self._context: RequestContext = RequestContext(request, context_args)
+            self._context = RequestContext(request, context_args)
         else:
-            self._context: Context = Context(context_args)
+            self._context = Context(context_args)
 
         # Dynamic base template
         self._context["base"] = base

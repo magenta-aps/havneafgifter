@@ -1,8 +1,8 @@
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 from django.contrib import messages
 from django.forms import BaseFormSet
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +20,7 @@ from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     PassengerTaxCreateView,
     PreviewPDFView,
+    ReceiptDetailView,
     _CruiseTaxFormSetView,
 )
 
@@ -195,12 +196,12 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             mock_add_message.assert_called_once_with(ANY, messages.SUCCESS, _("Thanks"))
 
 
-class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
+class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         cls.request_factory = RequestFactory()
-        cls.view = PreviewPDFView()
+        cls.view = ReceiptDetailView()
 
     def test_get_object_returns_harbor_dues_form(self):
         self.view.kwargs = {"pk": self.harbor_dues_form.pk}
@@ -217,9 +218,47 @@ class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
         self.view.get(self.request_factory.get(""))
         self.assertIsNone(self.view.get_object())
 
+    @parametrize(
+        "status,expected_message_class",
+        [
+            (0, messages.ERROR),
+            (1, messages.SUCCESS),
+        ],
+    )
+    def test_post_sends_email(self, status, expected_message_class):
+        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
+        with patch("havneafgifter.views.messages.add_message") as mock_add_message:
+            with patch(
+                "havneafgifter.models.HarborDuesForm.send_email",
+                return_value=(Mock(), status),
+            ) as mock_send_email:
+                self.view.post(self.request_factory.post(""))
+                mock_send_email.assert_called_once_with()
+                mock_add_message.assert_called_once_with(
+                    ANY, expected_message_class, ANY
+                )
+
+    def test_post_returns_404(self):
+        self.view.kwargs = {"pk": -1}
+        response = self.view.post(self.request_factory.post(""))
+        self.assertIsInstance(response, HttpResponseNotFound)
+
+
+class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.view = PreviewPDFView()
+
     def test_get_returns_pdf(self):
         for obj in (self.harbor_dues_form, self.cruise_tax_form):
             with self.subTest(obj=obj):
                 self.view.kwargs = {"pk": obj.pk}
                 response = self.view.get(self.request_factory.get(""))
                 self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_get_returns_404(self):
+        self.view.kwargs = {"pk": -1}
+        response = self.view.get(self.request_factory.get(""))
+        self.assertIsInstance(response, HttpResponseNotFound)

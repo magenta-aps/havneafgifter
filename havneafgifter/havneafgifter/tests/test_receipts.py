@@ -1,7 +1,9 @@
 from unittest.mock import Mock, PropertyMock, patch
 
-from django.template import Context, Template
+from django.http import HttpRequest
+from django.template import Context, RequestContext, Template
 from django.test import SimpleTestCase, TestCase
+from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import ShipType
 from havneafgifter.receipts import (
@@ -20,14 +22,21 @@ class _PDFMixin:
         self.assertGreater(len(content), 0)
 
 
-class TestReceipt(_PDFMixin, SimpleTestCase):
+class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
+    @parametrize(
+        "request,expected_context_type",
+        [
+            (None, Context),
+            (HttpRequest(), RequestContext),
+        ],
+    )
     @patch.object(Engine, "get_template", return_value=Template(""))
-    def test_init(self, mock_get_template):
+    def test_init(self, mock_get_template, request, expected_context_type):
         mock_form: Mock = Mock()
-        instance: Receipt = Receipt(mock_form)
+        instance: Receipt = Receipt(mock_form, request=request)
         self.assertIsInstance(instance._engine, Engine)
         self.assertIsInstance(instance._template, Template)
-        self.assertIsInstance(instance._context, Context)
+        self.assertIsInstance(instance._context, expected_context_type)
         mock_get_template.assert_called_once_with(instance.template)
         self.assertEqual(instance._context["form"], mock_form)
         self.assertEqual(instance._context["base"], _PDF_BASE_TEMPLATE)
