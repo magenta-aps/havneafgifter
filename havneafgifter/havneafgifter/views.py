@@ -1,12 +1,21 @@
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView
+from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
 
-from .forms import DisembarkmentForm, HarborDuesFormForm, PassengersByCountryForm
+from havneafgifter.forms import (
+    AuthenticationForm,
+    DisembarkmentForm,
+    HarborDuesFormForm,
+    PassengersByCountryForm,
+)
+
 from .models import (
     CruiseTaxForm,
     Disembarkment,
@@ -18,7 +27,32 @@ from .models import (
 )
 
 
-class HarborDuesFormCreateView(CreateView):
+class HavneafgiftView:
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{
+                **context,
+                "version": settings.VERSION,
+            }
+        )
+
+
+class LoginView(HavneafgiftView, DjangoLoginView):
+    template_name = "havneafgifter/login.html"
+    form_class = AuthenticationForm
+
+
+class LogoutView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if self.request.COOKIES.get(settings.SAML_SESSION_COOKIE_NAME):
+            # Logged in with saml2, redirect to saml2 logout
+            return reverse("saml2_logout")
+        else:
+            logout(self.request)
+            return settings.LOGOUT_REDIRECT_URL
+
+
+class HarborDuesFormCreateView(HavneafgiftView, CreateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
@@ -54,7 +88,7 @@ class HarborDuesFormCreateView(CreateView):
             )
 
 
-class _CruiseTaxFormSetView(FormView):
+class _CruiseTaxFormSetView(HavneafgiftView, FormView):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """
@@ -143,9 +177,9 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         )
 
 
-class HarborDuesFormDetailView(DetailView):
+class HarborDuesFormDetailView(HavneafgiftView, DetailView):
     model = HarborDuesForm
 
 
-class CruiseTaxFormDetailView(DetailView):
+class CruiseTaxFormDetailView(HavneafgiftView, DetailView):
     model = CruiseTaxForm

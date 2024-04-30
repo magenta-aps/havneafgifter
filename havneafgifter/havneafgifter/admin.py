@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 from .models import (
     CruiseTaxForm,
@@ -12,6 +12,7 @@ from .models import (
     PortTaxRate,
     ShippingAgent,
     TaxRates,
+    User,
 )
 
 
@@ -79,13 +80,39 @@ class DisembarkmentTaxRateAdmin(admin.ModelAdmin):
     pass
 
 
-# Unregister the provided model admin
-admin.site.unregister(User)
-
-
 # Register out own model admin, based on the default UserAdmin
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "cpr",
+                    "cvr",
+                    "organization",
+                )
+            },
+        ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+    )
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         is_superuser = request.user.is_superuser

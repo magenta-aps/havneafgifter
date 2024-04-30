@@ -5,6 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List
 
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -17,6 +18,34 @@ from django.db.models.signals import post_save
 from django.utils.translation import gettext as _
 
 from havneafgifter.data import DateTimeRange
+
+
+class User(AbstractUser):
+    cpr = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        validators=[
+            MinLengthValidator(10),
+            MaxLengthValidator(10),
+            RegexValidator(r"\d{10}"),
+        ],
+    )
+    cvr = models.CharField(
+        max_length=8,
+        null=True,
+        blank=True,
+        validators=[
+            MinLengthValidator(8),
+            MaxLengthValidator(8),
+            RegexValidator(r"\d{8}"),
+        ],
+    )
+    organization = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
 
 
 class ShipType(models.TextChoices):
