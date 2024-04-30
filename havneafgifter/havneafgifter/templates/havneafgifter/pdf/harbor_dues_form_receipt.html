@@ -1,0 +1,89 @@
+{% extends 'havneafgifter/pdf/receipt.html' %}
+
+{% comment %}
+SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+
+SPDX-License-Identifier: MPL-2.0
+{% endcomment %}
+
+{% block headline %}
+Umiarsualivimmut Akileraarutit
+<br>
+Harbour Dues
+{% endblock %}
+
+{% block additional_tables %}
+<div class="col-12">
+    <h2>
+        {% if form.vessel_type == ShipType.PASSENGER %}
+        Umiarsuaq ilaarsartaat
+        <br>
+        Passenger vessel
+        {% elif form.vessel_type == ShipType.FISHER %}
+        Nunat allamiut aaliasariutaat
+        <br>
+        Foreign fishing vessel
+        {% elif form.vessel_type == ShipType.FREIGHTER %}
+        Umiarsuaq assartuut
+        <br>
+        Cargo vessel
+        {% elif form.vessel_type == ShipType.OTHER %}
+        Umiarsuaq alla
+        <br>
+        Other vessel
+        {% endif %}
+    </h2>
+    <table class="table table-bordered">
+        <tbody>
+            {# This row is the same for all vessel types #}
+            <tr>
+                <th scope="row">
+                    Bruttoton(s) (BT)
+                    <br>
+                    Gross tonnage (GT)
+                </th>
+                <td class="table-active">
+                    {{ form.gross_tonnage }}
+                </td>
+                <th scope="row">
+                    BT-mut ataatsimut DKK
+                    <br>
+                    DKK per/BT
+                </th>
+                <td class="table-active">
+                    0,70 DKK
+                </td>
+            </tr>
+            {# This row varies based on the vessel type #}
+            <tr>
+                <th scope="row">
+                    {% if form.vessel_type in PASSENGER_OR_FISHER %}
+                    Ullut unnuallu qassissaat
+                    <br>
+                    24 hours started
+                    {% elif form.vessel_type in FREIGHTER_OR_OTHER %}
+                    Sap. Ak. qassissaat
+                    <br>
+                    Weeks started
+                    {% endif %}
+                </th>
+                <td class="table-active">
+                    {% if form.vessel_type in PASSENGER_OR_FISHER %}
+                    {{ form.duration_in_days }}
+                    {% elif form.vessel_type in FREIGHTER_OR_OTHER %}
+                    {{ form.duration_in_weeks }}
+                    {% endif %}
+                </td>
+                <th scope="row" class="fw-bold">
+                    Akileraarutit
+                    <br>
+                    Dues
+                </th>
+                <td class="table-active fw-bold">
+                    {{ form.harbour_tax }} DKK
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

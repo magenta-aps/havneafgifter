@@ -1,0 +1,240 @@
+{% extends base %}
+
+{% comment %}
+SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+
+SPDX-License-Identifier: MPL-2.0
+{% endcomment %}
+
+{% load l10n %}
+{% load i18n %}
+
+{% block extra_css %}
+@page {
+    size: A4;
+    margin: 2cm 1cm;
+
+    @top-right {
+        font-size: 7pt;
+        text-align: right;
+        content: 'Umiarsualivimmut Akileraaruti - {{ form.pk }}, {{ form.date|localize }} / Harbour dues - {{ form.pk }}, {{ form.date|localize }}';
+    }
+
+    @bottom-center {
+        font-size: 7pt;
+        content: 'https://havneafgifter.gl';
+    }
+}
+
+.container {
+    font-size: 7pt;
+}
+
+h1 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 0 0 1cm 0;
+}
+
+h2 {
+    font-size: 11pt;
+    font-weight: normal;
+    margin: 1cm 0 0.5cm 0;
+}
+
+table {
+    page-break-inside: avoid;
+}
+
+table th {
+    width: 1%;
+    vertical-align: top;
+}
+
+table td {
+    width: 1%;
+    word-wrap: break-word;
+}
+
+table td.table-active {
+    background-color: #eee !important;
+}
+
+table td p {
+    display: block;
+    font-weight: bold;
+}
+
+table tfoot td p {
+    font-weight: normal;
+}
+
+table.table-striped td:first-child {
+    width: 10%;
+}
+{% endblock %}
+
+{% block object_actions %}
+{# This block is only rendered when outputting HTML (not PDF) #}
+<div class="container">
+    <div class="row pt-3 pb-3 mb-3" style="border-bottom: 1px solid #eee">
+        <div class="col-12">
+            <form method="post" action=".">
+                {% csrf_token %}
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-secondary">
+                        {% translate 'View PDF' %}
+                    </a>
+                    <button type="submit" class="btn btn-secondary" name="action" value="send_email">
+                        {% translate 'Send email' %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>
+            Umiarsualivimmut Akileraaruti &ndash; {{ form.pk }}, {{ form.date|localize }}
+            /
+            Harbour dues &ndash; {{ form.pk }}, {{ form.date|localize }}
+        </h1>
+
+        <h2>
+            {% block headline %}
+            {% endblock %}
+        </h2>
+
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th scope="row">
+                        Umiarsualivik nunaliffik
+                        <br>
+                        Port of call
+                    </th>
+                    <td class="table-active">
+                        {{ form.port_of_call }}
+                    </td>
+                    <th scope="row">
+                        Sumiuussuseq
+                        <br>
+                        Nationality
+                    </th>
+                    <td class="table-active">
+                        {{ form.get_nationality_display }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        Angallat
+                        <br>
+                        Vessel
+                    </th>
+                    <td class="table-active" colspan="3">
+                        <p>
+                            Angallatip aqqa nalunaarsorneqarnermullu normua / Name and registration
+                        </p>
+                        {{ form.vessel_name }}
+                        <br>
+                        {{ form.vessel_imo }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        Piginnittoq
+                        <br>
+                        Owner
+                    </th>
+                    <td class="table-active" colspan="3">
+                        <p>
+                            Ateq / Name
+                        </p>
+                        {{ form.vessel_owner }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        Umiarsuup naalagaa
+                        <br>
+                        Master
+                    </th>
+                    <td class="table-active" colspan="3">
+                        <p>
+                            Ateq / Name
+                        </p>
+                        {{ form.vessel_master }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        Umiarsuaatileqatigiiffik
+                        <br>
+                        Shipping agent / company
+                    </th>
+                    <td class="table-active" colspan="3">
+                        <p>
+                            Ateq / Name
+                        </p>
+                        {{ form.shipping_agent }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        Piffisasaq nunaliffik
+                        <br>
+                        Time of arrival
+                    </th>
+                    <td class="table-active">
+                        <p>
+                            Ulloq / Date
+                        </p>
+                        {{ form.datetime_of_arrival|date:"j-n-Y" }}
+                    </td>
+                    <td class="table-active" colspan="2">
+                        <p>
+                            Nalunaaqutaq / Time
+                        </p>
+                        {{ form.datetime_of_arrival|date:"H:i" }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        Piffissaq aallarfissaq
+                        <br>
+                        Time of departure
+                    </th>
+                    <td class="table-active">
+                        <p>
+                            Ulloq / Date
+                        </p>
+                        {{ form.datetime_of_departure|date:"j-n-Y" }}
+                    </td>
+                    <td class="table-active" colspan="2">
+                        <p>
+                            Nalunaaqutaq / Time
+                        </p>
+                        {{ form.datetime_of_departure|date:"H:i" }}
+                    </td>
+                </tr>
+
+                {% block extra_main %}
+                {% endblock %}
+            </tbody>
+        </table>
+    </div>
+
+    {% block additional_tables %}
+    {% endblock %}
+</div>
+{% endblock %}

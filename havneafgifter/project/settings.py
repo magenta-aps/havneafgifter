@@ -85,6 +85,7 @@ TEMPLATES = [
         },
     },
 ]
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -170,13 +171,14 @@ LOGGING: dict = {
     },
     "formatters": {
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "{levelname} {name}: {message}",
             "style": "{",
         },
     },
     "handlers": {
         "gunicorn": {
             "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
     },
     "root": {
@@ -187,6 +189,14 @@ LOGGING: dict = {
         "django": {
             "handlers": ["gunicorn"],
             "level": "INFO",
+            "propagate": False,
+        },
+        "fontTools": {
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "weasyprint": {
+            "level": "ERROR",
             "propagate": False,
         },
     },
@@ -221,7 +231,7 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", None)
 EMAIL_USE_TLS = bool(strtobool(os.environ.get("EMAIL_USE_TLS", "False")))
 EMAIL_USE_SSL = bool(strtobool(os.environ.get("EMAIL_USE_SSL", "False")))
 EMAIL_SENDER = os.environ.get("EMAIL_SENDER", "noreply@nanoq.gl")
-
+EMAIL_ADDRESS_SKATTESTYRELSEN = os.environ.get("EMAIL_ADDRESS_SKATTESTYRELSEN")
 
 AUTH_USER_MODEL = "havneafgifter.User"
 

@@ -42,6 +42,10 @@ SPDX-License-Identifier: MPL-2.0
     {% endblock %}
 
     <div class="container">
+        {% block object_actions %}
+        {% endblock %}
+
+        {# Displays messages from the Django 'messages' framework #}
         {% bootstrap_messages %}
         {% block content %}
         {% endblock %}

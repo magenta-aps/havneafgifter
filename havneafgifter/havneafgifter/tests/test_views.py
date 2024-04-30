@@ -1,26 +1,28 @@
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 from django.contrib import messages
 from django.forms import BaseFormSet
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
-from ..models import (
+from havneafgifter.models import (
     CruiseTaxForm,
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
     ShipType,
 )
-from ..views import (
+from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     PassengerTaxCreateView,
+    PreviewPDFView,
+    ReceiptDetailView,
     _CruiseTaxFormSetView,
 )
-from .mixins import HarborDuesFormMixin
 
 
 class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
@@ -32,7 +34,7 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
             (
                 ShipType.FREIGHTER,
                 HarborDuesForm,
-                "havneafgifter:harbor_dues_form_detail",
+                "havneafgifter:receipt_detail_html",
             ),
             # Test 2: cruise ship creates cruise tax form and sends user to the
             # passenger tax form.
@@ -89,15 +91,17 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
         context_data = self.instance.get_context_data()
         self.assertIsInstance(context_data[name], BaseFormSet)
 
-    def _post_formset(self, *form_items, prefix="form"):
+    def _post_formset(self, *form_items, prefix="form", **extra):
         data = {
             "form-TOTAL_FORMS": len(form_items),
             "form-INITIAL_FORMS": len(form_items),
+            **extra,
         }
         for idx, item in enumerate(form_items):
             for key, val in item.items():
                 data[f"{prefix}-{idx}-{key}"] = val
         self.instance.request = self.request_factory.post("", data=data)
+        return self.instance.request
 
 
 class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
@@ -122,9 +126,12 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
 
     def test_form_valid_creates_objects(self):
         # Arrange
-        self._post_formset({"number_of_passengers": 42})
+        request = self._post_formset(
+            {"number_of_passengers": 42},
+            total_number_of_passengers=42,
+        )
         # Act: trigger DB insert logic
-        self.instance.form_valid(self.instance.get_form())
+        self.instance.post(request)
         # Assert: verify that the specified `PassengersByCountry` objects are
         # created.
         self.assertQuerySetEqual(
@@ -141,6 +148,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
                 }
             ],
         )
+
+    def test_total_number_of_passengers_validation(self):
+        request = self._post_formset(
+            {"number_of_passengers": 40},
+            {"number_of_passengers": 40},
+            total_number_of_passengers=100,
+        )
+        response = self.instance.post(request)
+        context_data = response.context_data
+        passengers_total_form = context_data["passengers_total_form"]
+        passengers_by_country_formset = context_data["passengers_by_country_formset"]
+        self.assertFalse(passengers_total_form.is_valid())
+        self.assertTrue(passengers_by_country_formset.is_valid())
 
 
 class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
@@ -192,3 +212,71 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             )
             # Assert: verify that we displayed a "thank you" message
             mock_add_message.assert_called_once_with(ANY, messages.SUCCESS, _("Thanks"))
+
+
+class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.view = ReceiptDetailView()
+
+    def test_get_object_returns_harbor_dues_form(self):
+        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
+        self.view.get(self.request_factory.get(""))
+        self.assertEqual(self.view.get_object(), self.harbor_dues_form)
+
+    def test_get_object_returns_cruise_tax_form(self):
+        self.view.kwargs = {"pk": self.cruise_tax_form.pk}
+        self.view.get(self.request_factory.get(""))
+        self.assertEqual(self.view.get_object(), self.cruise_tax_form)
+
+    def test_get_object_returns_none(self):
+        self.view.kwargs = {"pk": -1}
+        self.view.get(self.request_factory.get(""))
+        self.assertIsNone(self.view.get_object())
+
+    @parametrize(
+        "status,expected_message_class",
+        [
+            (0, messages.ERROR),
+            (1, messages.SUCCESS),
+        ],
+    )
+    def test_post_sends_email(self, status, expected_message_class):
+        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
+        with patch("havneafgifter.views.messages.add_message") as mock_add_message:
+            with patch(
+                "havneafgifter.models.HarborDuesForm.send_email",
+                return_value=(Mock(), status),
+            ) as mock_send_email:
+                self.view.post(self.request_factory.post(""))
+                mock_send_email.assert_called_once_with()
+                mock_add_message.assert_called_once_with(
+                    ANY, expected_message_class, ANY
+                )
+
+    def test_post_returns_404(self):
+        self.view.kwargs = {"pk": -1}
+        response = self.view.post(self.request_factory.post(""))
+        self.assertIsInstance(response, HttpResponseNotFound)
+
+
+class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.view = PreviewPDFView()
+
+    def test_get_returns_pdf(self):
+        for obj in (self.harbor_dues_form, self.cruise_tax_form):
+            with self.subTest(obj=obj):
+                self.view.kwargs = {"pk": obj.pk}
+                response = self.view.get(self.request_factory.get(""))
+                self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_get_returns_404(self):
+        self.view.kwargs = {"pk": -1}
+        response = self.view.get(self.request_factory.get(""))
+        self.assertIsInstance(response, HttpResponseNotFound)

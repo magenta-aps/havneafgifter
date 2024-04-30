@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict, List
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.core.mail import EmailMessage
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -15,9 +18,12 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q
 from django.db.models.signals import post_save
+from django.templatetags.l10n import localize
 from django.utils.translation import gettext as _
 
 from havneafgifter.data import DateTimeRange
+
+logger = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
@@ -273,6 +279,25 @@ class HarborDuesForm(models.Model):
             f"({self.datetime_of_arrival} - {self.datetime_of_departure})"
         )
 
+    def _get_num_periods_in_duration(self, period: int) -> int:
+        duration: timedelta = self.datetime_of_departure - self.datetime_of_arrival
+        num: int = int(round(duration.total_seconds() / period))
+        return num
+
+    @property
+    def duration_in_days(self) -> int:
+        return self._get_num_periods_in_duration(24 * 60 * 60)
+
+    @property
+    def duration_in_weeks(self) -> int:
+        # This assumes that we are counting the number of 7-day periods, rather than the
+        # number of calendar weeks (e.g. 7-day periods starting on Monday or Sunday,
+        # depending on the local convention.)
+        return self._get_num_periods_in_duration(7 * 24 * 60 * 60)
+
+    def calculate_tax(self, save: bool = True):
+        self.calculate_harbour_tax(save=save)
+
     def calculate_harbour_tax(
         self, save: bool = True
     ) -> Dict[str, Decimal | List[dict]]:
@@ -314,6 +339,76 @@ class HarborDuesForm(models.Model):
             self.save(update_fields=("harbour_tax",))
         return {"harbour_tax": harbour_tax, "details": details}
 
+    def get_receipt(self, **kwargs):
+        from havneafgifter.receipts import HarborDuesFormReceipt
+
+        return HarborDuesFormReceipt(self, **kwargs)
+
+    def send_email(self) -> tuple[EmailMessage, int]:
+        logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
+        msg = EmailMessage(
+            self.mail_subject,
+            self.mail_body,
+            from_email=settings.EMAIL_SENDER,
+            bcc=self.mail_recipients,
+        )
+        receipt = self.get_receipt()
+        msg.attach(
+            filename=f"{self.pk}.pdf",
+            content=receipt.pdf,
+            mimetype="application/pdf",
+        )
+        result = msg.send(fail_silently=False)
+        return msg, result
+
+    @property
+    def mail_subject(self):
+        # TODO: verify content
+        # TODO: include data from object?
+        return _("New harbor dues report")  # pragma: nocover
+
+    @property
+    def mail_body(self):
+        return _(
+            "On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
+            "environmental and maintenance fees related to the entry of %(vessel)s "
+            "in %(port)s"
+        ) % {
+            "date": localize(self.date),
+            "agent": self.shipping_agent.name,
+            "vessel": self.vessel_name,
+            "port": self.port_of_call.name,
+        }
+
+    @property
+    def mail_recipients(self) -> list[str]:
+        recipients: list[str] = []
+
+        if self.port_of_call.portauthority:
+            recipients.append(self.port_of_call.portauthority.email)
+        else:
+            logger.info(
+                "%r is not linked to a port authority, excluding from mail recipients",
+                self,
+            )
+
+        if self.shipping_agent:
+            recipients.append(self.shipping_agent.email)
+        else:
+            logger.info(
+                "%r is not linked to a shipping agent, excluding from mail recipients",
+                self,
+            )
+
+        if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
+            recipients.append(settings.EMAIL_ADDRESS_SKATTESTYRELSEN)
+        else:
+            logger.info(
+                "Skattestyrelsen email not configured, excluding from mail recipients",
+            )
+
+        return recipients
+
 
 class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
@@ -338,6 +433,11 @@ class CruiseTaxForm(HarborDuesForm):
         max_digits=12,
         verbose_name=_("Calculated disembarkment tax"),
     )
+
+    def calculate_tax(self, save: bool = True):
+        super().calculate_tax(save=save)  # calculates harbour tax
+        self.calculate_passenger_tax(save=save)
+        self.calculate_disembarkment_tax(save=save)
 
     def calculate_disembarkment_tax(self, save: bool = True):
         disembarkment_date = self.datetime_of_arrival
@@ -374,17 +474,43 @@ class CruiseTaxForm(HarborDuesForm):
             self.save(update_fields=("disembarkment_tax",))
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
-    def calculate_passenger_tax(self) -> Dict[str, Decimal]:
+    def calculate_passenger_tax(self, save: bool = True) -> Dict[str, Decimal]:
         arrival_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
             Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
             Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
         ).first()
         rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
-        return {"passenger_tax": self.number_of_passengers * rate, "taxrate": rate}
+        pax_tax: Decimal = self.number_of_passengers * rate
+        if save:
+            self.pax_tax = pax_tax
+            self.save(update_fields=("pax_tax",))
+        return {"passenger_tax": pax_tax, "taxrate": rate}
+
+    @property
+    def total_tax(self) -> Decimal:
+        def value_or_zero(val: Decimal | None) -> Decimal:
+            return val or Decimal("0")
+
+        return (
+            value_or_zero(self.harbour_tax)
+            + value_or_zero(self.pax_tax)
+            + value_or_zero(self.disembarkment_tax)
+        )
+
+    def get_receipt(self, **kwargs):
+        from havneafgifter.receipts import CruiseTaxFormReceipt
+
+        return CruiseTaxFormReceipt(self, **kwargs)
 
 
 class PassengersByCountry(models.Model):
+    class Meta:
+        ordering = [
+            "cruise_tax_form",
+            "nationality",
+        ]
+
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm,
         null=False,
@@ -430,6 +556,13 @@ class DisembarkmentSite(models.Model):
 
 
 class Disembarkment(models.Model):
+    class Meta:
+        ordering = [
+            "cruise_tax_form",
+            "disembarkment_site__municipality",
+            "disembarkment_site__name",
+        ]
+
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm, null=False, blank=False, on_delete=models.CASCADE
     )

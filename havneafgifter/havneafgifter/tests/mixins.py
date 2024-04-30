@@ -1,8 +1,16 @@
 import os
+from datetime import datetime
 
 from django.core.management import call_command
 
-from ..models import CruiseTaxForm, HarborDuesForm, Port, ShippingAgent, ShipType
+from havneafgifter.models import (
+    CruiseTaxForm,
+    HarborDuesForm,
+    Port,
+    PortAuthority,
+    ShippingAgent,
+    ShipType,
+)
 
 
 class HarborDuesFormMixin:
@@ -12,7 +20,12 @@ class HarborDuesFormMixin:
 
         cls._load_initial_disembarkment_sites()
 
-        cls.port = Port.objects.create(name="Nordhavn")
+        cls.port_authority = PortAuthority.objects.create(
+            email="portauthority@example.org"
+        )
+        cls.port = Port.objects.create(
+            name="Nordhavn", portauthority=cls.port_authority
+        )
         cls.shipping_agent = ShippingAgent.objects.create(name="Agent")
 
         # Valid data for creating a `HarborDuesForm` (or `CruiseTaxForm`) instance
@@ -25,8 +38,8 @@ class HarborDuesFormMixin:
             "shipping_agent": cls.shipping_agent,
             "gross_tonnage": 0,
             "vessel_type": ShipType.FREIGHTER,
-            "datetime_of_arrival": "2020-01-01",
-            "datetime_of_departure": "2020-02-01",
+            "datetime_of_arrival": datetime(2020, 1, 1),
+            "datetime_of_departure": datetime(2020, 2, 1),
         }
         # The same data, but with related objects replaced by their primary keys.
         # Suitable for testing form POSTs.
@@ -40,6 +53,9 @@ class HarborDuesFormMixin:
             },
         }
 
+        cls.harbor_dues_form = HarborDuesForm.objects.create(
+            **cls.harbor_dues_form_data
+        )
         cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.harbor_dues_form_data)
 
     @classmethod

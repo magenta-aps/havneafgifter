@@ -7,6 +7,7 @@
 <h1>{% translate "Passenger tax" %}</h1>
 <form action="." method="post" class="form">
     {% csrf_token %}
+    {% bootstrap_form passengers_total_form %}
     {% bootstrap_formset passengers_by_country_formset layout="horizontal" %}
     {% bootstrap_button button_type="submit" content=_("Continue") %}
     {% bootstrap_button button_type="reset" content=_("Cancel") %}
