@@ -184,6 +184,7 @@ class ReceiptDetailView(HavneafgiftView, DetailView):
                 f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
             )
         else:
+            form.calculate_tax(save=True)
             receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
         return HttpResponse(receipt.html)
 
