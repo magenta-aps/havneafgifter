@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict, List
 
-from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import (
