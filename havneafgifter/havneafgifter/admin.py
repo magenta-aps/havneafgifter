@@ -11,6 +11,7 @@ from havneafgifter.models import (
     PassengersByCountry,
     PortTaxRate,
     ShippingAgent,
+    ShipType,
     TaxRates,
     User,
 )
@@ -38,12 +39,24 @@ class HarborDuesFormAdmin(admin.ModelAdmin):
         "datetime_of_arrival",
         "datetime_of_departure",
     ]
-    actions = ["send_email"]
+    actions = [
+        "calculate_tax",
+        "send_email",
+    ]
+
+    @admin.action(description=_("Calculate tax"))
+    def calculate_tax(self, request, queryset):
+        for obj in queryset:
+            obj.calculate_tax(save=True)
 
     @admin.action(description=_("Send email"))
     def send_email(self, request, queryset):
         for obj in queryset:
             obj.send_email()
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.exclude(vessel_type=ShipType.CRUISE)
 
 
 class PassengersByCountryInlineAdmin(admin.TabularInline):
@@ -54,11 +67,20 @@ class PassengersByCountryInlineAdmin(admin.TabularInline):
 class DisembarkmentInlineAdmin(admin.TabularInline):
     model = Disembarkment
     extra = 0
+    fields = [
+        "disembarkment_site",
+        "number_of_passengers",
+    ]
 
 
 @admin.register(CruiseTaxForm)
 class CruiseTaxFormAdmin(HarborDuesFormAdmin):
     inlines = [PassengersByCountryInlineAdmin, DisembarkmentInlineAdmin]
+
+    def get_queryset(self, request):
+        # Skip `HarborDuesFormAdmin.get_queryset`, which excludes
+        # `vessel_type=ShipType.CRUISE`.
+        return super(admin.ModelAdmin, self).get_queryset(request)
 
 
 @admin.register(DisembarkmentSite)
@@ -83,7 +105,12 @@ class PortTaxRateAdmin(admin.ModelAdmin):
 
 @admin.register(DisembarkmentTaxRate)
 class DisembarkmentTaxRateAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        "municipality",
+        "disembarkment_site",
+        "disembarkment_tax_rate",
+        "tax_rates",
+    ]
 
 
 # Register out own model admin, based on the default UserAdmin
