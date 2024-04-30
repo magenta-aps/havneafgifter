@@ -141,6 +141,14 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         return context_data
 
     def form_valid(self, form):
+        # Populate `CruiseTaxForm.number_of_passengers`
+        passengers_total_form = PassengersTotalForm(data=self.request.POST)
+        assert passengers_total_form.is_valid()
+        self._cruise_tax_form.number_of_passengers = passengers_total_form.cleaned_data[
+            "total_number_of_passengers"
+        ]
+        self._cruise_tax_form.save(update_fields=("number_of_passengers",))
+
         # Create `PassengersByCountry` objects based on formset data
         passengers_by_country_objects = self._get_passengers_by_country_objects()
         PassengersByCountry.objects.bulk_create(passengers_by_country_objects)

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.models import (
@@ -95,21 +96,40 @@ class ShippingAgentAdmin(admin.ModelAdmin):
 
 @admin.register(TaxRates)
 class TaxRatesAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        "start_datetime",
+        "end_datetime",
+        "pax_tax_rate",
+    ]
 
 
 @admin.register(PortTaxRate)
 class PortTaxRateAdmin(admin.ModelAdmin):
-    pass
+    ordering = [
+        F("vessel_type").asc(nulls_first=True),  # type: ignore
+        F("port").asc(nulls_first=True),  # type: ignore
+        "gt_start",
+        "gt_end",
+    ]
+    list_display = [
+        "port",
+        "vessel_type",
+        "gt_start",
+        "gt_end",
+        "port_tax_rate",
+    ]
 
 
 @admin.register(DisembarkmentTaxRate)
 class DisembarkmentTaxRateAdmin(admin.ModelAdmin):
+    ordering = [
+        "municipality",
+        F("disembarkment_site__name").asc(nulls_first=True),  # type: ignore
+    ]
     list_display = [
         "municipality",
         "disembarkment_site",
         "disembarkment_tax_rate",
-        "tax_rates",
     ]
 
 
