@@ -33,7 +33,7 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
             (
                 ShipType.FREIGHTER,
                 HarborDuesForm,
-                "havneafgifter:harbor_dues_form_detail",
+                "havneafgifter:receipt_detail_html",
             ),
             # Test 2: cruise ship creates cruise tax form and sends user to the
             # passenger tax form.

@@ -4,14 +4,13 @@ from django.urls import URLPattern, URLResolver, path
 from django.views.generic import TemplateView
 
 from havneafgifter.views import (
-    CruiseTaxFormDetailView,
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
-    HarborDuesFormDetailView,
     LoginView,
     LogoutView,
     PassengerTaxCreateView,
     PreviewPDFView,
+    ReceiptDetailView,
 )
 
 app_name = "havneafgifter"
@@ -38,11 +37,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="harbor_dues_form_create",
     ),
     path(
-        "blanket/<int:pk>/",
-        HarborDuesFormDetailView.as_view(),
-        name="harbor_dues_form_detail",
-    ),
-    path(
         "blanket/opret/passagerer/<int:pk>/",
         PassengerTaxCreateView.as_view(),
         name="passenger_tax_create",
@@ -53,13 +47,13 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="environmental_tax_create",
     ),
     path(
-        "blanket/krydstogt/<int:pk>/",
-        CruiseTaxFormDetailView.as_view(),
-        name="cruise_tax_form_detail",
+        "blanket/<int:pk>/",
+        ReceiptDetailView.as_view(),
+        name="receipt_detail_html",
     ),
     path(
-        "pdf/<int:pk>/",
+        "blanket/pdf/<int:pk>/",
         PreviewPDFView.as_view(),
-        name="pdf_detail",
+        name="receipt_detail_pdf",
     ),
 ]

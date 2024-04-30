@@ -7,6 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 {% endcomment %}
 
 {% load l10n %}
+{% load i18n %}
 
 {% block extra_css %}
 @page {
@@ -71,6 +72,27 @@ table tfoot td p {
 table.table-striped td:first-child {
     width: 10%;
 }
+{% endblock %}
+
+{% block object_actions %}
+{# This block is only rendered when outputting HTML (not PDF) #}
+<div class="container">
+    <div class="row pt-3 pb-3 mb-3" style="border-bottom: 1px solid #eee">
+        <div class="col-12">
+            <form method="post" action=".">
+                {% csrf_token %}
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-secondary">
+                        {% translate 'View PDF' %}
+                    </a>
+                    <button type="submit" class="btn btn-secondary" name="action" value="send_email">
+                        {% translate 'Send email' %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}

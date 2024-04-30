@@ -81,7 +81,7 @@ class HarborDuesFormCreateView(HavneafgiftView, CreateView):
             messages.add_message(self.request, messages.SUCCESS, _("Thanks"))
             return HttpResponseRedirect(
                 reverse(
-                    "havneafgifter:harbor_dues_form_detail",
+                    "havneafgifter:receipt_detail_html",
                     kwargs={"pk": harbor_dues_form.pk},
                 )
             )
@@ -170,31 +170,42 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         messages.add_message(self.request, messages.SUCCESS, _("Thanks"))
         return HttpResponseRedirect(
             reverse(
-                "havneafgifter:cruise_tax_form_detail",
+                "havneafgifter:receipt_detail_html",
                 kwargs={"pk": self._cruise_tax_form.pk},
             )
         )
 
 
-class HarborDuesFormDetailView(HavneafgiftView, DetailView):
-    model = HarborDuesForm
-
-
-class CruiseTaxFormDetailView(HavneafgiftView, DetailView):
-    model = CruiseTaxForm
-
-
-class PreviewPDFView(DetailView):
+class ReceiptDetailView(HavneafgiftView, DetailView):
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
-            return HttpResponseNotFound("No form found")
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
         else:
-            receipt = form.get_receipt_pdf()
-        return HttpResponse(
-            receipt.pdf,
-            content_type="application/pdf",
-        )
+            receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
+        return HttpResponse(receipt.html)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
+        else:
+            email_message, status = form.send_email()
+            messages.add_message(
+                request,
+                messages.SUCCESS if status == 1 else messages.ERROR,
+                _("Email sent") if status == 1 else _("Error when sending email"),
+            )
+            return HttpResponseRedirect(
+                reverse(
+                    "havneafgifter:receipt_detail_html",
+                    kwargs={"pk": form.pk},
+                )
+            )
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
@@ -205,3 +216,18 @@ class PreviewPDFView(DetailView):
                 return HarborDuesForm.objects.get(pk=pk)
             except HarborDuesForm.DoesNotExist:
                 return None
+
+
+class PreviewPDFView(ReceiptDetailView):
+    def get(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
+        else:
+            receipt = form.get_receipt()
+        return HttpResponse(
+            receipt.pdf,
+            content_type="application/pdf",
+        )

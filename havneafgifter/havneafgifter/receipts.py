@@ -1,5 +1,6 @@
 import weasyprint
-from django.template import Context, Engine, Template
+from django.http import HttpRequest
+from django.template import Context, Engine, RequestContext, Template
 from django.utils.safestring import SafeString
 from django_weasyprint.utils import django_url_fetcher
 
@@ -22,12 +23,21 @@ class Receipt:
         self,
         form,
         base: str = _PDF_BASE_TEMPLATE,
+        request: HttpRequest | None = None,
     ) -> None:
         super().__init__()
         self.form = form
         self._engine: Engine = Engine.get_default()
         self._template: Template = self._engine.get_template(self.template)
-        self._context: Context = Context({"form": form, **self.get_context_data()})
+
+        # Use `RequestContext` if `request` is passed. This is necessary when rendering
+        # HTML output that also contains a `{% csrf_token %}`.
+        context_args: dict = {"form": form, **self.get_context_data()}
+        if request is not None:
+            self._context: RequestContext = RequestContext(request, context_args)
+        else:
+            self._context: Context = Context(context_args)
+
         # Dynamic base template
         self._context["base"] = base
 
@@ -57,8 +67,9 @@ class HarborDuesFormReceipt(Receipt):
         self,
         form: HarborDuesForm,
         base: str = _PDF_BASE_TEMPLATE,
+        request: HttpRequest | None = None,
     ) -> None:
-        super().__init__(form, base=base)
+        super().__init__(form, base=base, request=request)
 
     def get_context_data(self) -> dict:
         return {
@@ -75,8 +86,9 @@ class CruiseTaxFormReceipt(Receipt):
         self,
         form: CruiseTaxForm,
         base: str = _PDF_BASE_TEMPLATE,
+        request: HttpRequest | None = None,
     ) -> None:
-        super().__init__(form, base=base)
+        super().__init__(form, base=base, request=request)
 
     def get_context_data(self) -> dict:
         disembarkment_tax: dict = self.form.calculate_disembarkment_tax(save=False)
