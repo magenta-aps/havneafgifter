@@ -1,8 +1,43 @@
+from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
+from django.contrib.auth.forms import UsernameField
 from django.core.exceptions import ValidationError
-from django.forms import ChoiceField, Form, IntegerField, ModelForm, widgets
+from django.forms import (
+    CharField,
+    ChoiceField,
+    Form,
+    IntegerField,
+    ModelForm,
+    PasswordInput,
+    TextInput,
+    widgets,
+)
 from django.utils.translation import gettext_lazy as _
 
+from .form_mixins import BootstrapForm
 from .models import DisembarkmentSite, HarborDuesForm, Nationality
+
+
+class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
+    username = UsernameField(
+        widget=TextInput(
+            attrs={
+                "autofocus": True,
+                "class": "form-control",
+                "placeholder": _("Username"),
+            }
+        )
+    )
+    password = CharField(
+        label=_("Password"),
+        strip=False,
+        widget=PasswordInput(
+            attrs={
+                "autocomplete": "current-password",
+                "class": "form-control",
+                "placeholder": _("Password"),
+            }
+        ),
+    )
 
 
 class HTML5DateWidget(widgets.Input):

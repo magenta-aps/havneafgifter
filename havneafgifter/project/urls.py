@@ -12,4 +12,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
             namespace="havneafgifter",
         ),
     ),
+    path("saml2/", include("djangosaml2.urls")),
 ]
