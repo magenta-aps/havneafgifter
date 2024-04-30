@@ -14,6 +14,7 @@ from havneafgifter.forms import (
     DisembarkmentForm,
     HarborDuesFormForm,
     PassengersByCountryForm,
+    PassengersTotalForm,
 )
 from havneafgifter.models import (
     CruiseTaxForm,
@@ -110,6 +111,19 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
     template_name = "havneafgifter/passenger_tax_create.html"
     form_class = PassengersByCountryForm
 
+    def post(self, request, *args, **kwargs):
+        sum_passengers_by_country = sum(
+            pbc.number_of_passengers
+            for pbc in self._get_passengers_by_country_objects()
+        )
+        passengers_total_form = PassengersTotalForm(data=request.POST)
+        passengers_total_form.validate_total(sum_passengers_by_country)
+        if not passengers_total_form.is_valid():
+            return self.render_to_response(
+                self.get_context_data(passengers_total_form=passengers_total_form)
+            )
+        return super().post(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
         form_kwargs["initial"] = [
@@ -120,15 +134,15 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
+        context_data["passengers_total_form"] = kwargs.get(
+            "passengers_total_form", PassengersTotalForm()
+        )
         context_data["passengers_by_country_formset"] = self.get_form()
         return context_data
 
     def form_valid(self, form):
-        passengers_by_country_objects = [
-            PassengersByCountry(cruise_tax_form=self._cruise_tax_form, **cleaned_data)
-            for cleaned_data in self.get_form().cleaned_data
-            if cleaned_data["number_of_passengers"] > 0
-        ]
+        # Create `PassengersByCountry` objects based on formset data
+        passengers_by_country_objects = self._get_passengers_by_country_objects()
         PassengersByCountry.objects.bulk_create(passengers_by_country_objects)
 
         # Go to next step (environmental and maintenance fees)
@@ -138,6 +152,13 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
                 kwargs={"pk": self._cruise_tax_form.pk},
             )
         )
+
+    def _get_passengers_by_country_objects(self) -> list[PassengersByCountry]:
+        return [
+            PassengersByCountry(cruise_tax_form=self._cruise_tax_form, **cleaned_data)
+            for cleaned_data in self.get_form().cleaned_data
+            if cleaned_data["number_of_passengers"] > 0
+        ]
 
 
 class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):

@@ -81,6 +81,24 @@ class HarborDuesFormForm(ModelForm):
             )
 
 
+class PassengersTotalForm(Form):
+    total_number_of_passengers = IntegerField(label=_("Total number of passengers"))
+
+    def validate_total(self, sum_passengers_by_country):
+        # Trigger form validation, so `self.cleaned_data` is populated
+        self.is_valid()
+        # Compare total number of passengers to the sum of passengers by country
+        total_number_of_passengers = self.cleaned_data["total_number_of_passengers"]
+        if total_number_of_passengers != sum_passengers_by_country:
+            self.add_error(
+                "total_number_of_passengers",
+                _(
+                    "The total number of passengers does not match the sum of "
+                    "passengers by each nationality"
+                ),
+            )
+
+
 class PassengersByCountryForm(Form):
     nationality = ChoiceField(choices=Nationality, disabled=True)
     number_of_passengers = IntegerField()

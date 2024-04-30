@@ -91,15 +91,17 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
         context_data = self.instance.get_context_data()
         self.assertIsInstance(context_data[name], BaseFormSet)
 
-    def _post_formset(self, *form_items, prefix="form"):
+    def _post_formset(self, *form_items, prefix="form", **extra):
         data = {
             "form-TOTAL_FORMS": len(form_items),
             "form-INITIAL_FORMS": len(form_items),
+            **extra,
         }
         for idx, item in enumerate(form_items):
             for key, val in item.items():
                 data[f"{prefix}-{idx}-{key}"] = val
         self.instance.request = self.request_factory.post("", data=data)
+        return self.instance.request
 
 
 class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
@@ -124,9 +126,12 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
 
     def test_form_valid_creates_objects(self):
         # Arrange
-        self._post_formset({"number_of_passengers": 42})
+        request = self._post_formset(
+            {"number_of_passengers": 42},
+            total_number_of_passengers=42,
+        )
         # Act: trigger DB insert logic
-        self.instance.form_valid(self.instance.get_form())
+        self.instance.post(request)
         # Assert: verify that the specified `PassengersByCountry` objects are
         # created.
         self.assertQuerySetEqual(
@@ -143,6 +148,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
                 }
             ],
         )
+
+    def test_total_number_of_passengers_validation(self):
+        request = self._post_formset(
+            {"number_of_passengers": 40},
+            {"number_of_passengers": 40},
+            total_number_of_passengers=100,
+        )
+        response = self.instance.post(request)
+        context_data = response.context_data
+        passengers_total_form = context_data["passengers_total_form"]
+        passengers_by_country_formset = context_data["passengers_by_country_formset"]
+        self.assertFalse(passengers_total_form.is_valid())
+        self.assertTrue(passengers_by_country_formset.is_valid())
 
 
 class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
