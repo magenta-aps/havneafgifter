@@ -10,6 +10,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.load_ports()
         self.load_disembarkment_sites()
+        self.load_initial_rates()
 
     def load_ports(self):
         for authority_name, authority_email in (
@@ -105,5 +106,14 @@ class Command(BaseCommand):
             os.path.dirname(os.path.abspath(__file__)),
             "../../fixtures",
             "initial_disembarkment_sites.json",
+        )
+        call_command("loaddata", path, verbosity=1)
+
+    def load_initial_rates(self):
+        # Load initial data for TaxRates, PortTaxRate and DisembarkmentTaxRate
+        path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "../../fixtures",
+            "initial_rates.json",
         )
         call_command("loaddata", path, verbosity=1)
