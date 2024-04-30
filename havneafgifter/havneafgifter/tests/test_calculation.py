@@ -21,6 +21,8 @@ from havneafgifter.models import (
 
 
 class CalculationTest(TestCase):
+    maxDiff = None
+
     @classmethod
     def setUpTestData(cls):
         Port.objects.create(name="Test1")
@@ -458,19 +460,19 @@ class CalculationTest(TestCase):
         self.assertDictEqual(
             calculation["details"][0],
             {
-                "disembarkment": self.disembarkment1,
+                "disembarkment": self.disembarkment2,
                 "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
-                "taxrate": self.disembarkment_tax1,
-                "tax": Decimal("400.00"),  # 100 people * 40 kr
+                "taxrate": self.disembarkment_tax2,
+                "tax": Decimal("600.00"),  # 20 people * 30 kr
             },
         )
         self.assertDictEqual(
             calculation["details"][1],
             {
-                "disembarkment": self.disembarkment2,
+                "disembarkment": self.disembarkment1,
                 "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
-                "taxrate": self.disembarkment_tax2,
-                "tax": Decimal("600.00"),  # 20 people * 30 kr
+                "taxrate": self.disembarkment_tax1,
+                "tax": Decimal("400.00"),  # 100 people * 40 kr
             },
         )
         self.harborduesform1.refresh_from_db()

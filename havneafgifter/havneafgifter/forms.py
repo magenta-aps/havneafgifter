@@ -13,8 +13,8 @@ from django.forms import (
 )
 from django.utils.translation import gettext_lazy as _
 
-from .form_mixins import BootstrapForm
-from .models import DisembarkmentSite, HarborDuesForm, Nationality
+from havneafgifter.form_mixins import BootstrapForm
+from havneafgifter.models import DisembarkmentSite, HarborDuesForm, Nationality
 
 
 class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
@@ -78,6 +78,24 @@ class HarborDuesFormForm(ModelForm):
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
                 code="datetime_of_departure_before_datetime_of_arrival",
+            )
+
+
+class PassengersTotalForm(Form):
+    total_number_of_passengers = IntegerField(label=_("Total number of passengers"))
+
+    def validate_total(self, sum_passengers_by_country):
+        # Trigger form validation, so `self.cleaned_data` is populated
+        self.is_valid()
+        # Compare total number of passengers to the sum of passengers by country
+        total_number_of_passengers = self.cleaned_data["total_number_of_passengers"]
+        if total_number_of_passengers != sum_passengers_by_country:
+            self.add_error(
+                "total_number_of_passengers",
+                _(
+                    "The total number of passengers does not match the sum of "
+                    "passengers by each nationality"
+                ),
             )
 
 

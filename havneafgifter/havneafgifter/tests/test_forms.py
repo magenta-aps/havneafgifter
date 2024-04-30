@@ -1,11 +1,15 @@
 import copy
 
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
-from ..forms import DisembarkmentForm, HarborDuesFormForm
-from ..models import DisembarkmentSite
-from .mixins import HarborDuesFormMixin
+from havneafgifter.forms import (
+    DisembarkmentForm,
+    HarborDuesFormForm,
+    PassengersTotalForm,
+)
+from havneafgifter.models import DisembarkmentSite
+from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
 class TestHarborDuesFormForm(HarborDuesFormMixin, TestCase):
@@ -42,3 +46,11 @@ class TestPassengersByDisembarkmentSiteForm(HarborDuesFormMixin, TestCase):
         form.is_valid()
         # Assert that our clean method returns model instance
         self.assertEqual(form.clean_disembarkment_site(), ds)
+
+
+class TestPassengersTotalForm(SimpleTestCase):
+    def test_validate_total(self):
+        instance = PassengersTotalForm(data={"total_number_of_passengers": "100"})
+        instance.validate_total(101)
+        self.assertEqual(len(instance.errors), 1)
+        self.assertIn("total_number_of_passengers", instance.errors)

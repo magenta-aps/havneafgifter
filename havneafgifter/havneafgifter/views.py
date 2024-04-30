@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -14,9 +14,9 @@ from havneafgifter.forms import (
     DisembarkmentForm,
     HarborDuesFormForm,
     PassengersByCountryForm,
+    PassengersTotalForm,
 )
-
-from .models import (
+from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
@@ -82,7 +82,7 @@ class HarborDuesFormCreateView(HavneafgiftView, CreateView):
             messages.add_message(self.request, messages.SUCCESS, _("Thanks"))
             return HttpResponseRedirect(
                 reverse(
-                    "havneafgifter:harbor_dues_form_detail",
+                    "havneafgifter:receipt_detail_html",
                     kwargs={"pk": harbor_dues_form.pk},
                 )
             )
@@ -111,6 +111,19 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
     template_name = "havneafgifter/passenger_tax_create.html"
     form_class = PassengersByCountryForm
 
+    def post(self, request, *args, **kwargs):
+        sum_passengers_by_country = sum(
+            pbc.number_of_passengers
+            for pbc in self._get_passengers_by_country_objects()
+        )
+        passengers_total_form = PassengersTotalForm(data=request.POST)
+        passengers_total_form.validate_total(sum_passengers_by_country)
+        if not passengers_total_form.is_valid():
+            return self.render_to_response(
+                self.get_context_data(passengers_total_form=passengers_total_form)
+            )
+        return super().post(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
         form_kwargs["initial"] = [
@@ -121,15 +134,15 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
+        context_data["passengers_total_form"] = kwargs.get(
+            "passengers_total_form", PassengersTotalForm()
+        )
         context_data["passengers_by_country_formset"] = self.get_form()
         return context_data
 
     def form_valid(self, form):
-        passengers_by_country_objects = [
-            PassengersByCountry(cruise_tax_form=self._cruise_tax_form, **cleaned_data)
-            for cleaned_data in self.get_form().cleaned_data
-            if cleaned_data["number_of_passengers"] > 0
-        ]
+        # Create `PassengersByCountry` objects based on formset data
+        passengers_by_country_objects = self._get_passengers_by_country_objects()
         PassengersByCountry.objects.bulk_create(passengers_by_country_objects)
 
         # Go to next step (environmental and maintenance fees)
@@ -139,6 +152,17 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
                 kwargs={"pk": self._cruise_tax_form.pk},
             )
         )
+
+    def _get_passengers_by_country_objects(self) -> list[PassengersByCountry]:
+        formset = self.get_form()
+        return [
+            PassengersByCountry(
+                cruise_tax_form=self._cruise_tax_form,
+                **cleaned_data,  # type: ignore
+            )
+            for cleaned_data in formset.cleaned_data  # type: ignore
+            if cleaned_data["number_of_passengers"] > 0  # type: ignore
+        ]
 
 
 class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
@@ -171,15 +195,65 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         messages.add_message(self.request, messages.SUCCESS, _("Thanks"))
         return HttpResponseRedirect(
             reverse(
-                "havneafgifter:cruise_tax_form_detail",
+                "havneafgifter:receipt_detail_html",
                 kwargs={"pk": self._cruise_tax_form.pk},
             )
         )
 
 
-class HarborDuesFormDetailView(HavneafgiftView, DetailView):
-    model = HarborDuesForm
+class ReceiptDetailView(HavneafgiftView, DetailView):
+    def get(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
+        else:
+            form.calculate_tax(save=True)
+            receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
+        return HttpResponse(receipt.html)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
+        else:
+            email_message, status = form.send_email()
+            messages.add_message(
+                request,
+                messages.SUCCESS if status == 1 else messages.ERROR,
+                _("Email sent") if status == 1 else _("Error when sending email"),
+            )
+            return HttpResponseRedirect(
+                reverse(
+                    "havneafgifter:receipt_detail_html",
+                    kwargs={"pk": form.pk},
+                )
+            )
+
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            return CruiseTaxForm.objects.get(pk=pk)
+        except CruiseTaxForm.DoesNotExist:
+            try:
+                return HarborDuesForm.objects.get(pk=pk)
+            except HarborDuesForm.DoesNotExist:
+                return None
 
 
-class CruiseTaxFormDetailView(HavneafgiftView, DetailView):
-    model = CruiseTaxForm
+class PreviewPDFView(ReceiptDetailView):
+    def get(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
+        else:
+            receipt = form.get_receipt()
+        return HttpResponse(
+            receipt.pdf,
+            content_type="application/pdf",
+        )

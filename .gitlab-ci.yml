@@ -103,11 +103,12 @@ Lint Python:
   <<: *lint-default
   before_script:
     - pip3 install flake8
-    - pip3 install black==23.1.0
-    - pip3 install isort==5.12.0
+    - pip3 install flake8-absolute-import
+    - pip3 install black==24.4.1
+    - pip3 install isort==5.13.2
     #- pip3 install -r django/requirements.txt
   script:
-    - flake8 --max-line-length 88 --exclude=migrations,tests.py,settings.py --extend-ignore E226,E203 havneafgifter/ --
+    - flake8 --max-line-length 88 --exclude=migrations,settings.py --extend-ignore E226,E203 havneafgifter/ --
     - black --check --diff --exclude=migrations havneafgifter/
     - isort -c --profile black --diff --skip migrations havneafgifter/
 

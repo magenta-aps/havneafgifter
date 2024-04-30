@@ -87,7 +87,7 @@
     "model": "havneafgifter.cruisetaxform",
     "pk": 3,
     "fields": {
-        "number_of_passengers": null,
+        "number_of_passengers": 0,
         "pax_tax": null,
         "disembarkment_tax": null
     }
@@ -96,7 +96,7 @@
     "model": "havneafgifter.cruisetaxform",
     "pk": 4,
     "fields": {
-        "number_of_passengers": null,
+        "number_of_passengers": 0,
         "pax_tax": null,
         "disembarkment_tax": null
     }
