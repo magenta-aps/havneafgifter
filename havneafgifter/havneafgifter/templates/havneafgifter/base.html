@@ -32,7 +32,7 @@ SPDX-License-Identifier: MPL-2.0
             </button>
             {% endif %}
             {% if user.is_authenticated %}
-                <a href="{% url 'login' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
+                <a href="{% url 'havneafgifter:login' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
             {% endif %}
             <button type="button" class="btn btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
                 Om
@@ -47,6 +47,7 @@ SPDX-License-Identifier: MPL-2.0
 
         {# Displays messages from the Django 'messages' framework #}
         {% bootstrap_messages %}
+
         {% block content %}
         {% endblock %}
     </div>
