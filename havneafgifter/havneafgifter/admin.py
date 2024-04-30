@@ -106,8 +106,8 @@ class TaxRatesAdmin(admin.ModelAdmin):
 @admin.register(PortTaxRate)
 class PortTaxRateAdmin(admin.ModelAdmin):
     ordering = [
-        F("vessel_type").asc(nulls_first=True),
-        F("port").asc(nulls_first=True),
+        F("vessel_type").asc(nulls_first=True),  # type: ignore
+        F("port").asc(nulls_first=True),  # type: ignore
         "gt_start",
         "gt_end",
     ]
@@ -124,7 +124,7 @@ class PortTaxRateAdmin(admin.ModelAdmin):
 class DisembarkmentTaxRateAdmin(admin.ModelAdmin):
     ordering = [
         "municipality",
-        F("disembarkment_site__name").asc(nulls_first=True),
+        F("disembarkment_site__name").asc(nulls_first=True),  # type: ignore
     ]
     list_display = [
         "municipality",
