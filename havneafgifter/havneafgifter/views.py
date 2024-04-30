@@ -154,10 +154,14 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         )
 
     def _get_passengers_by_country_objects(self) -> list[PassengersByCountry]:
+        formset = self.get_form()
         return [
-            PassengersByCountry(cruise_tax_form=self._cruise_tax_form, **cleaned_data)
-            for cleaned_data in self.get_form().cleaned_data
-            if cleaned_data["number_of_passengers"] > 0
+            PassengersByCountry(
+                cruise_tax_form=self._cruise_tax_form,
+                **cleaned_data,  # type: ignore
+            )
+            for cleaned_data in formset.cleaned_data  # type: ignore
+            if cleaned_data["number_of_passengers"] > 0  # type: ignore
         ]
 
 
