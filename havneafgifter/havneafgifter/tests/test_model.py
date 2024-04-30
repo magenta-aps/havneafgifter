@@ -194,9 +194,9 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
     def test_duration_in_weeks(self):
         self.assertEqual(self.harbor_dues_form.duration_in_weeks, 4)
 
-    def test_get_receipt_pdf(self):
+    def test_get_receipt(self):
         self.assertIsInstance(
-            self.harbor_dues_form.get_receipt_pdf(), HarborDuesFormReceipt
+            self.harbor_dues_form.get_receipt(), HarborDuesFormReceipt
         )
 
     def test_send_email(self):
@@ -290,10 +290,8 @@ class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
             harbour_tax + passenger_tax + disembarkment_tax,
         )
 
-    def test_get_receipt_pdf(self):
-        self.assertIsInstance(
-            self.cruise_tax_form.get_receipt_pdf(), CruiseTaxFormReceipt
-        )
+    def test_get_receipt(self):
+        self.assertIsInstance(self.cruise_tax_form.get_receipt(), CruiseTaxFormReceipt)
 
 
 class TestDisembarkmentSite(TestCase):
