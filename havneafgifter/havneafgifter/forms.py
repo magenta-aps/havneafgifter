@@ -11,6 +11,7 @@ from django.forms import (
     TextInput,
     widgets,
 )
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.form_mixins import BootstrapForm
@@ -82,7 +83,10 @@ class HarborDuesFormForm(ModelForm):
 
 
 class PassengersTotalForm(Form):
-    total_number_of_passengers = IntegerField(label=_("Total number of passengers"))
+    total_number_of_passengers = IntegerField(
+        label=_("Total number of passengers"),
+        widget=widgets.NumberInput(attrs={"placeholder": "0"}),
+    )
 
     def validate_total(self, sum_passengers_by_country):
         # Trigger form validation, so `self.cleaned_data` is populated
@@ -103,15 +107,27 @@ class PassengersByCountryForm(Form):
     nationality = ChoiceField(choices=Nationality, disabled=True)
     number_of_passengers = IntegerField()
 
+    def __init__(self, *args, **kwargs):
+        assert kwargs.get("initial", {}).get("nationality") is not None
+        super().__init__(*args, **kwargs)
+        # Use initial (and unchangeable) value of each nationality as the label
+        # for each number field.
+        self.fields["number_of_passengers"].label = self.initial["nationality"].label
+
 
 class DisembarkmentForm(Form):
     disembarkment_site = ChoiceField(choices=[], disabled=True)
     number_of_passengers = IntegerField()
 
     def __init__(self, *args, **kwargs):
+        assert kwargs.get("initial", {}).get("disembarkment_site") is not None
         super().__init__(*args, **kwargs)
+        # Use initial (and unchangeable) disembarkment site as label for each
+        # number field.
+        self.fields["number_of_passengers"].label = self.initial_disembarkment_site.name
+        # Populate `disembarkment_site` choices
         self.fields["disembarkment_site"].choices = [
-            (ds.pk, str(ds)) for ds in DisembarkmentSite.objects.all()
+            (self.initial_disembarkment_site.pk, str(self.initial_disembarkment_site))
         ]
 
     def clean_disembarkment_site(self):
@@ -119,3 +135,13 @@ class DisembarkmentForm(Form):
         if isinstance(disembarkment_site, DisembarkmentSite):
             return disembarkment_site
         return DisembarkmentSite.objects.get(pk=disembarkment_site)
+
+    @cached_property
+    def initial_disembarkment_site(self):
+        disembarkment_site = self.initial.get("disembarkment_site")
+        if isinstance(disembarkment_site, int):
+            disembarkment_site = DisembarkmentSite.objects.get(pk=disembarkment_site)
+        return disembarkment_site
+
+    def get_municipality_display(self):
+        return self.initial_disembarkment_site.get_municipality_display()
