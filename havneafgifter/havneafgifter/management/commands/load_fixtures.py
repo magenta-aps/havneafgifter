@@ -20,9 +20,10 @@ class Command(BaseCommand):
             ("Mittarfeqarfiit", "mit@mit.gl"),
             ("Sikuki Harbour A/S", "sikuki@sikuki.gl"),
         ):
-            PortAuthority.objects.get_or_create(
+            port_authority, _ = PortAuthority.objects.get_or_create(
                 name=authority_name, defaults={"email": authority_email}
             )
+
         for port_name, port_authority_name in (
             ("Qaanaaq", None),
             ("Upernavik", "Royal Arctic Line A/S"),
@@ -52,6 +53,7 @@ class Command(BaseCommand):
             Port.objects.get_or_create(
                 name=port_name, defaults={"portauthority": authority}
             )
+            # TODO: kobl på bruger eller gruppe
 
     def load_rates(self):
         if not TaxRates.objects.exists():
