@@ -535,7 +535,7 @@ class PassengersByCountry(models.Model):
 
 class DisembarkmentSite(models.Model):
     class Meta:
-        ordering = ["municipality", "name"]
+        ordering = ["municipality", "pk"]
 
     name = models.CharField(
         max_length=200,
