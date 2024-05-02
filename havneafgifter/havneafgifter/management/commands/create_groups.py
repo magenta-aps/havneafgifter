@@ -42,30 +42,50 @@ class Command(BaseCommand):
             group.permissions.add(permission)
 
     def handle(self, *args, **options):
+        self.setup_permissions()
         self.setup_port_authority()
         self.setup_shipping_agent()
         self.setup_tax_officer()
 
-    def setup_port_authority(self):
+    def setup_permissions(self):
         harborduesform_contenttype = ContentType.objects.get_for_model(
             HarborDuesForm, for_concrete_model=False
         )
-        approve = Permission.objects.create(
-            content_type=harborduesform_contenttype,
-            codename="approve",
-            name="Approve forms",
+        cruisetaxform_contenttype = ContentType.objects.get_for_model(
+            CruiseTaxForm, for_concrete_model=False
         )
-        reject = Permission.objects.create(
+        Permission.objects.create(
             content_type=harborduesform_contenttype,
-            codename="reject",
-            name="Reject forms",
+            codename="approve_harborduesform",
+            name="Can approve harborduesforms",
         )
-        invoice = Permission.objects.create(
+        Permission.objects.create(
             content_type=harborduesform_contenttype,
-            codename="invoice",
-            name="Invoice forms",
+            codename="reject_harborduesform",
+            name="Can reject harborduesforms",
+        )
+        Permission.objects.create(
+            content_type=harborduesform_contenttype,
+            codename="invoice_harborduesform",
+            name="Can invoice harborduesforms",
+        )
+        Permission.objects.create(
+            content_type=cruisetaxform_contenttype,
+            codename="approve_cruisetaxform",
+            name="Can approve cruisetaxforms",
+        )
+        Permission.objects.create(
+            content_type=cruisetaxform_contenttype,
+            codename="reject_cruisetaxform",
+            name="Can reject cruisetaxforms",
+        )
+        Permission.objects.create(
+            content_type=cruisetaxform_contenttype,
+            codename="invoice_cruisetaxform",
+            name="Can invoice cruisetaxforms",
         )
 
+    def setup_port_authority(self):
         havnemyndighed, _ = Group.objects.update_or_create(
             name="PortAuthority",
         )
@@ -95,9 +115,6 @@ class Command(BaseCommand):
                     ),
                 ),
             ),
-            approve,
-            reject,
-            invoice,
         )
 
     def setup_shipping_agent(self):

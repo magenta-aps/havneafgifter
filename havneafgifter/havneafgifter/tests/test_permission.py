@@ -203,58 +203,64 @@ class ShippingAgentPermissionTest(PermissionTest):
         return self.shipping_agent_other
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
-        self._test_access(self.admin_user, self.other_item, "view", True)
-        self._test_access(self.admin_user, self.other_item, "change", True)
-        self._test_access(self.admin_user, self.other_item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", False)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
-        self._test_access(self.port_manager_user, self.other_item, "view", True)
-        self._test_access(self.port_manager_user, self.other_item, "change", False)
-        self._test_access(self.port_manager_user, self.other_item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", True)
-        self._test_access(self.agent_user, self.item, "delete", False)
-        self._test_access(self.agent_user, self.other_item, "view", True)
-        self._test_access(self.agent_user, self.other_item, "change", False)
-        self._test_access(self.agent_user, self.other_item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", False)
-        self._test_access(self.tax_user, self.item, "delete", False)
-        self._test_access(self.tax_user, self.other_item, "view", True)
-        self._test_access(self.tax_user, self.other_item, "change", False)
-        self._test_access(self.tax_user, self.other_item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
-        self._test_access(self.unprivileged_user, self.other_item, "view", False)
-        self._test_access(self.unprivileged_user, self.other_item, "change", False)
-        self._test_access(self.unprivileged_user, self.other_item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
-        self._test_access(self.inactive_user, self.other_item, "view", False)
-        self._test_access(self.inactive_user, self.other_item, "change", False)
-        self._test_access(self.inactive_user, self.other_item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.other_item),
+            self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
 
@@ -270,59 +276,65 @@ class PortAuthorityPermissionTest(PermissionTest):
         return self.port_authority_other
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
-        self._test_access(self.admin_user, self.other_item, "view", True)
-        self._test_access(self.admin_user, self.other_item, "change", True)
-        self._test_access(self.admin_user, self.other_item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", True)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
         # Portmanager may not change portauthority for another port
-        self._test_access(self.port_manager_user, self.other_item, "view", True)
-        self._test_access(self.port_manager_user, self.other_item, "change", False)
-        self._test_access(self.port_manager_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", False)
-        self._test_access(self.agent_user, self.item, "delete", False)
-        self._test_access(self.agent_user, self.other_item, "view", True)
-        self._test_access(self.agent_user, self.other_item, "change", False)
-        self._test_access(self.agent_user, self.other_item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", False)
-        self._test_access(self.tax_user, self.item, "delete", False)
-        self._test_access(self.tax_user, self.other_item, "view", True)
-        self._test_access(self.tax_user, self.other_item, "change", False)
-        self._test_access(self.tax_user, self.other_item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
-        self._test_access(self.unprivileged_user, self.other_item, "view", False)
-        self._test_access(self.unprivileged_user, self.other_item, "change", False)
-        self._test_access(self.unprivileged_user, self.other_item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
-        self._test_access(self.inactive_user, self.other_item, "view", False)
-        self._test_access(self.inactive_user, self.other_item, "change", False)
-        self._test_access(self.inactive_user, self.other_item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.other_item),
+            self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
 
@@ -338,58 +350,64 @@ class PortPermissionTest(PermissionTest):
         return self.port_other
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
-        self._test_access(self.admin_user, self.other_item, "view", True)
-        self._test_access(self.admin_user, self.other_item, "change", True)
-        self._test_access(self.admin_user, self.other_item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", False)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
-        self._test_access(self.port_manager_user, self.other_item, "view", True)
-        self._test_access(self.port_manager_user, self.other_item, "change", False)
-        self._test_access(self.port_manager_user, self.other_item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", False)
-        self._test_access(self.agent_user, self.item, "delete", False)
-        self._test_access(self.agent_user, self.other_item, "view", True)
-        self._test_access(self.agent_user, self.other_item, "change", False)
-        self._test_access(self.agent_user, self.other_item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", False)
-        self._test_access(self.tax_user, self.item, "delete", False)
-        self._test_access(self.tax_user, self.other_item, "view", True)
-        self._test_access(self.tax_user, self.other_item, "change", False)
-        self._test_access(self.tax_user, self.other_item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
-        self._test_access(self.unprivileged_user, self.other_item, "view", False)
-        self._test_access(self.unprivileged_user, self.other_item, "change", False)
-        self._test_access(self.unprivileged_user, self.other_item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
-        self._test_access(self.inactive_user, self.other_item, "view", False)
-        self._test_access(self.inactive_user, self.other_item, "change", False)
-        self._test_access(self.inactive_user, self.other_item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.other_item),
+            self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
 
@@ -405,60 +423,102 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         return self.form_other
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
-        self._test_access(self.admin_user, self.other_item, "view", True)
-        self._test_access(self.admin_user, self.other_item, "change", True)
-        self._test_access(self.admin_user, self.other_item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+        self._test_access(user, self.item, "approve", True)
+        self._test_access(user, self.item, "reject", True)
+        self._test_access(user, self.item, "invoice", True)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
+        self._test_access(user, self.other_item, "approve", True)
+        self._test_access(user, self.other_item, "reject", True)
+        self._test_access(user, self.other_item, "invoice", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", True)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", True)
+        self._test_access(user, self.item, "reject", True)
+        self._test_access(user, self.item, "invoice", True)
         # Portmanager may not see or change form for another port
-        self._test_access(self.port_manager_user, self.other_item, "view", False)
-        self._test_access(self.port_manager_user, self.other_item, "change", False)
-        self._test_access(self.port_manager_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", True)
-        self._test_access(self.agent_user, self.item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", False)
+        self._test_access(user, self.item, "reject", False)
+        self._test_access(user, self.item, "invoice", False)
         # Shipping agent may not see or change form for another port
-        self._test_access(self.agent_user, self.other_item, "view", False)
-        self._test_access(self.agent_user, self.other_item, "change", False)
-        self._test_access(self.agent_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", False)
-        self._test_access(self.tax_user, self.item, "delete", False)
-        self._test_access(self.tax_user, self.other_item, "view", True)
-        self._test_access(self.tax_user, self.other_item, "change", False)
-        self._test_access(self.tax_user, self.other_item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", False)
+        self._test_access(user, self.item, "reject", False)
+        self._test_access(user, self.item, "invoice", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
-        self._test_access(self.unprivileged_user, self.other_item, "view", False)
-        self._test_access(self.unprivileged_user, self.other_item, "change", False)
-        self._test_access(self.unprivileged_user, self.other_item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", False)
+        self._test_access(user, self.item, "reject", False)
+        self._test_access(user, self.item, "invoice", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
-        self._test_access(self.inactive_user, self.other_item, "view", False)
-        self._test_access(self.inactive_user, self.other_item, "change", False)
-        self._test_access(self.inactive_user, self.other_item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", False)
+        self._test_access(user, self.item, "reject", False)
+        self._test_access(user, self.item, "invoice", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.other_item),
+            self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
 
@@ -474,60 +534,66 @@ class PassengersByCountryPermissionTest(PermissionTest):
         return self.passengers_by_country_other
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
-        self._test_access(self.admin_user, self.other_item, "view", True)
-        self._test_access(self.admin_user, self.other_item, "change", True)
-        self._test_access(self.admin_user, self.other_item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", True)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
         # Portmanager may not see or change form for another port
-        self._test_access(self.port_manager_user, self.other_item, "view", False)
-        self._test_access(self.port_manager_user, self.other_item, "change", False)
-        self._test_access(self.port_manager_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", True)
-        self._test_access(self.agent_user, self.item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
         # Shipping agent may not see or change form for another port
-        self._test_access(self.agent_user, self.other_item, "view", False)
-        self._test_access(self.agent_user, self.other_item, "change", False)
-        self._test_access(self.agent_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", False)
-        self._test_access(self.tax_user, self.item, "delete", False)
-        self._test_access(self.tax_user, self.other_item, "view", True)
-        self._test_access(self.tax_user, self.other_item, "change", False)
-        self._test_access(self.tax_user, self.other_item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
-        self._test_access(self.unprivileged_user, self.other_item, "view", False)
-        self._test_access(self.unprivileged_user, self.other_item, "change", False)
-        self._test_access(self.unprivileged_user, self.other_item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
-        self._test_access(self.inactive_user, self.other_item, "view", False)
-        self._test_access(self.inactive_user, self.other_item, "change", False)
-        self._test_access(self.inactive_user, self.other_item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.other_item),
+            self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
 
@@ -543,60 +609,66 @@ class DisembarkmentPermissionTest(PermissionTest):
         return self.disembarkment_other
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
-        self._test_access(self.admin_user, self.other_item, "view", True)
-        self._test_access(self.admin_user, self.other_item, "change", True)
-        self._test_access(self.admin_user, self.other_item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", True)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
         # Portmanager may not see or change form for another port
-        self._test_access(self.port_manager_user, self.other_item, "view", False)
-        self._test_access(self.port_manager_user, self.other_item, "change", False)
-        self._test_access(self.port_manager_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", True)
-        self._test_access(self.agent_user, self.item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
         # Shipping agent may not see or change form for another port
-        self._test_access(self.agent_user, self.other_item, "view", False)
-        self._test_access(self.agent_user, self.other_item, "change", False)
-        self._test_access(self.agent_user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", False)
-        self._test_access(self.tax_user, self.item, "delete", False)
-        self._test_access(self.tax_user, self.other_item, "view", True)
-        self._test_access(self.tax_user, self.other_item, "change", False)
-        self._test_access(self.tax_user, self.other_item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", True)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
-        self._test_access(self.unprivileged_user, self.other_item, "view", False)
-        self._test_access(self.unprivileged_user, self.other_item, "change", False)
-        self._test_access(self.unprivileged_user, self.other_item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
-        self._test_access(self.inactive_user, self.other_item, "view", False)
-        self._test_access(self.inactive_user, self.other_item, "change", False)
-        self._test_access(self.inactive_user, self.other_item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.other_item),
+            self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
 
@@ -607,36 +679,42 @@ class TaxRatesPermissionTest(PermissionTest):
         return self.taxrates
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", False)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", False)
-        self._test_access(self.agent_user, self.item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", True)
-        self._test_access(self.tax_user, self.item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
 
@@ -647,36 +725,42 @@ class PortTaxRatesPermissionTest(PermissionTest):
         return self.port_taxrate
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", False)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", False)
-        self._test_access(self.agent_user, self.item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", True)
-        self._test_access(self.tax_user, self.item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
 
@@ -687,43 +771,49 @@ class DisembarkmentTaxRatesPermissionTest(PermissionTest):
         return self.disembarkment_taxrate
 
     def test_admin(self):
-        self._test_access(self.admin_user, self.item, "view", True)
-        self._test_access(self.admin_user, self.item, "change", True)
-        self._test_access(self.admin_user, self.item, "delete", True)
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
 
     def test_portmanager(self):
-        self._test_access(self.port_manager_user, self.item, "view", True)
-        self._test_access(self.port_manager_user, self.item, "change", False)
-        self._test_access(self.port_manager_user, self.item, "delete", False)
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_agent(self):
-        self._test_access(self.agent_user, self.item, "view", True)
-        self._test_access(self.agent_user, self.item, "change", False)
-        self._test_access(self.agent_user, self.item, "delete", False)
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_tax(self):
-        self._test_access(self.tax_user, self.item, "view", True)
-        self._test_access(self.tax_user, self.item, "change", True)
-        self._test_access(self.tax_user, self.item, "delete", False)
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
 
     def test_unprivileged(self):
-        self._test_access(self.unprivileged_user, self.item, "view", False)
-        self._test_access(self.unprivileged_user, self.item, "change", False)
-        self._test_access(self.unprivileged_user, self.item, "delete", False)
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
 
     def test_inactive(self):
-        self._test_access(self.inactive_user, self.item, "view", False)
-        self._test_access(self.inactive_user, self.item, "change", False)
-        self._test_access(self.inactive_user, self.item, "delete", False)
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
         self.assertEqual(
-            self.backend.get_group_permissions(self.inactive_user, self.item),
+            self.backend.get_group_permissions(user, self.item),
             set(),
         )
 
 
 class UserPermissionTest(PermissionTest):
     def test_user(self):
-        # self.inactive_user does not inherit from PermissionsMixin
+        # user does not inherit from PermissionsMixin
         self.assertEqual(
             self.backend.get_instance_permissions(
                 self.admin_user, self.inactive_user, False

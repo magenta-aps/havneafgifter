@@ -269,8 +269,8 @@ class Port(PermissionsMixin, models.Model):
             return self.name
 
 
-    class Country(models.TextChoices):
-        DENMARK = "DK", _("Denmark")
+class Country(models.TextChoices):
+    DENMARK = "DK", _("Denmark")
 
 
 class HarborDuesForm(PermissionsMixin, models.Model):
@@ -516,15 +516,26 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 Q(shipping_agent__users=user)
                 | Q(port_of_call__portauthority__users=user)
             )
+        if action in (
+            "approve",
+            "reject",
+            "invoice",
+        ):
+            return qs.filter(port_of_call__portauthority__users=user)
         return qs.none()
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
-        return (
-            action in ("view", "change")
-            and not from_group
-            and (
-                user.port_authority == self.port_of_call.portauthority
-                or user.shipping_agent == self.shipping_agent
+        return not from_group and (
+            (
+                action in ("view", "change")
+                and (
+                    user.port_authority == self.port_of_call.portauthority
+                    or user.shipping_agent == self.shipping_agent
+                )
+            )
+            or (
+                action in ("approve", "reject", "invoice")
+                and (user.port_authority == self.port_of_call.portauthority)
             )
         )
 
