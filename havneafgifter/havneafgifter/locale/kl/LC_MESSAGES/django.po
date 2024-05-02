@@ -22,7 +22,7 @@ msgstr ""
 #, fuzzy
 #| msgid "Calculated harbour tax"
 msgid "Calculate tax"
-msgstr "Umiarsualivimmiinner mut akitsuut"
+msgstr "Umiarsualivimmiinnermut akitsuut"
 
 #: havneafgifter/admin.py
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
@@ -301,7 +301,7 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Calculated harbour tax"
-msgstr "Umiarsualivimmiinner mut akitsuut"
+msgstr "Umiarsualivimmiinnermut akitsuut"
 
 #: havneafgifter/models.py
 msgid "New harbor dues report"
