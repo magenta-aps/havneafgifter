@@ -94,7 +94,7 @@ class Command(BaseCommand):
             *self.get_permissions(
                 # Port managers have access to the following actions
                 # on all model instances of these classes
-                (DisembarkmentSite, ("view", "add")),
+                (DisembarkmentSite, ("view",)),
                 (DisembarkmentTaxRate, ("view",)),
                 (
                     Port,
@@ -148,7 +148,7 @@ class Command(BaseCommand):
                 # on all model instances of these classes
                 (CruiseTaxForm, ("view",)),
                 (Disembarkment, ("view",)),
-                (DisembarkmentSite, ("view",)),
+                (DisembarkmentSite, ("view", "add", "change")),
                 (DisembarkmentTaxRate, ("add", "view", "change")),
                 (HarborDuesForm, ("view",)),
                 (PassengersByCountry, ("view",)),

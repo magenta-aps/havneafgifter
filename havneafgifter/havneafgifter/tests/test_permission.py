@@ -598,6 +598,52 @@ class PassengersByCountryPermissionTest(PermissionTest):
         )
 
 
+class DisembarkmentSitePermissionTest(PermissionTest):
+    @property
+    def item(self):
+        return self.disembarkment_site
+
+    def test_admin(self):
+        user = self.admin_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
+
+    def test_portmanager(self):
+        user = self.port_manager_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+
+    def test_agent(self):
+        user = self.agent_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+
+    def test_tax(self):
+        user = self.tax_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
+
+    def test_unprivileged(self):
+        user = self.unprivileged_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+
+    def test_inactive(self):
+        user = self.inactive_user
+        self._test_access(user, self.item, "view", False)
+        self._test_access(user, self.item, "change", False)
+        self._test_access(user, self.item, "delete", False)
+        self.assertEqual(
+            self.backend.get_group_permissions(user, self.item),
+            set(),
+        )
+
+
 class DisembarkmentPermissionTest(PermissionTest):
     @property
     def item(self):
