@@ -77,7 +77,7 @@ class PermissionsMixin(models.Model):
         return f"havneafgifter.{action}_{cls._meta.model_name}"
 
     @classmethod
-    def filter_user_permissions(cls, qs: QuerySet, user: User, action: str):
+    def filter_user_permissions(cls, qs: QuerySet, user: User, action: str) -> QuerySet:
         if user.is_anonymous or not user.is_active:
             return qs.none()
         if user.is_superuser:
@@ -89,6 +89,7 @@ class PermissionsMixin(models.Model):
 
         qs1 = cls._filter_user_permissions(qs, user, action)
         if qs1 is not None:
+            # User has permission to these specific instances
             return qs1
         return qs.none()
 
@@ -108,7 +109,7 @@ class PermissionsMixin(models.Model):
             # the standard Django permission system
             return True
         if self._has_permission(user, action, from_group):
-            # User har permission to this specific instance
+            # User has permission to this specific instance
             return True
         return False
 
@@ -513,15 +514,24 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             "change",
         ):
             return qs.filter(
-                Q(shipping_agent__users=user)
-                | Q(port_of_call__portauthority__users=user)
+                (
+                    Q(shipping_agent__isnull=False)
+                    & Q(shipping_agent_id=user.shipping_agent_id)
+                )
+                | (
+                    Q(port_of_call__portauthority__isnull=False)
+                    & Q(port_of_call__portauthority_id=user.port_authority_id)
+                )
             )
         if action in (
             "approve",
             "reject",
             "invoice",
         ):
-            return qs.filter(port_of_call__portauthority__users=user)
+            return qs.filter(
+                port_of_call__portauthority__isnull=False,
+                port_of_call__portauthority_id=user.port_authority_id,
+            )
         return qs.none()
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:

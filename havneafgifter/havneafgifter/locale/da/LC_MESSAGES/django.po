@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-02 09:40-0100\n"
+"POT-Creation-Date: 2024-05-03 11:07-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -386,10 +386,6 @@ msgstr ""
 msgid "Log ud"
 msgstr ""
 
-#: havneafgifter/templates/havneafgifter/cruisetaxform_detail.html
-msgid "Cruise tax summary"
-msgstr ""
-
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 msgid "Environmental and maintenance fee"
 msgstr ""
@@ -408,18 +404,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Continue"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-#, fuzzy
-#| msgid "France"
-msgid "Cancel"
-msgstr "Frankrig"
-
-#: havneafgifter/templates/havneafgifter/harborduesform_detail.html
-msgid "Harbor dues summary"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
