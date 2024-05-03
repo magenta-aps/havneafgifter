@@ -11,6 +11,7 @@ class Command(BaseCommand):
         self.load_ports()
         self.load_disembarkment_sites()
         self.load_initial_rates()
+        self.load_shipping_agent_and_forms()
 
     def load_ports(self):
         for authority_name, authority_email in (
@@ -102,18 +103,24 @@ class Command(BaseCommand):
 
     def load_disembarkment_sites(self):
         # Load 73 disembarkment sites
-        path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "../../fixtures",
-            "initial_disembarkment_sites.json",
-        )
+        path = self._get_fixture_path("initial_disembarkment_sites.json")
         call_command("loaddata", path, verbosity=1)
 
     def load_initial_rates(self):
         # Load initial data for TaxRates, PortTaxRate and DisembarkmentTaxRate
-        path = os.path.join(
+        path = self._get_fixture_path("initial_rates.json")
+        call_command("loaddata", path, verbosity=1)
+
+    def load_shipping_agent_and_forms(self):
+        # Load dummy data - a shipping agent, 2 harbor dues forms, and 2 cruise
+        # tax forms.
+        path = self._get_fixture_path("shipping_agent_and_forms.json")
+        call_command("loaddata", path, verbosity=1)
+
+    def _get_fixture_path(self, fixture_name: str) -> str:
+        path: str = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             "../../fixtures",
-            "initial_rates.json",
+            fixture_name,
         )
-        call_command("loaddata", path, verbosity=1)
+        return path
