@@ -320,6 +320,10 @@ msgid "Calculated disembarkment tax"
 msgstr "Beregnet ilandsætnings-afgift"
 
 #: havneafgifter/models.py
+msgid "Calculated passenger tax"
+msgstr "Beregnet passagerafgift"
+
+#: havneafgifter/models.py
 msgid "Nationality"
 msgstr "Nationalitet"
 

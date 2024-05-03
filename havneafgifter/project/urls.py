@@ -8,7 +8,7 @@ urlpatterns: List[URLResolver | URLPattern] = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("select2/", include("django_select2.urls")),
     path(
-        "havneafgifter/",
+        "",
         include(
             "havneafgifter.urls",
             namespace="havneafgifter",

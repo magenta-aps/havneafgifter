@@ -425,6 +425,14 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/layout.html
+msgid "Version"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/layout.html
+msgid "Kildekode"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid "Logged out"
 msgstr ""

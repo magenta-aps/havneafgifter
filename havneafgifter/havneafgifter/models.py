@@ -68,6 +68,10 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
     )
 
+    @property
+    def group_names(self):
+        return [group.name for group in self.groups.all()]
+
 
 class PermissionsMixin(models.Model):
     class Meta:
