@@ -47,7 +47,7 @@ services:
       driver: 'none' # Disable saving logs
     network_mode: "host"
 
-  toldbehandling-test-idp:
+  havneafgifter-test-idp:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
     image: kenchan0130/simplesamlphp
     container_name: toldbehandling-test-idp
