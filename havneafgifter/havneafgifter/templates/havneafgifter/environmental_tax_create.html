@@ -14,8 +14,16 @@
         passengers disembark.
         {% endblocktrans %}
     </div>
-    {% bootstrap_formset disembarkment_formset layout="horizontal" %}
+    <div class="col-6">
+        {# Formset asking for number of passengers at each disembarkment site #}
+        {% bootstrap_form disembarkment_formset.management_form %}
+        {% for form in disembarkment_formset.forms %}
+            {% ifchanged form.get_municipality_display %}
+                <h2>{{ form.get_municipality_display }}</h2>
+            {% endifchanged %}
+            {% bootstrap_field form.number_of_passengers layout="horizontal" horizontal_label_class="col-9" horizontal_field_class="col-3" %}
+        {% endfor %}
+    </div>
     {% bootstrap_button button_type="submit" content=_("Continue") %}
-    {% bootstrap_button button_type="reset" content=_("Cancel") %}
 </form>
 {% endblock content %}
