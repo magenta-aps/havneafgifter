@@ -13,10 +13,10 @@ SAML_ACS_FAILURE_RESPONSE_FUNCTION = "project.util.template_failure"
 ACS_DEFAULT_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
+AUTHENTICATION_BACKENDS = [
+    "havneafgifter.permissions.HavneafgiftPermissionBackend",
     "djangosaml2.backends.Saml2Backend",
-)
+]
 LOGIN_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
 LOGIN_URL = "/saml2/login/"
 LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")

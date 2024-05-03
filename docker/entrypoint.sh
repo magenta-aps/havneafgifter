@@ -44,8 +44,12 @@ if [ "${CREATE_DUMMY_ADMIN}" = true ]; then
 fi
 
 if [ "${CREATE_DUMMY_STAFF}" = true ]; then
-  echo 'creating staff user'
-  ./manage.py createuser staff staff -s -g Editors
+  echo 'creating tax user'
+  ./manage.py createuser tax tax -s -g TaxAuthority
+  echo 'creating shipping user'
+  ./manage.py createuser shipping shipping -s -g Shipping
+  echo 'creating portauthority user'
+  ./manage.py createuser portauthority portauthority -s -g PortAuthority
 fi
 
 python manage.py createcachetable

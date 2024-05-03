@@ -4,6 +4,7 @@ from datetime import datetime
 from django.core.management import call_command
 
 from havneafgifter.models import (
+    Country,
     CruiseTaxForm,
     HarborDuesForm,
     Port,
@@ -31,7 +32,7 @@ class HarborDuesFormMixin:
         # Valid data for creating a `HarborDuesForm` (or `CruiseTaxForm`) instance
         cls.harbor_dues_form_data = {
             "port_of_call": cls.port,
-            "nationality": HarborDuesForm.Country.DENMARK,
+            "nationality": Country.DENMARK,
             "vessel_name": "Mary",
             "vessel_owner": "Ejer",
             "vessel_master": "Mester",

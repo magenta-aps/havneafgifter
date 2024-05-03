@@ -16,7 +16,7 @@ from django.core.validators import (
     RegexValidator,
 )
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
 from django.templatetags.l10n import localize
 from django.utils.translation import gettext as _
@@ -52,6 +52,74 @@ class User(AbstractUser):
         null=True,
         blank=True,
     )
+    port_authority = models.ForeignKey(
+        "PortAuthority",
+        null=True,
+        blank=True,
+        related_name="users",
+        on_delete=models.SET_NULL,
+    )
+    shipping_agent = models.ForeignKey(
+        "ShippingAgent",
+        null=True,
+        blank=True,
+        related_name="users",
+        on_delete=models.SET_NULL,
+    )
+
+
+class PermissionsMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def permission_name(cls, action: str) -> str:
+        return f"havneafgifter.{action}_{cls._meta.model_name}"
+
+    @classmethod
+    def filter_user_permissions(cls, qs: QuerySet, user: User, action: str) -> QuerySet:
+        if user.is_anonymous or not user.is_active:
+            return qs.none()
+        if user.is_superuser:
+            return qs
+        if user.has_perm(cls.permission_name(action), None):
+            # User has permission for all instances through
+            # the standard Django permission system
+            return qs
+
+        qs1 = cls._filter_user_permissions(qs, user, action)
+        if qs1 is not None:
+            # User has permission to these specific instances
+            return qs1
+        return qs.none()
+
+    @classmethod
+    def _filter_user_permissions(
+        cls, qs: QuerySet, user: User, action: str
+    ) -> QuerySet | None:
+        return qs.none()
+
+    def has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        if user.is_anonymous or not user.is_active:
+            return False
+        if user.is_superuser:
+            return True
+        if user.has_perm(self.permission_name(action), None):
+            # User has permission for all instances through
+            # the standard Django permission system
+            return True
+        if self._has_permission(user, action, from_group):
+            # User has permission to this specific instance
+            return True
+        return False
+
+    def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        return (
+            not from_group
+            and self.filter_user_permissions(
+                self.__class__.objects.filter(pk=self.pk), user, action  # type: ignore
+            ).exists()
+        )
 
 
 class ShipType(models.TextChoices):
@@ -109,7 +177,7 @@ class Municipality(models.IntegerChoices):
     NATIONAL_PARK = 961, _("Northeast Greenland National Park")
 
 
-class ShippingAgent(models.Model):
+class ShippingAgent(PermissionsMixin, models.Model):
     class Meta:
         ordering = ["name"]
 
@@ -129,6 +197,20 @@ class ShippingAgent(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @classmethod
+    def _filter_user_permissions(
+        cls, qs: QuerySet, user: User, action: str
+    ) -> QuerySet | None:
+        # Filter the qs based on what the user is allowed to do
+        # These come on top of class-wide permissions (access to all instances)
+        #
+        if action == "change" and user.shipping_agent:
+            return qs.filter(pk=user.shipping_agent_id)
+        return None
+
+    def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        return action == "change" and not from_group and user.shipping_agent == self
+
 
 def imo_validator(value: str):
     if len(value) != 7:
@@ -140,7 +222,7 @@ def imo_validator(value: str):
         raise ValidationError("IMO Check failed")
 
 
-class PortAuthority(models.Model):
+class PortAuthority(PermissionsMixin, models.Model):
     class Meta:
         ordering = ["name"]
 
@@ -157,8 +239,20 @@ class PortAuthority(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @classmethod
+    def _filter_user_permissions(
+        cls, qs: QuerySet, user: User, action: str
+    ) -> QuerySet | None:
+        # Filter the qs based on what the user is allowed to do
+        if action == "change" and user.port_authority:
+            return qs.filter(pk=user.port_authority_id)
+        return None
 
-class Port(models.Model):
+    def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        return action == "change" and not from_group and user.port_authority == self
+
+
+class Port(PermissionsMixin, models.Model):
     class Meta:
         ordering = ["portauthority__name", "name"]
 
@@ -176,10 +270,11 @@ class Port(models.Model):
             return self.name
 
 
-class HarborDuesForm(models.Model):
-    class Country(models.TextChoices):
-        DENMARK = "DK", _("Denmark")
+class Country(models.TextChoices):
+    DENMARK = "DK", _("Denmark")
 
+
+class HarborDuesForm(PermissionsMixin, models.Model):
     date = models.DateField(
         null=False,
         blank=False,
@@ -409,6 +504,51 @@ class HarborDuesForm(models.Model):
 
         return recipients
 
+    @classmethod
+    def _filter_user_permissions(
+        cls, qs: QuerySet, user: User, action: str
+    ) -> QuerySet | None:
+        # Filter the qs based on what the user is allowed to do
+        if action in (
+            "view",
+            "change",
+        ):
+            return qs.filter(
+                (
+                    Q(shipping_agent__isnull=False)
+                    & Q(shipping_agent_id=user.shipping_agent_id)
+                )
+                | (
+                    Q(port_of_call__portauthority__isnull=False)
+                    & Q(port_of_call__portauthority_id=user.port_authority_id)
+                )
+            )
+        if action in (
+            "approve",
+            "reject",
+            "invoice",
+        ):
+            return qs.filter(
+                port_of_call__portauthority__isnull=False,
+                port_of_call__portauthority_id=user.port_authority_id,
+            )
+        return qs.none()
+
+    def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        return not from_group and (
+            (
+                action in ("view", "change")
+                and (
+                    user.port_authority == self.port_of_call.portauthority
+                    or user.shipping_agent == self.shipping_agent
+                )
+            )
+            or (
+                action in ("approve", "reject", "invoice")
+                and (user.port_authority == self.port_of_call.portauthority)
+            )
+        )
+
 
 class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
@@ -504,7 +644,7 @@ class CruiseTaxForm(HarborDuesForm):
         return CruiseTaxFormReceipt(self, **kwargs)
 
 
-class PassengersByCountry(models.Model):
+class PassengersByCountry(PermissionsMixin, models.Model):
     class Meta:
         ordering = [
             "cruise_tax_form",
@@ -532,8 +672,22 @@ class PassengersByCountry(models.Model):
         verbose_name=_("Number of passengers from nationality"),
     )
 
+    @classmethod
+    def _filter_user_permissions(
+        cls, qs: QuerySet, user: User, action: str
+    ) -> QuerySet | None:
+        # Filter the qs based on what the user is allowed to do
+        return qs.filter(
+            cruise_tax_form__in=CruiseTaxForm.filter_user_permissions(
+                CruiseTaxForm.objects.all(), user, action
+            )
+        )
 
-class DisembarkmentSite(models.Model):
+    def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        return self.cruise_tax_form._has_permission(user, action, from_group)
+
+
+class DisembarkmentSite(PermissionsMixin, models.Model):
     class Meta:
         ordering = ["municipality", "pk"]
 
@@ -555,7 +709,7 @@ class DisembarkmentSite(models.Model):
         return f"{self.name} ({self.get_municipality_display()})"
 
 
-class Disembarkment(models.Model):
+class Disembarkment(PermissionsMixin, models.Model):
     class Meta:
         ordering = [
             "cruise_tax_form",
@@ -577,8 +731,22 @@ class Disembarkment(models.Model):
         DisembarkmentSite, null=False, blank=False, on_delete=models.CASCADE
     )
 
+    @classmethod
+    def _filter_user_permissions(
+        cls, qs: QuerySet, user: User, action: str
+    ) -> QuerySet | None:
+        # Filter the qs based on what the user is allowed to do
+        return qs.filter(
+            cruise_tax_form__in=CruiseTaxForm.filter_user_permissions(
+                CruiseTaxForm.objects.all(), user, action
+            )
+        )
 
-class TaxRates(models.Model):
+    def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
+        return self.cruise_tax_form._has_permission(user, action, from_group)
+
+
+class TaxRates(PermissionsMixin, models.Model):
     class Meta:
         ordering = [F("start_datetime").asc(nulls_first=True)]
         verbose_name_plural = "TaxRates objects"
@@ -657,7 +825,7 @@ class TaxRates(models.Model):
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
 
 
-class PortTaxRate(models.Model):
+class PortTaxRate(PermissionsMixin, models.Model):
     tax_rates = models.ForeignKey(
         TaxRates,
         null=False,
@@ -704,7 +872,7 @@ class PortTaxRate(models.Model):
     )
 
 
-class DisembarkmentTaxRate(models.Model):
+class DisembarkmentTaxRate(PermissionsMixin, models.Model):
     class Meta:
         unique_together = ("tax_rates", "municipality", "disembarkment_site")
 

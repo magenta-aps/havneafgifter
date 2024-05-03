@@ -62,6 +62,10 @@ MIDDLEWARE = [
     "csp.middleware.CSPMiddleware",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "havneafgifter.permissions.HavneafgiftPermissionBackend",
+]
+
 ROOT_URLCONF = "project.urls"
 
 default_loaders = [
