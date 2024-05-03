@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-29 12:30-0100\n"
+"POT-Creation-Date: 2024-05-02 11:01-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: havneafgifter/admin.py
+msgid "Calculate tax"
+msgstr ""
+
+#: havneafgifter/admin.py
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Send email"
+msgstr ""
 
 #: havneafgifter/admin.py
 msgid "Personal info"
@@ -40,6 +49,16 @@ msgstr ""
 
 #: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Total number of passengers"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid ""
+"The total number of passengers does not match the sum of passengers by each "
+"nationality"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -275,6 +294,18 @@ msgid "Calculated harbour tax"
 msgstr ""
 
 #: havneafgifter/models.py
+msgid "New harbor dues report"
+msgstr ""
+
+#: havneafgifter/models.py
+#, python-format
+msgid ""
+"On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
+"environmental and maintenance fees related to the entry of %(vessel)s in "
+"%(port)s"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Number of passengers"
 msgstr ""
 
@@ -339,27 +370,24 @@ msgstr ""
 msgid "Log ud"
 msgstr ""
 
-#: havneafgifter/templates/havneafgifter/cruisetaxform_detail.html
-msgid "Cruise tax summary"
-msgstr ""
-
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 msgid "Environmental and maintenance fee"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-msgid "Continue"
+msgid ""
+"\n"
+"        Please notice that environmental and maintenance fees apply to "
+"<b>all</b>\n"
+"        passengers on board at the time of disembarkment, regardless of how "
+"many\n"
+"        passengers disembark.\n"
+"        "
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-msgid "Cancel"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_detail.html
-msgid "Harbor dues summary"
+msgid "Continue"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
@@ -400,6 +428,18 @@ msgstr ""
 msgid "Passenger tax"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "View PDF"
+msgstr ""
+
 #: havneafgifter/tests/test_views.py havneafgifter/views.py
 msgid "Thanks"
+msgstr ""
+
+#: havneafgifter/views.py
+msgid "Email sent"
+msgstr ""
+
+#: havneafgifter/views.py
+msgid "Error when sending email"
 msgstr ""
