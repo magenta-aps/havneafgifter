@@ -13,6 +13,7 @@ from django.forms import (
 )
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from dynamic_forms import DynamicField, DynamicFormMixin
 
 from havneafgifter.form_mixins import BootstrapForm
 from havneafgifter.models import DisembarkmentSite, HarborDuesForm, Nationality
@@ -103,32 +104,29 @@ class PassengersTotalForm(Form):
             )
 
 
-class PassengersByCountryForm(Form):
-    nationality = ChoiceField(choices=Nationality, disabled=True)
-    number_of_passengers = IntegerField()
+class PassengersByCountryForm(DynamicFormMixin, Form):
+    nationality = ChoiceField(
+        choices=Nationality,
+        disabled=True,
+    )
+    number_of_passengers = DynamicField(
+        IntegerField,
+        label=lambda form: form.initial["nationality"].label,
+    )
 
-    def __init__(self, *args, **kwargs):
-        assert kwargs.get("initial", {}).get("nationality") is not None
-        super().__init__(*args, **kwargs)
-        # Use initial (and unchangeable) value of each nationality as the label
-        # for each number field.
-        self.fields["number_of_passengers"].label = self.initial["nationality"].label
 
-
-class DisembarkmentForm(Form):
-    disembarkment_site = ChoiceField(choices=[], disabled=True)
-    number_of_passengers = IntegerField()
-
-    def __init__(self, *args, **kwargs):
-        assert kwargs.get("initial", {}).get("disembarkment_site") is not None
-        super().__init__(*args, **kwargs)
-        # Use initial (and unchangeable) disembarkment site as label for each
-        # number field.
-        self.fields["number_of_passengers"].label = self.initial_disembarkment_site.name
-        # Populate `disembarkment_site` choices
-        self.fields["disembarkment_site"].choices = [
-            (self.initial_disembarkment_site.pk, str(self.initial_disembarkment_site))
-        ]
+class DisembarkmentForm(DynamicFormMixin, Form):
+    disembarkment_site = DynamicField(
+        ChoiceField,
+        choices=lambda form: [
+            (form.initial_disembarkment_site.pk, str(form.initial_disembarkment_site))
+        ],
+        disabled=True,
+    )
+    number_of_passengers = DynamicField(
+        IntegerField,
+        label=lambda form: form.initial_disembarkment_site.name,
+    )
 
     def clean_disembarkment_site(self):
         disembarkment_site = self.cleaned_data.get("disembarkment_site")
