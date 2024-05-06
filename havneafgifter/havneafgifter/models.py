@@ -19,7 +19,7 @@ from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
 from django.templatetags.l10n import localize
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.data import DateTimeRange
 
