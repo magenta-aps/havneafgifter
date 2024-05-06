@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-06 07:40-0100\n"
+"POT-Creation-Date: 2024-05-06 09:36-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -344,6 +344,12 @@ msgstr ""
 #: havneafgifter/models.py
 msgid "Municipality"
 msgstr ""
+
+#: havneafgifter/models.py
+msgid "Other disembarkation outside of populated areas"
+msgstr ""
+"Pinngortitamut, nunaannarmut assigisaanulluunniit, najugaqarfiit "
+"avataaniittunut tulaassinerit allat"
 
 #: havneafgifter/models.py
 msgid "Number of passengers disembarking"

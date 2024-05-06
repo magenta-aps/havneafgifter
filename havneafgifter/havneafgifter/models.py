@@ -705,6 +705,13 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         verbose_name=_("Municipality"),
     )
 
+    is_outside_populated_areas = models.BooleanField(
+        default=False,
+        null=True,
+        blank=True,
+        verbose_name=_("Other disembarkation outside of populated areas"),
+    )
+
     def __str__(self) -> str:
         return f"{self.name} ({self.get_municipality_display()})"
 
