@@ -7,7 +7,6 @@ from django.forms import (
     ChoiceField,
     Form,
     IntegerField,
-    ModelChoiceField,
     ModelForm,
     PasswordInput,
     TextInput,
@@ -24,7 +23,6 @@ from havneafgifter.models import (
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
-    ShippingAgent,
     imo_validator,
 )
 
