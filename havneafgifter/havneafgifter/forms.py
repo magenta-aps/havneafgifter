@@ -13,6 +13,8 @@ from django.forms import (
 )
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from django_countries import countries
+from django_select2.forms import Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
 
 from havneafgifter.form_mixins import BootstrapForm
@@ -68,6 +70,7 @@ class HarborDuesFormForm(ModelForm):
             "datetime_of_departure",
         ]
         widgets = {
+            "nationality": Select2Widget(choices=countries),
             "datetime_of_arrival": HTML5DateWidget(),
             "datetime_of_departure": HTML5DateWidget(),
         }

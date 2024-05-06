@@ -7,7 +7,6 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from havneafgifter.models import (
-    Country,
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
@@ -83,7 +82,7 @@ class PermissionTest(TestCase):
         )
         cls.form = CruiseTaxForm.objects.create(
             port_of_call=cls.port,
-            nationality=Country.DENMARK,
+            nationality=Nationality.DENMARK,
             vessel_name="Naglfar",
             vessel_imo="9074729",
             vessel_owner="Magenta ApS",
@@ -97,7 +96,7 @@ class PermissionTest(TestCase):
         )
         cls.form_other = CruiseTaxForm.objects.create(
             port_of_call=cls.port_other,
-            nationality=Country.DENMARK,
+            nationality=Nationality.DENMARK,
             vessel_name="Naglfar",
             vessel_imo="9074729",
             vessel_owner="Magenta ApS",
