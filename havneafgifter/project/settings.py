@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_bootstrap5",
     "havneafgifter",
     "djangosaml2",
+    "django_select2",
 ]
 
 MIDDLEWARE = [
@@ -115,6 +116,22 @@ DATABASES = {
         "HOST": os.environ["POSTGRES_HOST"],
     },
 }
+
+# Cache(s)
+# https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-CACHES
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "select2": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "TIMEOUT": None,
+    },
+}
+
+# Tell select2 which cache configuration to use:
+SELECT2_CACHE_BACKEND = "select2"
 
 
 # Password validation
