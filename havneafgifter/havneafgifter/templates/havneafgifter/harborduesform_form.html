@@ -11,6 +11,8 @@
 <h1>{% translate "Harbour Dues/Port Tax" %}</h1>
 <form action="." method="post" class="form">
     {% csrf_token %}
+    {{ form.media.css }}
+    {{ form.media.js }}
     {% bootstrap_form form %}
     {% bootstrap_button button_type="submit" content=_("Create") %}
 </form>
