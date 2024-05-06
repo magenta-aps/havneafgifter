@@ -100,17 +100,6 @@ class HarborDuesFormForm(DynamicFormMixin, ModelForm):
         required=lambda form: not form.user_is_ship,
     )
 
-    shipping_agent = DynamicField(
-        ModelChoiceField,
-        queryset=lambda form: (
-            ShippingAgent.objects.none()
-            if form.user_is_ship
-            else ShippingAgent.objects.all()
-        ),
-        required=lambda form: not form.user_is_ship,
-        disabled=lambda form: form.user_is_ship,
-    )
-
     def clean(self):
         cleaned_data = super().clean()
         datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
