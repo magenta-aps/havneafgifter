@@ -271,10 +271,6 @@ class Port(PermissionsMixin, models.Model):
             return self.name
 
 
-class Country(models.TextChoices):
-    DENMARK = "DK", _("Denmark")
-
-
 class HarborDuesForm(PermissionsMixin, models.Model):
     date = models.DateField(
         null=False,
