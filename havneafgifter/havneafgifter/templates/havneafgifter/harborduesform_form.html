@@ -1,10 +1,14 @@
-{% extends "havneafgifter/layout.html" %}
+{% extends "havneafgifter/base.html" %}
 
 {% load i18n %}
 {% load django_bootstrap5 %}
 
+{% block title %}
+{% translate "Harbour Dues/Port Tax" %}
+{% endblock %}
+
 {% block content %}
-<h1>{% translate "New report" %}</h1>
+<h1>{% translate "Harbour Dues/Port Tax" %}</h1>
 <form action="." method="post" class="form">
     {% csrf_token %}
     {% bootstrap_form form %}
