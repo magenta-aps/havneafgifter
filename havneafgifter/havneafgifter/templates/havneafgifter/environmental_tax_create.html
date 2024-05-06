@@ -1,14 +1,18 @@
-{% extends "havneafgifter/layout.html" %}
+{% extends "havneafgifter/base.html" %}
 
 {% load i18n %}
 {% load django_bootstrap5 %}
 
+{% block title %}
+{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}
+{% endblock %}
+
 {% block content %}
-<h1>{% translate "Environmental and maintenance fee" %}</h1>
+<h1>{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h1>
 <form action="." method="post" class="form">
     {% csrf_token %}
     <div class="alert alert-info" role="alert">
-        {% blocktrans %}
+        {% blocktrans trimmed %}
         Please notice that environmental and maintenance fees apply to <b>all</b>
         passengers on board at the time of disembarkment, regardless of how many
         passengers disembark.

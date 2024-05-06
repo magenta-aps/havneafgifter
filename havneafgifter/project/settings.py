@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 
+import django.conf.locale
 from project.util import strtobool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -84,6 +86,7 @@ TEMPLATES = [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.i18n",
                 "django.contrib.messages.context_processors.messages",
             ],
             "loaders": default_loaders if DEBUG else cached_loaders,
@@ -136,12 +139,24 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "da-dk"
+LANGUAGE_CODE = "en-US"
 LANGUAGES = [
-    ("da", "Dansk"),
-    ("kl", "Kalaallisut"),
     ("en", "English"),
+    ("kl", "Kalaallisut"),
+    ("da", "Dansk"),
 ]
+EXTRA_LANG_INFO = {
+    "kl": {
+        "code": "kl",
+        "name": "Kalaallisut",
+        "name_local": "Kalaallisut",
+        "bidi": False,
+    },
+}
+# Add custom languages not provided by Django
+LANG_INFO = dict(django.conf.locale.LANG_INFO, **EXTRA_LANG_INFO)
+django.conf.locale.LANG_INFO = LANG_INFO
+
 TIME_ZONE = "America/Godthab"
 USE_I18N = True
 USE_L10N = True
@@ -237,6 +252,14 @@ EMAIL_USE_TLS = bool(strtobool(os.environ.get("EMAIL_USE_TLS", "False")))
 EMAIL_USE_SSL = bool(strtobool(os.environ.get("EMAIL_USE_SSL", "False")))
 EMAIL_SENDER = os.environ.get("EMAIL_SENDER", "noreply@nanoq.gl")
 EMAIL_ADDRESS_SKATTESTYRELSEN = os.environ.get("EMAIL_ADDRESS_SKATTESTYRELSEN")
+
+# django-csp
+CSP_DEFAULT_SRC = (
+    "'self'",
+    "localhost:8000" if DEBUG else HOST_DOMAIN,
+)
+CSP_SCRIPT_SRC_ATTR = ("'self'", "'unsafe-inline'")
+CSP_IMG_SRC = ("'self'", "data:")
 
 AUTH_USER_MODEL = "havneafgifter.User"
 

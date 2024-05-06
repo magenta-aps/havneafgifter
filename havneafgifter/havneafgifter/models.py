@@ -19,7 +19,7 @@ from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
 from django.templatetags.l10n import localize
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.data import DateTimeRange
 
@@ -703,6 +703,13 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Municipality"),
+    )
+
+    is_outside_populated_areas = models.BooleanField(
+        default=False,
+        null=True,
+        blank=True,
+        verbose_name=_("Other disembarkation outside of populated areas"),
     )
 
     def __str__(self) -> str:

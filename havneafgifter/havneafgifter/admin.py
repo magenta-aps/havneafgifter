@@ -86,7 +86,11 @@ class CruiseTaxFormAdmin(HarborDuesFormAdmin):
 
 @admin.register(DisembarkmentSite)
 class DisembarkmentSiteAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        "municipality",
+        "name",
+        "is_outside_populated_areas",
+    ]
 
 
 @admin.register(ShippingAgent)

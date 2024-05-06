@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-03 11:07-0100\n"
+"POT-Creation-Date: 2024-05-06 09:36-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -346,6 +346,12 @@ msgid "Municipality"
 msgstr ""
 
 #: havneafgifter/models.py
+msgid "Other disembarkation outside of populated areas"
+msgstr ""
+"Pinngortitamut, nunaannarmut assigisaanulluunniit, najugaqarfiit "
+"avataaniittunut tulaassinerit allat"
+
+#: havneafgifter/models.py
 msgid "Number of passengers disembarking"
 msgstr ""
 
@@ -380,23 +386,30 @@ msgid "Havneafgifter"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
-#: havneafgifter/templates/havneafgifter/layout.html
-msgid "Log ud"
+msgid "Log out"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "About"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Version"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Source code"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-msgid "Environmental and maintenance fee"
+msgid "Cruise Ships: Environmental and Maintenance Fee"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 msgid ""
-"\n"
-"        Please notice that environmental and maintenance fees apply to "
-"<b>all</b>\n"
-"        passengers on board at the time of disembarkment, regardless of how "
-"many\n"
-"        passengers disembark.\n"
-"        "
+"Please notice that environmental and maintenance fees apply to <b>all</b> "
+"passengers on board at the time of disembarkment, regardless of how many "
+"passengers disembark."
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
@@ -405,44 +418,45 @@ msgid "Continue"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "New report"
+msgid "Harbour Dues/Port Tax"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Create"
 msgstr ""
 
-#: havneafgifter/templates/havneafgifter/layout.html
-msgid "Version"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/layout.html
-msgid "Kildekode"
-msgstr ""
-
 #: havneafgifter/templates/havneafgifter/logged_out.html
-msgid "Logget ud"
+msgid "Logged out"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid ""
-"Du er nu logget ud. Det anbefales at du lukker denne browser-tab for at "
-"fjerne resterende data"
+"You are now logged out. We recommend that you close this browser tab to "
+"remove remaining cookie data"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
-msgid "Log ind igen"
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Log in"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/login.html
-msgid "Login"
+msgid "Log in using MitID"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-#, fuzzy
-#| msgid "Calculated passenger tax"
-msgid "Passenger tax"
-msgstr "Illasunut akitsuut"
+msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
+msgid ""
+"Cruise Ships: Port Tax, Passenger Tax (\"Pax Tax\") and Environmental and "
+"Maintenance Fee"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/pdf/harbor_dues_form_receipt.html
+msgid "Harbour Dues"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "View PDF"

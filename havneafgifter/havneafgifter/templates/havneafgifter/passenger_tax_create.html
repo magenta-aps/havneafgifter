@@ -1,10 +1,14 @@
-{% extends "havneafgifter/layout.html" %}
+{% extends "havneafgifter/base.html" %}
 
 {% load i18n %}
 {% load django_bootstrap5 %}
 
+{% block title %}
+{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}
+{% endblock %}
+
 {% block content %}
-<h1>{% translate "Passenger tax" %}</h1>
+<h1>{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}</h1>
 <form action="." method="post" class="form">
     {% csrf_token %}
     <div class="col-6">

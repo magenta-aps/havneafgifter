@@ -1,16 +1,20 @@
 {% extends "havneafgifter/base.html" %}
 {% load i18n %}
 
+{% block title %}
+{% translate "Logged out" %}
+{% endblock %}
+
 {% block content %}
 <div class="justify-content-md-center d-flex align-items-center vh-100">
     <div class="card" style="width: 40rem;">
-        <h5 class="card-header">{% translate "Logget ud" %}</h5>
+        <h5 class="card-header">{% translate "Logged out" %}</h5>
         <div class="card-body">
             <p>
-                {% translate "Du er nu logget ud. Det anbefales at du lukker denne browser-tab for at fjerne resterende data" %}
+                {% translate "You are now logged out. We recommend that you close this browser tab to remove remaining cookie data" %}
             </p>
-            <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate "Log ind igen" %}</a>
+            <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate "Log in" %}</a>
         </div>
-    </div></div>
+    </div>
+</div>
 {% endblock %}
-

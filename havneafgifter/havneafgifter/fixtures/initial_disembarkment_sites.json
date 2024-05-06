@@ -195,8 +195,9 @@
     "model": "havneafgifter.disembarkmentsite",
     "pk": 124,
     "fields": {
-        "name": "Pinngortitamut, nunaannarmut assigisaanulluunniit, najugaqarfiit avataaniittunut tulaassinerit allat/Other disembarkation outside of populated areas",
-        "municipality": 960
+        "name": "-",
+        "municipality": 960,
+        "is_outside_populated_areas": true
     }
 },
 {
@@ -291,8 +292,9 @@
     "model": "havneafgifter.disembarkmentsite",
     "pk": 136,
     "fields": {
-        "name": "Pinngortitamut, nunaannarmut assigisaanulluunniit, najugaqarfiit avataaniittunut tulaassinerit allat/Other disembarkation outside of populated areas",
-        "municipality": 959
+        "name": "-",
+        "municipality": 959,
+        "is_outside_populated_areas": true
     }
 },
 {
