@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-03 11:07-0100\n"
+"POT-Creation-Date: 2024-05-06 09:36-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,53 +19,49 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: havneafgifter/admin.py
-#, fuzzy
-#| msgid "Calculated harbour tax"
 msgid "Calculate tax"
-msgstr "Beregnet havneafgift"
+msgstr "Beregn havneafgift"
 
 #: havneafgifter/admin.py
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Send email"
-msgstr ""
+msgstr "Send email"
 
 #: havneafgifter/admin.py
 msgid "Personal info"
-msgstr ""
+msgstr "Personoplysninger "
 
 #: havneafgifter/admin.py
 msgid "Permissions"
-msgstr ""
+msgstr "Tilladelser"
 
 #: havneafgifter/admin.py
 msgid "Important dates"
-msgstr ""
+msgstr "Vigtige datoer"
 
 #: havneafgifter/forms.py
-#, fuzzy
-#| msgid "Vessel name"
 msgid "Username"
-msgstr "Skibets navn"
+msgstr "Brugernavn"
 
 #: havneafgifter/forms.py
 msgid "Password"
-msgstr ""
+msgstr "Kodeord"
 
 #: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
-msgstr ""
+msgstr "Afrejse-datoen kan ikke ligge før ankomst-datoen"
 
 #: havneafgifter/forms.py
-#, fuzzy
-#| msgid "Number of passengers"
 msgid "Total number of passengers"
-msgstr "Antal passagerer"
+msgstr "Samlet antal passagerer"
 
 #: havneafgifter/forms.py
 msgid ""
 "The total number of passengers does not match the sum of passengers by each "
 "nationality"
 msgstr ""
+"Det samlede antal passagerer stemmer ikke med summen af antal passagerer af "
+"hver nationalitet"
 
 #: havneafgifter/models.py
 msgid "Freighter"
@@ -85,7 +81,7 @@ msgstr "Krydstogtskib"
 
 #: havneafgifter/models.py
 msgid "Other vessel"
-msgstr ""
+msgstr "Andet fartøj"
 
 #: havneafgifter/models.py
 msgid "Australia"
@@ -101,7 +97,7 @@ msgstr "Belgien"
 
 #: havneafgifter/models.py
 msgid "Canada"
-msgstr ""
+msgstr "Canada"
 
 #: havneafgifter/models.py
 msgid "China"
@@ -117,7 +113,7 @@ msgstr "Danmark"
 
 #: havneafgifter/models.py
 msgid "Finland"
-msgstr ""
+msgstr "Finland"
 
 #: havneafgifter/models.py
 msgid "France"
@@ -137,7 +133,7 @@ msgstr "Grønland"
 
 #: havneafgifter/models.py
 msgid "Hong Kong"
-msgstr ""
+msgstr "Hong Kong"
 
 #: havneafgifter/models.py
 msgid "Iceland"
@@ -153,11 +149,11 @@ msgstr "Italien"
 
 #: havneafgifter/models.py
 msgid "Japan"
-msgstr ""
+msgstr "Japan"
 
 #: havneafgifter/models.py
 msgid "Luxembourg"
-msgstr ""
+msgstr "Luxembourg"
 
 #: havneafgifter/models.py
 msgid "Malaysia"
@@ -169,7 +165,7 @@ msgstr "Nederlandene"
 
 #: havneafgifter/models.py
 msgid "New Zealand"
-msgstr ""
+msgstr "New Zealand"
 
 #: havneafgifter/models.py
 msgid "Norway"
@@ -185,7 +181,7 @@ msgstr "Rusland"
 
 #: havneafgifter/models.py
 msgid "Singapore"
-msgstr ""
+msgstr "Singapore"
 
 #: havneafgifter/models.py
 msgid "South Korea"
@@ -205,7 +201,7 @@ msgstr "Schweiz"
 
 #: havneafgifter/models.py
 msgid "Taiwan"
-msgstr ""
+msgstr "Taiwan"
 
 #: havneafgifter/models.py
 msgid "United States of America"
@@ -237,15 +233,15 @@ msgstr "Email-adresse"
 
 #: havneafgifter/models.py
 msgid "Port authority company name"
-msgstr ""
+msgstr "Havnemyndighedens navn"
 
 #: havneafgifter/models.py
 msgid "Port authority contact email"
-msgstr ""
+msgstr "Havnemyndighedens kontakt-email"
 
 #: havneafgifter/models.py
 msgid "Port name"
-msgstr ""
+msgstr "Havnens navn"
 
 #: havneafgifter/models.py
 msgid "Form submission date"
@@ -280,16 +276,12 @@ msgid "Shipping agent"
 msgstr "Shippingagent"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Arrival date"
 msgid "Arrival date/time"
-msgstr "Ankomstdato"
+msgstr "Ankomstdato og -tidspunkt"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Departure date"
 msgid "Departure date/time"
-msgstr "Afgangsdato"
+msgstr "Afgangsdato og -tidspunkt"
 
 #: havneafgifter/models.py
 msgid "Gross tonnage"
@@ -324,10 +316,8 @@ msgid "Calculated passenger tax"
 msgstr "Beregnet passagerafgift"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Calculated passenger tax"
 msgid "Calculated disembarkment tax"
-msgstr "Beregnet passagerafgift"
+msgstr "Beregnet ilandsætnings-afgift"
 
 #: havneafgifter/models.py
 msgid "Nationality"
@@ -346,120 +336,133 @@ msgid "Municipality"
 msgstr "Kommune"
 
 #: havneafgifter/models.py
+msgid "Other disembarkation outside of populated areas"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Number of passengers disembarking"
 msgstr "Antal passagerer afskibet"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Number of passengers"
 msgid "Tax per passenger"
-msgstr "Antal passagerer"
+msgstr "Afgift pr. passager"
 
 #: havneafgifter/models.py
 msgid "Harbour"
-msgstr ""
+msgstr "Havn"
 
 #: havneafgifter/models.py
 msgid "Vessel gross tonnage (lower)"
-msgstr ""
+msgstr "Bruttotonnage (fra)"
 
 #: havneafgifter/models.py
 msgid "Vessel gross tonnage (upper)"
-msgstr ""
+msgstr "Bruttotonnage (til)"
 
 #: havneafgifter/models.py
 msgid "Tax per gross ton"
-msgstr ""
+msgstr "Afgift pr. bruttonton"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Disembarkment site"
 msgid "Disembarkment tax rate"
-msgstr "Landingssted"
+msgstr "Ilandsætnings-afgift"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Havneafgifter"
-msgstr ""
+msgstr "Havneafgifter"
 
 #: havneafgifter/templates/havneafgifter/base.html
-#: havneafgifter/templates/havneafgifter/layout.html
-msgid "Log ud"
-msgstr ""
+msgid "Log out"
+msgstr "Log ud"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "About"
+msgstr "Om"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Version"
+msgstr "Version"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Source code"
+msgstr "Kildekode"
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-msgid "Environmental and maintenance fee"
-msgstr ""
+msgid "Cruise Ships: Environmental and Maintenance Fee"
+msgstr "Krydstogtskibe: miljø- og vedligeholdelsesafgift"
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 msgid ""
-"\n"
-"        Please notice that environmental and maintenance fees apply to "
-"<b>all</b>\n"
-"        passengers on board at the time of disembarkment, regardless of how "
-"many\n"
-"        passengers disembark.\n"
-"        "
+"Please notice that environmental and maintenance fees apply to <b>all</b> "
+"passengers on board at the time of disembarkment, regardless of how many "
+"passengers disembark."
 msgstr ""
+"Vær opmærksom på at miljø- og vedligeholdelsesafgifter vedrører <b>alle</b> "
+"passagerer ombord på tidspunktet for ilandsætningen, uanset hvor mange "
+"passagerer, der ilandsættes."
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Continue"
-msgstr ""
+msgstr "Videre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "New report"
-msgstr ""
+msgid "Harbour Dues/Port Tax"
+msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Create"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/layout.html
-msgid "Version"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/layout.html
-msgid "Kildekode"
-msgstr ""
+msgstr "Opret"
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
-msgid "Logget ud"
-msgstr ""
+msgid "Logged out"
+msgstr "Logget ud"
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid ""
-"Du er nu logget ud. Det anbefales at du lukker denne browser-tab for at "
-"fjerne resterende data"
+"You are now logged out. We recommend that you close this browser tab to "
+"remove remaining cookie data"
 msgstr ""
+"Du er nu logget ud. Vi anbefaler, at du lukker dette faneblad for at fjerne "
+"tilbageværende cookie-data"
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
-msgid "Log ind igen"
-msgstr ""
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Log in"
+msgstr "Log ind"
 
 #: havneafgifter/templates/havneafgifter/login.html
-msgid "Login"
-msgstr ""
+msgid "Log in using MitID"
+msgstr "Log ind med MitID"
 
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-#, fuzzy
-#| msgid "Passenger ship"
-msgid "Passenger tax"
-msgstr "Passagerskib"
+msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
+msgstr "Krydstogtskibe: passagerafgift"
+
+#: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
+msgid ""
+"Cruise Ships: Port Tax, Passenger Tax (\"Pax Tax\") and Environmental and "
+"Maintenance Fee"
+msgstr ""
+"Krydstogtskibe: havneafgift, passagerafgift (\"pax tax\"), og miljø- og "
+"vedligeholdelsesafgift"
+
+#: havneafgifter/templates/havneafgifter/pdf/harbor_dues_form_receipt.html
+msgid "Harbour Dues"
+msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "View PDF"
-msgstr ""
+msgstr "Vis PDF"
 
 #: havneafgifter/tests/test_views.py havneafgifter/views.py
 msgid "Thanks"
-msgstr ""
+msgstr "Tak"
 
 #: havneafgifter/views.py
-#, fuzzy
-#| msgid "Email address"
 msgid "Email sent"
-msgstr "Email-adresse"
+msgstr "Email sendt"
 
 #: havneafgifter/views.py
 msgid "Error when sending email"
-msgstr ""
+msgstr "Fejl under afsendelse af email"

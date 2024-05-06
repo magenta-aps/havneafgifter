@@ -55,6 +55,14 @@ class TestDisembarkmentForm(HarborDuesFormMixin, TestCase):
             form.initial_disembarkment_site.name,
         )
 
+    def test_number_of_passengers_label_outside_populated_areas(self):
+        ds = DisembarkmentSite.objects.filter(is_outside_populated_areas=True).first()
+        form = DisembarkmentForm(initial={"disembarkment_site": ds.pk})
+        self.assertEqual(
+            form.fields["number_of_passengers"].label,
+            ds._meta.get_field("is_outside_populated_areas").verbose_name,
+        )
+
     def test_clean_disembarkment_site(self):
         ds = DisembarkmentSite.objects.first()
         form = DisembarkmentForm(

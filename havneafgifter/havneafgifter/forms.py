@@ -125,7 +125,7 @@ class DisembarkmentForm(DynamicFormMixin, Form):
     )
     number_of_passengers = DynamicField(
         IntegerField,
-        label=lambda form: form.initial_disembarkment_site.name,
+        label=lambda form: form.initial_disembarkment_site_name,
     )
 
     def clean_disembarkment_site(self):
@@ -140,6 +140,15 @@ class DisembarkmentForm(DynamicFormMixin, Form):
         if isinstance(disembarkment_site, int):
             disembarkment_site = DisembarkmentSite.objects.get(pk=disembarkment_site)
         return disembarkment_site
+
+    @cached_property
+    def initial_disembarkment_site_name(self):
+        disembarkment_site = self.initial_disembarkment_site
+        if disembarkment_site.is_outside_populated_areas:
+            field = disembarkment_site._meta.get_field("is_outside_populated_areas")
+            return field.verbose_name
+        else:
+            return disembarkment_site.name
 
     def get_municipality_display(self):
         return self.initial_disembarkment_site.get_municipality_display()

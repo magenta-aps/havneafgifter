@@ -229,7 +229,7 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
         instance.date = date(2020, 1, 1)
         self.assertEqual(
             instance.mail_body,
-            "On 1. januar 2020, Agent has reported harbor dues, cruise tax, "
+            "On Jan. 1, 2020, Agent has reported harbor dues, cruise tax, "
             "and environmental and maintenance fees related to the entry of Mary "
             "in Nordhavn",
         )
