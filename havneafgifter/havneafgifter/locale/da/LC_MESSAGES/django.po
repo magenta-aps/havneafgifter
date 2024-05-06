@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-06 09:36-0100\n"
+"POT-Creation-Date: 2024-05-06 11:31-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,6 +46,10 @@ msgstr "Brugernavn"
 #: havneafgifter/forms.py
 msgid "Password"
 msgstr "Kodeord"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "IMO-number"
+msgstr "IMO-nummer"
 
 #: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
@@ -260,10 +264,6 @@ msgid "Vessel name"
 msgstr "Skibets navn"
 
 #: havneafgifter/models.py
-msgid "IMO-number"
-msgstr "IMO-nummer"
-
-#: havneafgifter/models.py
 msgid "Vessel owner"
 msgstr "Skibets ejer"
 
@@ -318,10 +318,6 @@ msgstr "Beregnet passagerafgift"
 #: havneafgifter/models.py
 msgid "Calculated disembarkment tax"
 msgstr "Beregnet ilandsætnings-afgift"
-
-#: havneafgifter/models.py
-msgid "Calculated passenger tax"
-msgstr "Beregnet passagerafgift"
 
 #: havneafgifter/models.py
 msgid "Nationality"
