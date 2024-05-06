@@ -20,6 +20,7 @@ from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
 from django.templatetags.l10n import localize
 from django.utils.translation import gettext_lazy as _
+from django_countries import countries
 
 from havneafgifter.data import DateTimeRange
 
@@ -270,10 +271,6 @@ class Port(PermissionsMixin, models.Model):
             return self.name
 
 
-class Country(models.TextChoices):
-    DENMARK = "DK", _("Denmark")
-
-
 class HarborDuesForm(PermissionsMixin, models.Model):
     date = models.DateField(
         null=False,
@@ -292,7 +289,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     nationality = models.CharField(
         max_length=2,
-        choices=Country,
+        choices=countries,
         null=False,
         blank=False,
         verbose_name=_("Vessel nationality"),
