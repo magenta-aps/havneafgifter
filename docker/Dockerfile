@@ -6,15 +6,15 @@ FROM python:3.12
 ENV PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
-    mkdir -p /var/cache/told && \
+    mkdir -p /var/cache/havneafgift && \
     mkdir /static && \
     #gid/uid from salt
     groupadd -g 75170 -r havneafgifter && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75170 --no-log-init -r -g havneafgifter -G certificate_exporter havneafgifter && \
     chown -R havneafgifter:havneafgifter /static && \
-    chown -R havneafgifter:havneafgifter /var/cache/told && \
-    chmod a+w /var/cache/told
+    chown -R havneafgifter:havneafgifter /var/cache/havneafgift && \
+    chmod a+w /var/cache/havneafgift
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
