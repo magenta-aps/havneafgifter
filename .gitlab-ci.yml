@@ -279,3 +279,40 @@ Configure Production:
   needs: ["Release image"]
   variables:
     ENDPOINT: havneafgifter/salt/update-production
+
+
+# Deploy stage
+##############
+
+Deploy to Test:
+  stage: deploy
+  extends:
+    - .rules:semver-all
+    - .saltbert
+  needs: ["Configure Test"]
+  variables:
+    SALTBERT_ORCHESTRATION: groenland.havneafgifter.service-test
+    SALTBERT_URL: https://saltmaster.groenland.magentahosted.dk
+  rules:
+    # Matches <version core> from SemVer 2.0.0 BNF grammar. Ex. 2.3.4, but not 2.3.4-rc
+    - if: $CI_COMMIT_TAG =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
+      when: manual
+    # Matches all of SemVer 2.0.0
+    - if: $CI_COMMIT_TAG =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  environment:
+    name: test
+    url: "https://test.talippoq.aka.gl"
+
+Deploy to Production:
+  stage: deploy
+  extends:
+    - .rules:semver-core
+    - .saltbert
+  needs: ["Configure Production"]
+  variables:
+    SALTBERT_ORCHESTRATION: groenland.havneafgifter.service-prod
+    SALTBERT_URL: https://saltmaster.groenland.magentahosted.dk
+  when: manual
+  environment:
+    name: production
+    url: "https://talippoq.aka.gl"
