@@ -32,28 +32,40 @@ class Command(BaseCommand):
                     group = Group.objects.get(name=group_name)
                     user.groups.add(group)
                 except Group.DoesNotExist:
-                    print(f"Group {group_name} does not exist")
+                    self.stdout.write(f"Group {group_name} does not exist")
 
-        port_authority = options.get("port-authority")
-        if port_authority:
+        port_authority = options["port_authority"]
+        if port_authority is not None:
+            port_authority_name = " ".join(port_authority)
             try:
-                port_authority_name = " ".join(port_authority)
                 port_authority_object = PortAuthority.objects.get(
                     name=port_authority_name
                 )
                 user.port_authority = port_authority_object
                 user.save(update_fields=["port_authority"])
             except PortAuthority.DoesNotExist:
-                print(f"Port Authority {port_authority_name} does not exist")
+                self.stdout.write(
+                    f"Port Authority '{port_authority_name}' does not exist"
+                )
+            else:
+                self.stdout.write(
+                    f"Updated '{user}' port authority to '{port_authority_object}'"
+                )
 
-        shipping_agent = options.get("shipping-agent")
-        if shipping_agent:
+        shipping_agent = options["shipping_agent"]
+        if shipping_agent is not None:
+            shipping_agent_name = " ".join(shipping_agent)
             try:
-                shipping_agent_name = " ".join(shipping_agent)
                 shipping_agent_object = ShippingAgent.objects.get(
                     name=shipping_agent_name
                 )
                 user.shipping_agent = shipping_agent_object
                 user.save(update_fields=["shipping_agent"])
             except ShippingAgent.DoesNotExist:
-                print(f"Shipping Agent {shipping_agent_name} does not exist")
+                self.stdout.write(
+                    f"Shipping Agent '{shipping_agent_name}' does not exist"
+                )
+            else:
+                self.stdout.write(
+                    f"Updated '{user}' shipping agent to {shipping_agent_object}"
+                )
