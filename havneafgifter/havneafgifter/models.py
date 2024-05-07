@@ -230,6 +230,7 @@ def imo_validator(value: str):
 class PortAuthority(PermissionsMixin, models.Model):
     class Meta:
         ordering = ["name"]
+        verbose_name_plural = _("Port authorities")
 
     name = models.CharField(
         max_length=32,

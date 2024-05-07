@@ -28,8 +28,8 @@ if [ "${MIGRATE,,}" = true ]; then
   python manage.py migrate
 fi
 
-
 if [ "${LOAD_FIXTURES}" = true ]; then
+  echo 'loading fixtures'
   python manage.py load_fixtures
 fi
 

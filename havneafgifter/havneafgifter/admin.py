@@ -10,6 +10,8 @@ from havneafgifter.models import (
     DisembarkmentTaxRate,
     HarborDuesForm,
     PassengersByCountry,
+    Port,
+    PortAuthority,
     PortTaxRate,
     ShippingAgent,
     ShipType,
@@ -39,11 +41,20 @@ class HarborDuesFormAdmin(admin.ModelAdmin):
         "port_of_call",
         "datetime_of_arrival",
         "datetime_of_departure",
+        "shipping_agent",
+        "port_authority",
     ]
     actions = [
         "calculate_tax",
         "send_email",
     ]
+
+    @admin.display(description=_("Port authority"))
+    def port_authority(self, obj):
+        if obj.port_of_call.portauthority is not None:
+            return obj.port_of_call.portauthority.name
+        else:
+            return "-"
 
     @admin.action(description=_("Calculate tax"))
     def calculate_tax(self, request, queryset):
@@ -93,9 +104,42 @@ class DisembarkmentSiteAdmin(admin.ModelAdmin):
     ]
 
 
+@admin.register(Port)
+class PortAdmin(admin.ModelAdmin):
+    list_display = [
+        "name",
+    ]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(portauthority__isnull=True)
+
+
+class PortInlineAdmin(admin.TabularInline):
+    model = Port
+    extra = 0
+
+
+@admin.register(PortAuthority)
+class PortAuthorityAdmin(admin.ModelAdmin):
+    inlines = [PortInlineAdmin]
+    list_display = [
+        "name",
+        "email",
+    ]
+    search_fields = [
+        "name",
+        "email",
+        "port__name",
+    ]
+
+
 @admin.register(ShippingAgent)
 class ShippingAgentAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        "name",
+        "email",
+    ]
 
 
 @admin.register(TaxRates)
@@ -168,6 +212,7 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("This user belongs to"), {"fields": ("port_authority", "shipping_agent")}),
     )
 
     def get_form(self, request, obj=None, **kwargs):

@@ -8,6 +8,14 @@
     }
 },
 {
+    "model": "havneafgifter.shippingagent",
+    "pk": 2,
+    "fields": {
+        "name": "En anden agent",
+        "email": "other@example.org"
+    }
+},
+{
     "model": "havneafgifter.harborduesform",
     "pk": 1,
     "fields": {
@@ -19,8 +27,8 @@
         "vessel_owner": "Ejeren",
         "vessel_master": "Kaptajnen",
         "shipping_agent": 1,
-        "datetime_of_arrival": "2024-04-01",
-        "datetime_of_departure": "2024-04-08",
+        "datetime_of_arrival": "2024-04-01T01:00:00Z",
+        "datetime_of_departure": "2024-04-08T01:00:00Z",
         "gross_tonnage": 125,
         "vessel_type": "FISHER",
         "harbour_tax": null
@@ -37,9 +45,9 @@
         "vessel_imo": "9074729",
         "vessel_owner": "Ejer Navnesen",
         "vessel_master": "Kaptajn Efternavnsen",
-        "shipping_agent": 1,
-        "datetime_of_arrival": "2024-04-08",
-        "datetime_of_departure": "2024-04-15",
+        "shipping_agent": 2,
+        "datetime_of_arrival": "2024-04-08T01:00:00Z",
+        "datetime_of_departure": "2024-04-15T01:00:00Z",
         "gross_tonnage": 250,
         "vessel_type": "FREIGHTER",
         "harbour_tax": null
@@ -50,15 +58,15 @@
     "pk": 3,
     "fields": {
         "date": "2024-04-23",
-        "port_of_call": 12,
+        "port_of_call": 1,
         "nationality": "DK",
         "vessel_name": "Skibsnavn",
         "vessel_imo": "1234567",
         "vessel_owner": "Ejer Navnesen",
         "vessel_master": "Kaptajn Efternavnsen",
         "shipping_agent": 1,
-        "datetime_of_arrival": "2024-04-01",
-        "datetime_of_departure": "2024-04-05",
+        "datetime_of_arrival": "2024-04-01T01:00:00Z",
+        "datetime_of_departure": "2024-04-05T01:00:00Z",
         "gross_tonnage": 200,
         "vessel_type": "CRUISE",
         "harbour_tax": null
@@ -76,8 +84,8 @@
         "vessel_owner": "Ejeren",
         "vessel_master": "Kaptajnen",
         "shipping_agent": 1,
-        "datetime_of_arrival": "2024-04-01",
-        "datetime_of_departure": "2024-04-02",
+        "datetime_of_arrival": "2024-04-01T01:00:00Z",
+        "datetime_of_departure": "2024-04-02T01:00:00Z",
         "gross_tonnage": 1337,
         "vessel_type": "CRUISE",
         "harbour_tax": null
