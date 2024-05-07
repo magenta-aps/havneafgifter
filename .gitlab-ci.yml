@@ -246,6 +246,19 @@ Release image:
       "docker://${IMAGE_SHA}"
       "docker://${IMAGE_TAG}"
 
+Release Semantic commit:
+  extends: .release:semantic-commit
+
+Release Generate changelog:
+  extends: .release:generate-changelog
+
+Docs Export changelog:
+  extends:
+    - .rules:semver-all
+    - .docs:export-changelog
+  variables:
+    CHANGELOG_EXTRA_FLAGS: "--merge-prerelease"
+
 # Configure stage
 #################
 
