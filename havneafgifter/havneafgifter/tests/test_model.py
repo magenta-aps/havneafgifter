@@ -4,6 +4,7 @@ from unittest.mock import ANY, patch
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
+from django.utils import translation
 
 from havneafgifter.models import (
     DisembarkmentSite,
@@ -224,7 +225,11 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
             # expected.
             mock_send.assert_called_once_with(fail_silently=False)
 
+    @translation.override("da")
     def test_mail_body(self):
+        # Verify contents of mail body, and verify that mail body is always rendered
+        # in English, as we do not know the which language(s) the recipient(s) can
+        # read.
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         instance.date = date(2020, 1, 1)
         self.assertEqual(
@@ -233,6 +238,15 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
             "and environmental and maintenance fees related to the entry of Mary "
             "in Nordhavn",
         )
+
+    @translation.override("da")
+    def test_mail_subject(self):
+        # Verify contents of mail subject, and verify that mail subject is always
+        # rendered in English, as we do not know the which language(s) the
+        # recipient(s) can read.
+        instance = HarborDuesForm(**self.harbor_dues_form_data)
+        instance.date = date(2020, 1, 1)
+        self.assertEqual(instance.mail_subject, f"{instance.pk} (Jan. 1, 2020)")
 
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
     def test_mail_recipients(self):

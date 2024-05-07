@@ -19,6 +19,7 @@ from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
 from django.templatetags.l10n import localize
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 
@@ -460,22 +461,29 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def mail_subject(self):
-        # TODO: verify content
-        # TODO: include data from object?
-        return _("New harbor dues report")  # pragma: nocover
+        # Always use English, as we don't know which other languages the mail recipient
+        # can read.
+        with translation.override("en"):
+            return _("%(form_id)s (%(date)s)") % {
+                "form_id": self.pk,
+                "date": localize(self.date),
+            }
 
     @property
     def mail_body(self):
-        return _(
-            "On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
-            "environmental and maintenance fees related to the entry of %(vessel)s "
-            "in %(port)s"
-        ) % {
-            "date": localize(self.date),
-            "agent": self.shipping_agent.name,
-            "vessel": self.vessel_name,
-            "port": self.port_of_call.name,
-        }
+        # Always use English, as we don't know which other languages the mail recipient
+        # can read.
+        with translation.override("en"):
+            return _(
+                "On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
+                "environmental and maintenance fees related to the entry of %(vessel)s "
+                "in %(port)s"
+            ) % {
+                "date": localize(self.date),
+                "agent": self.shipping_agent.name,
+                "vessel": self.vessel_name,
+                "port": self.port_of_call.name,
+            }
 
     @property
     def mail_recipients(self) -> list[str]:
