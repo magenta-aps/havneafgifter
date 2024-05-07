@@ -50,20 +50,14 @@ SAML_CONFIG = {
             "endpoints": {
                 "assertion_consumer_service": [
                     (
-                        "http://localhost:8000/saml2/acs/",
+                        os.environ["SAML_SP_LOGIN_CALLBACK_URI"],
                         saml2.BINDING_HTTP_POST,
                     )
                 ],
                 "single_logout_service": [
                     (
-                        (
-                            "http://localhost:8000/saml2/ls/",
-                            saml2.BINDING_HTTP_REDIRECT,
-                        ),
-                        (
-                            "http://localhost:8000/saml2/ls/post",
-                            saml2.BINDING_HTTP_POST,
-                        ),
+                        os.environ["SAML_SP_LOGOUT_CALLBACK_URI"],
+                        saml2.BINDING_HTTP_REDIRECT,
                     ),
                 ],
             },
