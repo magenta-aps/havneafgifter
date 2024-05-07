@@ -285,4 +285,9 @@ CSP_IMG_SRC = ("'self'", "data:")
 
 AUTH_USER_MODEL = "havneafgifter.User"
 
+if os.environ.get("HOST_DOMAIN", False):
+    CSRF_TRUSTED_ORIGINS = [
+        "https://" + os.environ["HOST_DOMAIN"],
+    ]
+
 from .login_settings import *  # noqa
