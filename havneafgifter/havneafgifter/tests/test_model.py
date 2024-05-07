@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django.utils import translation
+from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
     DisembarkmentSite,
@@ -176,7 +177,7 @@ class TestPort(TestCase):
         self.assertEqual(str(instance), f"{port_name} ({authority_name})")
 
 
-class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
+class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     def test_str(self):
         instance = HarborDuesForm(
             vessel_name="Mary",
@@ -206,6 +207,7 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
 
     def test_send_email(self):
         instance = HarborDuesForm(**self.harbor_dues_form_data)
+        instance.save()
         with patch.object(EmailMessage, "send") as mock_send:
             msg, status = instance.send_email()
             # Assert the basic email fields are populated
@@ -213,10 +215,10 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
             self.assertEqual(msg.body, instance.mail_body)
             self.assertEqual(msg.bcc, instance.mail_recipients)
             self.assertEqual(msg.from_email, settings.EMAIL_SENDER)
-            # Assert that the receipt is attached as Receipt
+            # Assert that the receipt is attached as PDF, using the correct filename
             self.assertListEqual(
                 msg.attachments,
-                [(f"{instance.pk}.pdf", ANY, "application/pdf")],
+                [(f"{instance.form_id}.pdf", ANY, "application/pdf")],
             )
             pdf_content: bytes = msg.attachments[0][1]
             self.assertIsInstance(pdf_content, bytes)
@@ -225,19 +227,44 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
             # expected.
             mock_send.assert_called_once_with(fail_silently=False)
 
-    @translation.override("da")
-    def test_mail_body(self):
-        # Verify contents of mail body, and verify that mail body is always rendered
-        # in English, as we do not know the which language(s) the recipient(s) can
-        # read.
+    @parametrize(
+        "vessel_type,expected_text_1,expected_text_2",
+        [
+            (
+                ShipType.CRUISE,
+                # English
+                "Agent has Jan. 1, 2020 reported port taxes, cruise passenger taxes, "
+                "as well as environmental and maintenance fees in relation to a ship's "
+                "call at a Greenlandic port. See further details in the attached "
+                "overview.",
+                # Danish
+                "Agent har 1. januar 2020 indberettet havneafgift, "
+                "krydstogtpassagerafgift samt miljø- og vedligeholdelsesgebyr i "
+                "forbindelse med et skibs anløb i en grønlandsk havn. Se "
+                "yderligere detaljer i vedhæftede oversigt.",
+            ),
+            (
+                ShipType.OTHER,
+                # English
+                "Agent has Jan. 1, 2020 reported port taxes due to a ship's call at a "
+                "Greenlandic port. See further details in the attached overview.",
+                # Danish
+                "Agent har 1. januar 2020 indberettet havneafgift i forbindelse med et "
+                "skibs anløb i en grønlandsk havn. Se yderligere detaljer i vedhæftede "
+                "oversigt.",
+            ),
+        ],
+    )
+    def test_mail_body(self, vessel_type, expected_text_1, expected_text_2):
+        # Verify contents of mail body.
+        # 1. The mail body must consist of the same text repeated in English,
+        # Greenlandic, and Danish (in that order.)
+        # 2. The text varies, depending on whether the vessel is a cruise ship or not.
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         instance.date = date(2020, 1, 1)
-        self.assertEqual(
-            instance.mail_body,
-            "On Jan. 1, 2020, Agent has reported harbor dues, cruise tax, "
-            "and environmental and maintenance fees related to the entry of Mary "
-            "in Nordhavn",
-        )
+        instance.vessel_type = vessel_type
+        self.assertIn(expected_text_1, instance.mail_body)
+        self.assertIn(expected_text_2, instance.mail_body)
 
     @translation.override("da")
     def test_mail_subject(self):
@@ -246,7 +273,8 @@ class TestHarborDuesForm(HarborDuesFormMixin, TestCase):
         # recipient(s) can read.
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         instance.date = date(2020, 1, 1)
-        self.assertEqual(instance.mail_subject, f"{instance.pk} (Jan. 1, 2020)")
+        instance.save()
+        self.assertEqual(instance.mail_subject, f"{instance.form_id}")
 
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
     def test_mail_recipients(self):
