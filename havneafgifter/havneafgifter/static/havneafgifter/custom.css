@@ -9,9 +9,12 @@
     background-position: right .75rem center;
     background-size: 16px 12px;
     background-repeat: no-repeat;
-    height: 38px;
+    height: 38px !important;
     position: absolute;
     top: 1px;
     right: 1px;
-    width: 40px;
+    width: 40px !important;
+}
+.select2-selection__arrow b {
+    display: none;
 }
