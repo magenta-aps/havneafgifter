@@ -42,10 +42,10 @@ SAML_CONFIG = {
     "metadata_remote": os.environ.get("SAML_IDP_METADATA"),
     # Til metadata-fetch mellem containere
     "metadata_remote_container": os.environ.get("SAML_IDP_METADATA_CONTAINER"),
-    "metadata": {"local": ["/var/cache/told/idp_metadata.xml"]},  # IdP Metadata
+    "metadata": {"local": ["/var/cache/havneafgift/idp_metadata.xml"]},  # IdP Metadata
     "service": {
         "sp": {
-            "name": os.environ.get("SAML_SP_NAME") or "Told",
+            "name": os.environ.get("SAML_SP_NAME") or "Havneafgifter",
             "hide_assertion_consumer_service": False,
             "endpoints": {
                 "assertion_consumer_service": [
