@@ -14,7 +14,7 @@ DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 LOAD_FIXTURES=${LOAD_FIXTURES:=false}
 CREATE_GROUPS=${CREATE_GROUPS:=false}
 CREATE_DUMMY_ADMIN=${CREATE_DUMMY_ADMIN:=false}
-CREATE_DUMMY_STAFF=${CREATE_DUMMY_STAFF:=false}
+CREATE_DUMMY_USERS=${CREATE_DUMMY_USERS:=false}
 SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
 
 python manage.py wait_for_db
@@ -43,13 +43,15 @@ if [ "${CREATE_DUMMY_ADMIN}" = true ]; then
   DJANGO_SUPERUSER_PASSWORD=admin DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@admin.admin ./manage.py createsuperuser --noinput
 fi
 
-if [ "${CREATE_DUMMY_STAFF}" = true ]; then
+if [ "${CREATE_DUMMY_USERS}" = true ]; then
   echo 'creating tax user'
   ./manage.py createuser tax tax -s -g TaxAuthority
   echo 'creating shipping user'
-  ./manage.py createuser shipping shipping -s -g Shipping
+  ./manage.py createuser shipping shipping -s -g Shipping --shipping-agent Agenten
+  echo 'creating ship user'
+  ./manage.py createuser 9074729 ship -s -g Ship
   echo 'creating portauthority user'
-  ./manage.py createuser portauthority portauthority -s -g PortAuthority
+  ./manage.py createuser portauthority portauthority -s -g PortAuthority --port-authority Royal Arctic Line A/S
 fi
 
 python manage.py createcachetable

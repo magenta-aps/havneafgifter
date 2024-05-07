@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
@@ -37,6 +38,11 @@ class HavneafgiftView:
         )
 
 
+class RootView(RedirectView):
+    def get_redirect_url(self):
+        return reverse("havneafgifter:login")
+
+
 class LoginView(HavneafgiftView, DjangoLoginView):
     template_name = "havneafgifter/login.html"
     form_class = AuthenticationForm
@@ -52,9 +58,32 @@ class LogoutView(RedirectView):
             return settings.LOGOUT_REDIRECT_URL
 
 
-class HarborDuesFormCreateView(HavneafgiftView, CreateView):
+class PostLoginView(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        # We land here after login. Where to go?
+        if "Ship" in self.request.user.group_names:
+            return reverse("havneafgifter:harbor_dues_form_create")
+        # TODO: redirect to a list view?
+        return reverse("havneafgifter:harbor_dues_form_create")
+
+
+class HarborDuesFormCreateView(LoginRequiredMixin, HavneafgiftView, CreateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
+
+    def get_initial(self):
+        initial = {}
+        # Attempting to call group_names on a User that is not logged in
+        # will blow up, because that'd be an AnonymousUser,
+        # not our own implementation
+        if "Ship" in self.request.user.group_names:
+            initial["vessel_imo"] = self.request.user.username
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user_is_ship"] = "Ship" in self.request.user.group_names
+        return kwargs
 
     def form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
@@ -88,7 +117,7 @@ class HarborDuesFormCreateView(HavneafgiftView, CreateView):
             )
 
 
-class _CruiseTaxFormSetView(HavneafgiftView, FormView):
+class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """
@@ -209,7 +238,7 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         )
 
 
-class ReceiptDetailView(HavneafgiftView, DetailView):
+class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
