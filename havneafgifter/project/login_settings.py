@@ -17,8 +17,8 @@ AUTHENTICATION_BACKENDS = [
     "havneafgifter.permissions.HavneafgiftPermissionBackend",
     "djangosaml2.backends.Saml2Backend",
 ]
-LOGIN_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
-LOGIN_URL = "/saml2/login/"
+LOGIN_REDIRECT_URL = reverse_lazy("havneafgifter:post_login")
+LOGIN_URL = reverse_lazy("havneafgifter:login")
 LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SAML_DEFAULT_BINDING = saml2.BINDING_HTTP_REDIRECT

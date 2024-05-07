@@ -45,6 +45,7 @@ class Command(BaseCommand):
         self.setup_permissions()
         self.setup_port_authority()
         self.setup_shipping_agent()
+        self.setup_ship()
         self.setup_tax_officer()
 
     def setup_permissions(self):
@@ -123,6 +124,28 @@ class Command(BaseCommand):
             shipping,
             *self.get_permissions(
                 # Shipping agents have access to the following actions
+                # on all model instances of these classes
+                (CruiseTaxForm, ("add",)),
+                (Disembarkment, ("add",)),
+                (DisembarkmentSite, ("view",)),
+                (DisembarkmentTaxRate, ("view",)),
+                (HarborDuesForm, ("add",)),
+                (PassengersByCountry, ("add",)),
+                (Port, ("view",)),
+                (PortAuthority, ("view",)),
+                (PortTaxRate, ("view",)),
+                (ShippingAgent, ("view",)),
+                (TaxRates, ("view",)),
+                (User, ("view",)),
+            ),
+        )
+
+    def setup_ship(self):
+        ship, _ = Group.objects.update_or_create(name="Ship")
+        self.set_group_permissions(
+            ship,
+            *self.get_permissions(
+                # Ships have access to the following actions
                 # on all model instances of these classes
                 (CruiseTaxForm, ("add",)),
                 (Disembarkment, ("add",)),

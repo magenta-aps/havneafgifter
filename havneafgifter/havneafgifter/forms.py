@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.forms import (
     CharField,
     ChoiceField,
@@ -18,7 +19,12 @@ from django_select2.forms import Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
 
 from havneafgifter.form_mixins import BootstrapForm
-from havneafgifter.models import DisembarkmentSite, HarborDuesForm, Nationality
+from havneafgifter.models import (
+    DisembarkmentSite,
+    HarborDuesForm,
+    Nationality,
+    imo_validator,
+)
 
 
 class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
@@ -49,7 +55,11 @@ class HTML5DateWidget(widgets.Input):
     template_name = "django/forms/widgets/datetime.html"
 
 
-class HarborDuesFormForm(ModelForm):
+class HarborDuesFormForm(DynamicFormMixin, ModelForm):
+    def __init__(self, user_is_ship=False, *args, **kwargs):
+        self.user_is_ship = user_is_ship
+        super().__init__(*args, **kwargs)
+
     class Meta:
         model = HarborDuesForm
         fields = [
@@ -74,6 +84,19 @@ class HarborDuesFormForm(ModelForm):
             "datetime_of_arrival": HTML5DateWidget(),
             "datetime_of_departure": HTML5DateWidget(),
         }
+
+    vessel_imo = DynamicField(
+        CharField,
+        max_length=7,
+        min_length=7,
+        validators=[
+            RegexValidator(r"\d{7}"),
+            imo_validator,
+        ],
+        label=_("IMO-number"),
+        disabled=lambda form: form.user_is_ship,
+        required=lambda form: not form.user_is_ship,
+    )
 
     def clean(self):
         cleaned_data = super().clean()

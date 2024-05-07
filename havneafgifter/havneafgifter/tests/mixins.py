@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+from django.contrib.auth.models import Group
 from django.core.management import call_command
 
 from havneafgifter.models import (
@@ -11,12 +12,14 @@ from havneafgifter.models import (
     PortAuthority,
     ShippingAgent,
     ShipType,
+    User,
 )
 
 
 class HarborDuesFormMixin:
     @classmethod
     def setUpTestData(cls):
+        call_command("create_groups", verbosity=1)
         super().setUpTestData()
 
         cls._load_initial_disembarkment_sites()
@@ -29,6 +32,15 @@ class HarborDuesFormMixin:
         )
         cls.shipping_agent = ShippingAgent.objects.create(name="Agent")
 
+        cls.port_authority_user = User.objects.create(
+            username="port_auth", port_authority=cls.port_authority
+        )
+        cls.shipping_agent_user = User.objects.create(
+            username="shipping_agent", shipping_agent=cls.shipping_agent
+        )
+        cls.ship_user = User.objects.create(username="9074729")
+        cls.ship_user.groups.add(Group.objects.get(name="Ship"))
+
         # Valid data for creating a `HarborDuesForm` (or `CruiseTaxForm`) instance
         cls.harbor_dues_form_data = {
             "port_of_call": cls.port,
@@ -39,6 +51,7 @@ class HarborDuesFormMixin:
             "shipping_agent": cls.shipping_agent,
             "gross_tonnage": 0,
             "vessel_type": ShipType.FREIGHTER,
+            "vessel_imo": "9074729",
             "datetime_of_arrival": datetime(2020, 1, 1),
             "datetime_of_departure": datetime(2020, 2, 1),
         }

@@ -1,6 +1,9 @@
 from unittest.mock import ANY, Mock, patch
 
+from bs4 import BeautifulSoup
 from django.contrib import messages
+from django.contrib.auth.models import Group
+from django.core.management import call_command
 from django.forms import BaseFormSet
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.test import RequestFactory, TestCase
@@ -14,6 +17,7 @@ from havneafgifter.models import (
     HarborDuesForm,
     Nationality,
     ShipType,
+    User,
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
@@ -23,6 +27,54 @@ from havneafgifter.views import (
     ReceiptDetailView,
     _CruiseTaxFormSetView,
 )
+
+
+class TestRootView(TestCase):
+    def test_redirect(self):
+        response = self.client.get(reverse("havneafgifter:root"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("havneafgifter:login"))
+
+
+class TestPostLoginView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        call_command("create_groups", verbosity=1)
+
+    def test_redirect_not_logged_in(self):
+        response = self.client.get(reverse("havneafgifter:post_login"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.headers["Location"],
+            reverse("havneafgifter:login")
+            + "?next="
+            + reverse("havneafgifter:post_login"),
+        )
+
+    def test_redirect_logged_in_agent(self):
+        user = User.objects.create(username="JamesBond")
+        user.groups.add(Group.objects.get(name="Shipping"))
+        self.client.force_login(user)
+        response = self.client.get(reverse("havneafgifter:post_login"))
+        self.assertEqual(response.status_code, 302)
+        # Update this when default landing page changes
+        # in PostLoginView.get_redirect_url
+        self.assertEqual(
+            response.headers["Location"],
+            reverse("havneafgifter:harbor_dues_form_create"),
+        )
+
+    def test_redirect_logged_in_ship(self):
+        user = User.objects.create(username="9074729")
+        user.groups.add(Group.objects.get(name="Ship"))
+        self.client.force_login(user)
+        response = self.client.get(reverse("havneafgifter:post_login"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.headers["Location"],
+            reverse("havneafgifter:harbor_dues_form_create"),
+        )
 
 
 class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
@@ -48,6 +100,7 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
     def test_creates_model_instance_depending_on_vessel_type(
         self, vessel_type, model_class, next_view_name
     ):
+        self.client.force_login(self.shipping_agent_user)
         self.harbor_dues_form_data_pk["vessel_type"] = vessel_type
         response = self.client.post(
             reverse("havneafgifter:harbor_dues_form_create"),
@@ -59,6 +112,13 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
             response.url,
             reverse(next_view_name, kwargs={"pk": instance.pk}),
         )
+
+    def test_ship_user(self):
+        self.client.force_login(self.ship_user)
+        response = self.client.get(reverse("havneafgifter:harbor_dues_form_create"))
+        soup = BeautifulSoup(response.content, "html.parser")
+        field = soup.find("input", attrs={"name": "vessel_imo"})
+        self.assertEqual(field.attrs.get("value"), self.ship_user.username)
 
 
 class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):

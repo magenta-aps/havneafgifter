@@ -9,13 +9,16 @@ from havneafgifter.views import (
     LoginView,
     LogoutView,
     PassengerTaxCreateView,
+    PostLoginView,
     PreviewPDFView,
     ReceiptDetailView,
+    RootView,
 )
 
 app_name = "havneafgifter"
 
 urlpatterns: List[URLResolver | URLPattern] = [
+    path("", RootView.as_view(), name="root"),
     path(
         "login",
         LoginView.as_view(),
@@ -30,6 +33,11 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "logged_out",
         TemplateView.as_view(template_name="havneafgifter/logged_out.html"),
         name="logged_out",
+    ),
+    path(
+        "post_login",
+        PostLoginView.as_view(),
+        name="post_login",
     ),
     path(
         "blanket/opret/",
