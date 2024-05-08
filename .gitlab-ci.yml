@@ -169,7 +169,7 @@ Build image:
     POSTGRES_DB: havneafgifter
     POSTGRES_HOST: havneafgifter-db
     ENVIRONMENT: development
-    SAML_SP_ENTITY_ID: http://localhost:8000/saml/saml/metadata/
+    SAML_SP_ENTITY_ID: http://localhost:8000/saml2/metadata/
     SAML_SP_LOGIN_CALLBACK_URI: http://localhost:8000/saml/login/callback/
     SAML_SP_LOGOUT_CALLBACK_URI: http://localhost:8000/saml/logout/callback/
     SAML_SP_KEY: /ssl/sp/selfsigned.key
