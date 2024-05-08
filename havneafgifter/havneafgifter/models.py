@@ -18,7 +18,9 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
+from django.template.defaultfilters import date
 from django.templatetags.l10n import localize
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 
@@ -392,6 +394,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         # depending on the local convention.)
         return self._get_num_periods_in_duration(7 * 24 * 60 * 60)
 
+    @property
+    def form_id(self):
+        # Return "løbenummer" for this form object, on the form "001APR2024", where
+        # "001" is the primary key, "APR" is the month, and "2024" is the year.
+        # Always use English locale to ensure consistent formatting of the month names.
+        with translation.override("en"):
+            return f"{self.pk:03}{date(self.date, 'bY').upper()}"
+
     def calculate_tax(self, save: bool = True):
         self.calculate_harbour_tax(save=save)
 
@@ -451,7 +461,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         )
         receipt = self.get_receipt()
         msg.attach(
-            filename=f"{self.pk}.pdf",
+            filename=f"{self.form_id}.pdf",
             content=receipt.pdf,
             mimetype="application/pdf",
         )
@@ -460,22 +470,43 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def mail_subject(self):
-        # TODO: verify content
-        # TODO: include data from object?
-        return _("New harbor dues report")  # pragma: nocover
+        return self.form_id
 
     @property
     def mail_body(self):
-        return _(
-            "On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
-            "environmental and maintenance fees related to the entry of %(vessel)s "
-            "in %(port)s"
-        ) % {
-            "date": localize(self.date),
-            "agent": self.shipping_agent.name,
-            "vessel": self.vessel_name,
-            "port": self.port_of_call.name,
-        }
+        # The mail body consists of the same text repeated in English, Greenlandic, and
+        # Danish.
+        # The text varies depending on whether the form concerns a cruise ship, or any
+        # other type of vessel.
+        result = []
+        for lang_code, lang_name in settings.LANGUAGES:
+            with translation.override(lang_code):
+                context = {
+                    "date": localize(self.date),
+                    "agent": self.shipping_agent.name,
+                }
+                if self.vessel_type == ShipType.CRUISE:
+                    text = (
+                        _(
+                            "%(agent)s has %(date)s reported port taxes, cruise "
+                            "passenger taxes, as well as environmental and "
+                            "maintenance fees in relation to a ship's call "
+                            "at a Greenlandic port. See further details in the "
+                            "attached overview."
+                        )
+                        % context
+                    )
+                else:
+                    text = (
+                        _(
+                            "%(agent)s has %(date)s reported port taxes due to a "
+                            "ship's call at a Greenlandic port. See further details "
+                            "in the attached overview."
+                        )
+                        % context
+                    )
+                result.append(text)
+        return "\n\n".join(result)
 
     @property
     def mail_recipients(self) -> list[str]:

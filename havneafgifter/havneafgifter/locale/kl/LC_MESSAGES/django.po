@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-07 07:48-0100\n"
+"POT-Creation-Date: 2024-05-07 13:58-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -316,16 +316,26 @@ msgid "Calculated harbour tax"
 msgstr "Umiarsualivimmiinnermut akitsuut"
 
 #: havneafgifter/models.py
-msgid "New harbor dues report"
+#, python-format
+msgid ""
+"%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
+"as environmental and maintenance fees in relation to a ship's call at a "
+"Greenlandic port. See further details in the attached overview."
 msgstr ""
+"Umiarsuit takornariartaatit angisuut umiarsualivimmiinnerannut akitsuummik "
+"aamma avatangiisinut iluarsaassinermillu akiliummik %(agent)s %(date)s, "
+"umiarsuup Kalaallit Nunaanni umiarsualivimmut tulanneranut atatillugu "
+"nalunaaruteqarput. Paasissutissat ilaat ilanngussami takusinnaavatit."
 
 #: havneafgifter/models.py
 #, python-format
 msgid ""
-"On %(date)s, %(agent)s has reported harbor dues, cruise tax, and "
-"environmental and maintenance fees related to the entry of %(vessel)s in "
-"%(port)s"
+"%(agent)s has %(date)s reported port taxes due to a ship's call at a "
+"Greenlandic port. See further details in the attached overview."
 msgstr ""
+"%(agent)s %(date)s umiarsuup Kalaallit Nunaanni umiarsualivimmut "
+"tulanneranut atatillugu nalunaaruteqarput. Paasissutissat ilaat ilanngussami "
+"takusinnaavatit."
 
 #: havneafgifter/models.py
 msgid "Number of passengers"
