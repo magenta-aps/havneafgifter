@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import BACKEND_SESSION_KEY, authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
@@ -40,6 +40,11 @@ class HavneafgiftView:
 
 class RootView(RedirectView):
     def get_redirect_url(self):
+        if self.request.user.is_authenticated:
+            if "Ship" in self.request.user.group_names:
+                return reverse("havneafgifter:harbor_dues_form_create")
+            # TODO: redirect to a list view?
+            return reverse("havneafgifter:harbor_dues_form_create")
         return reverse("havneafgifter:login")
 
 
@@ -50,21 +55,32 @@ class LoginView(HavneafgiftView, DjangoLoginView):
 
 class LogoutView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        if self.request.COOKIES.get(settings.SAML_SESSION_COOKIE_NAME):
-            # Logged in with saml2, redirect to saml2 logout
-            return reverse("saml2_logout")
+        if (
+            self.request.session.get(BACKEND_SESSION_KEY)
+            == "project.auth_backend.Saml2Backend"
+            or "saml" in self.request.session
+        ):
+            return reverse("mitid:logout")
         else:
             logout(self.request)
             return settings.LOGOUT_REDIRECT_URL
 
 
-class PostLoginView(LoginRequiredMixin, RedirectView):
+class PostLoginView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        # We land here after login. Where to go?
-        if "Ship" in self.request.user.group_names:
-            return reverse("havneafgifter:harbor_dues_form_create")
-        # TODO: redirect to a list view?
-        return reverse("havneafgifter:harbor_dues_form_create")
+        if not self.request.user.is_authenticated:
+            user = authenticate(
+                request=self.request, saml_data=self.request.session.get("saml")
+            )
+            if user and user.is_authenticated:
+                login(
+                    request=self.request,
+                    user=user,
+                    backend="project.auth_backend.Saml2Backend",
+                )
+        if not self.request.user.is_authenticated:
+            return reverse("havneafgifter:login-failed")
+        return reverse("havneafgifter:root")
 
 
 class HarborDuesFormCreateView(LoginRequiredMixin, HavneafgiftView, CreateView):

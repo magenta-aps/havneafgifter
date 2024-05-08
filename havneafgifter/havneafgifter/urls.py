@@ -2,6 +2,7 @@ from typing import List
 
 from django.urls import URLPattern, URLResolver, path
 from django.views.generic import TemplateView
+from django_mitid_auth.saml.views import AccessDeniedView
 
 from havneafgifter.views import (
     EnvironmentalTaxCreateView,
@@ -38,6 +39,28 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "post_login",
         PostLoginView.as_view(),
         name="post_login",
+    ),
+    path(
+        "error/login-timeout/",
+        AccessDeniedView.as_view(
+            template_name="havneafgifter/error/login_timeout.html"
+        ),
+        name="login-timeout",
+    ),
+    path(
+        "error/login-repeat/",
+        AccessDeniedView.as_view(template_name="havneafgifter/error/login_repeat.html"),
+        name="login-repeat",
+    ),
+    path(
+        "error/login-nocpr/",
+        AccessDeniedView.as_view(template_name="havneafgifter/error/login_no_cpr.html"),
+        name="login-no-cpr",
+    ),
+    path(
+        "error/login-failed/",
+        AccessDeniedView.as_view(template_name="havneafgifter/error/login_failed.html"),
+        name="login-failed",
     ),
     path(
         "blanket/opret/",

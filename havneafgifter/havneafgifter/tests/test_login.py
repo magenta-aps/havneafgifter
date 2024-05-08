@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib.auth import BACKEND_SESSION_KEY
 from django.test import TestCase
 from django.urls import reverse
 
@@ -22,6 +23,26 @@ class LoginTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], settings.LOGIN_REDIRECT_URL)
 
+    def test_postlogin(self):
+        session = self.client.session
+        session.update(
+            {
+                "saml": {
+                    "ava": {
+                        "cpr": ["1234567890"],
+                        "cvr": ["12345678"],
+                        "firstname": ["Test"],
+                        "lastname": ["Testersen"],
+                        "email": ["test@example.com"],
+                    }
+                }
+            }
+        )
+        session.save()
+        response = self.client.get(reverse("havneafgifter:post_login"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/")
+
     def test_login_form_incorrect(self):
         self.client.get(reverse("havneafgifter:login"))
         response = self.client.post(
@@ -35,9 +56,16 @@ class LoginTest(TestCase):
 
     def test_logout_redirect_saml(self):
         self.client.login(username="test", password="test")
-        self.client.cookies.load({settings.SAML_SESSION_COOKIE_NAME: "some saml data"})
+        session = self.client.session
+        session.update(
+            {
+                BACKEND_SESSION_KEY: "project.auth_backend.Saml2Backend",
+                "saml": {"cpr": "1234567890"},
+            }
+        )
+        session.save()
         response = self.client.get(reverse("havneafgifter:logout"))
-        self.assertEqual(response.headers["Location"], reverse("saml2_logout"))
+        self.assertEqual(response.headers["Location"], reverse("mitid:logout"))
 
     def test_logout_redirect_no_saml(self):
         self.client.login(username="test", password="test")
