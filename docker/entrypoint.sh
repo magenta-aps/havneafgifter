@@ -18,6 +18,7 @@ CREATE_DUMMY_USERS=${CREATE_DUMMY_USERS:=false}
 SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
 
 python manage.py wait_for_db
+python manage.py createcachetable
 
 if [ "${MAKE_MIGRATIONS,,}" = true ]; then
   echo 'generating migrations'

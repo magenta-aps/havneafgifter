@@ -1,5 +1,4 @@
 # Copied from core python because its containing module `distutils` is deprecated.
-from django.shortcuts import render
 
 
 def strtobool(val):
@@ -12,9 +11,17 @@ def strtobool(val):
         raise ValueError("invalid truth value %r" % (val,))
 
 
-def template_failure(request, exception=None, status=403, **kwargs):
-    print(exception)
-    """ Renders a simple template with an error message. """
-    return render(
-        request, "djangosaml2/login_error.html", {"exception": exception}, status=status
-    )
+# Samme som item[key1][key2][key3] ...
+# men giver ikke KeyError hvis en key ikke findes
+# eller ValueError hvis et af leddene er None i stedet for en dict
+# Der returneres enten den ønskede værdi eller None
+def lenient_get(item, *keys: str | int):
+    for key in keys:
+        if item is not None:
+            if isinstance(item, dict) and type(key) is str:
+                item = item.get(key)
+            elif isinstance(item, list) and type(key) is int and len(item) > key:
+                item = item[key]
+            else:
+                return None
+    return item

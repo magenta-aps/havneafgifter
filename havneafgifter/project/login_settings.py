@@ -9,17 +9,28 @@ SAML_SESSION_COOKIE_NAME = "saml_session"
 SAML_SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = True
 SAML_CREATE_UNKNOWN_USER = True
-SAML_ACS_FAILURE_RESPONSE_FUNCTION = "project.util.template_failure"
 ACS_DEFAULT_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-AUTHENTICATION_BACKENDS = [
-    "havneafgifter.permissions.HavneafgiftPermissionBackend",
-    "djangosaml2.backends.Saml2Backend",
-]
+LOGIN_NAMESPACE = "mitid"
+LOGIN_TIMEOUT_URL = reverse_lazy("havneafgifter:login-timeout")
+LOGIN_REPEATED_URL = reverse_lazy("havneafgifter:login-repeat")
+LOGIN_NO_CPRCVR_URL = reverse_lazy("havneafgifter:login-no-cpr")
 LOGIN_REDIRECT_URL = reverse_lazy("havneafgifter:post_login")
 LOGIN_URL = reverse_lazy("havneafgifter:login")
 LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")
+LOGIN_PROVIDER_CLASS = os.environ.get("LOGIN_PROVIDER_CLASS") or None
+LOGIN_BYPASS_ENABLED = False
+LOGIN_WHITELISTED_URLS = [
+    "/favicon.ico",
+    "/_ht/",
+    LOGIN_URL,
+    LOGIN_TIMEOUT_URL,
+    LOGIN_REPEATED_URL,
+    LOGIN_NO_CPRCVR_URL,
+    LOGIN_REDIRECT_URL,
+    reverse_lazy("havneafgifter:root"),
+]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SAML_DEFAULT_BINDING = saml2.BINDING_HTTP_REDIRECT
 SAML_ATTRIBUTE_MAPPING = {
@@ -31,7 +42,7 @@ SAML_ATTRIBUTE_MAPPING = {
     "https://data.gov.dk/model/core/eid/professional/orgName": ("organization"),
 }
 
-SAML_CONFIG = {
+SAML = {
     "enabled": bool(strtobool(os.environ.get("SAML_ENABLED", "False"))),
     "debug": 1,
     "entityid": os.environ.get("SAML_SP_ENTITY_ID"),

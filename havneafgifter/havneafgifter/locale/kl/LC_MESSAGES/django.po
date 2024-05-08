@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-07 13:58-0100\n"
+"POT-Creation-Date: 2024-05-08 07:36-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -437,6 +437,37 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Continue"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/error.html
+msgid "Log ud"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/error.html
+msgid "Log ind"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/login_failed.html
+#: havneafgifter/templates/havneafgifter/error/login_no_cpr.html
+#: havneafgifter/templates/havneafgifter/error/login_repeat.html
+#: havneafgifter/templates/havneafgifter/error/login_timeout.html
+msgid "Adgang nægtet"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/login_failed.html
+msgid "Der kunne ikke logges ind med den angivne bruger."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/login_no_cpr.html
+msgid "Det anvendte login har ikke et CPR-nummer tilknyttet."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/login_repeat.html
+msgid "Det anvendte login er allerede anvendt. Prøv at logge ind igen."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/error/login_timeout.html
+msgid "Det anvendte login er timet ud. Prøv at logge ind igen."
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html

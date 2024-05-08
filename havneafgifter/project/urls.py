@@ -14,5 +14,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
             namespace="havneafgifter",
         ),
     ),
-    path("saml2/", include("djangosaml2.urls")),
+    path("saml/", include("django_mitid_auth.urls", namespace="mitid")),
 ]

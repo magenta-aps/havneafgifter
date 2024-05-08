@@ -30,10 +30,37 @@ from havneafgifter.views import (
 
 
 class TestRootView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        call_command("create_groups", verbosity=1)
+
     def test_redirect(self):
         response = self.client.get(reverse("havneafgifter:root"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], reverse("havneafgifter:login"))
+
+    def test_redirect_ship(self):
+        user = User.objects.create(username="Boaty McBoatface")
+        user.groups.add(Group.objects.get(name="Ship"))
+        self.client.force_login(user)
+        response = self.client.get(reverse("havneafgifter:root"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.headers["Location"],
+            reverse("havneafgifter:harbor_dues_form_create"),
+        )
+
+    def test_redirect_shipping(self):
+        user = User.objects.create(username="Sortskæg")
+        user.groups.add(Group.objects.get(name="Shipping"))
+        self.client.force_login(user)
+        response = self.client.get(reverse("havneafgifter:root"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.headers["Location"],
+            reverse("havneafgifter:harbor_dues_form_create"),
+        )
 
 
 class TestPostLoginView(TestCase):
@@ -46,10 +73,7 @@ class TestPostLoginView(TestCase):
         response = self.client.get(reverse("havneafgifter:post_login"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-            response.headers["Location"],
-            reverse("havneafgifter:login")
-            + "?next="
-            + reverse("havneafgifter:post_login"),
+            response.headers["Location"], reverse("havneafgifter:login-failed")
         )
 
     def test_redirect_logged_in_agent(self):
@@ -62,7 +86,7 @@ class TestPostLoginView(TestCase):
         # in PostLoginView.get_redirect_url
         self.assertEqual(
             response.headers["Location"],
-            reverse("havneafgifter:harbor_dues_form_create"),
+            reverse("havneafgifter:root"),
         )
 
     def test_redirect_logged_in_ship(self):
@@ -73,7 +97,7 @@ class TestPostLoginView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response.headers["Location"],
-            reverse("havneafgifter:harbor_dues_form_create"),
+            reverse("havneafgifter:root"),
         )
 
 

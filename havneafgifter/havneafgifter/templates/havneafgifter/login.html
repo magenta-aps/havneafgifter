@@ -33,5 +33,5 @@
     <input type="hidden" name="next" value="{{ next }}">
 </form>
 
-<a href="{% url 'saml2_login' %}">{% translate "Log in using MitID" %}</a>
+<a href="{% url 'mitid:login' %}">{% translate "Log in using MitID" %}</a>
 {% endblock %}
