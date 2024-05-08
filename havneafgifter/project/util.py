@@ -1,5 +1,4 @@
 # Copied from core python because its containing module `distutils` is deprecated.
-from django.shortcuts import render
 
 
 def strtobool(val):
