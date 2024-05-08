@@ -2,6 +2,7 @@ from typing import List
 
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
+from django_mitid_auth.saml.views import MetadataView
 
 urlpatterns: List[URLResolver | URLPattern] = [
     path("django-admin/", admin.site.urls),
@@ -15,4 +16,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
         ),
     ),
     path("saml/", include("django_mitid_auth.urls", namespace="mitid")),
+    path("saml2/metadata/", MetadataView.as_view(), name="saml_metadata_override"),
 ]
