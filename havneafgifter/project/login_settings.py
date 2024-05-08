@@ -30,6 +30,7 @@ LOGIN_WHITELISTED_URLS = [
     LOGIN_NO_CPRCVR_URL,
     LOGIN_REDIRECT_URL,
     reverse_lazy("havneafgifter:root"),
+    reverse_lazy("saml_metadata_override"),
 ]
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SAML_DEFAULT_BINDING = saml2.BINDING_HTTP_REDIRECT
