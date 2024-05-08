@@ -584,5 +584,21 @@
         "name": "Tasiilaq",
         "municipality": 956
     }
+},
+{
+    "model": "havneafgifter.disembarkmentsite",
+    "pk": 173,
+    "fields": {
+        "name": "Ammassivik",
+        "municipality": 955
+    }
+},
+{
+    "model": "havneafgifter.disembarkmentsite",
+    "pk": 174,
+    "fields": {
+        "name": "Alluitsup Paa",
+        "municipality": 955
+    }
 }
 ]
