@@ -322,6 +322,10 @@ msgid ""
 "as environmental and maintenance fees in relation to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
+"Umiarsuit takornariartaatit angisuut umiarsualivimmiinnerannut akitsuummik "
+"aamma avatangiisinut iluarsaassinermillu akiliummik %(agent)s %(date)s, "
+"umiarsuup Kalaallit Nunaanni umiarsualivimmut tulanneranut atatillugu "
+"nalunaaruteqarput. Paasissutissat ilaat ilanngussami takusinnaavatit."
 
 #: havneafgifter/models.py
 #, python-format
@@ -329,6 +333,9 @@ msgid ""
 "%(agent)s has %(date)s reported port taxes due to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
+"%(agent)s %(date)s umiarsuup Kalaallit Nunaanni umiarsualivimmut "
+"tulanneranut atatillugu nalunaaruteqarput. Paasissutissat ilaat ilanngussami "
+"takusinnaavatit."
 
 #: havneafgifter/models.py
 msgid "Number of passengers"

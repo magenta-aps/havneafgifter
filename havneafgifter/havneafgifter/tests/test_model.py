@@ -178,6 +178,8 @@ class TestPort(TestCase):
 
 
 class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+    maxDiff = None
+
     def test_str(self):
         instance = HarborDuesForm(
             vessel_name="Mary",
@@ -228,7 +230,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             mock_send.assert_called_once_with(fail_silently=False)
 
     @parametrize(
-        "vessel_type,expected_text_1,expected_text_2",
+        "vessel_type,expected_text_1,expected_text_2,expected_text_3",
         [
             (
                 ShipType.CRUISE,
@@ -237,6 +239,12 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
                 "as well as environmental and maintenance fees in relation to a ship's "
                 "call at a Greenlandic port. See further details in the attached "
                 "overview.",
+                # Greenlandic
+                "Umiarsuit takornariartaatit angisuut umiarsualivimmiinnerannut "
+                "akitsuummik aamma avatangiisinut iluarsaassinermillu akiliummik "
+                "Agent Jan. 1, 2020, umiarsuup Kalaallit Nunaanni "
+                "umiarsualivimmut tulanneranut atatillugu nalunaaruteqarput. "
+                "Paasissutissat ilaat ilanngussami takusinnaavatit.",
                 # Danish
                 "Agent har 1. januar 2020 indberettet havneafgift, "
                 "krydstogtpassagerafgift samt miljø- og vedligeholdelsesgebyr i "
@@ -248,6 +256,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
                 # English
                 "Agent has Jan. 1, 2020 reported port taxes due to a ship's call at a "
                 "Greenlandic port. See further details in the attached overview.",
+                # Greenlandic
+                "Agent Jan. 1, 2020 umiarsuup Kalaallit Nunaanni umiarsualivimmut "
+                "tulanneranut atatillugu nalunaaruteqarput. Paasissutissat ilaat "
+                "ilanngussami takusinnaavatit.",
                 # Danish
                 "Agent har 1. januar 2020 indberettet havneafgift i forbindelse med et "
                 "skibs anløb i en grønlandsk havn. Se yderligere detaljer i vedhæftede "
@@ -255,7 +267,9 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             ),
         ],
     )
-    def test_mail_body(self, vessel_type, expected_text_1, expected_text_2):
+    def test_mail_body(
+        self, vessel_type, expected_text_1, expected_text_2, expected_text_3
+    ):
         # Verify contents of mail body.
         # 1. The mail body must consist of the same text repeated in English,
         # Greenlandic, and Danish (in that order.)
@@ -263,8 +277,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         instance.date = date(2020, 1, 1)
         instance.vessel_type = vessel_type
-        self.assertIn(expected_text_1, instance.mail_body)
-        self.assertIn(expected_text_2, instance.mail_body)
+        self.assertEqual(
+            instance.mail_body,
+            "\n\n".join((expected_text_1, expected_text_2, expected_text_3)),
+        )
 
     @translation.override("da")
     def test_mail_subject(self):
