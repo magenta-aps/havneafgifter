@@ -40,12 +40,22 @@ class HavneafgiftView:
 
 class RootView(RedirectView):
     def get_redirect_url(self):
-        if self.request.user.is_authenticated:
-            if "Ship" in self.request.user.group_names:
-                return reverse("havneafgifter:harbor_dues_form_create")
-            # TODO: redirect to a list view?
+        if not self.request.user.is_authenticated:
+            user = authenticate(
+                request=self.request, saml_data=self.request.session.get("saml")
+            )
+            if user and user.is_authenticated:
+                login(
+                    request=self.request,
+                    user=user,
+                    backend="project.auth_backend.Saml2Backend",
+                )
+            if not self.request.user.is_authenticated:
+                return reverse("havneafgifter:login")
+        if "Ship" in self.request.user.group_names:
             return reverse("havneafgifter:harbor_dues_form_create")
-        return reverse("havneafgifter:login")
+        # TODO: redirect to a list view?
+        return reverse("havneafgifter:harbor_dues_form_create")
 
 
 class LoginView(HavneafgiftView, DjangoLoginView):
