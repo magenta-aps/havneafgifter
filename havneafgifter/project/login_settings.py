@@ -29,6 +29,7 @@ LOGIN_WHITELISTED_URLS = [
     LOGIN_REPEATED_URL,
     LOGIN_NO_CPRCVR_URL,
     LOGIN_REDIRECT_URL,
+    LOGOUT_REDIRECT_URL,
     reverse_lazy("havneafgifter:root"),
     reverse_lazy("saml_metadata_override"),
 ]
