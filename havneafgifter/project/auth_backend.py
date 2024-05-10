@@ -49,7 +49,7 @@ class Saml2Backend(ModelBackend):
         user, created = user_model.objects.update_or_create(
             **{"username": lenient_get(ava, map["username"], 0)},
             defaults={
-                user_attr: lenient_get(ava, saml_attr, 0)
+                user_attr: lenient_get(ava, saml_attr, 0) or ""
                 for user_attr, saml_attr in map.items()
                 if user_attr != "username"
             },
