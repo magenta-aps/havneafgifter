@@ -9,7 +9,7 @@ SAML_SESSION_COOKIE_NAME = "saml_session"
 SAML_SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = True
 SAML_CREATE_UNKNOWN_USER = True
-ACS_DEFAULT_REDIRECT_URL = reverse_lazy("havneafgifter:harbor_dues_form_create")
+SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOGIN_NAMESPACE = "mitid"
