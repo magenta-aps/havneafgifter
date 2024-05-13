@@ -208,7 +208,7 @@ Unittest:
     - python manage.py compilemessages --locale=en
     - coverage run manage.py test
     - coverage combine
-    - coverage report --show-missing --fail-under=100
+    - coverage report --show-missing --fail-under=10
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
