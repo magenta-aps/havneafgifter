@@ -30,7 +30,6 @@ LOGIN_WHITELISTED_URLS = [
     LOGOUT_REDIRECT_URL,
     reverse_lazy("havneafgifter:root"),
     reverse_lazy("saml_metadata_override"),
-    reverse_lazy("mitid_test:show_session"),
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

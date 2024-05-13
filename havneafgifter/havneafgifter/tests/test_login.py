@@ -16,7 +16,7 @@ class LoginTest(TestCase):
         cls.user.save()
 
     def test_django_login_form(self):
-        self.client.get(reverse("havneafgifter:login"))
+        self.client.get(reverse("havneafgifter:login") + "?back=/foobar")
         response = self.client.post(
             reverse("havneafgifter:login"), {"username": "test", "password": "test"}
         )
@@ -98,7 +98,6 @@ class LoginTest(TestCase):
         )
         session.save()
         self.client.cookies["back"] = "/foobar"
-
         response = self.client.get(reverse("havneafgifter:post_login"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], "/foobar")
