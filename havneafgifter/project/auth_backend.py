@@ -43,7 +43,9 @@ class Saml2Backend(ModelBackend):
         }
 
         if not ava.get(map["username"]):
-            logger.error(f"unique identifier {map['username']} not found in saml data")
+            logger.error(
+                "Unique identifier '%s' not found in saml data", map["username"]
+            )
             return None
 
         user, created = user_model.objects.update_or_create(
@@ -55,6 +57,14 @@ class Saml2Backend(ModelBackend):
             },
         )
         if created:
+            logger.info(
+                "Created new User object from saml login (username='%s')", user.username
+            )
             user.set_unusable_password()
             user.save(update_fields=("password",))
+        else:
+            logger.info(
+                "Logging in existing User from saml login (username='%s')",
+                user.username,
+            )
         return user
