@@ -73,13 +73,7 @@ class LoginTest(TestCase):
         self.assertEqual(response.headers["Location"], settings.LOGOUT_REDIRECT_URL)
 
     def test_django_login_back(self):
-        session = self.client.session
-        session.update(
-            {
-                "backpage": "/foobar",
-            }
-        )
-        session.save()
+        self.client.cookies["back"] = "/foobar"
         self.client.post(
             reverse("havneafgifter:login"), {"username": "test", "password": "test"}
         )
@@ -91,7 +85,6 @@ class LoginTest(TestCase):
         session = self.client.session
         session.update(
             {
-                "backpage": "/foobar",
                 "saml": {
                     "ava": {
                         "cpr": ["1234567890"],
@@ -104,6 +97,8 @@ class LoginTest(TestCase):
             }
         )
         session.save()
+        self.client.cookies["back"] = "/foobar"
+
         response = self.client.get(reverse("havneafgifter:post_login"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], "/foobar")
