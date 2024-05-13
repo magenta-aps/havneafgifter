@@ -51,7 +51,6 @@ class RootView(RedirectView):
                 request=self.request, saml_data=self.request.session.get("saml")
             )
             if user and user.is_authenticated:
-                print("login() may clear session")
                 login(
                     request=self.request,
                     user=user,
@@ -70,8 +69,6 @@ class LoginView(HavneafgiftView, DjangoLoginView):
     form_class = AuthenticationForm
 
     def get(self, request, *args, **kwargs):
-        print(f"LoginView session_id: {self.request.session.session_key}")
-        print(f"LoginView session: {dict(self.request.session)}")
         response = super().get(request, *args, **kwargs)
         if self.back:
             response.set_cookie(
@@ -107,14 +104,11 @@ class LogoutView(RedirectView):
 
 class PostLoginView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        print(f"Postlogin session_id: {self.request.session.session_key}")
-        print(f"Postlogin session: {dict(self.request.session)}")
         if not self.request.user.is_authenticated:
             user = authenticate(
                 request=self.request, saml_data=self.request.session.get("saml")
             )
             if user and user.is_authenticated:
-                print("login() may clear session")
                 login(
                     request=self.request,
                     user=user,
@@ -123,7 +117,6 @@ class PostLoginView(RedirectView):
         if not self.request.user.is_authenticated:
             return reverse("havneafgifter:login-failed")
         backpage = self.request.COOKIES.get("back")
-        print(f"Postlogin backpage: {backpage}")
         if backpage:
             return backpage
         return reverse("havneafgifter:root")
