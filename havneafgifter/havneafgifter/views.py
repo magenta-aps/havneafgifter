@@ -70,7 +70,7 @@ class LoginView(HavneafgiftView, DjangoLoginView):
 
     def get(self, request, *args, **kwargs):
         request.session["backpage"] = self.back
-        print(f"LoginView session_id: {dict(self.request.session.session_key)}")
+        print(f"LoginView session_id: {self.request.session.session_key}")
         print(f"LoginView session: {dict(self.request.session)}")
         request.session.modified = True
         return super().get(request, *args, **kwargs)
@@ -103,7 +103,7 @@ class LogoutView(RedirectView):
 
 class PostLoginView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        print(f"Postlogin session_id: {dict(self.request.session.session_key)}")
+        print(f"Postlogin session_id: {self.request.session.session_key}")
         print(f"Postlogin session: {dict(self.request.session)}")
         if not self.request.user.is_authenticated:
             user = authenticate(
