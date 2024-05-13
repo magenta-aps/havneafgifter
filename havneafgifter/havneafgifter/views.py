@@ -51,6 +51,7 @@ class RootView(RedirectView):
                 request=self.request, saml_data=self.request.session.get("saml")
             )
             if user and user.is_authenticated:
+                print("login() may clear session")
                 login(
                     request=self.request,
                     user=user,
@@ -110,6 +111,7 @@ class PostLoginView(RedirectView):
                 request=self.request, saml_data=self.request.session.get("saml")
             )
             if user and user.is_authenticated:
+                print("login() may clear session")
                 login(
                     request=self.request,
                     user=user,
