@@ -9,6 +9,6 @@ urlpatterns = [
     path("privilege1/", views.Privilege1View.as_view()),
     path("privilege3/", views.Privilege3View.as_view()),
     path("force_auth/", views.ForceAuthView.as_view()),
-    path("show_session/", views.ShowSession.as_view()),
+    path("show_session/", views.ShowSession.as_view(), name="show_session"),
     path("list_sessions/", views.ListSessions.as_view()),
 ]
