@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "havneafgifter",
     "django_select2",
     "django_mitid_auth",
+    "mitid_test",
 ]
 
 MIDDLEWARE = [

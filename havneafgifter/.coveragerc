@@ -12,5 +12,6 @@ omit =
     */migrations/*
     */management/*
     */tests/*
+    */mitid_test/*
 parallel = true
 concurrency = multiprocessing
