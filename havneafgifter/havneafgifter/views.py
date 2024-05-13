@@ -70,7 +70,6 @@ class LoginView(HavneafgiftView, DjangoLoginView):
     form_class = AuthenticationForm
 
     def get(self, request, *args, **kwargs):
-        # request.session["backpage"] = self.back
         print(f"LoginView session_id: {self.request.session.session_key}")
         print(f"LoginView session: {dict(self.request.session)}")
         response = super().get(request, *args, **kwargs)
@@ -123,7 +122,7 @@ class PostLoginView(RedirectView):
                 )
         if not self.request.user.is_authenticated:
             return reverse("havneafgifter:login-failed")
-        backpage = self.request.session.get("backpage")
+        backpage = self.request.COOKIES.get("back")
         print(f"Postlogin backpage: {backpage}")
         if backpage:
             return backpage

@@ -53,10 +53,12 @@ class Privilege3View(MitIdLOAMixin, PrivilegeView):
 class ForceAuthView(View):
     # SP-force-authn-side-1
     def get(self, request):
-        request.session["backpage"] = request.GET.get("back")
+        back = request.GET.get("back") or None
         provider = login_provider_class()
         request.session["login_method"] = provider.__name__
-        return provider.login(request, auth_params={"force_authn": True})
+        response = provider.login(request, auth_params={"force_authn": True})
+        response.set_cookie("back", back, secure=True, httponly=True, samesite="None")
+        return response
 
 
 class ShowSession(View):
