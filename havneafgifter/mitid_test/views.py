@@ -55,7 +55,7 @@ class ForceAuthView(View):
     def get(self, request):
         request.session["backpage"] = request.GET.get("back")
         provider = login_provider_class()
-        request.session["login_method"] = provider.__class__.__name__
+        request.session["login_method"] = provider.__name__
         return provider.login(request, auth_params={"force_authn": True})
 
 
