@@ -33,5 +33,5 @@
     <input type="hidden" name="next" value="{{ next }}">
 </form>
 
-<a href="{% url 'mitid:login' %}">{% translate "Log in using MitID" %}</a>
+<a href="{% url 'mitid:login' %}{% if back %}?back={{back|urlencode}}{% endif %}">{% translate "Log in using MitID" %}</a>
 {% endblock %}

@@ -1,6 +1,12 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import BACKEND_SESSION_KEY, authenticate, login, logout
+from django.contrib.auth import (
+    BACKEND_SESSION_KEY,
+    REDIRECT_FIELD_NAME,
+    authenticate,
+    login,
+    logout,
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.forms import formset_factory
@@ -62,6 +68,22 @@ class LoginView(HavneafgiftView, DjangoLoginView):
     template_name = "havneafgifter/login.html"
     form_class = AuthenticationForm
 
+    def get(self, request, *args, **kwargs):
+        request.session["backpage"] = self.back
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{
+                **context,
+                "back": self.back,
+            }
+        )
+
+    @property
+    def back(self):
+        return self.request.GET.get("back") or self.request.GET.get(REDIRECT_FIELD_NAME)
+
 
 class LogoutView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
@@ -90,6 +112,9 @@ class PostLoginView(RedirectView):
                 )
         if not self.request.user.is_authenticated:
             return reverse("havneafgifter:login-failed")
+        backpage = self.request.session.get("backpage")
+        if backpage:
+            return backpage
         return reverse("havneafgifter:root")
 
 
