@@ -75,7 +75,9 @@ class LoginView(HavneafgiftView, DjangoLoginView):
         print(f"LoginView session: {dict(self.request.session)}")
         response = super().get(request, *args, **kwargs)
         if self.back:
-            response.set_cookie("back", self.back, secure=True, httponly=True, samesite="None")
+            response.set_cookie(
+                "back", self.back, secure=True, httponly=True, samesite="None"
+            )
         return response
 
     def get_context_data(self, **context):
