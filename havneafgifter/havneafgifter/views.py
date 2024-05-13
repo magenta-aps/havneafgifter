@@ -70,11 +70,13 @@ class LoginView(HavneafgiftView, DjangoLoginView):
     form_class = AuthenticationForm
 
     def get(self, request, *args, **kwargs):
-        request.session["backpage"] = self.back
+        # request.session["backpage"] = self.back
         print(f"LoginView session_id: {self.request.session.session_key}")
         print(f"LoginView session: {dict(self.request.session)}")
-        request.session.modified = True
-        return super().get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
+        if self.back:
+            response.set_cookie("back", self.back, secure=True, httponly=True, samesite="None")
+        return response
 
     def get_context_data(self, **context):
         return super().get_context_data(
