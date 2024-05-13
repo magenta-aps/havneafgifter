@@ -100,6 +100,7 @@ class LogoutView(RedirectView):
 
 class PostLoginView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
+        print(f"Postlogin session: {dict(self.request.session)}")
         if not self.request.user.is_authenticated:
             user = authenticate(
                 request=self.request, saml_data=self.request.session.get("saml")
@@ -113,6 +114,7 @@ class PostLoginView(RedirectView):
         if not self.request.user.is_authenticated:
             return reverse("havneafgifter:login-failed")
         backpage = self.request.session.get("backpage")
+        print(f"Postlogin backpage: {backpage}")
         if backpage:
             return backpage
         return reverse("havneafgifter:root")
