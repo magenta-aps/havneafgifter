@@ -922,7 +922,7 @@ class PortTaxRate(PermissionsMixin, models.Model):
         vessel_type = self.vessel_type
         gt_start = self.gt_start
         gt_end = self.gt_end
-        return f"{tax_rates}, {port}, {vessel_type}, {gt_start}, {gt_end}"
+        return f"{tax_rates}, {port}, {vessel_type}, {gt_start} t - {gt_end} t"
 
 
 class DisembarkmentTaxRate(PermissionsMixin, models.Model):
