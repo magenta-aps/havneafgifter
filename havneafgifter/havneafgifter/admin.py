@@ -153,6 +153,9 @@ class TaxRatesAdmin(admin.ModelAdmin):
 
 @admin.register(PortTaxRate)
 class PortTaxRateAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        "tax_rates",
+    ]
     ordering = [
         F("vessel_type").asc(nulls_first=True),  # type: ignore
         F("port").asc(nulls_first=True),  # type: ignore
@@ -170,6 +173,9 @@ class PortTaxRateAdmin(admin.ModelAdmin):
 
 @admin.register(DisembarkmentTaxRate)
 class DisembarkmentTaxRateAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        "tax_rates",
+    ]
     ordering = [
         "municipality",
         F("disembarkment_site__name").asc(nulls_first=True),  # type: ignore
