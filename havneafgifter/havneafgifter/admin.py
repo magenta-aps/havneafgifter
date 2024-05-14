@@ -220,6 +220,14 @@ class CustomUserAdmin(UserAdmin):
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
         (_("This user belongs to"), {"fields": ("port_authority", "shipping_agent")}),
     )
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "group_list",
+        "is_staff",
+    )
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -273,3 +281,6 @@ class CustomUserAdmin(UserAdmin):
             if not request.user.is_superuser and obj.is_superuser:
                 return False
         return super().has_change_permission(request, obj)
+
+    def group_list(self, obj):
+        return ", ".join([group.name for group in obj.groups.all()])
