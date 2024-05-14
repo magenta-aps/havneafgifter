@@ -862,8 +862,8 @@ class TaxRates(PermissionsMixin, models.Model):
                 end_datetime = item.start_datetime
 
     def __str__(self) -> str:
-        start = self.start_datetime.date() if self.start_datetime else "..."
-        end = self.end_datetime.date() if self.end_datetime else "..."
+        start = self.start_datetime.date() if self.start_datetime else "-∞"
+        end = self.end_datetime.date() if self.end_datetime else "∞"
         return f"{start} - {end}"
 
 
