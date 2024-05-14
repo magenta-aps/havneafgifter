@@ -7,5 +7,5 @@
 {% block content %}
     {% translate "Adgang nægtet" as header %}
     {% translate 'Det anvendte login er timet ud. Prøv at logge ind igen.' as body %}
-    {% include 'error/error.html' with header=header body=body login=True %}
+    {% include 'havneafgifter/error/error.html' with header=header body=body login=True %}
 {% endblock %}
