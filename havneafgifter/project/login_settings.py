@@ -32,7 +32,7 @@ LOGIN_WHITELISTED_URLS = [
     reverse_lazy("saml_metadata_override"),
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SAML_DEFAULT_BINDING = saml2.BINDING_HTTP_REDIRECT
 SAML_ATTRIBUTE_MAPPING = {
     "https://data.gov.dk/model/core/eid/cprNumber": ("username", "cpr"),
