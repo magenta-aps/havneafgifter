@@ -35,9 +35,13 @@ class HarborDuesFormMixin:
         cls.port_authority_user = User.objects.create(
             username="port_auth", port_authority=cls.port_authority
         )
+        cls.port_authority_user.groups.add(Group.objects.get(name="PortAuthority"))
+
         cls.shipping_agent_user = User.objects.create(
             username="shipping_agent", shipping_agent=cls.shipping_agent
         )
+        cls.shipping_agent_user.groups.add(Group.objects.get(name="Shipping"))
+
         cls.ship_user = User.objects.create(username="9074729")
         cls.ship_user.groups.add(Group.objects.get(name="Ship"))
 

@@ -396,7 +396,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
             )
 
-        if not form.has_permission(self.request.user, "view"):
+        if not form.has_permission(request.user, "view"):
             raise PermissionDenied
 
         form.calculate_tax(save=True)

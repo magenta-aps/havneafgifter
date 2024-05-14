@@ -2,7 +2,8 @@ from unittest.mock import ANY, Mock, patch
 
 from bs4 import BeautifulSoup
 from django.contrib import messages
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import AnonymousUser, Group
+from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.forms import BaseFormSet
 from django.http import HttpResponseNotFound, HttpResponseRedirect
@@ -18,12 +19,15 @@ from havneafgifter.models import (
     HarborDuesForm,
     Nationality,
     PassengersByCountry,
+    PortAuthority,
+    ShippingAgent,
     ShipType,
     User,
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
     EnvironmentalTaxCreateView,
+    HarborDuesFormListView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -392,16 +396,28 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.view = ReceiptDetailView()
+        cls.user = User.objects.create(username="admin", is_superuser=True)
 
     def test_get_object_returns_harbor_dues_form(self):
         self.view.kwargs = {"pk": self.harbor_dues_form.pk}
-        self.view.get(self.request_factory.get(""))
+        request = self.request_factory.get("")
+        request.user = self.user
+        self.view.get(request)
         self.assertEqual(self.view.get_object(), self.harbor_dues_form)
 
     def test_get_object_returns_cruise_tax_form(self):
         self.view.kwargs = {"pk": self.cruise_tax_form.pk}
-        self.view.get(self.request_factory.get(""))
+        request = self.request_factory.get("")
+        request.user = self.user
+        self.view.get(request)
         self.assertEqual(self.view.get_object(), self.cruise_tax_form)
+
+    def test_get_object_return_permission_denied(self):
+        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
+        request = self.request_factory.get("")
+        request.user = AnonymousUser()
+        with self.assertRaises(PermissionDenied):
+            self.view.get(request)
 
     def test_get_object_returns_none(self):
         self.view.kwargs = {"pk": -1}
@@ -452,3 +468,54 @@ class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
         self.view.kwargs = {"pk": -1}
         response = self.view.get(self.request_factory.get(""))
         self.assertIsInstance(response, HttpResponseNotFound)
+
+
+class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.view = HarborDuesFormListView()
+
+    def test_list_admin(self):
+        request = self.request_factory.get("")
+        request.user = User.objects.create(username="admin", is_superuser=True)
+        self.view.setup(request)
+        self.view.get(request)
+        self.assertIn(self.harbor_dues_form, self.view.get_queryset())
+
+    def test_list_agent(self):
+        request = self.request_factory.get("")
+        request.user = self.shipping_agent_user
+        self.view.setup(request)
+        self.view.get(request)
+        self.assertIn(self.harbor_dues_form, self.view.get_queryset())
+
+    def test_list_port_authority(self):
+        request = self.request_factory.get("")
+        request.user = self.port_authority_user
+        self.view.setup(request)
+        self.view.get(request)
+        self.assertIn(self.harbor_dues_form, self.view.get_queryset())
+
+    def test_list_other_agent(self):
+        request = self.request_factory.get("")
+        request.user = User.objects.create(
+            username="other_shipping_agent",
+            shipping_agent=ShippingAgent.objects.create(name="Impostor"),
+        )
+        request.user.groups.add(Group.objects.get(name="Shipping"))
+        self.view.setup(request)
+        self.view.get(request)
+        self.assertNotIn(self.harbor_dues_form, self.view.get_queryset())
+
+    def test_list_other_port_authority(self):
+        request = self.request_factory.get("")
+        request.user = User.objects.create(
+            username="other_port_auth",
+            port_authority=PortAuthority.objects.create(email="impostor@example.org"),
+        )
+        request.user.groups.add(Group.objects.get(name="PortAuthority"))
+        self.view.setup(request)
+        self.view.get(request)
+        self.assertNotIn(self.harbor_dues_form, self.view.get_queryset())
