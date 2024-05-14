@@ -5,8 +5,6 @@ import saml2
 from django.urls import reverse_lazy
 from project.util import strtobool
 
-SAML_SESSION_COOKIE_NAME = "saml_session"
-SAML_SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = True
 SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
