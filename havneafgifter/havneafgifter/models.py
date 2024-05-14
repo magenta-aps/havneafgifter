@@ -861,6 +861,11 @@ class TaxRates(PermissionsMixin, models.Model):
                     item.save(update_fields=("end_datetime",))
                 end_datetime = item.start_datetime
 
+    def __str__(self) -> str:
+        start = self.start_datetime.date() if self.start_datetime else "..."
+        end = self.end_datetime.date() if self.end_datetime else "..."
+        return f"{start} - {end}"
+
 
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
 
@@ -911,6 +916,14 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Tax per gross ton"),
     )
 
+    def __str__(self) -> str:
+        tax_rates = self.tax_rates
+        port = self.port.name if self.port else ""
+        vessel_type = self.vessel_type
+        gt_start = self.gt_start
+        gt_end = self.gt_end
+        return f"{tax_rates}, {port}, {vessel_type}, {gt_start}, {gt_end}"
+
 
 class DisembarkmentTaxRate(PermissionsMixin, models.Model):
     class Meta:
@@ -947,3 +960,9 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
         max_digits=12,
         verbose_name=_("Disembarkment tax rate"),
     )
+
+    def __str__(self) -> str:
+        tax_rates = self.tax_rates
+        municipality = self.get_municipality_display()
+        rate = self.disembarkment_tax_rate
+        return f"{tax_rates}, {municipality}, {rate}"
