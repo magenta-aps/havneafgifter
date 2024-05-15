@@ -26,3 +26,6 @@
 .select2-selection__arrow b {
     display: none;
 }
+.card {
+    width: 40rem;
+}
