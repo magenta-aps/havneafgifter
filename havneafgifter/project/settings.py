@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_select2",
     "django_mitid_auth",
     "mitid_test",
+    "csp_helpers",
 ]
 
 MIDDLEWARE = [
@@ -95,6 +96,9 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
             "loaders": default_loaders if DEBUG else cached_loaders,
+            "libraries": {
+                "csp": "csp.templatetags.csp",
+            },
         },
     },
 ]
@@ -288,7 +292,11 @@ CSP_DEFAULT_SRC = (
     "'self'",
     "localhost:8000" if DEBUG else HOST_DOMAIN,
 )
-CSP_SCRIPT_SRC_ATTR = ("'self'", "'unsafe-inline'")
+CSP_SCRIPT_SRC_ATTR = (
+    "'self'",
+    "localhost:8000" if DEBUG else HOST_DOMAIN,
+)
+CSP_STYLE_SRC_ATTR = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:")
 
 AUTH_USER_MODEL = "havneafgifter.User"

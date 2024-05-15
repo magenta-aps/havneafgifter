@@ -16,4 +16,14 @@
     {% bootstrap_form form %}
     {% bootstrap_button button_type="submit" content=_("Create") %}
 </form>
+<script nonce="{{request.csp_nonce}}">
+    $("[name={{form.vessel_imo.name}}]").on("invalid", function () {
+        if (this.validity.tooShort || this.validity.tooLong) {
+            this.setCustomValidity("{% translate 'IMO numbers should be 7 digits' %}");
+        } else {
+            this.setCustomValidity("");
+            this.reportValidity();
+        }
+    });
+</script>
 {% endblock content %}
