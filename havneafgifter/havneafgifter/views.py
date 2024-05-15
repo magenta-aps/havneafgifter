@@ -1,3 +1,4 @@
+from csp_helpers.mixins import CSPViewMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import (
@@ -172,7 +173,9 @@ class HarborDuesFormCreateView(LoginRequiredMixin, HavneafgiftView, CreateView):
             )
 
 
-class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
+class _CruiseTaxFormSetView(
+    LoginRequiredMixin, CSPViewMixin, HavneafgiftView, FormView
+):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """

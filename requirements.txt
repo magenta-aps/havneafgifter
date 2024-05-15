@@ -16,6 +16,8 @@ types-requests==2.31.0.20240218
 weasyprint==61.2
 django-weasyprint==2.3.0
 django-csp==3.8
+django-csp[jinja2]
+django-csp-helpers==0.7.1
 django-forms-dynamic==1.0.0
 django-countries==7.6.1
 django-select2==8.1.2

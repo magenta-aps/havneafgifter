@@ -7,16 +7,17 @@ SPDX-License-Identifier: MPL-2.0
 {% load static %}
 {% load i18n %}
 {% load django_bootstrap5 %}
+{% load csp %}
 
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% bootstrap_css %}
-    <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" />
-    {% bootstrap_javascript %}
-    <script src="{% static 'jquery/jquery-3.7.1.min.js' %}"></script>
+    <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" />
+    <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" >
+    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{request.csp_nonce}}"></script>
+    <script src="{% static 'jquery/jquery-3.7.1.min.js' %}" nonce="{{request.csp_nonce}}"></script>
     <title>{% block title %}{% translate "Havneafgifter" %}{% endblock %}</title>
     {% block extra_headers %}
     {% endblock %}
@@ -42,14 +43,14 @@ SPDX-License-Identifier: MPL-2.0
             <form action="{% url 'set_language' %}" method="post" class="navbar-form navbar-right mx-1 my-2">
                 {% csrf_token %}
                 <div class="form-group">
-                    <select name="language" class="form-control" onchange="this.form.submit()">
+                    <select name="language" class="form-control">
                     {% for language in languages %}
-                    <option value="{{ language.code }}"
-                        {% if language.code == LANGUAGE_CODE %}selected="selected"{% endif %}>
+                    <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected="selected"{% endif %}>
                         {{ language.name_local|capfirst }}
                     </option>
                     {% endfor %}
                     </select>
+                    <script nonce="{{request.csp_nonce}}">$("[name=language]").on("change", function (){this.form.submit()})</script>
                 </div>
             </form>
             {# endif #}
