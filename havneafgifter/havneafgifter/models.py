@@ -426,9 +426,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 vessel_type=self.vessel_type,
                 gross_ton=self.gross_tonnage,
             )
-            gross_tonnage = max(self.gross_tonnage, port_taxrate.round_gross_ton_up_to)
             range_port_tax = Decimal(0)
             if port_taxrate is not None:
+                gross_tonnage: int = max(
+                    self.gross_tonnage, port_taxrate.round_gross_ton_up_to
+                )
                 if self.vessel_type in (ShipType.FISHER, ShipType.OTHER):
                     payments = datetime_range.started_weeks
                 else:
