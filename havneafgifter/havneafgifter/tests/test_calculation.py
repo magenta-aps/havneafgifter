@@ -57,7 +57,8 @@ class CalculationTest(TestCase):
             vessel_type=None,
             gt_start=0,
             gt_end=None,
-            port_tax_rate=70,
+            port_tax_rate=Decimal("0.7"),
+            round_gross_ton_up_to=70,
         )
         cls.port_tax2 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates1,
@@ -65,7 +66,8 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=0,
             gt_end=30_000,
-            port_tax_rate=110,
+            port_tax_rate=Decimal("1.1"),
+            round_gross_ton_up_to=70,
         )
         cls.port_tax3 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates1,
@@ -73,7 +75,7 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=30_000,
             gt_end=None,
-            port_tax_rate=220,
+            port_tax_rate=Decimal("2.2"),
         )
         cls.port_tax4 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates1,
@@ -89,7 +91,7 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=30_000,
             gt_end=None,
-            port_tax_rate=110,
+            port_tax_rate=Decimal("1.1"),
         )
 
         cls.port_tax6 = PortTaxRate.objects.create(
@@ -98,7 +100,8 @@ class CalculationTest(TestCase):
             vessel_type=None,
             gt_start=0,
             gt_end=None,
-            port_tax_rate=140,
+            port_tax_rate=Decimal("1.4"),
+            round_gross_ton_up_to=70,
         )
         cls.port_tax7 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates2,
@@ -106,7 +109,8 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=0,
             gt_end=30_000,
-            port_tax_rate=220,
+            port_tax_rate=Decimal("2.2"),
+            round_gross_ton_up_to=70,
         )
         cls.port_tax8 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates2,
@@ -114,7 +118,7 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=30_000,
             gt_end=None,
-            port_tax_rate=440,
+            port_tax_rate=Decimal("4.4"),
         )
         cls.port_tax9 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates2,
@@ -123,6 +127,7 @@ class CalculationTest(TestCase):
             gt_start=0,
             gt_end=30_000,
             port_tax_rate=0,
+            round_gross_ton_up_to=70,
         )
         cls.port_tax10 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates2,
@@ -130,7 +135,7 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=30_000,
             gt_end=None,
-            port_tax_rate=220,
+            port_tax_rate=Decimal("2.2"),
         )
 
         cls.port_tax11 = PortTaxRate.objects.create(
@@ -139,7 +144,8 @@ class CalculationTest(TestCase):
             vessel_type=None,
             gt_start=0,
             gt_end=None,
-            port_tax_rate=70,
+            port_tax_rate=Decimal("0.7"),
+            round_gross_ton_up_to=70,
         )
         cls.port_tax12 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates3,
@@ -147,7 +153,8 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=0,
             gt_end=30_000,
-            port_tax_rate=110,
+            port_tax_rate=Decimal("1.1"),
+            round_gross_ton_up_to=70,
         )
         cls.port_tax13 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates3,
@@ -155,7 +162,7 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=30_000,
             gt_end=None,
-            port_tax_rate=220,
+            port_tax_rate=Decimal("2.2"),
         )
         cls.port_tax14 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates3,
@@ -164,6 +171,7 @@ class CalculationTest(TestCase):
             gt_start=0,
             gt_end=30_000,
             port_tax_rate=0,
+            round_gross_ton_up_to=70,
         )
         cls.port_tax15 = PortTaxRate.objects.create(
             tax_rates=cls.tax_rates3,
@@ -171,7 +179,7 @@ class CalculationTest(TestCase):
             vessel_type=ShipType.CRUISE,
             gt_start=30_000,
             gt_end=None,
-            port_tax_rate=110,
+            port_tax_rate=Decimal("1.1"),
         )
         cls.disembarkment_tax1 = DisembarkmentTaxRate.objects.create(
             tax_rates=cls.tax_rates1,
@@ -319,7 +327,7 @@ class CalculationTest(TestCase):
 
     def test_calculate_harbour_tax_1(self):
         calculation: dict = self.harborduesform1.calculate_harbour_tax()
-        self.assertEqual(calculation["harbour_tax"], Decimal("10340.00"))
+        self.assertEqual(calculation["harbour_tax"], Decimal("4136000.00"))
         self.assertEqual(len(calculation["details"]), 3)
         self.assertDictEqual(
             calculation["details"][0],
@@ -329,7 +337,7 @@ class CalculationTest(TestCase):
                     datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),  # end_date not included in range
-                "harbour_tax": Decimal("1870.00"),  # 17 days * 110 kr
+                "harbour_tax": Decimal("748000.00"),  # 17 days * 40000 tons * 1.10 kr
             },
         )
         self.assertDictEqual(
@@ -340,7 +348,7 @@ class CalculationTest(TestCase):
                     datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("6820.00"),  # 31 days * 220 kr
+                "harbour_tax": Decimal("2728000.00"),  # 31 days * 40000 tons * 2.20 kr
             },
         )
         self.assertDictEqual(
@@ -351,15 +359,15 @@ class CalculationTest(TestCase):
                     datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("1650.00"),  # 15 days * 110 kr
+                "harbour_tax": Decimal("660000.00"),  # 15 days * 40000 tons * 1.10 kr
             },
         )
         self.harborduesform1.refresh_from_db()
-        self.assertEqual(self.harborduesform1.harbour_tax, Decimal("10340.00"))
+        self.assertEqual(self.harborduesform1.harbour_tax, Decimal("4136000.00"))
 
     def test_calculate_harbour_tax_2(self):
         calculation: dict = self.harborduesform2.calculate_harbour_tax()
-        self.assertEqual(calculation["harbour_tax"], Decimal("20680.00"))
+        self.assertEqual(calculation["harbour_tax"], Decimal("8272000.00"))
         self.assertEqual(len(calculation["details"]), 3)
         self.assertDictEqual(
             calculation["details"][0],
@@ -369,7 +377,7 @@ class CalculationTest(TestCase):
                     datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),  # end_date not included in range
-                "harbour_tax": Decimal("3740.00"),  # 17 days * 220 kr
+                "harbour_tax": Decimal("1496000.00"),  # 17 days * 40000 tons * 2.20 kr
             },
         )
         self.assertDictEqual(
@@ -380,7 +388,7 @@ class CalculationTest(TestCase):
                     datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("13640.00"),  # 31 days * 440 kr
+                "harbour_tax": Decimal("5456000.00"),  # 31 days * 40000 tons * 4.40 kr
             },
         )
         self.assertDictEqual(
@@ -391,15 +399,15 @@ class CalculationTest(TestCase):
                     datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("3300.00"),  # 15 days * 220 kr
+                "harbour_tax": Decimal("1320000.00"),  # 15 days * 40000 tons * 2.20 kr
             },
         )
         self.harborduesform2.refresh_from_db()
-        self.assertEqual(self.harborduesform2.harbour_tax, Decimal("20680.00"))
+        self.assertEqual(self.harborduesform2.harbour_tax, Decimal("8272000.00"))
 
     def test_calculate_harbour_tax_3(self):
         calculation: dict = self.harborduesform3.calculate_harbour_tax()
-        self.assertEqual(calculation["harbour_tax"], Decimal("6580.00"))
+        self.assertEqual(calculation["harbour_tax"], Decimal("3290000.00"))
         self.assertEqual(len(calculation["details"]), 3)
         self.assertDictEqual(
             calculation["details"][0],
@@ -409,7 +417,7 @@ class CalculationTest(TestCase):
                     datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),  # end_date not included in range
-                "harbour_tax": Decimal("1190.00"),  # 17 days * 70 kr
+                "harbour_tax": Decimal("595000.00"),  # 17 days * 50000 tons * 0.70 kr
             },
         )
         self.assertDictEqual(
@@ -420,7 +428,7 @@ class CalculationTest(TestCase):
                     datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("4340.00"),  # 31 days * 140 kr
+                "harbour_tax": Decimal("2170000.00"),  # 31 days * 50000 tons * 1.40 kr
             },
         )
         self.assertDictEqual(
@@ -431,15 +439,18 @@ class CalculationTest(TestCase):
                     datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
                     datetime(2025, 2, 15, 16, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("1050.00"),  # 15 days * 70 kr
+                "harbour_tax": Decimal("525000.00"),  # 15 days * 50000 tons * 0.70 kr
             },
         )
         self.harborduesform3.refresh_from_db()
-        self.assertEqual(self.harborduesform3.harbour_tax, Decimal("6580.00"))
+        self.assertEqual(self.harborduesform3.harbour_tax, Decimal("3290000.00"))
 
     def test_calculate_harbor_tax4(self):
         calculation: dict = self.harborduesform4.calculate_harbour_tax()
-        self.assertEqual(calculation["harbour_tax"], Decimal("140.00"))  # 2 weeks * 70
+        print(calculation)
+        self.assertEqual(
+            calculation["harbour_tax"], Decimal("98.00")
+        )  # 2 weeks * 10 tons (round up to 70) * 0.70
         self.assertEqual(len(calculation["details"]), 1)
         self.assertEqual(
             calculation["details"][0],
@@ -449,7 +460,9 @@ class CalculationTest(TestCase):
                     start_datetime=datetime(2025, 4, 17, 8, 0, 0, tzinfo=timezone.utc),
                     end_datetime=datetime(2025, 4, 24, 16, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("140.00"),
+                "harbour_tax": Decimal(
+                    "98.00"
+                ),  # 2 weeks * 10 tons (round up to 70) * 0.70
             },
         )
 

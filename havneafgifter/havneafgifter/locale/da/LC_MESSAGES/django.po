@@ -388,6 +388,10 @@ msgid "Tax per gross ton"
 msgstr "Afgift pr. bruttonton"
 
 #: havneafgifter/models.py
+msgid "Round GT up to"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Disembarkment tax rate"
 msgstr "Ilandsætnings-afgift"
 
