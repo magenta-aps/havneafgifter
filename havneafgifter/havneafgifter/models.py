@@ -428,11 +428,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
             range_port_tax = Decimal(0)
             if port_taxrate is not None:
+                gross_tonnage: int = max(
+                    self.gross_tonnage, port_taxrate.round_gross_ton_up_to
+                )
                 if self.vessel_type in (ShipType.FISHER, ShipType.OTHER):
                     payments = datetime_range.started_weeks
                 else:
                     payments = datetime_range.started_days
-                range_port_tax = payments * port_taxrate.port_tax_rate
+                range_port_tax = payments * port_taxrate.port_tax_rate * gross_tonnage
                 harbour_tax += range_port_tax
             details.append(
                 {
@@ -914,6 +917,10 @@ class PortTaxRate(PermissionsMixin, models.Model):
         max_digits=12,
         default=Decimal(0),
         verbose_name=_("Tax per gross ton"),
+    )
+
+    round_gross_ton_up_to = models.PositiveIntegerField(
+        null=False, blank=False, default=0, verbose_name=_("Round GT up to")
     )
 
     def __str__(self) -> str:
