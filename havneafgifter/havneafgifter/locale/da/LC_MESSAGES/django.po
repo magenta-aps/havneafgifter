@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-14 12:41-0100\n"
+"POT-Creation-Date: 2024-05-15 05:40-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -82,8 +82,10 @@ msgid "Freighter"
 msgstr "Fragtskib"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Fishing ship"
+msgid "Fishing ship"
+msgstr "Fiskerbåd"
+
+#: havneafgifter/models.py
 msgid "Foreign fishing ship"
 msgstr "Udenlandsk fiskerbåd"
 
@@ -474,6 +476,10 @@ msgstr "Havneafgift"
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Create"
 msgstr "Opret"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "IMO numbers should be 7 digits"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid "Logged out"
