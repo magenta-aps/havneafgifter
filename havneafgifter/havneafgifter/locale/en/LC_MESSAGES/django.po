@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-15 06:09-0100\n"
+"POT-Creation-Date: 2024-05-15 08:09-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -412,7 +412,8 @@ msgstr ""
 msgid ""
 "Please notice that environmental and maintenance fees apply to <b>all</b> "
 "passengers on board at the time of disembarkment, regardless of how many "
-"passengers disembark."
+"passengers disembark. Register total number of passengers on board at the "
+"time of disembarcation."
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
@@ -498,6 +499,10 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "View PDF"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Submit new harbor dues form"
 msgstr ""
 
 #: havneafgifter/tests/test_views.py havneafgifter/views.py
