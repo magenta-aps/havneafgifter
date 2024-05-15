@@ -1,7 +1,8 @@
+from csp_helpers.mixins import CSPFormMixin
 from django import forms
 
 
-class BootstrapForm(forms.Form):
+class BootstrapForm(CSPFormMixin, forms.Form):
     def __init__(self, *args, **kwargs):
         super(BootstrapForm, self).__init__(*args, **kwargs)
         self.kwargs = kwargs
