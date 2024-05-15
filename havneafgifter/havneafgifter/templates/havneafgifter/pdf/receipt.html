@@ -88,6 +88,9 @@ table.table-striped td:first-child {
                     <button type="submit" class="btn btn-secondary" name="action" value="send_email">
                         {% translate 'Send email' %}
                     </button>
+                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-secondary">
+                        {% translate 'Submit new harbor dues form' %}
+                    </a>
                 </div>
             </form>
         </div>
