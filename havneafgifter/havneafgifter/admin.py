@@ -110,10 +110,6 @@ class PortAdmin(admin.ModelAdmin):
         "name",
     ]
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.filter(portauthority__isnull=True)
-
 
 class PortInlineAdmin(admin.TabularInline):
     model = Port
