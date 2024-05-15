@@ -176,7 +176,6 @@ class Nationality(models.TextChoices):
 
 class Municipality(models.IntegerChoices):
     KUJALLEQ = 955, "Kujalleq"
-    QAASUITSUP = 958, "Qaasuitsup"
     QEQQATA = 957, "Qeqqata"
     SERMERSOOQ = 956, "Sermersooq"
     QEQERTALIK = 959, "Qeqertalik"
