@@ -123,7 +123,9 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
-class HarborDuesFormCreateView(LoginRequiredMixin, HavneafgiftView, CreateView):
+class HarborDuesFormCreateView(
+    LoginRequiredMixin, CSPViewMixin, HavneafgiftView, CreateView
+):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
@@ -173,9 +175,7 @@ class HarborDuesFormCreateView(LoginRequiredMixin, HavneafgiftView, CreateView):
             )
 
 
-class _CruiseTaxFormSetView(
-    LoginRequiredMixin, CSPViewMixin, HavneafgiftView, FormView
-):
+class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """

@@ -1,3 +1,4 @@
+from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.core.exceptions import ValidationError
@@ -55,7 +56,7 @@ class HTML5DateWidget(widgets.Input):
     template_name = "django/forms/widgets/datetime.html"
 
 
-class HarborDuesFormForm(DynamicFormMixin, ModelForm):
+class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     def __init__(self, user_is_ship=False, *args, **kwargs):
         self.user_is_ship = user_is_ship
         super().__init__(*args, **kwargs)
@@ -109,7 +110,7 @@ class HarborDuesFormForm(DynamicFormMixin, ModelForm):
             )
 
 
-class PassengersTotalForm(Form):
+class PassengersTotalForm(CSPFormMixin, Form):
     total_number_of_passengers = IntegerField(
         label=_("Total number of passengers"),
         widget=widgets.NumberInput(attrs={"placeholder": "0"}),
@@ -130,7 +131,7 @@ class PassengersTotalForm(Form):
             )
 
 
-class PassengersByCountryForm(DynamicFormMixin, Form):
+class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
     nationality = ChoiceField(
         choices=Nationality,
         disabled=True,
@@ -141,7 +142,7 @@ class PassengersByCountryForm(DynamicFormMixin, Form):
     )
 
 
-class DisembarkmentForm(DynamicFormMixin, Form):
+class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
     disembarkment_site = DynamicField(
         ChoiceField,
         choices=lambda form: [
