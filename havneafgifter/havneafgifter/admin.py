@@ -168,7 +168,7 @@ class PortTaxRateAdmin(admin.ModelAdmin):
         "gt_start",
         "gt_end",
         "port_tax_rate",
-        "round_gross_ton_up_to"
+        "round_gross_ton_up_to",
     ]
 
 

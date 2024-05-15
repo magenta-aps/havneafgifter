@@ -918,10 +918,7 @@ class PortTaxRate(PermissionsMixin, models.Model):
     )
 
     round_gross_ton_up_to = models.PositiveIntegerField(
-        null=False,
-        blank=False,
-        default=0,
-        verbose_name=_("Round GT up to")
+        null=False, blank=False, default=0, verbose_name=_("Round GT up to")
     )
 
     def __str__(self) -> str:

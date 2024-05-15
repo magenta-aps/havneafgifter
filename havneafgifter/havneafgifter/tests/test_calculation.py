@@ -448,7 +448,9 @@ class CalculationTest(TestCase):
     def test_calculate_harbor_tax4(self):
         calculation: dict = self.harborduesform4.calculate_harbour_tax()
         print(calculation)
-        self.assertEqual(calculation["harbour_tax"], Decimal("98.00"))  # 2 weeks * 10 tons (round up to 70) * 0.70
+        self.assertEqual(
+            calculation["harbour_tax"], Decimal("98.00")
+        )  # 2 weeks * 10 tons (round up to 70) * 0.70
         self.assertEqual(len(calculation["details"]), 1)
         self.assertEqual(
             calculation["details"][0],
@@ -458,7 +460,9 @@ class CalculationTest(TestCase):
                     start_datetime=datetime(2025, 4, 17, 8, 0, 0, tzinfo=timezone.utc),
                     end_datetime=datetime(2025, 4, 24, 16, 0, 0, tzinfo=timezone.utc),
                 ),
-                "harbour_tax": Decimal("98.00"),  # 2 weeks * 10 tons (round up to 70) * 0.70
+                "harbour_tax": Decimal(
+                    "98.00"
+                ),  # 2 weeks * 10 tons (round up to 70) * 0.70
             },
         )
 
