@@ -388,6 +388,10 @@ msgid "Tax per gross ton"
 msgstr "Afgift pr. bruttonton"
 
 #: havneafgifter/models.py
+msgid "Round GT up to"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Disembarkment tax rate"
 msgstr "Ilandsætnings-afgift"
 
@@ -472,10 +476,6 @@ msgstr "Havneafgift"
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Create"
 msgstr "Opret"
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "IMO numbers should be 7 digits"
-msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid "Logged out"

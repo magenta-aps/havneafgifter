@@ -17,7 +17,8 @@
         "vessel_type": null,
         "gt_start": 0,
         "gt_end": null,
-        "port_tax_rate": "70.00"
+        "port_tax_rate": "0.70",
+        "round_gross_ton_up_to": 70
     }
 },
 {
@@ -29,7 +30,8 @@
         "vessel_type": "CRUISE",
         "gt_start": 0,
         "gt_end": 30000,
-        "port_tax_rate": "110.00"
+        "port_tax_rate": "1.10",
+        "round_gross_ton_up_to": 70
     }
 },
 {
@@ -41,7 +43,7 @@
         "vessel_type": "CRUISE",
         "gt_start": 30000,
         "gt_end": null,
-        "port_tax_rate": "220.00"
+        "port_tax_rate": "2.20"
     }
 },
 {
@@ -53,7 +55,8 @@
         "vessel_type": "CRUISE",
         "gt_start": 0,
         "gt_end": 30000,
-        "port_tax_rate": "0.00"
+        "port_tax_rate": "0.00",
+        "round_gross_ton_up_to": 70
     }
 },
 {
@@ -65,7 +68,7 @@
         "vessel_type": "CRUISE",
         "gt_start": 30000,
         "gt_end": null,
-        "port_tax_rate": "110.00"
+        "port_tax_rate": "1.10"
     }
 },
 {
