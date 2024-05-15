@@ -18,7 +18,12 @@
 </form>
 <script nonce="{{request.csp_nonce}}">
     $("[name={{form.vessel_imo.name}}]").on("invalid", function () {
-        this.setCustomValidity("{% translate 'IMO numbers should be 7 digits' %}")
+        if (this.validity.tooShort || this.validity.tooLong) {
+            this.setCustomValidity("{% translate 'IMO numbers should be 7 digits' %}");
+        } else {
+            this.setCustomValidity("");
+            this.reportValidity();
+        }
     });
 </script>
 {% endblock content %}
