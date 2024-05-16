@@ -81,17 +81,17 @@ table.table-striped td:first-child {
         <div class="col-12">
             <form method="post" action=".">
                 {% csrf_token %}
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-secondary">
+                <nav class="navbar" >
+                    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-success">
                         {% translate 'View PDF' %}
                     </a>
-                    <button type="submit" class="btn btn-secondary" name="action" value="send_email">
+                    <button type="submit" class="btn btn-success" name="action" value="send_email">
                         {% translate 'Send email' %}
                     </button>
-                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-secondary">
-                        {% translate 'Submit new harbor dues form' %}
+                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary ms-2 ms-auto">
+                        {% translate 'Submit new form' %}
                     </a>
-                </div>
+                </nav>
             </form>
         </div>
     </div>
