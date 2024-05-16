@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from decimal import Decimal
 from unittest.mock import ANY, patch
 
 from django.conf import settings
@@ -24,11 +25,12 @@ from havneafgifter.receipts import CruiseTaxFormReceipt, HarborDuesFormReceipt
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
-class ModelTest(TestCase):
+class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        Port.objects.create(name="Test1")
-        Port.objects.create(name="Test2")
+        super().setUpTestData()
+        cls.port1 = Port.objects.create(name="Test1")
+        cls.port2 = Port.objects.create(name="Test2")
         cls.tax_rates = TaxRates.objects.create(
             pax_tax_rate=0,
             start_datetime=None,
@@ -145,6 +147,27 @@ class ModelTest(TestCase):
             self.tax_rates.end_datetime,
             datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
         )
+
+    @parametrize(
+        "vessel_type,expected_tax_per_gross_ton",
+        [
+            (ShipType.FISHER, Decimal("70")),
+            (ShipType.FREIGHTER, Decimal("70")),
+            (ShipType.PASSENGER, Decimal("70")),
+            (ShipType.OTHER, Decimal("70")),
+            (ShipType.CRUISE, Decimal("110")),
+        ],
+    )
+    def test_tax_per_gross_ton(
+        self, vessel_type: ShipType, expected_tax_per_gross_ton: Decimal
+    ) -> None:
+        """The `tax_per_gross_ton` returns the correct value for each vessel type."""
+        if vessel_type is ShipType.CRUISE:
+            instance = self.cruise_tax_form
+        else:
+            instance = self.harbor_dues_form
+        instance.vessel_type = vessel_type
+        self.assertEqual(instance.tax_per_gross_ton, expected_tax_per_gross_ton)
 
 
 class TestShippingAgent(TestCase):
