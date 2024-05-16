@@ -16,6 +16,7 @@ from havneafgifter.models import (
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
+    PassengersByCountry,
     ShipType,
     User,
 )
@@ -214,6 +215,17 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
 class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
     view_class = PassengerTaxCreateView
 
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Create an existing `PassengersByCountry` object (which is updated during
+        # the test.)
+        cls._existing_passengers_by_country = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.cruise_tax_form,
+            nationality=Nationality.BELGIUM,
+            number_of_passengers=10,
+        )
+
     def test_get_form_returns_expected_formset(self):
         self._assert_get_form_returns_expected_formset()
 
@@ -223,7 +235,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         self.assertListEqual(
             form_kwargs["initial"],
             [
-                {"nationality": nationality, "number_of_passengers": 0}
+                {
+                    "nationality": nationality,
+                    "number_of_passengers": (
+                        0
+                        if nationality != Nationality.BELGIUM
+                        else self._existing_passengers_by_country.number_of_passengers
+                    ),
+                    "pk": (
+                        None
+                        if nationality != Nationality.BELGIUM
+                        else self._existing_passengers_by_country.pk
+                    ),
+                }
                 for nationality in Nationality
             ],
         )
@@ -234,8 +258,14 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
     def test_form_valid_creates_objects(self):
         # Arrange
         request = self._post_formset(
+            # Add new entry for Australia (index 0)
             {"number_of_passengers": 42},
-            total_number_of_passengers=42,
+            # Add new (empty) entry for Austria (index 1)
+            {"number_of_passengers": 0},
+            # Update existing entry for Belgium (index 2)
+            {"number_of_passengers": 42},
+            # Submit correct number of total passengers
+            total_number_of_passengers=2 * 42,
         )
         # Act: trigger DB insert logic
         self.instance.post(request)
@@ -252,7 +282,12 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
                     "cruise_tax_form": self.cruise_tax_form.pk,
                     "nationality": Nationality.AUSTRALIA.value,
                     "number_of_passengers": 42,
-                }
+                },
+                {
+                    "cruise_tax_form": self.cruise_tax_form.pk,
+                    "nationality": Nationality.BELGIUM.value,
+                    "number_of_passengers": 42,
+                },
             ],
         )
 

@@ -696,6 +696,10 @@ class PassengersByCountry(PermissionsMixin, models.Model):
             "cruise_tax_form",
             "nationality",
         ]
+        unique_together = [
+            "cruise_tax_form",
+            "nationality",
+        ]
 
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm,
