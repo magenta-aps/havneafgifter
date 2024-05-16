@@ -21,6 +21,7 @@ from django.db.models.signals import post_save
 from django.template.defaultfilters import date
 from django.templatetags.l10n import localize
 from django.utils import translation
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 
@@ -447,6 +448,16 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             self.harbour_tax = harbour_tax
             self.save(update_fields=("harbour_tax",))
         return {"harbour_tax": harbour_tax, "details": details}
+
+    @cached_property
+    def tax_per_gross_ton(self) -> Decimal | None:
+        result = None
+        harbour_tax = self.calculate_harbour_tax(save=False)
+        for detail in harbour_tax["details"]:  # type: ignore
+            current = detail["port_taxrate"].port_tax_rate
+            if (result is None) or (result < current):
+                result = current
+        return result
 
     def get_receipt(self, **kwargs):
         from havneafgifter.receipts import HarborDuesFormReceipt
