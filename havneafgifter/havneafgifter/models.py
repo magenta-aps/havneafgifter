@@ -453,7 +453,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def tax_per_gross_ton(self) -> Decimal | None:
         result = None
         harbour_tax = self.calculate_harbour_tax(save=False)
-        for detail in harbour_tax["details"]:
+        for detail in harbour_tax["details"]:  # type: ignore
             current = detail["port_taxrate"].port_tax_rate
             if (result is None) or (result < current):
                 result = current
