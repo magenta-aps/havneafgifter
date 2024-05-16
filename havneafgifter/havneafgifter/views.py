@@ -104,6 +104,11 @@ class LogoutView(RedirectView):
 
 
 class PostLoginView(RedirectView):
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        response.delete_cookie("back")
+        return response
+
     def get_redirect_url(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
             user = authenticate(
