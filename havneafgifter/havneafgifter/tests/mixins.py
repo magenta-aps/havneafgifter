@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.contrib.auth.models import Group
 from django.core.management import call_command
@@ -52,8 +52,8 @@ class HarborDuesFormMixin:
             "gross_tonnage": 0,
             "vessel_type": ShipType.FREIGHTER,
             "vessel_imo": "9074729",
-            "datetime_of_arrival": datetime(2020, 1, 1),
-            "datetime_of_departure": datetime(2020, 2, 1),
+            "datetime_of_arrival": datetime(2020, 1, 1, tzinfo=timezone.utc),
+            "datetime_of_departure": datetime(2020, 2, 1, tzinfo=timezone.utc),
         }
         # The same data, but with related objects replaced by their primary keys.
         # Suitable for testing form POSTs.

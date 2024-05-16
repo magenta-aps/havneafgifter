@@ -48,8 +48,13 @@ Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintena
     <td class="table-active">
         {{ form.gross_tonnage }}
     </td>
-    <td colspan="2">
-        {# Here, the original form contains 4 hardcoded numbers #}
+    <th scope="row">
+        BT-mut ataatsimut DKK
+        <br>
+        DKK per/BT
+    </th>
+    <td class="table-active">
+        {{ form.tax_per_gross_ton }} DKK
     </td>
 </tr>
 
