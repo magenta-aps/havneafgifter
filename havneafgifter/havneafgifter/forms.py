@@ -7,6 +7,7 @@ from django.forms import (
     CharField,
     ChoiceField,
     Form,
+    HiddenInput,
     IntegerField,
     ModelForm,
     PasswordInput,
@@ -140,6 +141,10 @@ class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
         IntegerField,
         label=lambda form: form.initial["nationality"].label,
     )
+    pk = IntegerField(
+        required=False,
+        widget=HiddenInput(),
+    )
 
 
 class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
@@ -153,6 +158,10 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
     number_of_passengers = DynamicField(
         IntegerField,
         label=lambda form: form.initial_disembarkment_site_name,
+    )
+    pk = IntegerField(
+        required=False,
+        widget=HiddenInput(),
     )
 
     def clean_disembarkment_site(self):

@@ -696,6 +696,10 @@ class PassengersByCountry(PermissionsMixin, models.Model):
             "cruise_tax_form",
             "nationality",
         ]
+        unique_together = [
+            "cruise_tax_form",
+            "nationality",
+        ]
 
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm,
@@ -768,6 +772,10 @@ class Disembarkment(PermissionsMixin, models.Model):
             "cruise_tax_form",
             "disembarkment_site__municipality",
             "disembarkment_site__name",
+        ]
+        unique_together = [
+            "cruise_tax_form",
+            "disembarkment_site",
         ]
 
     cruise_tax_form = models.ForeignKey(

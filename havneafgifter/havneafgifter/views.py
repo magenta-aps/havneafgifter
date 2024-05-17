@@ -218,16 +218,17 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
-        form_kwargs["initial"] = [
-            {"nationality": nationality, "number_of_passengers": 0}
-            for nationality in Nationality
-        ]
+        form_kwargs["initial"] = self._get_initial_formset_data()
         return form_kwargs
 
     def get_context_data(self, **kwargs):
+        total_num = self._cruise_tax_form.number_of_passengers
         context_data = super().get_context_data(**kwargs)
         context_data["passengers_total_form"] = kwargs.get(
-            "passengers_total_form", PassengersTotalForm()
+            "passengers_total_form",
+            PassengersTotalForm(
+                initial={"total_number_of_passengers": total_num},
+            ),
         )
         context_data["passengers_by_country_formset"] = self.get_form()
         return context_data
@@ -241,9 +242,21 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         ]
         self._cruise_tax_form.save(update_fields=("number_of_passengers",))
 
-        # Create `PassengersByCountry` objects based on formset data
+        # Create or update `PassengersByCountry` objects based on formset data
         passengers_by_country_objects = self._get_passengers_by_country_objects()
-        PassengersByCountry.objects.bulk_create(passengers_by_country_objects)
+        PassengersByCountry.objects.bulk_create(
+            passengers_by_country_objects,
+            update_conflicts=True,
+            unique_fields=["cruise_tax_form", "nationality"],
+            update_fields=["number_of_passengers"],
+        )
+
+        # Remove any `PassengersByCountry` objects which have 0 passengers after the
+        # "create or update" processing above.
+        PassengersByCountry.objects.filter(
+            cruise_tax_form=self._cruise_tax_form,
+            number_of_passengers=0,
+        ).delete()
 
         # Go to next step (environmental and maintenance fees)
         return HttpResponseRedirect(
@@ -261,7 +274,32 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
                 **cleaned_data,  # type: ignore
             )
             for cleaned_data in formset.cleaned_data  # type: ignore
-            if cleaned_data["number_of_passengers"] > 0  # type: ignore
+        ]
+
+    def _get_initial_formset_data(self):
+        def pk(val):
+            if val is not None:
+                return val[0]
+
+        def number_of_passengers(val):
+            if val is not None:
+                return val[1]
+            return 0
+
+        current = {
+            pbc.nationality: (pbc.pk, pbc.number_of_passengers)
+            for pbc in PassengersByCountry.objects.filter(
+                cruise_tax_form=self._cruise_tax_form,
+            )
+        }
+
+        return [
+            {
+                "pk": pk(current.get(nationality)),
+                "number_of_passengers": number_of_passengers(current.get(nationality)),
+                "nationality": nationality,
+            }
+            for nationality in Nationality
         ]
 
 
@@ -271,10 +309,7 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
-        form_kwargs["initial"] = [
-            {"disembarkment_site": disembarkment_site.pk, "number_of_passengers": 0}
-            for disembarkment_site in DisembarkmentSite.objects.all()
-        ]
+        form_kwargs["initial"] = self._get_initial_formset_data()
         return form_kwargs
 
     def get_context_data(self, **kwargs):
@@ -283,12 +318,21 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         return context_data
 
     def form_valid(self, form):
-        disembarkment_objects = [
-            Disembarkment(cruise_tax_form=self._cruise_tax_form, **cleaned_data)
-            for cleaned_data in self.get_form().cleaned_data
-            if cleaned_data["number_of_passengers"] > 0
-        ]
-        Disembarkment.objects.bulk_create(disembarkment_objects)
+        # Create or update `Disembarkment` objects based on formset data
+        disembarkment_objects = self._get_disembarkment_objects()
+        Disembarkment.objects.bulk_create(
+            disembarkment_objects,
+            update_conflicts=True,
+            unique_fields=["cruise_tax_form", "disembarkment_site"],
+            update_fields=["number_of_passengers"],
+        )
+
+        # Remove any `Disembarkment` objects which have 0 passengers after the
+        # "create or update" processing above.
+        Disembarkment.objects.filter(
+            cruise_tax_form=self._cruise_tax_form,
+            number_of_passengers=0,
+        ).delete()
 
         # User is all done filling out data for cruise ship.
         # Go to detail view to display result.
@@ -299,6 +343,45 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
                 kwargs={"pk": self._cruise_tax_form.pk},
             )
         )
+
+    def _get_disembarkment_objects(self) -> list[Disembarkment]:
+        formset = self.get_form()
+        disembarkment_objects = [
+            Disembarkment(
+                cruise_tax_form=self._cruise_tax_form,
+                **cleaned_data,  # type: ignore
+            )
+            for cleaned_data in formset.cleaned_data  # type: ignore
+        ]
+        return disembarkment_objects
+
+    def _get_initial_formset_data(self):
+        def pk(val):
+            if val is not None:
+                return val[0]
+
+        def number_of_passengers(val):
+            if val is not None:
+                return val[1]
+            return 0
+
+        current = {
+            d.disembarkment_site: (d.pk, d.number_of_passengers)
+            for d in Disembarkment.objects.filter(
+                cruise_tax_form=self._cruise_tax_form,
+            )
+        }
+
+        return [
+            {
+                "pk": pk(current.get(disembarkment_site)),
+                "number_of_passengers": number_of_passengers(
+                    current.get(disembarkment_site)
+                ),
+                "disembarkment_site": disembarkment_site.pk,
+            }
+            for disembarkment_site in DisembarkmentSite.objects.all()
+        ]
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
