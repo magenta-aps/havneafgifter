@@ -13,9 +13,11 @@ from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
     CruiseTaxForm,
+    Disembarkment,
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
+    PassengersByCountry,
     ShipType,
     User,
 )
@@ -214,6 +216,17 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
 class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
     view_class = PassengerTaxCreateView
 
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Create an existing `PassengersByCountry` object (which is updated during
+        # the test.)
+        cls._existing_passengers_by_country = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.cruise_tax_form,
+            nationality=Nationality.BELGIUM,
+            number_of_passengers=10,
+        )
+
     def test_get_form_returns_expected_formset(self):
         self._assert_get_form_returns_expected_formset()
 
@@ -223,7 +236,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         self.assertListEqual(
             form_kwargs["initial"],
             [
-                {"nationality": nationality, "number_of_passengers": 0}
+                {
+                    "nationality": nationality,
+                    "number_of_passengers": (
+                        0
+                        if nationality != Nationality.BELGIUM
+                        else self._existing_passengers_by_country.number_of_passengers
+                    ),
+                    "pk": (
+                        None
+                        if nationality != Nationality.BELGIUM
+                        else self._existing_passengers_by_country.pk
+                    ),
+                }
                 for nationality in Nationality
             ],
         )
@@ -234,8 +259,14 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
     def test_form_valid_creates_objects(self):
         # Arrange
         request = self._post_formset(
+            # Add new entry for Australia (index 0)
             {"number_of_passengers": 42},
-            total_number_of_passengers=42,
+            # Add new (empty) entry for Austria (index 1)
+            {"number_of_passengers": 0},
+            # Update existing entry for Belgium (index 2)
+            {"number_of_passengers": 42},
+            # Submit correct number of total passengers
+            total_number_of_passengers=2 * 42,
         )
         # Act: trigger DB insert logic
         self.instance.post(request)
@@ -252,7 +283,12 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
                     "cruise_tax_form": self.cruise_tax_form.pk,
                     "nationality": Nationality.AUSTRALIA.value,
                     "number_of_passengers": 42,
-                }
+                },
+                {
+                    "cruise_tax_form": self.cruise_tax_form.pk,
+                    "nationality": Nationality.BELGIUM.value,
+                    "number_of_passengers": 42,
+                },
             ],
         )
 
@@ -273,6 +309,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
 class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
     view_class = EnvironmentalTaxCreateView
 
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Create an existing `Disembarkment` object (which is updated during the
+        # test.)
+        cls._disembarkment_site_1 = DisembarkmentSite.objects.first()
+        cls._disembarkment_site_2 = DisembarkmentSite.objects.all()[1]
+        cls._existing_disembarkment = Disembarkment.objects.create(
+            cruise_tax_form=cls.cruise_tax_form,
+            disembarkment_site=cls._disembarkment_site_1,
+            number_of_passengers=10,
+        )
+
     def test_get_form_returns_expected_formset(self):
         self._assert_get_form_returns_expected_formset()
 
@@ -282,7 +331,19 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
         self.assertListEqual(
             form_kwargs["initial"],
             [
-                {"disembarkment_site": ds.pk, "number_of_passengers": 0}
+                {
+                    "disembarkment_site": ds.pk,
+                    "number_of_passengers": (
+                        0
+                        if ds != self._existing_disembarkment.disembarkment_site
+                        else self._existing_disembarkment.number_of_passengers
+                    ),
+                    "pk": (
+                        None
+                        if ds != self._existing_disembarkment.disembarkment_site
+                        else self._existing_disembarkment.pk
+                    ),
+                }
                 for ds in DisembarkmentSite.objects.all()
             ],
         )
@@ -293,10 +354,10 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
     def test_form_valid_creates_objects(self):
         # Arrange
         self._post_formset(
-            {
-                "disembarkment_site": DisembarkmentSite.objects.first().pk,
-                "number_of_passengers": 42,
-            }
+            # Update existing entry for first disembarkment site (index 0)
+            {"number_of_passengers": 42},
+            # Add new entry for next disembarkment site (index 1)
+            {"number_of_passengers": 42},
         )
         with patch("havneafgifter.views.messages.add_message") as mock_add_message:
             # Act: trigger DB insert logic
@@ -308,13 +369,17 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                     "cruise_tax_form",
                     "disembarkment_site",
                     "number_of_passengers",
-                ),
+                ).order_by("disembarkment_site__pk"),
                 [
                     {
                         "cruise_tax_form": self.cruise_tax_form.pk,
-                        "disembarkment_site": DisembarkmentSite.objects.first().pk,
+                        "disembarkment_site": ds.pk,
                         "number_of_passengers": 42,
                     }
+                    for ds in [
+                        self._disembarkment_site_1,
+                        self._disembarkment_site_2,
+                    ]
                 ],
             )
             # Assert: verify that we displayed a "thank you" message
