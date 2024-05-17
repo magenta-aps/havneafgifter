@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_bootstrap5",
+    "django_tables2",
     "havneafgifter",
     "django_select2",
     "django_mitid_auth",
@@ -300,6 +301,8 @@ CSP_STYLE_SRC_ATTR = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:")
 
 AUTH_USER_MODEL = "havneafgifter.User"
+
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap5.html"
 
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [

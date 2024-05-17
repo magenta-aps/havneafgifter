@@ -75,6 +75,9 @@ class User(AbstractUser):
     def group_names(self):
         return [group.name for group in self.groups.all()]
 
+    def has_group_name(self, name):
+        return self.groups.filter(name=name).exists()
+
 
 class PermissionsMixin(models.Model):
     class Meta:
@@ -107,7 +110,7 @@ class PermissionsMixin(models.Model):
     ) -> QuerySet | None:
         return qs.none()
 
-    def has_permission(self, user: User, action: str, from_group: bool) -> bool:
+    def has_permission(self, user: User, action: str, from_group: bool = False) -> bool:
         if user.is_anonymous or not user.is_active:
             return False
         if user.is_superuser:
@@ -211,7 +214,11 @@ class ShippingAgent(PermissionsMixin, models.Model):
         # Filter the qs based on what the user is allowed to do
         # These come on top of class-wide permissions (access to all instances)
         #
-        if action == "change" and user.shipping_agent:
+        if (
+            action == "change"
+            and user.shipping_agent
+            and user.has_group_name("Shipping")
+        ):
             return qs.filter(pk=user.shipping_agent_id)
         return None
 
@@ -252,7 +259,11 @@ class PortAuthority(PermissionsMixin, models.Model):
         cls, qs: QuerySet, user: User, action: str
     ) -> QuerySet | None:
         # Filter the qs based on what the user is allowed to do
-        if action == "change" and user.port_authority:
+        if (
+            action == "change"
+            and user.port_authority
+            and user.has_group_name("PortAuthority")
+        ):
             return qs.filter(pk=user.port_authority_id)
         return None
 
@@ -559,25 +570,28 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             "view",
             "change",
         ):
-            return qs.filter(
-                (
-                    Q(shipping_agent__isnull=False)
-                    & Q(shipping_agent_id=user.shipping_agent_id)
+            filter: Q = Q()
+            if user.has_group_name("Shipping"):
+                filter |= Q(shipping_agent__isnull=False) & Q(
+                    shipping_agent_id=user.shipping_agent_id
                 )
-                | (
-                    Q(port_of_call__portauthority__isnull=False)
-                    & Q(port_of_call__portauthority_id=user.port_authority_id)
+            if user.has_group_name("PortAuthority"):
+                filter |= Q(port_of_call__portauthority__isnull=False) & Q(
+                    port_of_call__portauthority_id=user.port_authority_id
                 )
-            )
+            if filter.children:
+                return qs.filter(filter)
+
         if action in (
             "approve",
             "reject",
             "invoice",
         ):
-            return qs.filter(
-                port_of_call__portauthority__isnull=False,
-                port_of_call__portauthority_id=user.port_authority_id,
-            )
+            if user.has_group_name("PortAuthority"):
+                return qs.filter(
+                    port_of_call__portauthority__isnull=False,
+                    port_of_call__portauthority_id=user.port_authority_id,
+                )
         return qs.none()
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:

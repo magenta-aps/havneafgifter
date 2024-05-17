@@ -10,12 +10,14 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
+from django.core.exceptions import PermissionDenied
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
+from django_tables2 import SingleTableView
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -31,8 +33,10 @@ from havneafgifter.models import (
     HarborDuesForm,
     Nationality,
     PassengersByCountry,
+    PermissionsMixin,
     ShipType,
 )
+from havneafgifter.tables import HarborDuesFormTable
 
 
 class HavneafgiftView:
@@ -391,9 +395,13 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             return HttpResponseNotFound(
                 f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
             )
-        else:
-            form.calculate_tax(save=True)
-            receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
+
+        if not form.has_permission(request.user, "view"):
+            raise PermissionDenied
+
+        form.calculate_tax(save=True)
+        receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
+
         return HttpResponse(receipt.html)
 
     def post(self, request, *args, **kwargs):
@@ -439,4 +447,15 @@ class PreviewPDFView(ReceiptDetailView):
         return HttpResponse(
             receipt.pdf,
             content_type="application/pdf",
+        )
+
+
+class HarborDuesFormListView(
+    LoginRequiredMixin, PermissionsMixin, HavneafgiftView, SingleTableView
+):
+    table_class = HarborDuesFormTable
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.all(), self.request.user, "view"
         )
