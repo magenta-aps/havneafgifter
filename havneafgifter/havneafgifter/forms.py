@@ -159,6 +159,10 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
         IntegerField,
         label=lambda form: form.initial_disembarkment_site_name,
     )
+    pk = IntegerField(
+        required=False,
+        widget=HiddenInput(),
+    )
 
     def clean_disembarkment_site(self):
         disembarkment_site = self.cleaned_data.get("disembarkment_site")
