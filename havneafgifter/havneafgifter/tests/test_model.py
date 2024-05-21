@@ -219,7 +219,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         self.assertEqual(self.harbor_dues_form.duration_in_days, 31)
 
     def test_duration_in_weeks(self):
-        self.assertEqual(self.harbor_dues_form.duration_in_weeks, 4)
+        self.assertEqual(self.harbor_dues_form.duration_in_weeks, 5)
 
     def test_calculate_tax(self):
         self.harbor_dues_form.calculate_tax(save=True)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List
 
@@ -389,21 +389,15 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             f"({self.datetime_of_arrival} - {self.datetime_of_departure})"
         )
 
-    def _get_num_periods_in_duration(self, period: int) -> int:
-        duration: timedelta = self.datetime_of_departure - self.datetime_of_arrival
-        num: int = int(round(duration.total_seconds() / period))
-        return num
-
     @property
     def duration_in_days(self) -> int:
-        return self._get_num_periods_in_duration(24 * 60 * 60)
+        range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
+        return range.started_days
 
     @property
     def duration_in_weeks(self) -> int:
-        # This assumes that we are counting the number of 7-day periods, rather than the
-        # number of calendar weeks (e.g. 7-day periods starting on Monday or Sunday,
-        # depending on the local convention.)
-        return self._get_num_periods_in_duration(7 * 24 * 60 * 60)
+        range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
+        return range.started_weeks
 
     @property
     def form_id(self):
