@@ -350,6 +350,94 @@ class Port(PermissionsMixin, models.Model):
 
 
 class HarborDuesForm(PermissionsMixin, models.Model):
+    class Meta:
+        constraints = [
+            # `port_of_call` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(
+                    # Disallow for non-cruise ships
+                    (~Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=False))
+                    |
+                    # Allow *and* disallow for cruise ships
+                    (Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=True))
+                    | (Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=False))
+                ),
+                name="port_of_call_cannot_be_null_for_non_cruise_ships",
+            ),
+            # `gross_tonnage` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(
+                    # Disallow for non-cruise ships
+                    (~Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=False))
+                    |
+                    # Allow *and* disallow for cruise ships
+                    (Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=True))
+                    | (Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=False))
+                ),
+                name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
+            ),
+            # `datetime_of_arrival` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(
+                    # Disallow for non-cruise ships
+                    (
+                        ~Q(vessel_type=ShipType.CRUISE)
+                        & Q(datetime_of_arrival__isnull=False)
+                    )
+                    |
+                    # Allow *and* disallow for cruise ships
+                    (
+                        Q(vessel_type=ShipType.CRUISE)
+                        & Q(datetime_of_arrival__isnull=True)
+                    )
+                    | (
+                        Q(vessel_type=ShipType.CRUISE)
+                        & Q(datetime_of_arrival__isnull=False)
+                    )
+                ),
+                name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
+            ),
+            # `datetime_of_departure` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(
+                    # Disallow for non-cruise ships
+                    (
+                        ~Q(vessel_type=ShipType.CRUISE)
+                        & Q(datetime_of_departure__isnull=False)
+                    )
+                    |
+                    # Allow *and* disallow for cruise ships
+                    (
+                        Q(vessel_type=ShipType.CRUISE)
+                        & Q(datetime_of_departure__isnull=True)
+                    )
+                    | (
+                        Q(vessel_type=ShipType.CRUISE)
+                        & Q(datetime_of_departure__isnull=False)
+                    )
+                ),
+                name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
+            ),
+            # `datetime_of_arrival` and `datetime_of_departure` must either both
+            # be present, or both be blank/NULL.
+            models.CheckConstraint(
+                check=(
+                    # Both present
+                    (
+                        Q(datetime_of_arrival__isnull=False)
+                        & Q(datetime_of_departure__isnull=False)
+                    )
+                    # Both absent
+                    | (
+                        Q(datetime_of_arrival__isnull=True)
+                        & Q(datetime_of_departure__isnull=True)
+                    )
+                ),
+                name="datetime_of_arrival_and_departure_must_both_be_present_"
+                "or_both_be_null",
+            ),
+        ]
+
     date = models.DateField(
         null=False,
         blank=False,
@@ -359,8 +447,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     port_of_call = models.ForeignKey(
         Port,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Port of call"),
         on_delete=models.PROTECT,
     )
@@ -416,16 +504,20 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     datetime_of_arrival = models.DateTimeField(
-        null=False, blank=False, verbose_name=_("Arrival date/time")
+        null=True,
+        blank=True,
+        verbose_name=_("Arrival date/time"),
     )
 
     datetime_of_departure = models.DateTimeField(
-        null=False, blank=False, verbose_name=_("Departure date/time")
+        null=True,
+        blank=True,
+        verbose_name=_("Departure date/time"),
     )
 
     gross_tonnage = models.PositiveIntegerField(
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Gross tonnage"),
     )
 
@@ -645,8 +737,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
 class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         default=0,
         verbose_name=_("Number of passengers"),
     )
