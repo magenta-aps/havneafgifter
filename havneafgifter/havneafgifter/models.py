@@ -23,6 +23,7 @@ from django.template.defaultfilters import date
 from django.templatetags.l10n import localize
 from django.utils import translation
 from django.utils.functional import cached_property
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 
@@ -74,7 +75,7 @@ class MailRecipientList:
         if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
             self.recipients.append(
                 MailRecipient(
-                    name=_("Tax Authority"),
+                    name=gettext("Tax Authority"),
                     email=settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
                     object=None,
                 )
