@@ -69,7 +69,7 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="harbor_dues_form_create",
     ),
     path(
-        "blanket/liste",
+        "blanket/",
         HarborDuesFormListView.as_view(),
         name="harbor_dues_form_list",
     ),
