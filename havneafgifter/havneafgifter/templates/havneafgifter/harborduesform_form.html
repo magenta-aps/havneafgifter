@@ -7,6 +7,29 @@
 {% translate "Harbour Dues/Port Tax" %}
 {% endblock %}
 
+{% block extra_headers %}
+<script nonce="{{ request.csp_nonce }}" src="{% url 'javascript-catalog' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    $(document).ready(function () {
+        const vesselTypeSelect = $("select#id_vessel_type");
+        const submitButton = $("button[type=submit]");
+
+        vesselTypeSelect.on("change", function () {
+            const vesselType = $(this).val();
+            let buttonText = gettext("Submit");
+
+            if (vesselType === "CRUISE") {
+                buttonText = gettext("Continue");
+            }
+
+            submitButton.text(buttonText);
+        });
+    });
+})();
+</script>
+{% endblock %}
+
 {% block content %}
 <h1>{% translate "Harbour Dues/Port Tax" %}</h1>
 <form action="." method="post" class="form">
@@ -14,7 +37,7 @@
     {{ form.media.css }}
     {{ form.media.js }}
     {% bootstrap_form form %}
-    {% bootstrap_button button_type="submit" content=_("Create") %}
+    {% bootstrap_button button_type="submit" content=_("Submit") %}
 </form>
 <script nonce="{{request.csp_nonce}}">
     $("[name={{form.vessel_imo.name}}]").on("invalid", function () {
