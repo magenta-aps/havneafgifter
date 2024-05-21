@@ -13,7 +13,6 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
-from django.template.defaultfilters import join
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -153,8 +152,9 @@ class _SendEmailMixin:
     def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm) -> str:
         return _(
             "Thank you for submitting this form. "
-            "A copy of this receipt has been sent to %(recipient_names)s"
-        ) % dict(recipient_names=join(form.mail_recipient_names, ", "))
+            "Your harbour dues form has now been received by the port authority "
+            "and the Greenlandic Tax Authority."
+        )
 
 
 class HarborDuesFormCreateView(

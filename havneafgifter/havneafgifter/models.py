@@ -89,10 +89,6 @@ class MailRecipientList:
     def recipient_emails(self) -> list[str]:
         return [recipient.email for recipient in self.recipients]
 
-    @property
-    def recipient_names(self) -> list[str]:
-        return [recipient.name for recipient in self.recipients]
-
 
 class User(AbstractUser):
     cpr = models.CharField(
@@ -597,11 +593,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def mail_recipients(self) -> list[str]:
         recipient_list: MailRecipientList = MailRecipientList(self)
         return recipient_list.recipient_emails
-
-    @property
-    def mail_recipient_names(self) -> list[str]:
-        recipient_list: MailRecipientList = MailRecipientList(self)
-        return recipient_list.recipient_names
 
     @classmethod
     def _filter_user_permissions(
