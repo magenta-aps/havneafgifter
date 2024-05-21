@@ -36,7 +36,15 @@
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
-    {% bootstrap_form form %}
+    <div class="row">
+        <div class="col-9">
+            {% bootstrap_field form.port_of_call %}
+        </div>
+        <div class="col-3">
+            {% bootstrap_field form.no_port_of_call wrapper_class="pt-3 mt-3 mb-3" %}
+        </div>
+    </div>
+    {% bootstrap_form form exclude="port_of_call,no_port_of_call" %}
     {% bootstrap_button button_type="submit" content=_("Submit") %}
 </form>
 <script nonce="{{request.csp_nonce}}">

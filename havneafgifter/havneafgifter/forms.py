@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UsernameField
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.forms import (
+    BooleanField,
     CharField,
     ChoiceField,
     Form,
@@ -25,6 +26,7 @@ from havneafgifter.models import (
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
+    ShipType,
     imo_validator,
 )
 
@@ -58,10 +60,6 @@ class HTML5DateWidget(widgets.Input):
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
-    def __init__(self, user_is_ship=False, *args, **kwargs):
-        self.user_is_ship = user_is_ship
-        super().__init__(*args, **kwargs)
-
     class Meta:
         model = HarborDuesForm
         fields = [
@@ -100,14 +98,46 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=lambda form: not form.user_is_ship,
     )
 
+    no_port_of_call = BooleanField(
+        initial=False,
+        label=_("No port of call"),
+    )
+
+    def __init__(self, user_is_ship=False, *args, **kwargs):
+        self.user_is_ship = user_is_ship
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
+        # Handle "datetime" fields
         datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
-        if datetime_of_arrival > datetime_of_departure:
+        if (
+            (datetime_of_arrival is not None)
+            and (datetime_of_departure is not None)
+            and (datetime_of_arrival > datetime_of_departure)
+        ):
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
                 code="datetime_of_departure_before_datetime_of_arrival",
+            )
+        # Handle "port of call" fields
+        port_of_call = cleaned_data.get("port_of_call")
+        no_port_of_call = cleaned_data.get("no_port_of_call")
+        if (port_of_call is not None) and (no_port_of_call is True):
+            raise ValidationError(
+                _("Port of call cannot be filled if 'no port of call' is selected"),
+                code="port_of_call_chosen_but_no_port_of_call_is_true",
+            )
+        # Handle "no port of call" vs. "vessel type"
+        vessel_type = cleaned_data.get("vessel_type")
+        if (vessel_type != ShipType.CRUISE) and (no_port_of_call is True):
+            raise ValidationError(
+                _(
+                    "You can only choose 'no port of call' when the vessel is a "
+                    "cruise ship"
+                ),
+                code="no_port_of_call_cannot_be_true_for_non_cruise_ships",
             )
 
 
