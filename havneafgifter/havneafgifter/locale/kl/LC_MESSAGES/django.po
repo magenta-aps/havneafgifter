@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-21 12:52-0100\n"
+"POT-Creation-Date: 2024-05-21 13:13-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -533,14 +533,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
-msgstr ""
-
-#: havneafgifter/tests/test_views.py havneafgifter/views.py
-msgid "Thanks"
-msgstr ""
-
-#: havneafgifter/views.py
-msgid "Email sent"
 msgstr ""
 
 #: havneafgifter/views.py
