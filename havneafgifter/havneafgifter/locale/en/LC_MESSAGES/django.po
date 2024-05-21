@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-17 07:33-0100\n"
+"POT-Creation-Date: 2024-05-21 13:13-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,7 +27,6 @@ msgid "Calculate tax"
 msgstr ""
 
 #: havneafgifter/admin.py
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Send email"
 msgstr ""
 
@@ -71,6 +70,10 @@ msgstr ""
 msgid ""
 "The total number of passengers does not match the sum of passengers by each "
 "nationality"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Tax Authority"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -417,8 +420,8 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-msgid "Continue"
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/error.html
@@ -457,10 +460,6 @@ msgid "Harbour Dues/Port Tax"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Create"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "IMO numbers should be 7 digits"
 msgstr ""
 
@@ -491,6 +490,10 @@ msgstr ""
 msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+msgid "Continue"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid ""
 "Cruise Ships: Port Tax, Passenger Tax (\"Pax Tax\") and Environmental and "
@@ -509,14 +512,12 @@ msgstr ""
 msgid "Submit new form"
 msgstr ""
 
-#: havneafgifter/tests/test_views.py havneafgifter/views.py
-msgid "Thanks"
-msgstr ""
-
-#: havneafgifter/views.py
-msgid "Email sent"
-msgstr ""
-
 #: havneafgifter/views.py
 msgid "Error when sending email"
+msgstr ""
+
+#: havneafgifter/views.py
+msgid ""
+"Thank you for submitting this form. Your harbour dues form has now been "
+"received by the port authority and the Greenlandic Tax Authority."
 msgstr ""

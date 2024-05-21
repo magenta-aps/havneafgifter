@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-17 07:33-0100\n"
+"POT-Creation-Date: 2024-05-21 13:13-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,6 @@ msgid "Calculate tax"
 msgstr "Beregn havneafgift"
 
 #: havneafgifter/admin.py
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Send email"
 msgstr "Send email"
 
@@ -76,6 +75,10 @@ msgid ""
 msgstr ""
 "Det samlede antal passagerer stemmer ikke med summen af antal passagerer af "
 "hver nationalitet"
+
+#: havneafgifter/models.py
+msgid "Tax Authority"
+msgstr "Skattestyrelsen"
 
 #: havneafgifter/models.py
 msgid "Freighter"
@@ -246,10 +249,8 @@ msgid "Email address"
 msgstr "Email-adresse"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Port authority company name"
 msgid "Port authorities"
-msgstr "Havnemyndighedens navn"
+msgstr "Havnemyndigheder"
 
 #: havneafgifter/models.py
 msgid "Port authority company name"
@@ -436,9 +437,9 @@ msgstr ""
 "passagerer, der ilandsættes."
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-msgid "Continue"
-msgstr "Videre"
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
+msgstr "Indsend"
 
 #: havneafgifter/templates/havneafgifter/error/error.html
 #, fuzzy
@@ -480,10 +481,6 @@ msgid "Harbour Dues/Port Tax"
 msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Create"
-msgstr "Opret"
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "IMO numbers should be 7 digits"
 msgstr ""
 
@@ -516,6 +513,10 @@ msgstr "Log ind med MitID"
 msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
 msgstr "Krydstogtskibe: passagerafgift"
 
+#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+msgid "Continue"
+msgstr "Videre"
+
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid ""
 "Cruise Ships: Port Tax, Passenger Tax (\"Pax Tax\") and Environmental and "
@@ -534,16 +535,16 @@ msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
-msgstr ""
-
-#: havneafgifter/tests/test_views.py havneafgifter/views.py
-msgid "Thanks"
-msgstr "Tak"
-
-#: havneafgifter/views.py
-msgid "Email sent"
-msgstr "Email sendt"
+msgstr "Indsend ny blanket"
 
 #: havneafgifter/views.py
 msgid "Error when sending email"
 msgstr "Fejl under afsendelse af email"
+
+#: havneafgifter/views.py
+msgid ""
+"Thank you for submitting this form. Your harbour dues form has now been "
+"received by the port authority and the Greenlandic Tax Authority."
+msgstr ""
+"Tak fordi du indsendte denne blanket. Din blanket er nu modtaget af "
+"havnemyndigheden og den grønlandske skattestyrelse."

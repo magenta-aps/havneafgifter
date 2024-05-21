@@ -12,6 +12,7 @@ from havneafgifter.models import (
     DisembarkmentSite,
     EmailMessage,
     HarborDuesForm,
+    MailRecipientList,
     Municipality,
     Port,
     PortAuthority,
@@ -315,49 +316,6 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         instance.save()
         self.assertEqual(instance.mail_subject, f"{instance.form_id}")
 
-    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
-    def test_mail_recipients(self):
-        instance = HarborDuesForm(**self.harbor_dues_form_data)
-        self.assertListEqual(
-            instance.mail_recipients,
-            [
-                instance.port_of_call.portauthority.email,
-                instance.shipping_agent.email,
-                settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
-            ],
-        )
-
-    def test_mail_recipients_excludes_missing_port_authority(self):
-        instance = HarborDuesForm(**self.harbor_dues_form_data)
-        instance.port_of_call.portauthority = None
-        self._assert_mail_recipients_property_logs_message(
-            instance,
-            "is not linked to a port authority, excluding from mail recipients",
-        )
-
-    def test_mail_recipients_excludes_missing_shipping_agent(self):
-        instance = HarborDuesForm(**self.harbor_dues_form_data)
-        instance.shipping_agent = None
-        self._assert_mail_recipients_property_logs_message(
-            instance,
-            "is not linked to a shipping agent, excluding from mail recipients",
-        )
-
-    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN=None)
-    def test_mail_recipients_excludes_missing_skattestyrelsen_email(self):
-        instance = HarborDuesForm(**self.harbor_dues_form_data)
-        self._assert_mail_recipients_property_logs_message(
-            instance,
-            "Skattestyrelsen email not configured, excluding from mail recipients",
-        )
-
-    def _assert_mail_recipients_property_logs_message(self, instance, message):
-        with self.assertLogs() as logged:
-            instance.mail_recipients
-            self.assertTrue(
-                any(record.message.endswith(message) for record in logged.records)
-            )
-
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
     def test_calculate_tax(self):
@@ -392,3 +350,56 @@ class TestDisembarkmentSite(TestCase):
             municipality=Municipality.AVANNAATA,
         )
         self.assertEqual(str(instance), "Naturen (Avannaata)")
+
+
+class TestMailRecipientList(HarborDuesFormMixin, TestCase):
+    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
+    def test_mail_recipients(self):
+        instance = self._get_instance()
+        self.assertListEqual(
+            instance.recipient_emails,
+            [
+                instance.form.port_of_call.portauthority.email,
+                instance.form.shipping_agent.email,
+                settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
+            ],
+        )
+
+    def test_mail_recipients_excludes_missing_port_authority(self):
+        def clear_port_authority(form):
+            form.port_of_call.portauthority = None
+            return form
+
+        self._assert_mail_recipients_property_logs_message(
+            "is not linked to a port authority, excluding from mail recipients",
+            clear_port_authority,
+        )
+
+    def test_mail_recipients_excludes_missing_shipping_agent(self):
+        def clear_shipping_agent(form):
+            form.shipping_agent = None
+            return form
+
+        self._assert_mail_recipients_property_logs_message(
+            "is not linked to a shipping agent, excluding from mail recipients",
+            clear_shipping_agent,
+        )
+
+    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN=None)
+    def test_mail_recipients_excludes_missing_skattestyrelsen_email(self):
+        self._assert_mail_recipients_property_logs_message(
+            "Skattestyrelsen email not configured, excluding from mail recipients",
+        )
+
+    def _get_instance(self, modifier=None):
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        if modifier:
+            form = modifier(form)
+        return MailRecipientList(form)
+
+    def _assert_mail_recipients_property_logs_message(self, message, modifier=None):
+        with self.assertLogs() as logged:
+            self._get_instance(modifier=modifier)
+            self.assertTrue(
+                any(record.message.endswith(message) for record in logged.records)
+            )

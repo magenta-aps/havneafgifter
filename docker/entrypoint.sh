@@ -65,9 +65,12 @@ python manage.py collectstatic --no-input --clear
 
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
-  python manage.py makemessages --locale=kl --no-obsolete --add-location file
-  python manage.py makemessages --locale=da --no-obsolete --add-location file
-  python manage.py makemessages --locale=en --no-obsolete --add-location file
+  python manage.py makemessages --locale=kl --no-obsolete --add-location file --domain django
+  python manage.py makemessages --locale=kl --no-obsolete --add-location file --domain djangojs --extension=js,html
+  python manage.py makemessages --locale=da --no-obsolete --add-location file --domain django
+  python manage.py makemessages --locale=da --no-obsolete --add-location file --domain djangojs --extension=js,html
+  python manage.py makemessages --locale=en --no-obsolete --add-location file --domain django
+  python manage.py makemessages --locale=en --no-obsolete --add-location file --domain djangojs --extension=js,html
 fi
 if [ "${COMPILEMESSAGES,,}" = true ]; then
   echo 'compiling messages'
