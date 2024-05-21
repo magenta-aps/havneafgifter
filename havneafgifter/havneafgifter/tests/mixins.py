@@ -30,7 +30,9 @@ class HarborDuesFormMixin:
         cls.port = Port.objects.create(
             name="Nordhavn", portauthority=cls.port_authority
         )
-        cls.shipping_agent = ShippingAgent.objects.create(name="Agent")
+        cls.shipping_agent = ShippingAgent.objects.create(
+            name="Agent", email="shipping@example.org"
+        )
 
         cls.port_authority_user = User.objects.create(
             username="port_auth", port_authority=cls.port_authority

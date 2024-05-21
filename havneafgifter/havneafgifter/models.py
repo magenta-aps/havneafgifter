@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List
@@ -28,6 +29,68 @@ from django_countries import countries
 from havneafgifter.data import DateTimeRange
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class MailRecipient:
+    name: str
+    email: str
+    object: models.Model | None
+
+
+class MailRecipientList:
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
+        self.form = form
+        self.recipients = []
+
+        if form.port_of_call.portauthority and form.port_of_call.portauthority.email:
+            self.recipients.append(
+                MailRecipient(
+                    name=form.port_of_call.portauthority.name,
+                    email=form.port_of_call.portauthority.email,
+                    object=form.port_of_call.portauthority,
+                )
+            )
+        else:
+            logger.info(
+                "%r is not linked to a port authority, excluding from mail recipients",
+                self,
+            )
+
+        if form.shipping_agent and form.shipping_agent.email:
+            self.recipients.append(
+                MailRecipient(
+                    name=form.shipping_agent.name,
+                    email=form.shipping_agent.email,
+                    object=form.shipping_agent,
+                )
+            )
+        else:
+            logger.info(
+                "%r is not linked to a shipping agent, excluding from mail recipients",
+                self,
+            )
+
+        if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
+            self.recipients.append(
+                MailRecipient(
+                    name=_("Tax Authority"),
+                    email=settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
+                    object=None,
+                )
+            )
+        else:
+            logger.info(
+                "Skattestyrelsen email not configured, excluding from mail recipients",
+            )
+
+    @property
+    def recipient_emails(self) -> list[str]:
+        return [recipient.email for recipient in self.recipients]
+
+    @property
+    def recipient_names(self) -> list[str]:
+        return [recipient.name for recipient in self.recipients]
 
 
 class User(AbstractUser):
@@ -531,32 +594,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def mail_recipients(self) -> list[str]:
-        recipients: list[str] = []
+        recipient_list: MailRecipientList = MailRecipientList(self)
+        return recipient_list.recipient_emails
 
-        if self.port_of_call.portauthority:
-            recipients.append(self.port_of_call.portauthority.email)
-        else:
-            logger.info(
-                "%r is not linked to a port authority, excluding from mail recipients",
-                self,
-            )
-
-        if self.shipping_agent:
-            recipients.append(self.shipping_agent.email)
-        else:
-            logger.info(
-                "%r is not linked to a shipping agent, excluding from mail recipients",
-                self,
-            )
-
-        if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
-            recipients.append(settings.EMAIL_ADDRESS_SKATTESTYRELSEN)
-        else:
-            logger.info(
-                "Skattestyrelsen email not configured, excluding from mail recipients",
-            )
-
-        return recipients
+    @property
+    def mail_recipient_names(self) -> list[str]:
+        recipient_list: MailRecipientList = MailRecipientList(self)
+        return recipient_list.recipient_names
 
     @classmethod
     def _filter_user_permissions(
