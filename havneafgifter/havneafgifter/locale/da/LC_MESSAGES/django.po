@@ -313,6 +313,12 @@ msgid "Calculated harbour tax"
 msgstr "Beregnet havneafgift"
 
 #: havneafgifter/models.py
+#, fuzzy
+#| msgid "Port of call"
+msgid "no port of call"
+msgstr "Ingen ankomsthavn"
+
+#: havneafgifter/models.py
 #, python-format
 msgid ""
 "%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "

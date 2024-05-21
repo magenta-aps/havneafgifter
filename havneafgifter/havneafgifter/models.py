@@ -536,10 +536,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     def __str__(self) -> str:
+        port_of_call = self.port_of_call or _("no port of call")
         return (
-            f"{self.vessel_name}, {self.port_of_call} "
+            f"{self.vessel_name}, {port_of_call} "
             f"({self.datetime_of_arrival} - {self.datetime_of_departure})"
         )
+
+    def _any_is_none(self, *vals) -> bool:
+        return any(val is None for val in vals)
 
     @property
     def duration_in_days(self) -> int:
@@ -565,6 +569,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def calculate_harbour_tax(
         self, save: bool = True
     ) -> Dict[str, Decimal | List[dict]]:
+        if self._any_is_none(
+            self.port_of_call,
+            self.datetime_of_arrival,
+            self.datetime_of_departure,
+        ):
+            return {"harbour_tax": None, "details": []}
+
         taxrates = TaxRates.objects.filter(
             Q(start_datetime__isnull=True)
             | Q(start_datetime__lte=self.datetime_of_departure),
@@ -765,7 +776,7 @@ class CruiseTaxForm(HarborDuesForm):
         self.calculate_disembarkment_tax(save=save)
 
     def calculate_disembarkment_tax(self, save: bool = True):
-        disembarkment_date = self.datetime_of_arrival
+        disembarkment_date = self.datetime_of_arrival or self.date
         taxrate = TaxRates.objects.filter(
             Q(start_datetime__isnull=True) | Q(start_datetime__lte=disembarkment_date),
             Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
@@ -800,6 +811,13 @@ class CruiseTaxForm(HarborDuesForm):
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
     def calculate_passenger_tax(self, save: bool = True) -> Dict[str, Decimal]:
+        if self._any_is_none(
+            self.number_of_passengers,
+            self.datetime_of_arrival,
+            self.datetime_of_departure,
+        ):
+            return {"passenger_tax": None, "taxrate": Decimal("0")}
+
         arrival_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
             Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),

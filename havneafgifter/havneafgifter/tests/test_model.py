@@ -4,6 +4,7 @@ from unittest.mock import ANY, patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import translation
 from unittest_parametrize import ParametrizedTestCase, parametrize
@@ -204,17 +205,90 @@ class TestPort(TestCase):
 class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     maxDiff = None
 
-    def test_str(self):
+    @parametrize(
+        "vessel_type,field,required",
+        [
+            (ShipType.FISHER, "port_of_call", True),
+            (ShipType.CRUISE, "port_of_call", False),
+            (ShipType.FISHER, "gross_tonnage", True),
+            (ShipType.CRUISE, "gross_tonnage", False),
+            (ShipType.FISHER, "datetime_of_arrival", True),
+            (ShipType.CRUISE, "datetime_of_arrival", False),
+            (ShipType.FISHER, "datetime_of_departure", True),
+            (ShipType.CRUISE, "datetime_of_departure", False),
+        ],
+    )
+    def test_fields_only_nullable_for_cruise_ships(self, vessel_type, field, required):
+        instance = HarborDuesForm(vessel_type=vessel_type)
+        setattr(instance, field, None)
+        if required:
+            with self.assertRaises(IntegrityError):
+                instance.save()
+        else:
+            instance.save()
+
+    @parametrize(
+        "arrival,departure,should_fail",
+        [
+            (
+                None,
+                None,
+                False,
+            ),
+            (
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2020, 1, 31, 0, 0, 0, tzinfo=timezone.utc),
+                False,
+            ),
+            (
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                None,
+                True,
+            ),
+            (
+                None,
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                True,
+            ),
+        ],
+    )
+    def test_datetime_of_arrival_and_departure_constraints(
+        self, arrival, departure, should_fail
+    ):
+        instance = HarborDuesForm(
+            vessel_type=ShipType.CRUISE,
+            datetime_of_arrival=arrival,
+            datetime_of_departure=departure,
+        )
+        if should_fail:
+            with self.assertRaises(IntegrityError):
+                instance.save()
+        else:
+            instance.save()
+
+    @parametrize(
+        "port_of_call,expected_str",
+        [
+            (
+                Port(name="Nordhavn"),
+                "Mary, Nordhavn "
+                "(2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
+            ),
+            (
+                None,
+                "Mary, no port of call "
+                "(2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
+            ),
+        ],
+    )
+    def test_str(self, port_of_call, expected_str):
         instance = HarborDuesForm(
             vessel_name="Mary",
-            port_of_call=Port(name="Nordhavn"),
+            port_of_call=port_of_call,
             datetime_of_arrival=datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
             datetime_of_departure=datetime(2020, 1, 31, 0, 0, 0, tzinfo=timezone.utc),
         )
-        self.assertEqual(
-            str(instance),
-            "Mary, Nordhavn (2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
-        )
+        self.assertEqual(str(instance), expected_str)
 
     def test_duration_in_days(self):
         self.assertEqual(self.harbor_dues_form.duration_in_days, 31)
