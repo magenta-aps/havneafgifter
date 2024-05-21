@@ -149,7 +149,7 @@ class _SendEmailMixin:
             ),
         )
 
-    def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm) -> str:
+    def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm):
         return _(
             "Thank you for submitting this form. "
             "Your harbour dues form has now been received by the port authority "

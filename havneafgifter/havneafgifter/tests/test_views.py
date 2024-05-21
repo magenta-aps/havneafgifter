@@ -26,8 +26,8 @@ from havneafgifter.models import (
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
     EnvironmentalTaxCreateView,
-    HarborDuesFormListView,
     HarborDuesFormCreateView,
+    HarborDuesFormListView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
