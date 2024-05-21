@@ -44,7 +44,11 @@ class MailRecipientList:
         self.form = form
         self.recipients = []
 
-        if form.port_of_call.portauthority and form.port_of_call.portauthority.email:
+        if (
+            form.port_of_call
+            and form.port_of_call.portauthority
+            and form.port_of_call.portauthority.email
+        ):
             self.recipients.append(
                 MailRecipient(
                     name=form.port_of_call.portauthority.name,
@@ -545,15 +549,27 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def _any_is_none(self, *vals) -> bool:
         return any(val is None for val in vals)
 
-    @property
-    def duration_in_days(self) -> int:
-        range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
-        return range.started_days
+    def _period_is_not_none(self):
+        return (
+            self.datetime_of_arrival is not None
+            and self.datetime_of_departure is not None
+        )
 
     @property
-    def duration_in_weeks(self) -> int:
-        range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
-        return range.started_weeks
+    def duration_in_days(self) -> int | None:
+        if self._period_is_not_none():
+            range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
+            return range.started_days
+        else:
+            return None
+
+    @property
+    def duration_in_weeks(self) -> int | None:
+        if self._period_is_not_none():
+            range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
+            return range.started_weeks
+        else:
+            return None
 
     @property
     def form_id(self):
