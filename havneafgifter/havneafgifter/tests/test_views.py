@@ -9,7 +9,6 @@ from django.forms import BaseFormSet
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
@@ -28,10 +27,12 @@ from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormListView,
+    HarborDuesFormCreateView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
     _CruiseTaxFormSetView,
+    _SendEmailMixin,
 )
 
 
@@ -130,7 +131,46 @@ class TestPostLoginView(TestCase):
         )
 
 
+class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+
+    @parametrize(
+        "status,expected_message_class",
+        [
+            (0, messages.ERROR),
+            (1, messages.SUCCESS),
+        ],
+    )
+    def test_send_email_produces_message(self, status, expected_message_class):
+        instance = _SendEmailMixin()
+        with patch("havneafgifter.views.messages.add_message") as mock_add_message:
+            with patch(
+                "havneafgifter.models.HarborDuesForm.send_email",
+                return_value=(Mock(), status),
+            ) as mock_send_email:
+                instance._send_email(
+                    self.harbor_dues_form,
+                    self.request_factory.post("/"),
+                )
+                mock_send_email.assert_called_once_with()
+                mock_add_message.assert_called_once_with(
+                    ANY, expected_message_class, ANY
+                )
+
+
 class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+    view_class = HarborDuesFormCreateView
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = cls.view_class()
+        cls.user = User.objects.create(username="Test Testersen")
+
     @parametrize(
         "vessel_type,model_class,next_view_name",
         [
@@ -172,6 +212,26 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         soup = BeautifulSoup(response.content, "html.parser")
         field = soup.find("input", attrs={"name": "vessel_imo"})
         self.assertEqual(field.attrs.get("value"), self.ship_user.username)
+
+    def test_sends_email_and_displays_confirmation_message_on_submit(self):
+        """When a form is completed (for other vessel types than cruise ships),
+        the receipt must be emailed to the relevant recipients, and a confirmation
+        message must be displayed to the user submitting the form.
+        """
+        with patch.object(self.instance, "_send_email") as mock_send_email:
+            request = self._post_form(self.harbor_dues_form_data_pk)
+            self.instance.post(request)
+            # Assert that we call the `_send_email` method as expected
+            mock_send_email.assert_called_once_with(
+                HarborDuesForm.objects.latest("pk"),
+                request,
+            )
+
+    def _post_form(self, data):
+        request = self.request_factory.post("", data=data)
+        request.user = self.user
+        self.instance.request = request
+        return request
 
 
 class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
@@ -357,16 +417,16 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
 
     def test_form_valid_creates_objects(self):
         # Arrange
-        self._post_formset(
+        request = self._post_formset(
             # Update existing entry for first disembarkment site (index 0)
             {"number_of_passengers": 42},
             # Add new entry for next disembarkment site (index 1)
             {"number_of_passengers": 42},
         )
-        with patch("havneafgifter.views.messages.add_message") as mock_add_message:
+        with patch.object(self.instance, "_send_email") as mock_send_email:
             # Act: trigger DB insert logic
             self.instance.form_valid(self.instance.get_form())
-            # Assert: verify that the specified `PassengersByCountry` objects are
+            # Assert: verify that the specified `Disembarkment` objects are
             # created.
             self.assertQuerySetEqual(
                 self.cruise_tax_form.disembarkment_set.values(
@@ -386,8 +446,11 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                     ]
                 ],
             )
-            # Assert: verify that we displayed a "thank you" message
-            mock_add_message.assert_called_once_with(ANY, messages.SUCCESS, _("Thanks"))
+            # Assert: verify that we call the `_send_email` method as expected
+            mock_send_email.assert_called_once_with(
+                self.instance._cruise_tax_form,
+                request,
+            )
 
 
 class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
@@ -423,31 +486,6 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
         self.view.kwargs = {"pk": -1}
         self.view.get(self.request_factory.get(""))
         self.assertIsNone(self.view.get_object())
-
-    @parametrize(
-        "status,expected_message_class",
-        [
-            (0, messages.ERROR),
-            (1, messages.SUCCESS),
-        ],
-    )
-    def test_post_sends_email(self, status, expected_message_class):
-        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
-        with patch("havneafgifter.views.messages.add_message") as mock_add_message:
-            with patch(
-                "havneafgifter.models.HarborDuesForm.send_email",
-                return_value=(Mock(), status),
-            ) as mock_send_email:
-                self.view.post(self.request_factory.post(""))
-                mock_send_email.assert_called_once_with()
-                mock_add_message.assert_called_once_with(
-                    ANY, expected_message_class, ANY
-                )
-
-    def test_post_returns_404(self):
-        self.view.kwargs = {"pk": -1}
-        response = self.view.post(self.request_factory.post(""))
-        self.assertIsInstance(response, HttpResponseNotFound)
 
 
 class TestPreviewPDFView(HarborDuesFormMixin, TestCase):

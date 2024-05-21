@@ -13,6 +13,7 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.template.defaultfilters import join
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -132,8 +133,32 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
+class _SendEmailMixin:
+    def _send_email(
+        self,
+        form: HarborDuesForm | CruiseTaxForm,
+        request,
+    ) -> None:
+        email_message, status = form.send_email()
+        messages.add_message(
+            request,
+            messages.SUCCESS if status == 1 else messages.ERROR,
+            (
+                self._get_success_message(form)
+                if status == 1
+                else _("Error when sending email")
+            ),
+        )
+
+    def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm) -> str:
+        return _(
+            "Thank you for submitting this form. "
+            "A copy of this receipt has been sent to %(recipient_names)s"
+        ) % dict(recipient_names=join(form.mail_recipient_names, ", "))
+
+
 class HarborDuesFormCreateView(
-    LoginRequiredMixin, CSPViewMixin, HavneafgiftView, CreateView
+    LoginRequiredMixin, CSPViewMixin, _SendEmailMixin, HavneafgiftView, CreateView
 ):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
@@ -173,9 +198,10 @@ class HarborDuesFormCreateView(
             )
         else:
             # User is all done filling out data for this vessel
-            # Go to detail view to display result.
             harbor_dues_form.save()
-            messages.add_message(self.request, messages.SUCCESS, _("Thanks"))
+            # Send email to relevant recipients
+            self._send_email(harbor_dues_form, self.request)
+            # Go to detail view to display result.
             return HttpResponseRedirect(
                 reverse(
                     "havneafgifter:receipt_detail_html",
@@ -307,7 +333,7 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         ]
 
 
-class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
+class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
     template_name = "havneafgifter/environmental_tax_create.html"
     form_class = DisembarkmentForm
 
@@ -338,9 +364,10 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
             number_of_passengers=0,
         ).delete()
 
-        # User is all done filling out data for cruise ship.
+        # User is now all done filling out data for cruise ship.
+        # Send email to relevant recipients.
+        self._send_email(self._cruise_tax_form, self.request)
         # Go to detail view to display result.
-        messages.add_message(self.request, messages.SUCCESS, _("Thanks"))
         return HttpResponseRedirect(
             reverse(
                 "havneafgifter:receipt_detail_html",
@@ -403,26 +430,6 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
         receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
 
         return HttpResponse(receipt.html)
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_object()
-        if form is None:
-            return HttpResponseNotFound(
-                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
-            )
-        else:
-            email_message, status = form.send_email()
-            messages.add_message(
-                request,
-                messages.SUCCESS if status == 1 else messages.ERROR,
-                _("Email sent") if status == 1 else _("Error when sending email"),
-            )
-            return HttpResponseRedirect(
-                reverse(
-                    "havneafgifter:receipt_detail_html",
-                    kwargs={"pk": form.pk},
-                )
-            )
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
