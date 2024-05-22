@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+import socket
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -546,7 +547,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             content=receipt.pdf,
             mimetype="application/pdf",
         )
-        result = msg.send(fail_silently=False)
+        try:
+            result = msg.send(fail_silently=False)
+        except socket.gaierror:
+            result = 0
         return msg, result
 
     @property
