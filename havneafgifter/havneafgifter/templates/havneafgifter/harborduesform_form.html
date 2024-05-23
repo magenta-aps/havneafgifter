@@ -12,9 +12,9 @@
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     $(document).ready(function () {
+        // Update text on submit button depending on the selected vessel type
         const vesselTypeSelect = $("select#id_vessel_type");
         const submitButton = $("button[type=submit]");
-
         vesselTypeSelect.on("change", function () {
             const vesselType = $(this).val();
             let buttonText = gettext("Submit");
@@ -24,6 +24,25 @@
             }
 
             submitButton.text(buttonText);
+        });
+
+        // Disable "port of call", etc. inputs, if "no port of call" is selected
+        const noPortOfCallCheckbox = $("input#id_no_port_of_call");
+        const portOfCallSelect = $("select#id_port_of_call")
+        const datetimeInputs = $("input#id_datetime_of_arrival, input#id_datetime_of_departure");
+        const grossTonnageInput = $("input#id_gross_tonnage");
+        noPortOfCallCheckbox.on("change", function () {
+            const disabled = $(this).is(":checked") ? "disabled" : null;
+
+            portOfCallSelect.attr("disabled", disabled);
+            datetimeInputs.attr("disabled", disabled);
+            grossTonnageInput.attr("disabled", disabled);
+
+            if (disabled) {
+                portOfCallSelect.val(null);
+                datetimeInputs.val(null);
+                grossTonnageInput.val(null);
+            }
         });
     });
 })();
