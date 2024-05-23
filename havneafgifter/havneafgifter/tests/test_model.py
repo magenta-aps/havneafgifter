@@ -320,6 +320,9 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             self.harbor_dues_form.duration_in_weeks, expected_duration_in_days
         )
 
+    def test_has_port_of_call(self):
+        self.assertTrue(self.harbor_dues_form.has_port_of_call)
+
     def test_calculate_tax(self):
         self.harbor_dues_form.calculate_tax(save=True)
         self.assertIsNotNone(self.harbor_dues_form.harbour_tax)
@@ -416,6 +419,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
 
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
+    def test_has_port_of_call(self):
+        self.assertTrue(self.cruise_tax_form.has_port_of_call)
+        self.assertFalse(self.cruise_tax_form_without_port_of_call.has_port_of_call)
+
     def test_calculate_tax(self):
         self.cruise_tax_form.calculate_tax(save=True)
         self.assertIsNotNone(self.cruise_tax_form.harbour_tax)

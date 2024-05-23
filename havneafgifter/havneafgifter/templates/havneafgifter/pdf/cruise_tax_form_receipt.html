@@ -33,6 +33,7 @@ Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintena
     </td>
 </tr>
 
+{% if form.has_port_of_call %}
 <tr>
     <th colspan="4">
         Umiarsualivimmiinnermut akitsuut / Port Tax
@@ -76,10 +77,12 @@ Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintena
         {{ form.harbour_tax }} DKK
     </td>
 </tr>
+{% endif %}
 {% endblock %}
 
 {% block additional_tables %}
 <div class="col-12">
+    {% if form.has_port_of_call %}
     {# Item: total number of passengers, total pax tax #}
     <h2>
         Ilaasunut akitsuut
@@ -149,6 +152,7 @@ Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintena
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 
     {# List: disembarkments #}
     <h2>
@@ -246,6 +250,7 @@ Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintena
     </h1>
     <table class="table table-striped">
         <tbody>
+            {% if form.has_port_of_call %}
             <tr>
                 <td colspan="3">
                     Umiarsualivimmiinnermut akiliut
@@ -266,6 +271,7 @@ Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintena
                     {{ form.pax_tax }} DKK
                 </td>
             </tr>
+            {% endif %}
             <tr>
                 <td colspan="3">
                     Avatangiisinut iluarsaassinermullu akitsuut

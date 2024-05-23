@@ -98,10 +98,23 @@ class TestCruiseTaxFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
     def test_renders_pdf(self):
         self.assert_content_is_pdf(self.instance.pdf)
 
-    def get_context_data(self):
+    def test_get_context_data(self):
         result: dict = self.instance.get_context_data()
         self.assertListEqual(list(result.keys()), ["disembarkment_tax_items"])
         self.assertListEqual(
             result["disembarkment_tax_items"],
             self.cruise_tax_form.calculate_disembarkment_tax()["details"],
         )
+
+
+class TestCruiseTaxFormReceiptWithoutPortOfCall(
+    HarborDuesFormMixin, _PDFMixin, TestCase
+):
+    def setUp(self):
+        super().setUp()
+        self.instance: CruiseTaxFormReceipt = CruiseTaxFormReceipt(
+            self.cruise_tax_form_without_port_of_call
+        )
+
+    def test_renders_pdf(self):
+        self.assert_content_is_pdf(self.instance.pdf)

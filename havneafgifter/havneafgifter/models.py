@@ -584,6 +584,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         with translation.override("en"):
             return f"{self.pk:03}{date(self.date, 'bY').upper()}"
 
+    @property
+    def has_port_of_call(self) -> bool:
+        if self.vessel_type == ShipType.CRUISE:
+            return self.port_of_call is not None
+        else:
+            # Non-cruise ships always have a port of call
+            return True
+
     def calculate_tax(self, save: bool = True):
         self.calculate_harbour_tax(save=save)
 
