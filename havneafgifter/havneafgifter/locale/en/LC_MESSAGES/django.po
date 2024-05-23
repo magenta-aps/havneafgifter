@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-21 13:13-0100\n"
+"POT-Creation-Date: 2024-05-23 13:51-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,27 @@ msgid "IMO-number"
 msgstr ""
 
 #: havneafgifter/forms.py
+msgid "No port of call"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Please supply either both arrival and departure dates, or none of them"
+msgstr ""
+
+#: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Port of call cannot be filled if 'no port of call' is selected"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Port of call must be filled if 'no port of call' is not selected"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "You can only choose 'no port of call' when the vessel is a cruise ship"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -70,6 +90,10 @@ msgstr ""
 msgid ""
 "The total number of passengers does not match the sum of passengers by each "
 "nationality"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Authority for vessels without port of call"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -412,6 +436,7 @@ msgid "Source code"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
 msgstr ""
 
