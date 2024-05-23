@@ -5,7 +5,6 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -558,7 +557,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     @property
     def duration_in_days(self) -> int | None:
         if self._period_is_not_none():
-            range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
+            range = DateTimeRange(
+                self.datetime_of_arrival,  # type: ignore
+                self.datetime_of_departure,  # type: ignore
+            )
             return range.started_days
         else:
             return None
@@ -566,7 +568,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     @property
     def duration_in_weeks(self) -> int | None:
         if self._period_is_not_none():
-            range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
+            range = DateTimeRange(
+                self.datetime_of_arrival,  # type: ignore
+                self.datetime_of_departure,  # type: ignore
+            )
             return range.started_weeks
         else:
             return None
@@ -584,7 +589,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     def calculate_harbour_tax(
         self, save: bool = True
-    ) -> Dict[str, Decimal | List[dict]]:
+    ) -> dict[str, Decimal | list[dict] | None]:
         if self._any_is_none(
             self.port_of_call,
             self.datetime_of_arrival,
@@ -602,18 +607,19 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         details = []
         for taxrate in taxrates:
             datetime_range = taxrate.get_overlap(
-                self.datetime_of_arrival,
-                self.datetime_of_departure,
+                self.datetime_of_arrival,  # type: ignore
+                self.datetime_of_departure,  # type: ignore
             )
             port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
-                port=self.port_of_call,
+                port=self.port_of_call,  # type: ignore
                 vessel_type=self.vessel_type,
-                gross_ton=self.gross_tonnage,
+                gross_ton=self.gross_tonnage,  # type: ignore
             )
             range_port_tax = Decimal(0)
             if port_taxrate is not None:
                 gross_tonnage: int = max(
-                    self.gross_tonnage, port_taxrate.round_gross_ton_up_to
+                    self.gross_tonnage,  # type: ignore
+                    port_taxrate.round_gross_ton_up_to,
                 )
                 if self.vessel_type in (
                     ShipType.FREIGHTER,
@@ -751,13 +757,17 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             (
                 action in ("view", "change")
                 and (
-                    user.port_authority == self.port_of_call.portauthority
-                    or user.shipping_agent == self.shipping_agent
+                    (self.port_of_call is None)
+                    or (user.port_authority == self.port_of_call.portauthority)
+                    or (user.shipping_agent == self.shipping_agent)
                 )
             )
             or (
                 action in ("approve", "reject", "invoice")
-                and (user.port_authority == self.port_of_call.portauthority)
+                and (
+                    (self.port_of_call is None)
+                    or (user.port_authority == self.port_of_call.portauthority)
+                )
             )
         )
 
@@ -826,7 +836,7 @@ class CruiseTaxForm(HarborDuesForm):
             self.save(update_fields=("disembarkment_tax",))
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
-    def calculate_passenger_tax(self, save: bool = True) -> Dict[str, Decimal]:
+    def calculate_passenger_tax(self, save: bool = True) -> dict[str, Decimal | None]:
         if self._any_is_none(
             self.number_of_passengers,
             self.datetime_of_arrival,
@@ -840,7 +850,7 @@ class CruiseTaxForm(HarborDuesForm):
             Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
         ).first()
         rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
-        pax_tax: Decimal = self.number_of_passengers * rate
+        pax_tax: Decimal = self.number_of_passengers * rate  # type: ignore
         if save:
             self.pax_tax = pax_tax
             self.save(update_fields=("pax_tax",))
