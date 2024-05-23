@@ -287,6 +287,9 @@ EMAIL_USE_TLS = bool(strtobool(os.environ.get("EMAIL_USE_TLS", "False")))
 EMAIL_USE_SSL = bool(strtobool(os.environ.get("EMAIL_USE_SSL", "False")))
 EMAIL_SENDER = os.environ.get("EMAIL_SENDER", "noreply@nanoq.gl")
 EMAIL_ADDRESS_SKATTESTYRELSEN = os.environ.get("EMAIL_ADDRESS_SKATTESTYRELSEN")
+EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL = os.environ.get(
+    "EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL"
+)
 
 # django-csp
 CSP_DEFAULT_SRC = (

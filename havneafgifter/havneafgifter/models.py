@@ -56,10 +56,24 @@ class MailRecipientList:
                 )
             )
         else:
-            logger.info(
-                "%r is not linked to a port authority, excluding from mail recipients",
-                self,
-            )
+            if (
+                isinstance(form, CruiseTaxForm)
+                and not form.has_port_of_call
+                and settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL
+            ):
+                self.recipients.append(
+                    MailRecipient(
+                        name=gettext("Authority for vessels without port of call"),
+                        email=settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
+                        object=None,
+                    )
+                )
+            else:
+                logger.info(
+                    "%r is not linked to a port authority, excluding from "
+                    "mail recipients",
+                    self,
+                )
 
         if form.shipping_agent and form.shipping_agent.email:
             self.recipients.append(

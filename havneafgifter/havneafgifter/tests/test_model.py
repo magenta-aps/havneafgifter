@@ -470,6 +470,21 @@ class TestMailRecipientList(HarborDuesFormMixin, TestCase):
             ],
         )
 
+    @override_settings(
+        EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org",
+        EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL="ral@example.org",
+    )
+    def test_mail_recipients_falls_back_if_no_port_of_call(self):
+        instance = MailRecipientList(self.cruise_tax_form_without_port_of_call)
+        self.assertListEqual(
+            instance.recipient_emails,
+            [
+                settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
+                instance.form.shipping_agent.email,
+                settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
+            ],
+        )
+
     def test_mail_recipients_excludes_missing_port_authority(self):
         def clear_port_authority(form):
             form.port_of_call.portauthority = None
