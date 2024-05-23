@@ -99,6 +99,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     )
 
     no_port_of_call = BooleanField(
+        required=False,
         initial=False,
         label=_("No port of call"),
     )
@@ -109,9 +110,23 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+
         # Handle "datetime" fields
         datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
+        num_empty = len(
+            [val for val in (datetime_of_arrival, datetime_of_departure) if val is None]
+        )
+        # Either both datetime fields must be supplied, or none of them
+        if num_empty not in (0, 2):
+            raise ValidationError(
+                _(
+                    "Please supply either both arrival and departure dates, or "
+                    "none of them"
+                ),
+                code="either_both_or_no_datetime_fields_must_be_filled",
+            )
+        # Arrival datetime must be before departure datetime
         if (
             (datetime_of_arrival is not None)
             and (datetime_of_departure is not None)
@@ -121,16 +136,26 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 _("Date of departure cannot be before date of arrival"),
                 code="datetime_of_departure_before_datetime_of_arrival",
             )
+
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
         no_port_of_call = cleaned_data.get("no_port_of_call")
+        # "Port of call" cannot be set if "no port of call" is also set
         if (port_of_call is not None) and (no_port_of_call is True):
             raise ValidationError(
                 _("Port of call cannot be filled if 'no port of call' is selected"),
                 code="port_of_call_chosen_but_no_port_of_call_is_true",
             )
+        # And the opposite: "port of call" must be set if "no port of call" is not set
+        if (port_of_call is None) and (no_port_of_call is False):
+            raise ValidationError(
+                _("Port of call must be filled if 'no port of call' is not selected"),
+                code="port_of_call_is_empty_and_no_port_of_call_is_false",
+            )
+
         # Handle "no port of call" vs. "vessel type"
         vessel_type = cleaned_data.get("vessel_type")
+        # Only cruise ships can select "no port of call"
         if (vessel_type != ShipType.CRUISE) and (no_port_of_call is True):
             raise ValidationError(
                 _(

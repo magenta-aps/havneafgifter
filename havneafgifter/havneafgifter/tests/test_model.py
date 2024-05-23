@@ -290,11 +290,35 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         )
         self.assertEqual(str(instance), expected_str)
 
-    def test_duration_in_days(self):
-        self.assertEqual(self.harbor_dues_form.duration_in_days, 31)
+    @parametrize(
+        "has_datetime_data,expected_duration_in_days",
+        [
+            (True, 31),
+            (False, None),
+        ],
+    )
+    def test_duration_in_days(self, has_datetime_data, expected_duration_in_days):
+        if has_datetime_data is False:
+            self.harbor_dues_form.datetime_of_arrival = None
+            self.harbor_dues_form.datetime_of_departure = None
+        self.assertEqual(
+            self.harbor_dues_form.duration_in_days, expected_duration_in_days
+        )
 
-    def test_duration_in_weeks(self):
-        self.assertEqual(self.harbor_dues_form.duration_in_weeks, 5)
+    @parametrize(
+        "has_datetime_data,expected_duration_in_days",
+        [
+            (True, 5),
+            (False, None),
+        ],
+    )
+    def test_duration_in_weeks(self, has_datetime_data, expected_duration_in_days):
+        if has_datetime_data is False:
+            self.harbor_dues_form.datetime_of_arrival = None
+            self.harbor_dues_form.datetime_of_departure = None
+        self.assertEqual(
+            self.harbor_dues_form.duration_in_weeks, expected_duration_in_days
+        )
 
     def test_calculate_tax(self):
         self.harbor_dues_form.calculate_tax(save=True)
