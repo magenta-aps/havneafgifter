@@ -26,7 +26,8 @@
             submitButton.text(buttonText);
         });
 
-        // Disable "port of call", etc. inputs, if "no port of call" is selected
+        // Disable "port of call", etc. inputs, if "no port of call" is selected.
+        // Enforce vessel type CRUISE if "no port of call" is selected.
         const noPortOfCallCheckbox = $("#id_no_port_of_call");
         const portOfCallSelect = $("#id_port_of_call")
         const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
@@ -37,11 +38,14 @@
             portOfCallSelect.attr("disabled", disabled);
             datetimeInputs.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
+            vesselTypeSelect.attr("disabled", disabled);
 
             if (disabled) {
                 portOfCallSelect.val(null);
                 datetimeInputs.val(null);
                 grossTonnageInput.val(null);
+                // Enforce vessel type CRUISE
+                vesselTypeSelect.val("CRUISE");
             }
         });
     });
