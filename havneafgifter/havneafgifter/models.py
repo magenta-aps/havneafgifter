@@ -584,11 +584,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def has_port_of_call(self) -> bool:
-        if self.vessel_type == ShipType.CRUISE:
-            return self.port_of_call is not None
-        else:
-            # Non-cruise ships always have a port of call
-            return True
+        # Cruise ships *can* have a port of call, but are not required to have it.
+        # Non-cruise ships *must* have a port of call.
+        return self.vessel_type != ShipType.CRUISE or self.port_of_call is not None
 
     def calculate_tax(self, save: bool = True):
         self.calculate_harbour_tax(save=save)
