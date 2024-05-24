@@ -376,8 +376,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     (~Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=False))
                     |
                     # Allow *and* disallow for cruise ships
-                    (Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=True))
-                    | (Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=False))
+                    Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="port_of_call_cannot_be_null_for_non_cruise_ships",
             ),
@@ -388,8 +387,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     (~Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=False))
                     |
                     # Allow *and* disallow for cruise ships
-                    (Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=True))
-                    | (Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=False))
+                    Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
             ),
@@ -403,14 +401,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     )
                     |
                     # Allow *and* disallow for cruise ships
-                    (
-                        Q(vessel_type=ShipType.CRUISE)
-                        & Q(datetime_of_arrival__isnull=True)
-                    )
-                    | (
-                        Q(vessel_type=ShipType.CRUISE)
-                        & Q(datetime_of_arrival__isnull=False)
-                    )
+                    Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
             ),
@@ -424,14 +415,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     )
                     |
                     # Allow *and* disallow for cruise ships
-                    (
-                        Q(vessel_type=ShipType.CRUISE)
-                        & Q(datetime_of_departure__isnull=True)
-                    )
-                    | (
-                        Q(vessel_type=ShipType.CRUISE)
-                        & Q(datetime_of_departure__isnull=False)
-                    )
+                    Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
             ),
