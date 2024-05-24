@@ -379,6 +379,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="port_of_call_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
             ),
             # `gross_tonnage` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
@@ -390,6 +391,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_arrival` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
@@ -404,6 +406,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_departure` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
@@ -418,6 +421,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     Q(vessel_type=ShipType.CRUISE)
                 ),
                 name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_arrival` and `datetime_of_departure` must either both
             # be present, or both be blank/NULL.
@@ -436,6 +440,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 ),
                 name="datetime_of_arrival_and_departure_must_both_be_present_"
                 "or_both_be_null",
+                violation_error_code="constraint_violated",  # type: ignore
             ),
         ]
 

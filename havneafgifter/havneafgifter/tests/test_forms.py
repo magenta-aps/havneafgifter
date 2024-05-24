@@ -1,7 +1,8 @@
 import copy
 from datetime import datetime, timezone
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.forms.utils import ErrorList
 from django.test import SimpleTestCase, TestCase
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
@@ -37,7 +38,7 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         data = copy.copy(self.harbor_dues_form_data)
         data.update(changes)
         self._assert_form_has_error(
-            data, "either_both_or_no_datetime_fields_must_be_filled"
+            data, "port_of_call_requires_arrival_and_departure_dates"
         )
 
     def test_error_on_departure_before_arrival(self):
@@ -91,6 +92,28 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         self._assert_form_has_error(
             data, "no_port_of_call_cannot_be_true_for_non_cruise_ships"
         )
+
+    def test_user_visible_non_field_errors(self):
+        # Submit data that will lead to violating a database constraint
+        data = copy.copy(self.harbor_dues_form_data)
+        data["gross_tonnage"] = None
+        form = HarborDuesFormForm(data=data)
+        # We expect the `form.save(...)` to raise ValueError in this case
+        try:
+            form.save(commit=False)
+        except ValueError:
+            # Assert that the DB constraint violation produces the expected
+            # non-field error.
+            self.assertEqual(
+                str(form.errors.get(NON_FIELD_ERRORS)[0]),
+                "Constraint “gross_tonnage_cannot_be_null_for_non_cruise_ships” "
+                "is violated.",
+            )
+            # Assert that the same non-field error is not visible to the user
+            self.assertEqual(
+                form.user_visible_non_field_errors(),
+                ErrorList(),  # empty error list
+            )
 
     def _assert_form_has_error(self, data, code):
         form = HarborDuesFormForm(data=data)

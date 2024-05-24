@@ -59,6 +59,7 @@
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
+
     <div class="row">
         <div class="col-9">
             {% bootstrap_field form.port_of_call %}
@@ -67,7 +68,16 @@
             {% bootstrap_field form.no_port_of_call wrapper_class="pt-3 mt-3 mb-3" %}
         </div>
     </div>
-    {% bootstrap_form form exclude="port_of_call,no_port_of_call" %}
+
+    {% if form.user_visible_non_field_errors %}
+    <ul class="list-unstyled text-danger">
+        {% for error in form.user_visible_non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% bootstrap_form form exclude="port_of_call,no_port_of_call" alert_error_type="none" %}
     {% bootstrap_button button_type="submit" content=_("Submit") %}
 </form>
 <script nonce="{{request.csp_nonce}}">

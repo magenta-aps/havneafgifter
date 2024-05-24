@@ -1,7 +1,7 @@
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import UsernameField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import RegexValidator
 from django.forms import (
     BooleanField,
@@ -15,6 +15,7 @@ from django.forms import (
     TextInput,
     widgets,
 )
+from django.forms.utils import ErrorList
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
@@ -164,6 +165,18 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 ),
                 code="no_port_of_call_cannot_be_true_for_non_cruise_ships",
             )
+
+    def user_visible_non_field_errors(self) -> ErrorList | None:
+        non_field_errors = self.errors.get(NON_FIELD_ERRORS)
+        if non_field_errors:
+            return ErrorList(
+                [
+                    error
+                    for error in non_field_errors.__dict__["data"]
+                    if error.code != "constraint_violated"
+                ]
+            )
+        return None
 
 
 class PassengersTotalForm(CSPFormMixin, Form):
