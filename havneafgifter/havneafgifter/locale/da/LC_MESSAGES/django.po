@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-23 14:11-0100\n"
+"POT-Creation-Date: 2024-05-24 10:26-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -65,11 +65,6 @@ msgid "No port of call"
 msgstr "Ingen ankomsthavn"
 
 #: havneafgifter/forms.py
-msgid "Please supply either both arrival and departure dates, or none of them"
-msgstr ""
-"Angiv venligst enten både ankomst- og afgangstidspunkt, eller ingen af dem"
-
-#: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
 msgstr "Afrejse-datoen kan ikke ligge før ankomst-datoen"
 
@@ -84,6 +79,12 @@ msgstr "Ankomsthavn skal udfyldes, hvis 'ingen ankomsthavn' ikke er valgt"
 #: havneafgifter/forms.py
 msgid "You can only choose 'no port of call' when the vessel is a cruise ship"
 msgstr "Du kan kun vælge 'ingen ankomsthavn' ved krydstogtskibe"
+
+#: havneafgifter/forms.py
+msgid "If reporting port tax, please specify both arrival and departure date"
+msgstr ""
+"Angiv venligst både ankomst- og afgangsdato, når du indrapporterer "
+"havneafgifter"
 
 #: havneafgifter/forms.py
 msgid "Total number of passengers"

@@ -115,19 +115,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         # Handle "datetime" fields
         datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
-        num_empty = len(
-            [val for val in (datetime_of_arrival, datetime_of_departure) if val is None]
-        )
-        # Either both datetime fields must be supplied, or none of them
-        if num_empty not in (0, 2):
-            raise ValidationError(
-                _(
-                    "Please supply either both arrival and departure dates, or "
-                    "none of them"
-                ),
-                code="either_both_or_no_datetime_fields_must_be_filled",
-            )
-        # Arrival datetime must be before departure datetime
+        # If both dates are given, arrival must be before departure
         if (
             (datetime_of_arrival is not None)
             and (datetime_of_departure is not None)
@@ -164,6 +152,20 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                     "cruise ship"
                 ),
                 code="no_port_of_call_cannot_be_true_for_non_cruise_ships",
+            )
+
+        # Handle "port of call" vs. "arrival" and "departure" fields
+        # If given a port of call, both arrival and departure dates must be given
+        # as well.
+        if (port_of_call is not None) and (
+            datetime_of_arrival is None or datetime_of_departure is None
+        ):
+            raise ValidationError(
+                _(
+                    "If reporting port tax, please specify both arrival and departure "
+                    "date",
+                ),
+                code="port_of_call_requires_arrival_and_departure_dates",
             )
 
     def user_visible_non_field_errors(self) -> ErrorList | None:
