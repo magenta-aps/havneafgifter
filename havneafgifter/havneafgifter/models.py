@@ -371,39 +371,21 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         constraints = [
             # `port_of_call` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(
-                    # Disallow for non-cruise ships
-                    (~Q(vessel_type=ShipType.CRUISE) & Q(port_of_call__isnull=False))
-                    |
-                    # Allow *and* disallow for cruise ships
-                    Q(vessel_type=ShipType.CRUISE)
-                ),
+                check=(Q(vessel_type=ShipType.CRUISE) | Q(port_of_call__isnull=False)),
                 name="port_of_call_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
             # `gross_tonnage` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(
-                    # Disallow for non-cruise ships
-                    (~Q(vessel_type=ShipType.CRUISE) & Q(gross_tonnage__isnull=False))
-                    |
-                    # Allow *and* disallow for cruise ships
-                    Q(vessel_type=ShipType.CRUISE)
-                ),
+                check=(Q(vessel_type=ShipType.CRUISE) | Q(gross_tonnage__isnull=False)),
                 name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_arrival` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
                 check=(
-                    # Disallow for non-cruise ships
-                    (
-                        ~Q(vessel_type=ShipType.CRUISE)
-                        & Q(datetime_of_arrival__isnull=False)
-                    )
-                    |
-                    # Allow *and* disallow for cruise ships
                     Q(vessel_type=ShipType.CRUISE)
+                    | Q(datetime_of_arrival__isnull=False)
                 ),
                 name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
@@ -411,14 +393,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             # `datetime_of_departure` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
                 check=(
-                    # Disallow for non-cruise ships
-                    (
-                        ~Q(vessel_type=ShipType.CRUISE)
-                        & Q(datetime_of_departure__isnull=False)
-                    )
-                    |
-                    # Allow *and* disallow for cruise ships
                     Q(vessel_type=ShipType.CRUISE)
+                    | Q(datetime_of_departure__isnull=False)
                 ),
                 name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
