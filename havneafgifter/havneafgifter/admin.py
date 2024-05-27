@@ -51,10 +51,10 @@ class HarborDuesFormAdmin(admin.ModelAdmin):
 
     @admin.display(description=_("Port authority"))
     def port_authority(self, obj):
-        if obj.port_of_call.portauthority is not None:
-            return obj.port_of_call.portauthority.name
-        else:
+        if obj.port_of_call is None or obj.port_of_call.portauthority is None:
             return "-"
+        else:
+            return obj.port_of_call.portauthority.name
 
     @admin.action(description=_("Calculate tax"))
     def calculate_tax(self, request, queryset):

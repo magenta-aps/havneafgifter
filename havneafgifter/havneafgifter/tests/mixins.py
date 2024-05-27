@@ -77,6 +77,21 @@ class HarborDuesFormMixin:
             **cls.harbor_dues_form_data
         )
         cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.harbor_dues_form_data)
+        cls.cruise_tax_form_without_port_of_call = CruiseTaxForm.objects.create(
+            vessel_type=ShipType.CRUISE,
+            **{
+                k: v
+                for k, v in cls.harbor_dues_form_data.items()
+                if k
+                not in (
+                    "port_of_call",
+                    "datetime_of_arrival",
+                    "datetime_of_departure",
+                    "gross_tonnage",
+                    "vessel_type",
+                )
+            }
+        )
 
     @classmethod
     def _load_initial_disembarkment_sites(cls):

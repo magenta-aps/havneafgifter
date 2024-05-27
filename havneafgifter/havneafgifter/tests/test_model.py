@@ -4,6 +4,7 @@ from unittest.mock import ANY, patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import translation
 from unittest_parametrize import ParametrizedTestCase, parametrize
@@ -204,23 +205,123 @@ class TestPort(TestCase):
 class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     maxDiff = None
 
-    def test_str(self):
+    @parametrize(
+        "vessel_type,field,required",
+        [
+            (ShipType.FISHER, "port_of_call", True),
+            (ShipType.CRUISE, "port_of_call", False),
+            (ShipType.FISHER, "gross_tonnage", True),
+            (ShipType.CRUISE, "gross_tonnage", False),
+            (ShipType.FISHER, "datetime_of_arrival", True),
+            (ShipType.CRUISE, "datetime_of_arrival", False),
+            (ShipType.FISHER, "datetime_of_departure", True),
+            (ShipType.CRUISE, "datetime_of_departure", False),
+        ],
+    )
+    def test_fields_only_nullable_for_cruise_ships(self, vessel_type, field, required):
+        instance = HarborDuesForm(vessel_type=vessel_type)
+        setattr(instance, field, None)
+        if required:
+            with self.assertRaises(IntegrityError):
+                instance.save()
+        else:
+            instance.save()
+
+    @parametrize(
+        "arrival,departure,should_fail",
+        [
+            (
+                None,
+                None,
+                False,
+            ),
+            (
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                datetime(2020, 1, 31, 0, 0, 0, tzinfo=timezone.utc),
+                False,
+            ),
+            (
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                None,
+                True,
+            ),
+            (
+                None,
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                True,
+            ),
+        ],
+    )
+    def test_datetime_of_arrival_and_departure_constraints(
+        self, arrival, departure, should_fail
+    ):
+        instance = HarborDuesForm(
+            vessel_type=ShipType.CRUISE,
+            datetime_of_arrival=arrival,
+            datetime_of_departure=departure,
+        )
+        if should_fail:
+            with self.assertRaises(IntegrityError):
+                instance.save()
+        else:
+            instance.save()
+
+    @parametrize(
+        "port_of_call,expected_str",
+        [
+            (
+                Port(name="Nordhavn"),
+                "Mary, Nordhavn "
+                "(2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
+            ),
+            (
+                None,
+                "Mary, no port of call "
+                "(2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
+            ),
+        ],
+    )
+    def test_str(self, port_of_call, expected_str):
         instance = HarborDuesForm(
             vessel_name="Mary",
-            port_of_call=Port(name="Nordhavn"),
+            port_of_call=port_of_call,
             datetime_of_arrival=datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
             datetime_of_departure=datetime(2020, 1, 31, 0, 0, 0, tzinfo=timezone.utc),
         )
+        self.assertEqual(str(instance), expected_str)
+
+    @parametrize(
+        "has_datetime_data,expected_duration_in_days",
+        [
+            (True, 31),
+            (False, None),
+        ],
+    )
+    def test_duration_in_days(self, has_datetime_data, expected_duration_in_days):
+        if has_datetime_data is False:
+            self.harbor_dues_form.datetime_of_arrival = None
+            self.harbor_dues_form.datetime_of_departure = None
         self.assertEqual(
-            str(instance),
-            "Mary, Nordhavn (2020-01-01 00:00:00+00:00 - 2020-01-31 00:00:00+00:00)",
+            self.harbor_dues_form.duration_in_days, expected_duration_in_days
         )
 
-    def test_duration_in_days(self):
-        self.assertEqual(self.harbor_dues_form.duration_in_days, 31)
+    @parametrize(
+        "has_datetime_data,expected_duration_in_days",
+        [
+            (True, 5),
+            (False, None),
+        ],
+    )
+    def test_duration_in_weeks(self, has_datetime_data, expected_duration_in_days):
+        if has_datetime_data is False:
+            self.harbor_dues_form.datetime_of_arrival = None
+            self.harbor_dues_form.datetime_of_departure = None
+        self.assertEqual(
+            self.harbor_dues_form.duration_in_weeks, expected_duration_in_days
+        )
 
-    def test_duration_in_weeks(self):
-        self.assertEqual(self.harbor_dues_form.duration_in_weeks, 5)
+    def test_has_port_of_call(self):
+        self.assertTrue(self.harbor_dues_form.has_port_of_call)
 
     def test_calculate_tax(self):
         self.harbor_dues_form.calculate_tax(save=True)
@@ -318,6 +419,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
 
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
+    def test_has_port_of_call(self):
+        self.assertTrue(self.cruise_tax_form.has_port_of_call)
+        self.assertFalse(self.cruise_tax_form_without_port_of_call.has_port_of_call)
+
     def test_calculate_tax(self):
         self.cruise_tax_form.calculate_tax(save=True)
         self.assertIsNotNone(self.cruise_tax_form.harbour_tax)
@@ -360,6 +465,21 @@ class TestMailRecipientList(HarborDuesFormMixin, TestCase):
             instance.recipient_emails,
             [
                 instance.form.port_of_call.portauthority.email,
+                instance.form.shipping_agent.email,
+                settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
+            ],
+        )
+
+    @override_settings(
+        EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org",
+        EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL="ral@example.org",
+    )
+    def test_mail_recipients_falls_back_if_no_port_of_call(self):
+        instance = MailRecipientList(self.cruise_tax_form_without_port_of_call)
+        self.assertListEqual(
+            instance.recipient_emails,
+            [
+                settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
                 instance.form.shipping_agent.email,
                 settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
             ],
