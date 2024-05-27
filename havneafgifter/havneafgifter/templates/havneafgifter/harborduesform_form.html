@@ -12,26 +12,31 @@
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     $(document).ready(function () {
-        // Update text on submit button depending on the selected vessel type
-        const vesselTypeSelect = $("select#id_vessel_type");
-        const submitButton = $("button[type=submit]");
-        vesselTypeSelect.on("change", function () {
-            const vesselType = $(this).val();
-            let buttonText = gettext("Submit");
-
-            if (vesselType === "CRUISE") {
-                buttonText = gettext("Continue");
-            }
-
-            submitButton.text(buttonText);
-        });
-
-        // Disable "port of call", etc. inputs, if "no port of call" is selected.
-        // Enforce vessel type CRUISE if "no port of call" is selected.
         const noPortOfCallCheckbox = $("#id_no_port_of_call");
         const portOfCallSelect = $("#id_port_of_call")
         const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
         const grossTonnageInput = $("#id_gross_tonnage");
+        const vesselTypeSelect = $("select#id_vessel_type");
+        const submitButton = $("button[type=submit]");
+
+        const toggleButtonText = function (state) {
+            let buttonText = gettext("Submit");
+            if (state) {
+                buttonText = gettext("Continue");
+            }
+            submitButton.text(buttonText);
+        }
+
+        // Update text on submit button depending on the selected vessel type.
+        vesselTypeSelect.on("change", function () {
+            const vesselType = $(this).val();
+            const state = vesselType === "CRUISE";
+            toggleButtonText(state);
+        });
+
+        // Disable "port of call", etc. inputs, if "no port of call" is selected.
+        // Enforce vessel type CRUISE if "no port of call" is selected.
+        // Update text on submit button depending on the selected vessel type,
         noPortOfCallCheckbox.on("change", function () {
             const disabled = $(this).is(":checked") ? "disabled" : null;
 
@@ -47,6 +52,8 @@
                 // Enforce vessel type CRUISE
                 vesselTypeSelect.val("CRUISE");
             }
+
+            toggleButtonText(disabled === "disabled");
         });
     });
 })();
