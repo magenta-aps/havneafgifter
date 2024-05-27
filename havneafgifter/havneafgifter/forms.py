@@ -1,9 +1,10 @@
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import UsernameField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import RegexValidator
 from django.forms import (
+    BooleanField,
     CharField,
     ChoiceField,
     Form,
@@ -14,6 +15,7 @@ from django.forms import (
     TextInput,
     widgets,
 )
+from django.forms.utils import ErrorList
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
@@ -25,6 +27,7 @@ from havneafgifter.models import (
     DisembarkmentSite,
     HarborDuesForm,
     Nationality,
+    ShipType,
     imo_validator,
 )
 
@@ -58,10 +61,6 @@ class HTML5DateWidget(widgets.Input):
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
-    def __init__(self, user_is_ship=False, *args, **kwargs):
-        self.user_is_ship = user_is_ship
-        super().__init__(*args, **kwargs)
-
     class Meta:
         model = HarborDuesForm
         fields = [
@@ -100,15 +99,86 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=lambda form: not form.user_is_ship,
     )
 
+    no_port_of_call = BooleanField(
+        required=False,
+        initial=False,
+        label=_("No port of call"),
+    )
+
+    def __init__(self, user_is_ship=False, *args, **kwargs):
+        self.user_is_ship = user_is_ship
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
+
+        # Handle "datetime" fields
         datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
-        if datetime_of_arrival > datetime_of_departure:
+        # If both dates are given, arrival must be before departure
+        if (
+            (datetime_of_arrival is not None)
+            and (datetime_of_departure is not None)
+            and (datetime_of_arrival > datetime_of_departure)
+        ):
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
                 code="datetime_of_departure_before_datetime_of_arrival",
             )
+
+        # Handle "port of call" fields
+        port_of_call = cleaned_data.get("port_of_call")
+        no_port_of_call = cleaned_data.get("no_port_of_call")
+        # "Port of call" cannot be set if "no port of call" is also set
+        if (port_of_call is not None) and (no_port_of_call is True):
+            raise ValidationError(
+                _("Port of call cannot be filled if 'no port of call' is selected"),
+                code="port_of_call_chosen_but_no_port_of_call_is_true",
+            )
+        # And the opposite: "port of call" must be set if "no port of call" is not set
+        if (port_of_call is None) and (no_port_of_call is False):
+            raise ValidationError(
+                _("Port of call must be filled if 'no port of call' is not selected"),
+                code="port_of_call_is_empty_and_no_port_of_call_is_false",
+            )
+
+        # Handle "no port of call" vs. "vessel type"
+        vessel_type = cleaned_data.get("vessel_type")
+        # Only cruise ships can select "no port of call"
+        if (vessel_type != ShipType.CRUISE) and (no_port_of_call is True):
+            raise ValidationError(
+                _(
+                    "You can only choose 'no port of call' when the vessel is a "
+                    "cruise ship"
+                ),
+                code="no_port_of_call_cannot_be_true_for_non_cruise_ships",
+            )
+
+        # Handle "port of call" vs. "arrival" and "departure" fields
+        # If given a port of call, both arrival and departure dates must be given
+        # as well.
+        if (port_of_call is not None) and (
+            datetime_of_arrival is None or datetime_of_departure is None
+        ):
+            raise ValidationError(
+                _(
+                    "If reporting port tax, please specify both arrival and departure "
+                    "date",
+                ),
+                code="port_of_call_requires_arrival_and_departure_dates",
+            )
+
+    def user_visible_non_field_errors(self) -> ErrorList | None:
+        non_field_errors = self.errors.get(NON_FIELD_ERRORS)
+        if non_field_errors:
+            return ErrorList(
+                [
+                    error
+                    for error in non_field_errors.__dict__["data"]
+                    if error.code != "constraint_violated"
+                ]
+            )
+        return None
 
 
 class PassengersTotalForm(CSPFormMixin, Form):

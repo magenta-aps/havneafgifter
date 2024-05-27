@@ -48,6 +48,13 @@ class HavneafgiftView:
             }
         )
 
+    def get_redirect_for_form(
+        self,
+        viewname: str,
+        form: HarborDuesForm | CruiseTaxForm,
+    ):
+        return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
+
 
 class RootView(RedirectView):
     def get_redirect_url(self):
@@ -189,24 +196,27 @@ class HarborDuesFormCreateView(
                     if not k.startswith("_")  # skip `_state`, etc.
                 }
             )
-            # Send user to next step - filling out passenger tax info
-            return HttpResponseRedirect(
-                reverse(
+            if cruise_tax_form.has_port_of_call:
+                # Send user to next step - filling out passenger tax info
+                return self.get_redirect_for_form(
                     "havneafgifter:passenger_tax_create",
-                    kwargs={"pk": cruise_tax_form.pk},
+                    cruise_tax_form,
                 )
-            )
+            else:
+                # Send user to final step - filling out environmental tax info
+                return self.get_redirect_for_form(
+                    "havneafgifter:environmental_tax_create",
+                    cruise_tax_form,
+                )
         else:
             # User is all done filling out data for this vessel
             harbor_dues_form.save()
             # Send email to relevant recipients
             self._send_email(harbor_dues_form, self.request)
             # Go to detail view to display result.
-            return HttpResponseRedirect(
-                reverse(
-                    "havneafgifter:receipt_detail_html",
-                    kwargs={"pk": harbor_dues_form.pk},
-                )
+            return self.get_redirect_for_form(
+                "havneafgifter:receipt_detail_html",
+                harbor_dues_form,
             )
 
 
@@ -289,11 +299,9 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         ).delete()
 
         # Go to next step (environmental and maintenance fees)
-        return HttpResponseRedirect(
-            reverse(
-                "havneafgifter:environmental_tax_create",
-                kwargs={"pk": self._cruise_tax_form.pk},
-            )
+        return self.get_redirect_for_form(
+            "havneafgifter:environmental_tax_create",
+            self._cruise_tax_form,
         )
 
     def _get_passengers_by_country_objects(self) -> list[PassengersByCountry]:
@@ -368,11 +376,9 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
         # Send email to relevant recipients.
         self._send_email(self._cruise_tax_form, self.request)
         # Go to detail view to display result.
-        return HttpResponseRedirect(
-            reverse(
-                "havneafgifter:receipt_detail_html",
-                kwargs={"pk": self._cruise_tax_form.pk},
-            )
+        return self.get_redirect_for_form(
+            "havneafgifter:receipt_detail_html",
+            self._cruise_tax_form,
         )
 
     def _get_disembarkment_objects(self) -> list[Disembarkment]:

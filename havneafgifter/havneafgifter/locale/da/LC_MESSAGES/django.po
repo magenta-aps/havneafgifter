@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-21 13:13-0100\n"
+"POT-Creation-Date: 2024-05-24 10:26-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,8 +61,30 @@ msgid "IMO-number"
 msgstr "IMO-nummer"
 
 #: havneafgifter/forms.py
+msgid "No port of call"
+msgstr "Ingen ankomsthavn"
+
+#: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
 msgstr "Afrejse-datoen kan ikke ligge før ankomst-datoen"
+
+#: havneafgifter/forms.py
+msgid "Port of call cannot be filled if 'no port of call' is selected"
+msgstr "Ankomsthavn kan ikke udfyldes, hvis 'ingen ankomsthavn' er valgt"
+
+#: havneafgifter/forms.py
+msgid "Port of call must be filled if 'no port of call' is not selected"
+msgstr "Ankomsthavn skal udfyldes, hvis 'ingen ankomsthavn' ikke er valgt"
+
+#: havneafgifter/forms.py
+msgid "You can only choose 'no port of call' when the vessel is a cruise ship"
+msgstr "Du kan kun vælge 'ingen ankomsthavn' ved krydstogtskibe"
+
+#: havneafgifter/forms.py
+msgid "If reporting port tax, please specify both arrival and departure date"
+msgstr ""
+"Angiv venligst både ankomst- og afgangsdato, når du indrapporterer "
+"havneafgifter"
 
 #: havneafgifter/forms.py
 msgid "Total number of passengers"
@@ -75,6 +97,10 @@ msgid ""
 msgstr ""
 "Det samlede antal passagerer stemmer ikke med summen af antal passagerer af "
 "hver nationalitet"
+
+#: havneafgifter/models.py
+msgid "Authority for vessels without port of call"
+msgstr "Havnemyndighed for skibe uden ankomsthavn"
 
 #: havneafgifter/models.py
 msgid "Tax Authority"
@@ -313,6 +339,10 @@ msgid "Calculated harbour tax"
 msgstr "Beregnet havneafgift"
 
 #: havneafgifter/models.py
+msgid "no port of call"
+msgstr "Ingen ankomsthavn"
+
+#: havneafgifter/models.py
 #, python-format
 msgid ""
 "%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
@@ -417,6 +447,7 @@ msgid "Source code"
 msgstr "Kildekode"
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
 msgstr "Krydstogtskibe: miljø- og vedligeholdelsesafgift"
 
@@ -482,7 +513,7 @@ msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "IMO numbers should be 7 digits"
-msgstr ""
+msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "Harbor dues list"

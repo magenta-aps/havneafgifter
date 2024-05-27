@@ -172,33 +172,52 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         cls.user = User.objects.create(username="Test Testersen")
 
     @parametrize(
-        "vessel_type,model_class,next_view_name",
+        "vessel_type,no_port_of_call,model_class,next_view_name",
         [
-            # Test 1: freighter, etc. creates harbor dues form and sends user
-            # to the harbor dues form detail view.
+            # Test 1: user creates harbor dues form and is sent directly to receipt
             (
                 ShipType.FREIGHTER,
+                False,
                 HarborDuesForm,
                 "havneafgifter:receipt_detail_html",
             ),
-            # Test 2: cruise ship creates cruise tax form and sends user to the
-            # passenger tax form.
+            # Test 2: user creates cruise tax form with a port of call, and is sent to
+            # the passenger tax form.
             (
                 ShipType.CRUISE,
+                False,
                 CruiseTaxForm,
                 "havneafgifter:passenger_tax_create",
+            ),
+            # Test 3: user creates cruise tax form without a port of call, and is sent
+            # to the environmental tax form.
+            (
+                ShipType.CRUISE,
+                True,
+                CruiseTaxForm,
+                "havneafgifter:environmental_tax_create",
             ),
         ],
     )
     def test_creates_model_instance_depending_on_vessel_type(
-        self, vessel_type, model_class, next_view_name
+        self,
+        vessel_type,
+        no_port_of_call,
+        model_class,
+        next_view_name,
     ):
         self.client.force_login(self.shipping_agent_user)
+        # Arrange: set up POST data
         self.harbor_dues_form_data_pk["vessel_type"] = vessel_type
+        if no_port_of_call:
+            self.harbor_dues_form_data_pk["no_port_of_call"] = "on"
+            self.harbor_dues_form_data_pk["port_of_call"] = ""
+        # Act: post data
         response = self.client.post(
             reverse("havneafgifter:harbor_dues_form_create"),
             data=self.harbor_dues_form_data_pk,
         )
+        # Assert
         instance = model_class.objects.latest("pk")
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(

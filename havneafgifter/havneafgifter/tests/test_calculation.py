@@ -495,3 +495,31 @@ class CalculationTest(TestCase):
         calculation = self.harborduesform1.calculate_passenger_tax()
         self.assertEqual(calculation["passenger_tax"], Decimal("5000.00"))
         self.assertEqual(calculation["taxrate"], Decimal("50.00"))
+
+    def test_calculate_taxes_for_cruise_ships_without_port_of_call(self):
+        # Arrange: create object where nullable fields are not set
+        instance = CruiseTaxForm(
+            vessel_type=ShipType.CRUISE,
+            port_of_call=None,
+            gross_tonnage=None,
+            datetime_of_arrival=None,
+            datetime_of_departure=None,
+            number_of_passengers=None,
+        )
+        # Arrange: populate `instance.date`, which is used as fallback value in
+        # `calculate_disembarkment_tax`.
+        instance.save()
+        # Arrange: add disembarkments to this cruise tax form
+        Disembarkment.objects.create(
+            cruise_tax_form=instance,
+            disembarkment_site=DisembarkmentSite.objects.first(),
+            number_of_passengers=10,
+        )
+        # Act: calculate all three taxes and refresh object from DB
+        instance.calculate_tax()
+        instance.refresh_from_db()
+        # Assert no harbour tax or pax tax is due
+        self.assertIsNone(instance.harbour_tax)
+        self.assertIsNone(instance.pax_tax)
+        # Assert that disembarkment tax is due (10 passengers * 30 DKK == 300 DKK)
+        self.assertEqual(instance.disembarkment_tax, Decimal("300"))

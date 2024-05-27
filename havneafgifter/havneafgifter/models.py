@@ -5,7 +5,6 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -44,7 +43,11 @@ class MailRecipientList:
         self.form = form
         self.recipients = []
 
-        if form.port_of_call.portauthority and form.port_of_call.portauthority.email:
+        if (
+            form.port_of_call
+            and form.port_of_call.portauthority
+            and form.port_of_call.portauthority.email
+        ):
             self.recipients.append(
                 MailRecipient(
                     name=form.port_of_call.portauthority.name,
@@ -53,10 +56,24 @@ class MailRecipientList:
                 )
             )
         else:
-            logger.info(
-                "%r is not linked to a port authority, excluding from mail recipients",
-                self,
-            )
+            if (
+                isinstance(form, CruiseTaxForm)
+                and not form.has_port_of_call
+                and settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL
+            ):
+                self.recipients.append(
+                    MailRecipient(
+                        name=gettext("Authority for vessels without port of call"),
+                        email=settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
+                        object=None,
+                    )
+                )
+            else:
+                logger.info(
+                    "%r is not linked to a port authority, excluding from "
+                    "mail recipients",
+                    self,
+                )
 
         if form.shipping_agent and form.shipping_agent.email:
             self.recipients.append(
@@ -350,6 +367,59 @@ class Port(PermissionsMixin, models.Model):
 
 
 class HarborDuesForm(PermissionsMixin, models.Model):
+    class Meta:
+        constraints = [
+            # `port_of_call` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(Q(vessel_type=ShipType.CRUISE) | Q(port_of_call__isnull=False)),
+                name="port_of_call_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
+            ),
+            # `gross_tonnage` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(Q(vessel_type=ShipType.CRUISE) | Q(gross_tonnage__isnull=False)),
+                name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
+            ),
+            # `datetime_of_arrival` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(
+                    Q(vessel_type=ShipType.CRUISE)
+                    | Q(datetime_of_arrival__isnull=False)
+                ),
+                name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
+            ),
+            # `datetime_of_departure` can only be left blank/NULL for cruise ships
+            models.CheckConstraint(
+                check=(
+                    Q(vessel_type=ShipType.CRUISE)
+                    | Q(datetime_of_departure__isnull=False)
+                ),
+                name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
+                violation_error_code="constraint_violated",  # type: ignore
+            ),
+            # `datetime_of_arrival` and `datetime_of_departure` must either both
+            # be present, or both be blank/NULL.
+            models.CheckConstraint(
+                check=(
+                    # Both present
+                    (
+                        Q(datetime_of_arrival__isnull=False)
+                        & Q(datetime_of_departure__isnull=False)
+                    )
+                    # Both absent
+                    | (
+                        Q(datetime_of_arrival__isnull=True)
+                        & Q(datetime_of_departure__isnull=True)
+                    )
+                ),
+                name="datetime_of_arrival_and_departure_must_both_be_present_"
+                "or_both_be_null",
+                violation_error_code="constraint_violated",  # type: ignore
+            ),
+        ]
+
     date = models.DateField(
         null=False,
         blank=False,
@@ -359,8 +429,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     port_of_call = models.ForeignKey(
         Port,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Port of call"),
         on_delete=models.PROTECT,
     )
@@ -416,16 +486,20 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     datetime_of_arrival = models.DateTimeField(
-        null=False, blank=False, verbose_name=_("Arrival date/time")
+        null=True,
+        blank=True,
+        verbose_name=_("Arrival date/time"),
     )
 
     datetime_of_departure = models.DateTimeField(
-        null=False, blank=False, verbose_name=_("Departure date/time")
+        null=True,
+        blank=True,
+        verbose_name=_("Departure date/time"),
     )
 
     gross_tonnage = models.PositiveIntegerField(
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Gross tonnage"),
     )
 
@@ -444,20 +518,42 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     def __str__(self) -> str:
+        port_of_call = self.port_of_call or _("no port of call")
         return (
-            f"{self.vessel_name}, {self.port_of_call} "
+            f"{self.vessel_name}, {port_of_call} "
             f"({self.datetime_of_arrival} - {self.datetime_of_departure})"
         )
 
-    @property
-    def duration_in_days(self) -> int:
-        range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
-        return range.started_days
+    def _any_is_none(self, *vals) -> bool:
+        return any(val is None for val in vals)
+
+    def _period_is_not_none(self):
+        return (
+            self.datetime_of_arrival is not None
+            and self.datetime_of_departure is not None
+        )
 
     @property
-    def duration_in_weeks(self) -> int:
-        range = DateTimeRange(self.datetime_of_arrival, self.datetime_of_departure)
-        return range.started_weeks
+    def duration_in_days(self) -> int | None:
+        if self._period_is_not_none():
+            range = DateTimeRange(
+                self.datetime_of_arrival,  # type: ignore
+                self.datetime_of_departure,  # type: ignore
+            )
+            return range.started_days
+        else:
+            return None
+
+    @property
+    def duration_in_weeks(self) -> int | None:
+        if self._period_is_not_none():
+            range = DateTimeRange(
+                self.datetime_of_arrival,  # type: ignore
+                self.datetime_of_departure,  # type: ignore
+            )
+            return range.started_weeks
+        else:
+            return None
 
     @property
     def form_id(self):
@@ -467,12 +563,25 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         with translation.override("en"):
             return f"{self.pk:03}{date(self.date, 'bY').upper()}"
 
+    @property
+    def has_port_of_call(self) -> bool:
+        # Cruise ships *can* have a port of call, but are not required to have it.
+        # Non-cruise ships *must* have a port of call.
+        return self.vessel_type != ShipType.CRUISE or self.port_of_call is not None
+
     def calculate_tax(self, save: bool = True):
         self.calculate_harbour_tax(save=save)
 
     def calculate_harbour_tax(
         self, save: bool = True
-    ) -> Dict[str, Decimal | List[dict]]:
+    ) -> dict[str, Decimal | list[dict] | None]:
+        if self._any_is_none(
+            self.port_of_call,
+            self.datetime_of_arrival,
+            self.datetime_of_departure,
+        ):
+            return {"harbour_tax": None, "details": []}
+
         taxrates = TaxRates.objects.filter(
             Q(start_datetime__isnull=True)
             | Q(start_datetime__lte=self.datetime_of_departure),
@@ -483,18 +592,19 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         details = []
         for taxrate in taxrates:
             datetime_range = taxrate.get_overlap(
-                self.datetime_of_arrival,
-                self.datetime_of_departure,
+                self.datetime_of_arrival,  # type: ignore
+                self.datetime_of_departure,  # type: ignore
             )
             port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
-                port=self.port_of_call,
+                port=self.port_of_call,  # type: ignore
                 vessel_type=self.vessel_type,
-                gross_ton=self.gross_tonnage,
+                gross_ton=self.gross_tonnage,  # type: ignore
             )
             range_port_tax = Decimal(0)
             if port_taxrate is not None:
                 gross_tonnage: int = max(
-                    self.gross_tonnage, port_taxrate.round_gross_ton_up_to
+                    self.gross_tonnage,  # type: ignore
+                    port_taxrate.round_gross_ton_up_to,
                 )
                 if self.vessel_type in (
                     ShipType.FREIGHTER,
@@ -632,21 +742,25 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             (
                 action in ("view", "change")
                 and (
-                    user.port_authority == self.port_of_call.portauthority
-                    or user.shipping_agent == self.shipping_agent
+                    (self.port_of_call is None)
+                    or (user.port_authority == self.port_of_call.portauthority)
+                    or (user.shipping_agent == self.shipping_agent)
                 )
             )
             or (
                 action in ("approve", "reject", "invoice")
-                and (user.port_authority == self.port_of_call.portauthority)
+                and (
+                    (self.port_of_call is None)
+                    or (user.port_authority == self.port_of_call.portauthority)
+                )
             )
         )
 
 
 class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         default=0,
         verbose_name=_("Number of passengers"),
     )
@@ -673,7 +787,7 @@ class CruiseTaxForm(HarborDuesForm):
         self.calculate_disembarkment_tax(save=save)
 
     def calculate_disembarkment_tax(self, save: bool = True):
-        disembarkment_date = self.datetime_of_arrival
+        disembarkment_date = self.datetime_of_arrival or self.date
         taxrate = TaxRates.objects.filter(
             Q(start_datetime__isnull=True) | Q(start_datetime__lte=disembarkment_date),
             Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
@@ -707,14 +821,21 @@ class CruiseTaxForm(HarborDuesForm):
             self.save(update_fields=("disembarkment_tax",))
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
-    def calculate_passenger_tax(self, save: bool = True) -> Dict[str, Decimal]:
+    def calculate_passenger_tax(self, save: bool = True) -> dict[str, Decimal | None]:
+        if self._any_is_none(
+            self.number_of_passengers,
+            self.datetime_of_arrival,
+            self.datetime_of_departure,
+        ):
+            return {"passenger_tax": None, "taxrate": Decimal("0")}
+
         arrival_date = self.datetime_of_arrival
         taxrate = TaxRates.objects.filter(
             Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
             Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
         ).first()
         rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
-        pax_tax: Decimal = self.number_of_passengers * rate
+        pax_tax: Decimal = self.number_of_passengers * rate  # type: ignore
         if save:
             self.pax_tax = pax_tax
             self.save(update_fields=("pax_tax",))

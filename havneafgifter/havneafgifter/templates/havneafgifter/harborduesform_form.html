@@ -12,18 +12,55 @@
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     $(document).ready(function () {
-        const vesselTypeSelect = $("select#id_vessel_type");
+        const form = $("form");
+        const noPortOfCallCheckbox = $("#id_no_port_of_call");
+        const portOfCallSelect = $("#id_port_of_call")
+        const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
+        const grossTonnageInput = $("#id_gross_tonnage");
+        const vesselTypeSelect = $("#id_vessel_type");
         const submitButton = $("button[type=submit]");
 
-        vesselTypeSelect.on("change", function () {
-            const vesselType = $(this).val();
+        const toggleButtonText = function (state) {
             let buttonText = gettext("Submit");
-
-            if (vesselType === "CRUISE") {
+            if (state) {
                 buttonText = gettext("Continue");
             }
-
             submitButton.text(buttonText);
+        }
+
+        // Update text on submit button depending on the selected vessel type.
+        vesselTypeSelect.on("change", function () {
+            const vesselType = $(this).val();
+            const state = vesselType === "CRUISE";
+            toggleButtonText(state);
+        });
+
+        // Disable "port of call", etc. inputs, if "no port of call" is selected.
+        // Enforce vessel type CRUISE if "no port of call" is selected.
+        // Update text on submit button depending on the selected vessel type,
+        noPortOfCallCheckbox.on("change", function () {
+            const disabled = $(this).is(":checked") ? "disabled" : null;
+
+            portOfCallSelect.attr("disabled", disabled);
+            datetimeInputs.attr("disabled", disabled);
+            grossTonnageInput.attr("disabled", disabled);
+            vesselTypeSelect.attr("disabled", disabled);
+
+            if (disabled) {
+                portOfCallSelect.val(null);
+                datetimeInputs.val(null);
+                grossTonnageInput.val(null);
+                // Enforce vessel type CRUISE
+                vesselTypeSelect.val("CRUISE");
+            }
+
+            toggleButtonText(disabled === "disabled");
+        });
+
+        // Hook form submit, so we can ensure that vessel type field is still
+        // POSTed to server, even if it is disabled.
+        form.on("submit", function (evt) {
+            vesselTypeSelect.attr("disabled", null);
         });
     });
 })();
@@ -36,7 +73,25 @@
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
-    {% bootstrap_form form %}
+
+    <div class="row">
+        <div class="col-9">
+            {% bootstrap_field form.port_of_call %}
+        </div>
+        <div class="col-3">
+            {% bootstrap_field form.no_port_of_call wrapper_class="pt-3 mt-3 mb-3" %}
+        </div>
+    </div>
+
+    {% if form.user_visible_non_field_errors %}
+    <ul class="list-unstyled text-danger">
+        {% for error in form.user_visible_non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% bootstrap_form form exclude="port_of_call,no_port_of_call" alert_error_type="none" %}
     {% bootstrap_button button_type="submit" content=_("Submit") %}
 </form>
 <script nonce="{{request.csp_nonce}}">
