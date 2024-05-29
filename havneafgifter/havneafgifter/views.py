@@ -130,7 +130,7 @@ class PostLoginView(RedirectView):
                 login(
                     request=self.request,
                     user=user,
-                    backend="project.auth_backend.Saml2Backend",
+                    backend="django_mitid_auth.saml.backend.Saml2Backend",
                 )
         if not self.request.user.is_authenticated:
             return reverse("havneafgifter:login-failed")
