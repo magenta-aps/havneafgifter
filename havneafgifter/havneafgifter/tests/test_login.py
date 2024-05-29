@@ -59,7 +59,7 @@ class LoginTest(TestCase):
         session = self.client.session
         session.update(
             {
-                BACKEND_SESSION_KEY: "project.auth_backend.Saml2Backend",
+                BACKEND_SESSION_KEY: "django_mitid_auth.saml.backend.Saml2Backend",
                 "saml": {"cpr": "1234567890"},
             }
         )
