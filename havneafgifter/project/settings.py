@@ -73,7 +73,7 @@ MIDDLEWARE = [
 
 AUTHENTICATION_BACKENDS = [
     "havneafgifter.permissions.HavneafgiftPermissionBackend",
-    "project.auth_backend.Saml2Backend",
+    "django_mitid_auth.saml.backend.Saml2Backend",
 ]
 
 ROOT_URLCONF = "project.urls"
