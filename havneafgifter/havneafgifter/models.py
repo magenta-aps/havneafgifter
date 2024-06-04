@@ -557,11 +557,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def form_id(self):
-        # Return "løbenummer" for this form object, on the form "001APR2024", where
-        # "001" is the primary key, "APR" is the month, and "2024" is the year.
+        # Return "løbenummer" for this form object, on the form "00001APR2024", where
+        # "00001" is the primary key, "APR" is the month, and "2024" is the year.
         # Always use English locale to ensure consistent formatting of the month names.
         with translation.override("en"):
-            return f"{self.pk:03}{date(self.date, 'bY').upper()}"
+            return f"{self.pk:05}{date(self.date, 'bY').upper()}"
 
     @property
     def has_port_of_call(self) -> bool:
@@ -661,7 +661,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def mail_subject(self):
-        return self.form_id
+        return f"Talippoq: {self.pk:05} ({self.date})"
 
     @property
     def mail_body(self):

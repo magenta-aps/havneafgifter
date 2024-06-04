@@ -415,7 +415,9 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         instance = HarborDuesForm(**self.harbor_dues_form_data)
         instance.date = date(2020, 1, 1)
         instance.save()
-        self.assertEqual(instance.mail_subject, f"{instance.form_id}")
+        self.assertEqual(
+            instance.mail_subject, f"Talippoq: {instance.pk:05} ({instance.date})"
+        )
 
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
