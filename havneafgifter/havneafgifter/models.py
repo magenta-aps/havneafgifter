@@ -5,10 +5,13 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from io import BytesIO
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.core.files import File
+from django.core.files.storage import FileSystemStorage
 from django.core.mail import EmailMessage
 from django.core.validators import (
     MaxLengthValidator,
@@ -29,6 +32,8 @@ from django_countries import countries
 from havneafgifter.data import DateTimeRange
 
 logger = logging.getLogger(__name__)
+
+pdf_storage = FileSystemStorage(location="/storage/pdf")
 
 
 @dataclass
@@ -517,6 +522,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("Calculated harbour tax"),
     )
 
+    pdf = models.FileField(
+        null=True,
+        blank=True,
+        storage=pdf_storage,
+        verbose_name=_("PDF file"),
+    )
+
     def __str__(self) -> str:
         port_of_call = self.port_of_call or _("no port of call")
         return (
@@ -568,6 +580,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         # Cruise ships *can* have a port of call, but are not required to have it.
         # Non-cruise ships *must* have a port of call.
         return self.vessel_type != ShipType.CRUISE or self.port_of_call is not None
+
+    def get_pdf_filename(self) -> str:
+        return f"{self.form_id}.pdf"
 
     def calculate_tax(self, save: bool = True):
         self.calculate_harbour_tax(save=save)
@@ -652,11 +667,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         )
         receipt = self.get_receipt()
         msg.attach(
-            filename=f"{self.form_id}.pdf",
+            filename=self.get_pdf_filename(),
             content=receipt.pdf,
             mimetype="application/pdf",
         )
         result = msg.send(fail_silently=False)
+        if result:
+            self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
+            self.save(update_fields=["pdf"])
         return msg, result
 
     @property
