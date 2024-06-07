@@ -22,6 +22,7 @@ services:
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
       - ./log/havneafgifter.log:/log/havneafgifter.log:rw
       - ./dev-environment/cert:/ssl:ro
+      - pdf-data:/storage/pdf:rw
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
@@ -69,3 +70,4 @@ services:
 volumes:
   postgres-data:
   file-data:
+  pdf-data:

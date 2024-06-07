@@ -4,6 +4,7 @@ from unittest.mock import ANY, patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import translation
@@ -353,6 +354,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             # Assert that `HarborDuesForm.send_mail` calls `EmailMessage.send` as
             # expected.
             mock_send.assert_called_once_with(fail_silently=False)
+            # Assert that the generated PDF is also saved locally
+            instance.refresh_from_db()
+            self.assertIsInstance(instance.pdf, File)
+            self.assertEqual(instance.pdf.name, instance.get_pdf_filename())
 
     @parametrize(
         "vessel_type,expected_text_1,expected_text_2,expected_text_3",
