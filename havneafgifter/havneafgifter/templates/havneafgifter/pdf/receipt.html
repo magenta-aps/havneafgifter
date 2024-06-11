@@ -87,7 +87,9 @@ table.table-striped td:first-child {
                     {% csrf_token %}
                     <button class="btn btn-primary ms-2">{% translate 'Send email' %}</button>
                 </form>
-                <a href="{% url 'havneafgifter:harbor_dues_form_update' pk=form.pk %}" class="btn btn-primary ms-2">
+                <a href="{% url 'havneafgifter:harbor_dues_form_update' pk=form.pk %}"
+                   id="edit"
+                   class="btn btn-primary {% if form.pdf %}disabled{% endif %} ms-2">
                     {% translate 'Edit this form' %}
                 </a>
                 <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary ms-2 ms-auto">

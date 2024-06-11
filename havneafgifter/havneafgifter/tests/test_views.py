@@ -1,9 +1,11 @@
+from io import BytesIO
 from unittest.mock import ANY, Mock, patch
 
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
+from django.core.files import File
 from django.core.management import call_command
 from django.forms import BaseFormSet
 from django.http import (
@@ -550,12 +552,33 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
         with self.assertRaises(PermissionDenied):
             self.view.setup(self._request(AnonymousUser()), pk=self.harbor_dues_form.pk)
 
-    def test_get_returns_html(self):
+    @parametrize(
+        "has_file,expected_attr",
+        [
+            (False, "btn btn-primary"),
+            (True, "btn btn-primary disabled"),
+        ],
+    )
+    def test_get_returns_html(self, has_file, expected_attr):
+        # Arrange: pretend a PDF file is attached if `has_file` is True
+        self.harbor_dues_form.pdf = File(
+            BytesIO(), name="testing.pdf" if has_file else ""
+        )
+        self.harbor_dues_form.save(update_fields=["pdf"])
+        # Act
         request = self._request(self.user)
         self.view.setup(request, pk=self.harbor_dues_form.pk)
+        # Assert
         response = self.view.get(request)
         self.assertEqual(response.status_code, HttpResponse.status_code)
         self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
+        # Assert that the "Edit" button is disabled if form has PDF file
+        # (and not disabled if form has no PDF file.)
+        soup = BeautifulSoup(response.content, "html.parser")
+        button = soup.find("a", attrs={"id": "edit"})
+        self.assertTrue(
+            set(expected_attr.split(" ")).issubset(set(button.attrs.get("class")))
+        )
 
     def test_post_sends_email(self):
         # Arrange
