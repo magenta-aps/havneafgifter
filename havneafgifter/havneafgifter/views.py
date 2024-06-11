@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
 from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -453,33 +453,22 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
 class ReceiptDetailView(
     LoginRequiredMixin, _SendEmailMixin, HavneafgiftView, DetailView
 ):
-    def get(self, request, *args, **kwargs):
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
         form = self.get_object()
         if form is None:
-            return HttpResponseNotFound(
-                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
-            )
-
+            raise Http404(self._not_found_response())
         if not form.has_permission(request.user, "view"):
             raise PermissionDenied()
+        self.form = form
 
-        form.calculate_tax(save=True)
-        receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
-
+    def get(self, request, *args, **kwargs):
+        self.form.calculate_tax(save=True)
+        receipt = self.form.get_receipt(base="havneafgifter/base.html", request=request)
         return HttpResponse(receipt.html)
 
     def post(self, request, *args, **kwargs):
-        form = self.get_object()
-        if form is None:
-            return HttpResponseNotFound(
-                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
-            )
-
-        if not form.has_permission(request.user, "view"):
-            raise PermissionDenied()
-
-        self._send_email(form, request)
-
+        self._send_email(self.form, request)
         return HttpResponseRedirect(".")
 
     def get_object(self, queryset=None):
@@ -492,16 +481,13 @@ class ReceiptDetailView(
             except HarborDuesForm.DoesNotExist:
                 return None
 
+    def _not_found_response(self):
+        return f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+
 
 class PreviewPDFView(ReceiptDetailView):
     def get(self, request, *args, **kwargs):
-        form = self.get_object()
-        if form is None:
-            return HttpResponseNotFound(
-                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
-            )
-        else:
-            receipt = form.get_receipt()
+        receipt = self.form.get_receipt()
         return HttpResponse(
             receipt.pdf,
             content_type="application/pdf",

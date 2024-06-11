@@ -6,7 +6,12 @@ from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.forms import BaseFormSet
-from django.http import HttpResponseNotFound, HttpResponseRedirect
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+)
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from unittest_parametrize import ParametrizedTestCase, parametrize
@@ -526,39 +531,36 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.view = ReceiptDetailView()
-        cls.user = User.objects.create(username="admin", is_superuser=True)
+        cls.user, _ = User.objects.get_or_create(username="admin", is_superuser=True)
 
     def test_get_object_returns_harbor_dues_form(self):
-        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
-        request = self.request_factory.get("")
-        request.user = self.user
-        self.view.get(request)
+        self.view.setup(self._request(self.user), pk=self.harbor_dues_form.pk)
         self.assertEqual(self.view.get_object(), self.harbor_dues_form)
 
     def test_get_object_returns_cruise_tax_form(self):
-        self.view.kwargs = {"pk": self.cruise_tax_form.pk}
-        request = self.request_factory.get("")
-        request.user = self.user
-        self.view.get(request)
+        self.view.setup(self._request(self.user), pk=self.cruise_tax_form.pk)
         self.assertEqual(self.view.get_object(), self.cruise_tax_form)
 
-    def test_get_object_returns_permission_denied(self):
-        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
-        request = self.request_factory.get("")
-        request.user = AnonymousUser()
-        with self.assertRaises(PermissionDenied):
-            self.view.get(request)
-
     def test_get_object_returns_none(self):
-        self.view.kwargs = {"pk": -1}
-        self.view.get(self.request_factory.get(""))
+        with self.assertRaises(Http404):
+            self.view.setup(self._request(self.user), pk=-1)
         self.assertIsNone(self.view.get_object())
+
+    def test_setup_raises_permission_denied(self):
+        with self.assertRaises(PermissionDenied):
+            self.view.setup(self._request(AnonymousUser()), pk=self.harbor_dues_form.pk)
+
+    def test_get_returns_html(self):
+        request = self._request(self.user)
+        self.view.setup(request, pk=self.harbor_dues_form.pk)
+        response = self.view.get(request)
+        self.assertEqual(response.status_code, HttpResponse.status_code)
+        self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
 
     def test_post_sends_email(self):
         # Arrange
-        request = self.request_factory.post("")
-        request.user = self.user
-        self.view.kwargs = {"pk": self.harbor_dues_form.pk}
+        request = self._request(self.user, method="post")
+        self.view.setup(request, pk=self.harbor_dues_form.pk)
         with patch.object(self.view, "_send_email") as mock_send_email:
             # Act
             self.view.post(request)
@@ -568,6 +570,11 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
                 request,
             )
 
+    def _request(self, user, method="get"):
+        request = self.request_factory.request(method=method)
+        request.user = user
+        return request
+
 
 class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
     @classmethod
@@ -575,18 +582,26 @@ class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.view = PreviewPDFView()
+        cls.user, _ = User.objects.get_or_create(username="admin", is_superuser=True)
 
     def test_get_returns_pdf(self):
         for obj in (self.harbor_dues_form, self.cruise_tax_form):
             with self.subTest(obj=obj):
-                self.view.kwargs = {"pk": obj.pk}
-                response = self.view.get(self.request_factory.get(""))
+                self.view.setup(self._request(), pk=obj.pk)
+                response = self.view.get(self._request())
+                self.assertEqual(response.status_code, HttpResponse.status_code)
                 self.assertEqual(response["Content-Type"], "application/pdf")
 
-    def test_get_returns_404(self):
-        self.view.kwargs = {"pk": -1}
-        response = self.view.get(self.request_factory.get(""))
-        self.assertIsInstance(response, HttpResponseNotFound)
+    def test_get_raises_404(self):
+        with self.assertRaises(Http404):
+            self.view.setup(self._request(), pk=-1)
+            response = self.view.get(self._request())
+            self.assertIsInstance(response, HttpResponseNotFound)
+
+    def _request(self):
+        request = self.request_factory.get("")
+        request.user = self.user
+        return request
 
 
 class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
