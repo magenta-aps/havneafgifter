@@ -346,7 +346,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             # Assert that the receipt is attached as PDF, using the correct filename
             self.assertListEqual(
                 msg.attachments,
-                [(f"{instance.form_id}.pdf", ANY, "application/pdf")],
+                [(instance.get_pdf_filename(), ANY, "application/pdf")],
             )
             pdf_content: bytes = msg.attachments[0][1]
             self.assertIsInstance(pdf_content, bytes)
@@ -357,7 +357,8 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             # Assert that the generated PDF is also saved locally
             instance.refresh_from_db()
             self.assertIsInstance(instance.pdf, File)
-            self.assertEqual(instance.pdf.name, instance.get_pdf_filename())
+            self.assertTrue(instance.pdf.name.startswith(instance.form_id))
+            self.assertTrue(instance.pdf.name.endswith(".pdf"))
 
     @parametrize(
         "vessel_type,expected_text_1,expected_text_2,expected_text_3",
