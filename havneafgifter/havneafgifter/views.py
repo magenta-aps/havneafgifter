@@ -450,7 +450,9 @@ class EnvironmentalTaxCreateView(_CruiseTaxFormSetView):
         ]
 
 
-class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
+class ReceiptDetailView(
+    LoginRequiredMixin, _SendEmailMixin, HavneafgiftView, DetailView
+):
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
@@ -459,12 +461,26 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             )
 
         if not form.has_permission(request.user, "view"):
-            raise PermissionDenied
+            raise PermissionDenied()
 
         form.calculate_tax(save=True)
         receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
 
         return HttpResponse(receipt.html)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form is None:
+            return HttpResponseNotFound(
+                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            )
+
+        if not form.has_permission(request.user, "view"):
+            raise PermissionDenied()
+
+        self._send_email(form, request)
+
+        return HttpResponseRedirect(".")
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
