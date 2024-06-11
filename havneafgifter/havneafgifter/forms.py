@@ -55,7 +55,7 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
     )
 
 
-class HTML5DateWidget(widgets.Input):
+class HTML5DateWidget(widgets.DateTimeInput):
     input_type = "datetime-local"
     template_name = "django/forms/widgets/datetime.html"
 
@@ -76,14 +76,10 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "gross_tonnage",
             "vessel_type",
         ]
-        localized_fields = [
-            "datetime_of_arrival",
-            "datetime_of_departure",
-        ]
         widgets = {
             "nationality": Select2Widget(choices=countries),
-            "datetime_of_arrival": HTML5DateWidget(),
-            "datetime_of_departure": HTML5DateWidget(),
+            "datetime_of_arrival": HTML5DateWidget(format="%Y-%m-%dT%H:%M:%S"),
+            "datetime_of_departure": HTML5DateWidget(format="%Y-%m-%dT%H:%M:%S"),
         }
 
     vessel_imo = DynamicField(
@@ -99,9 +95,10 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=lambda form: not form.user_is_ship,
     )
 
-    no_port_of_call = BooleanField(
+    no_port_of_call = DynamicField(
+        BooleanField,
         required=False,
-        initial=False,
+        initial=lambda form: not form.instance.has_port_of_call,
         label=_("No port of call"),
     )
 
