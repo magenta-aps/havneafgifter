@@ -63,6 +63,18 @@ msgid "No port of call"
 msgstr ""
 
 #: havneafgifter/forms.py
+msgid "No"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Yes"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Select 'yes' to create a draft"
+msgstr ""
+
+#: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
 msgstr ""
 
@@ -282,6 +294,10 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Port name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Draft status"
 msgstr ""
 
 #: havneafgifter/models.py

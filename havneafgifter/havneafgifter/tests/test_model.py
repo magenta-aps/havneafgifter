@@ -220,7 +220,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         ],
     )
     def test_fields_only_nullable_for_cruise_ships(self, vessel_type, field, required):
-        instance = HarborDuesForm(vessel_type=vessel_type)
+        instance = HarborDuesForm(vessel_type=vessel_type, status="done")
         setattr(instance, field, None)
         if required:
             with self.assertRaises(IntegrityError):
@@ -260,6 +260,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             vessel_type=ShipType.CRUISE,
             datetime_of_arrival=arrival,
             datetime_of_departure=departure,
+            status="done",
         )
         if should_fail:
             with self.assertRaises(IntegrityError):

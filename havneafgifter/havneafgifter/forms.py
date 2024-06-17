@@ -75,28 +75,34 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_departure",
             "gross_tonnage",
             "vessel_type",
+            "status",
         ]
         localized_fields = [
             "datetime_of_arrival",
             "datetime_of_departure",
         ]
         widgets = {
-            "nationality": Select2Widget(choices=countries),
             "datetime_of_arrival": HTML5DateWidget(),
             "datetime_of_departure": HTML5DateWidget(),
         }
 
+    nationality = ChoiceField(
+        required=False,
+        choices=[("", "---")] + list(countries),
+        widget=Select2Widget(choices=[("", "---")] + list(countries)),
+    )
+
     vessel_imo = DynamicField(
         CharField,
+        min_length=0,
         max_length=7,
-        min_length=7,
         validators=[
             RegexValidator(r"\d{7}"),
             imo_validator,
         ],
         label=_("IMO-number"),
         disabled=lambda form: form.user_is_ship,
-        required=lambda form: not form.user_is_ship,
+        required=False,
     )
 
     no_port_of_call = BooleanField(
@@ -105,12 +111,25 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("No port of call"),
     )
 
+    status = ChoiceField(
+        required=False,
+        choices=[
+            ("ny", _("No")),
+            ("kladde", _("Yes")),
+        ],
+        label=_("Select 'yes' to create a draft"),
+    )
+
     def __init__(self, user_is_ship=False, *args, **kwargs):
         self.user_is_ship = user_is_ship
         super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
+
+        status = cleaned_data.get("status")
+        if status == "kladde":
+            return cleaned_data
 
         # Handle "datetime" fields
         datetime_of_arrival = cleaned_data.get("datetime_of_arrival")
