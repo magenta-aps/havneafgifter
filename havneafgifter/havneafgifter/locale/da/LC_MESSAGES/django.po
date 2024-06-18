@@ -8,7 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2024-06-21 13:17-0100\n"
+=======
+"POT-Creation-Date: 2024-06-18 06:26-0100\n"
+>>>>>>> 9fc6251 (feat: [#60307] add Status enum and missing CheckConstraints)
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -273,6 +277,18 @@ msgstr "Andet europæisk land"
 #: havneafgifter/models.py
 msgid "Other"
 msgstr "Andet land"
+
+#: havneafgifter/models.py
+msgid "New"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Draft"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Done"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Northeast Greenland National Park"

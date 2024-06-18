@@ -28,6 +28,7 @@ from havneafgifter.models import (
     HarborDuesForm,
     Nationality,
     ShipType,
+    Status,
     imo_validator,
 )
 
@@ -114,8 +115,8 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     status = ChoiceField(
         required=False,
         choices=[
-            ("ny", _("No")),
-            ("kladde", _("Yes")),
+            (Status.NEW, _("No")),
+            (Status.DRAFT, _("Yes")),
         ],
         label=_("Select 'yes' to create a draft"),
     )
@@ -128,7 +129,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         cleaned_data = super().clean()
 
         status = cleaned_data.get("status")
-        if status == "kladde":
+        if status == Status.DRAFT:
             return cleaned_data
 
         # Handle "datetime" fields
