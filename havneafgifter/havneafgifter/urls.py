@@ -64,7 +64,9 @@ urlpatterns: List[URLResolver | URLPattern] = [
     ),
     path(
         "error/login_assurance/",
-        AccessDeniedView.as_view(template_name="havneafgifter/error/login_assurance.html"),
+        AccessDeniedView.as_view(
+            template_name="havneafgifter/error/login_assurance.html"
+        ),
         name="login-assurance-level",
     ),
     path(
