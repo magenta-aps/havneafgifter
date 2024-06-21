@@ -15,6 +15,7 @@ LOGIN_TIMEOUT_URL = reverse_lazy("havneafgifter:login-timeout")
 LOGIN_REPEATED_URL = reverse_lazy("havneafgifter:login-repeat")
 LOGIN_NO_CPRCVR_URL = reverse_lazy("havneafgifter:login-no-cpr")
 LOGIN_REDIRECT_URL = reverse_lazy("havneafgifter:post_login")
+LOGIN_ASSURANCE_LEVEL_URL = reverse_lazy("havneafgifter:login-assurance-level")
 LOGIN_URL = reverse_lazy("havneafgifter:login")
 LOGOUT_REDIRECT_URL = reverse_lazy("havneafgifter:logged_out")
 LOGIN_PROVIDER_CLASS = os.environ.get("LOGIN_PROVIDER_CLASS") or None
@@ -26,6 +27,7 @@ LOGIN_WHITELISTED_URLS = [
     LOGIN_TIMEOUT_URL,
     LOGIN_REPEATED_URL,
     LOGIN_NO_CPRCVR_URL,
+    LOGIN_ASSURANCE_LEVEL_URL,
     LOGIN_REDIRECT_URL,
     LOGOUT_REDIRECT_URL,
     reverse_lazy("havneafgifter:root"),
