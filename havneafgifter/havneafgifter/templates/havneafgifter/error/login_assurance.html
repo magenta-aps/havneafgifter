@@ -2,6 +2,6 @@
 
 {% block content %}
     {% translate "Adgang nægtet" as header %}
-    {% translate 'Det anvendte login har ikke et CPR-nummer tilknyttet.' as body %}
+    {% translate 'Der er logget ind med utilstrækkeligt sikringsniveau. Prøv at logge ind igen.' as body %}
     {% include 'havneafgifter/error/error.html' with header=header body=body logout=True %}
 {% endblock %}

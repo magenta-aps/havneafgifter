@@ -63,6 +63,13 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="login-failed",
     ),
     path(
+        "error/login_assurance/",
+        AccessDeniedView.as_view(
+            template_name="havneafgifter/error/login_assurance.html"
+        ),
+        name="login-assurance-level",
+    ),
+    path(
         "blanket/opret/",
         HarborDuesFormCreateView.as_view(),
         name="harbor_dues_form_create",
