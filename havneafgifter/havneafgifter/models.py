@@ -380,7 +380,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=(Q(status=Status.DRAFT) | Q(nationality__isnull=False)),
+                check=(
+                    Q(status=Status.DRAFT)
+                    | (Q(vessel_type=ShipType.CRUISE) | Q(nationality__isnull=False))
+                ),
                 name="nationality_cannot_be_null_for_non_drafts",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
@@ -451,7 +454,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         ]
 
     status = models.CharField(
-        default="ny",
+        default=Status.NEW,
         choices=Status.choices,
         verbose_name=_("Draft status"),
     )
@@ -645,7 +648,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
             port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
                 port=self.port_of_call,  # type: ignore
-                vessel_type=self.vessel_type,
+                vessel_type=self.vessel_type,  # type: ignore
                 gross_ton=self.gross_tonnage,  # type: ignore
             )
             range_port_tax = Decimal(0)

@@ -21,6 +21,7 @@ from havneafgifter.models import (
     PortTaxRate,
     ShippingAgent,
     ShipType,
+    Status,
     TaxRates,
     imo_validator,
 )
@@ -205,6 +206,32 @@ class TestPort(TestCase):
 
 class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     maxDiff = None
+
+    @parametrize(
+        "status,field,required",
+        [
+            (Status.NEW, "port_of_call", True),
+            (Status.DRAFT, "port_of_call", False),
+            (Status.DONE, "port_of_call", True),
+            (Status.NEW, "gross_tonnage", True),
+            (Status.DRAFT, "gross_tonnage", False),
+            (Status.DONE, "gross_tonnage", True),
+            (Status.DONE, "datetime_of_arrival", True),
+            (Status.DRAFT, "datetime_of_arrival", False),
+            (Status.DONE, "datetime_of_arrival", True),
+            (Status.NEW, "datetime_of_departure", True),
+            (Status.DRAFT, "datetime_of_departure", False),
+            (Status.DONE, "datetime_of_departure", True),
+        ],
+    )
+    def test_fields_only_nullable_for_drafts(self, status, field, required):
+        instance = HarborDuesForm(status=status, vessel_type=ShipType.FISHER)
+        setattr(instance, field, None)
+        if required:
+            with self.assertRaises(IntegrityError):
+                instance.save()
+        else:
+            instance.save()
 
     @parametrize(
         "vessel_type,field,required",
