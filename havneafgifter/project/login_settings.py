@@ -23,6 +23,8 @@ LOGIN_BYPASS_ENABLED = False
 LOGIN_WHITELISTED_URLS = [
     "/favicon.ico",
     "/_ht/",
+    "/metrics/health/storage",
+    "/metrics/health/database",
     LOGIN_URL,
     LOGIN_TIMEOUT_URL,
     LOGIN_REPEATED_URL,

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "django_mitid_auth",
     "mitid_test",
     "csp_helpers",
+    "metrics",
 ]
 
 MIDDLEWARE = [
