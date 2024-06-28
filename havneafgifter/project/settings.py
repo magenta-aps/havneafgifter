@@ -215,7 +215,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_ROOT = "/upload/"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
 
+# Storage
+STORAGE_ROOT = "/storage/"
+STORAGE_PDF = os.path.join(STORAGE_ROOT, "pdf")
 
+# Logging
 LOGGING: dict = {
     "version": 1,
     "disable_existing_loggers": True,

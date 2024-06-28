@@ -33,7 +33,7 @@ from havneafgifter.data import DateTimeRange
 
 logger = logging.getLogger(__name__)
 
-pdf_storage = FileSystemStorage(location="/storage/pdf")
+pdf_storage = FileSystemStorage(location=settings.STORAGE_PDF)
 
 
 @dataclass
