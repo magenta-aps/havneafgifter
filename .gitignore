@@ -14,3 +14,4 @@ data/er/*
 *.code-workspace
 **/.DS_Store
 **/__pycache__
+**/.coverage*
