@@ -13,3 +13,4 @@ data/er/*
 *.vscode/
 *.code-workspace
 **/.DS_Store
+**/__pycache__
