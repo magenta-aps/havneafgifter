@@ -2,7 +2,7 @@
 
 import django.core.files.storage
 from django.db import migrations, models
-
+from django.conf import settings
 
 class Migration(migrations.Migration):
 
@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='harborduesform',
             name='pdf',
-            field=models.FileField(blank=True, null=True, storage=django.core.files.storage.FileSystemStorage(location='/storage/pdf'), upload_to='', verbose_name='PDF file'),
+            field=models.FileField(blank=True, null=True, storage=django.core.files.storage.FileSystemStorage(location=settings.STORAGE_PDF), upload_to='', verbose_name='PDF file'),
         ),
     ]

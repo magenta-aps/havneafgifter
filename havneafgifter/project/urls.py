@@ -20,6 +20,7 @@ urlpatterns: List[URLResolver | URLPattern] = [
     ),
     path("saml/", include("django_mitid_auth.urls", namespace="mitid")),
     path("saml2/metadata/", MetadataView.as_view(), name="saml_metadata_override"),
+    path("metrics/", include("metrics.urls")),
 ]
 if settings.MITID_TEST_ENABLED:
     urlpatterns.append(
