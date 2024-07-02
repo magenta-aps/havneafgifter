@@ -118,7 +118,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             (Status.NEW, _("No")),
             (Status.DRAFT, _("Yes")),
         ],
-        label=_("Select 'yes' to create a draft"),
+        label=_("Draft"),
     )
 
     def __init__(self, user_is_ship=False, *args, **kwargs):

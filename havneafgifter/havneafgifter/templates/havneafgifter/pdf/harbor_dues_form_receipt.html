@@ -49,7 +49,7 @@ Harbour Dues
                     Gross tonnage (GT)
                 </th>
                 <td class="table-active">
-                    {{ form.gross_tonnage }}
+                    {{ form.gross_tonnage|default_if_none:"" }}
                 </td>
                 <th scope="row">
                     BT-mut ataatsimut DKK
@@ -57,7 +57,7 @@ Harbour Dues
                     DKK per/BT
                 </th>
                 <td class="table-active">
-                    {{ form.tax_per_gross_ton }} DKK
+                    {{ form.tax_per_gross_ton|default_if_none:0 }} DKK
                 </td>
             </tr>
             {# This row varies based on the vessel type #}
@@ -86,7 +86,7 @@ Harbour Dues
                     Dues
                 </th>
                 <td class="table-active fw-bold">
-                    {{ form.harbour_tax }} DKK
+                    {{ form.harbour_tax|default_if_none:0 }} DKK
                 </td>
             </tr>
         </tbody>
