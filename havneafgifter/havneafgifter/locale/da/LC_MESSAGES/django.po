@@ -65,6 +65,18 @@ msgid "No port of call"
 msgstr "Ingen ankomsthavn"
 
 #: havneafgifter/forms.py
+msgid "No"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Yes"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Select 'yes' to create a draft"
+msgstr ""
+
+#: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
 msgstr "Afrejse-datoen kan ikke ligge før ankomst-datoen"
 
@@ -263,6 +275,18 @@ msgid "Other"
 msgstr "Andet land"
 
 #: havneafgifter/models.py
+msgid "New"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Draft"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Done"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Northeast Greenland National Park"
 msgstr "Nordøstgrønlands nationalpark"
 
@@ -289,6 +313,10 @@ msgstr "Havnemyndighedens kontakt-email"
 #: havneafgifter/models.py
 msgid "Port name"
 msgstr "Havnens navn"
+
+#: havneafgifter/models.py
+msgid "Draft status"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Form submission date"

@@ -116,7 +116,7 @@ table.table-striped td:first-child {
                         Port of call
                     </th>
                     <td class="table-active">
-                        {{ form.port_of_call }}
+                        {{ form.port_of_call|default_if_none:"" }}
                     </td>
                     {% endif %}
                     <th scope="row">
@@ -139,7 +139,7 @@ table.table-striped td:first-child {
                         <p>
                             Angallatip aqqa nalunaarsorneqarnermullu normua / Name and registration
                         </p>
-                        {{ form.vessel_name }}
+                        {{ form.vessel_name|default_if_none:"" }}
                         <br>
                         {{ form.vessel_imo }}
                     </td>
@@ -155,7 +155,7 @@ table.table-striped td:first-child {
                         <p>
                             Ateq / Name
                         </p>
-                        {{ form.vessel_owner }}
+                        {{ form.vessel_owner|default_if_none:"" }}
                     </td>
                 </tr>
 
@@ -169,7 +169,7 @@ table.table-striped td:first-child {
                         <p>
                             Ateq / Name
                         </p>
-                        {{ form.vessel_master }}
+                        {{ form.vessel_master|default_if_none:"" }}
                     </td>
                 </tr>
 
@@ -183,7 +183,7 @@ table.table-striped td:first-child {
                         <p>
                             Ateq / Name
                         </p>
-                        {{ form.shipping_agent }}
+                        {{ form.shipping_agent|default_if_none:"" }}
                     </td>
                 </tr>
 

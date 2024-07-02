@@ -12,7 +12,7 @@ from havneafgifter.forms import (
     PassengersByCountryForm,
     PassengersTotalForm,
 )
-from havneafgifter.models import DisembarkmentSite, Nationality, Port
+from havneafgifter.models import DisembarkmentSite, Nationality, Port, Status
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
@@ -92,6 +92,14 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         self._assert_form_has_error(
             data, "no_port_of_call_cannot_be_true_for_non_cruise_ships"
         )
+
+    def test_form_clean_does_nothing_if_draft(self):
+        data = copy.copy(self.harbor_dues_form_form_data)
+        data["status"] = Status.DRAFT.value
+        form = HarborDuesFormForm(data=data)
+        self.assertTrue(form.is_valid())
+        result = form.clean()
+        self.assertEqual(data, result)
 
     def test_user_visible_non_field_errors(self):
         # Submit data that will lead to violating a database constraint

@@ -27,7 +27,6 @@ from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
-from django_countries import countries
 
 from havneafgifter.data import DateTimeRange
 
@@ -260,6 +259,12 @@ class Nationality(models.TextChoices):
     OTHERS = "OT", _("Other")
 
 
+class Status(models.TextChoices):
+    NEW = ("NEW", _("New"))
+    DRAFT = ("DRAFT", _("Draft"))
+    DONE = ("DONE", _("Done"))
+
+
 class Municipality(models.IntegerChoices):
     KUJALLEQ = 955, "Kujalleq"
     QEQQATA = 957, "Qeqqata"
@@ -374,23 +379,40 @@ class Port(PermissionsMixin, models.Model):
 class HarborDuesForm(PermissionsMixin, models.Model):
     class Meta:
         constraints = [
+            models.CheckConstraint(
+                check=(
+                    Q(status=Status.DRAFT)
+                    | (Q(vessel_type=ShipType.CRUISE) | Q(nationality__isnull=False))
+                ),
+                name="nationality_cannot_be_null_for_non_drafts",
+                violation_error_code="constraint_violated",  # type: ignore
+            ),
             # `port_of_call` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(Q(vessel_type=ShipType.CRUISE) | Q(port_of_call__isnull=False)),
+                check=(
+                    Q(status=Status.DRAFT)
+                    | (Q(vessel_type=ShipType.CRUISE) | Q(port_of_call__isnull=False))
+                ),
                 name="port_of_call_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
             # `gross_tonnage` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(Q(vessel_type=ShipType.CRUISE) | Q(gross_tonnage__isnull=False)),
+                check=(
+                    Q(status=Status.DRAFT)
+                    | (Q(vessel_type=ShipType.CRUISE) | Q(gross_tonnage__isnull=False))
+                ),
                 name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_arrival` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
                 check=(
-                    Q(vessel_type=ShipType.CRUISE)
-                    | Q(datetime_of_arrival__isnull=False)
+                    Q(status=Status.DRAFT)
+                    | (
+                        Q(vessel_type=ShipType.CRUISE)
+                        | Q(datetime_of_arrival__isnull=False)
+                    )
                 ),
                 name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
@@ -398,8 +420,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             # `datetime_of_departure` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
                 check=(
-                    Q(vessel_type=ShipType.CRUISE)
-                    | Q(datetime_of_departure__isnull=False)
+                    Q(status=Status.DRAFT)
+                    | (
+                        Q(vessel_type=ShipType.CRUISE)
+                        | Q(datetime_of_departure__isnull=False)
+                    )
                 ),
                 name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
@@ -408,15 +433,18 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             # be present, or both be blank/NULL.
             models.CheckConstraint(
                 check=(
-                    # Both present
-                    (
-                        Q(datetime_of_arrival__isnull=False)
-                        & Q(datetime_of_departure__isnull=False)
-                    )
-                    # Both absent
+                    Q(status=Status.DRAFT)
                     | (
-                        Q(datetime_of_arrival__isnull=True)
-                        & Q(datetime_of_departure__isnull=True)
+                        # Both present
+                        (
+                            Q(datetime_of_arrival__isnull=False)
+                            & Q(datetime_of_departure__isnull=False)
+                        )
+                        # Both absent
+                        | (
+                            Q(datetime_of_arrival__isnull=True)
+                            & Q(datetime_of_departure__isnull=True)
+                        )
                     )
                 ),
                 name="datetime_of_arrival_and_departure_must_both_be_present_"
@@ -424,6 +452,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 violation_error_code="constraint_violated",  # type: ignore
             ),
         ]
+
+    status = models.CharField(
+        default=Status.NEW,
+        choices=Status.choices,
+        verbose_name=_("Draft status"),
+    )
 
     date = models.DateField(
         null=False,
@@ -442,16 +476,15 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     nationality = models.CharField(
         max_length=2,
-        choices=countries,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Vessel nationality"),
     )
 
     vessel_name = models.CharField(
         max_length=255,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Vessel name"),
     )
 
@@ -470,22 +503,22 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     vessel_owner = models.CharField(
         max_length=255,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Vessel owner"),
     )
 
     vessel_master = models.CharField(
         max_length=255,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name=_("Vessel captain"),
     )
 
     shipping_agent = models.ForeignKey(
         ShippingAgent,
         null=True,
-        blank=False,
+        blank=True,
         verbose_name=_("Shipping agent"),
         on_delete=models.SET_NULL,
     )
@@ -509,6 +542,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     vessel_type = models.CharField(
+        null=True,
+        blank=True,
         max_length=9,
         choices=ShipType,
         verbose_name=_("Vessel type"),
@@ -594,6 +629,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             self.port_of_call,
             self.datetime_of_arrival,
             self.datetime_of_departure,
+            self.gross_tonnage,
         ):
             return {"harbour_tax": None, "details": []}
 
@@ -612,7 +648,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
             port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
                 port=self.port_of_call,  # type: ignore
-                vessel_type=self.vessel_type,
+                vessel_type=self.vessel_type,  # type: ignore
                 gross_ton=self.gross_tonnage,  # type: ignore
             )
             range_port_tax = Decimal(0)
