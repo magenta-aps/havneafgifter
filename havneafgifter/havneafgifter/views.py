@@ -35,6 +35,7 @@ from havneafgifter.models import (
     PassengersByCountry,
     PermissionsMixin,
     ShipType,
+    Status,
 )
 from havneafgifter.tables import HarborDuesFormTable
 
@@ -211,8 +212,9 @@ class HarborDuesFormCreateView(
         else:
             # User is all done filling out data for this vessel
             harbor_dues_form.save()
-            # Send email to relevant recipients
-            self._send_email(harbor_dues_form, self.request)
+            if harbor_dues_form.status != Status.DRAFT:
+                # Send email to relevant recipients
+                self._send_email(harbor_dues_form, self.request)
             # Go to detail view to display result.
             return self.get_redirect_for_form(
                 "havneafgifter:receipt_detail_html",
@@ -374,7 +376,8 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
 
         # User is now all done filling out data for cruise ship.
         # Send email to relevant recipients.
-        self._send_email(self._cruise_tax_form, self.request)
+        if self._cruise_tax_form.status != Status.DRAFT:
+            self._send_email(self._cruise_tax_form, self.request)
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
