@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-21 13:17-0100\n"
+"POT-Creation-Date: 2024-07-05 08:45-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,8 +72,8 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: havneafgifter/forms.py
-msgid "Select 'yes' to create a draft"
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Draft"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -276,10 +276,6 @@ msgstr "Andet land"
 
 #: havneafgifter/models.py
 msgid "New"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Draft"
 msgstr ""
 
 #: havneafgifter/models.py
