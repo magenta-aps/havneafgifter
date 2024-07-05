@@ -16,18 +16,19 @@ class HavneafgiftPermissionBackend(ModelBackend):
         if not user_obj.is_active or user_obj.is_anonymous:
             # Needed to override here, because super would return if obj is not None
             return set()
-        if not hasattr(user_obj, "_perm_cache"):
-            user_obj._perm_cache = {}
+
+        if not hasattr(user_obj, "_obj_perm_cache"):
+            user_obj._obj_perm_cache = {}
         if obj is None:
-            obj_key = f"{obj.__class__.__name__}"
+            obj_key = "None"
         else:
             obj_key = f"{obj.__class__.__name__}.{obj.pk}"
-        if obj_key not in user_obj._perm_cache:
-            user_obj._perm_cache[obj_key] = {
+        if obj_key not in user_obj._obj_perm_cache:
+            user_obj._obj_perm_cache[obj_key] = {
                 *self.get_user_permissions(user_obj, obj=obj),
                 *self.get_group_permissions(user_obj, obj=obj),
             }
-        return user_obj._perm_cache[obj_key]
+        return user_obj._obj_perm_cache[obj_key]
 
     def _get_permissions(self, user_obj, obj, from_name):
         # Mostly copied from super
