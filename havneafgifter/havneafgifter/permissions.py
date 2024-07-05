@@ -20,7 +20,7 @@ class HavneafgiftPermissionBackend(ModelBackend):
         if not hasattr(user_obj, "_obj_perm_cache"):
             user_obj._obj_perm_cache = {}
         if obj is None:
-            obj_key = f"None"
+            obj_key = "None"
         else:
             obj_key = f"{obj.__class__.__name__}.{obj.pk}"
         if obj_key not in user_obj._obj_perm_cache:
