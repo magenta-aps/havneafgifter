@@ -13,7 +13,7 @@ from django.forms import (
     ModelForm,
     PasswordInput,
     TextInput,
-    widgets,
+    widgets, MultipleChoiceField, DateTimeField, ModelMultipleChoiceField, DateTimeInput,
 )
 from django.forms.utils import ErrorList
 from django.utils.functional import cached_property
@@ -29,7 +29,7 @@ from havneafgifter.models import (
     Nationality,
     ShipType,
     Status,
-    imo_validator,
+    imo_validator, Municipality,
 )
 
 
@@ -278,3 +278,38 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 
     def get_municipality_display(self):
         return self.initial_disembarkment_site.get_municipality_display()
+
+
+class StatisticsForm(Form):
+    municipality = MultipleChoiceField(
+        choices=Municipality.choices,
+        required=False,
+    )
+    arrival_gt = DateTimeField(
+        label="Arrival after",
+        required=False,
+        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+    )
+    arrival_lt = DateTimeField(
+        label="Arrival before",
+        required=False,
+        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+    )
+    departure_gt = DateTimeField(
+        label="Departure after",
+        required=False,
+        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+    )
+    departure_lt = DateTimeField(
+        label="Departure before",
+        required=False,
+        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+    )
+    vessel_type = MultipleChoiceField(
+        choices=ShipType.choices,
+        required=False,
+    )
+    site = ModelMultipleChoiceField(
+        queryset=DisembarkmentSite.objects.all(),
+        required=False,
+    )

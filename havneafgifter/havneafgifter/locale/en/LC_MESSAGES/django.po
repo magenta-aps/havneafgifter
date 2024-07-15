@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-05 08:45-0100\n"
+"POT-Creation-Date: 2024-07-15 08:06-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -478,6 +478,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
+#: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Submit"
 msgstr ""
 
@@ -527,6 +528,7 @@ msgid "IMO numbers should be 7 digits"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
+#: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Harbor dues list"
 msgstr ""
 

@@ -31,7 +31,7 @@
         "datetime_of_departure": "2024-04-08T01:00:00Z",
         "gross_tonnage": 125,
         "vessel_type": "FISHER",
-        "harbour_tax": null
+        "harbour_tax": "0.00"
     }
 },
 {

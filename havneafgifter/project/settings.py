@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "mitid_test",
     "csp_helpers",
     "metrics",
+    "tempus_dominus",
 ]
 
 MIDDLEWARE = [
@@ -304,6 +305,7 @@ CSP_DEFAULT_SRC = (
 CSP_SCRIPT_SRC_ATTR = (
     "'self'",
     "localhost:8000" if DEBUG else HOST_DOMAIN,
+    "cdnjs.cloudflare.com"
 )
 CSP_STYLE_SRC_ATTR = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:")
@@ -316,5 +318,7 @@ if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [
         os.environ["HOST_DOMAIN"],
     ]
+TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
+TEMPUS_DOMINUS_INCLUDE_ASSETS = False
 
 from .login_settings import *  # noqa

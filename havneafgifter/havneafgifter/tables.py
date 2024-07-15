@@ -8,3 +8,9 @@ class HarborDuesFormTable(tables.Table):
 
     class Meta:
         model = HarborDuesForm
+
+
+class StatistikTable(tables.Table):
+    municipality = tables.Column()
+    disembarkment_tax = tables.Column()
+    harbour_tax = tables.Column()

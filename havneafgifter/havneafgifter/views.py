@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from csp_helpers.mixins import CSPViewMixin
 from django.conf import settings
 from django.contrib import messages
@@ -11,20 +13,22 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
+from django.db.models import Sum, F, Count
+from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
-from django_tables2 import SingleTableView
+from django_tables2 import SingleTableView, SingleTableMixin, RequestConfig
 
 from havneafgifter.forms import (
     AuthenticationForm,
     DisembarkmentForm,
     HarborDuesFormForm,
     PassengersByCountryForm,
-    PassengersTotalForm,
+    PassengersTotalForm, StatisticsForm,
 )
 from havneafgifter.models import (
     CruiseTaxForm,
@@ -37,7 +41,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
 )
-from havneafgifter.tables import HarborDuesFormTable
+from havneafgifter.tables import HarborDuesFormTable, StatistikTable
 
 
 class HavneafgiftView:
@@ -475,3 +479,79 @@ class HarborDuesFormListView(
         return HarborDuesForm.filter_user_permissions(
             HarborDuesForm.objects.all(), self.request.user, "view"
         )
+
+
+class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, FormView):
+    form_class = StatisticsForm
+    template_name = "havneafgifter/statistik.html"
+    table_class = StatistikTable
+
+    def form_valid(self, request, *args, **kwargs):
+        """Handle GET requests: instantiate a blank version of the form."""
+        return self.render_to_response(self.get_context_data())
+
+    def get_table_data(self):
+        form = self.get_form()
+        if form.is_valid():
+            qs = HarborDuesForm.objects.all()
+            # qs = Disembarkment.objects.filter(
+            #     cruise_tax_form__status=Status.DONE
+            # )
+            print(form.cleaned_data)
+            group_fields = []
+            output_fields = ["id", "municipality","disembarkment_tax","harbour_tax","count"]
+            shortcut_fields = {
+                "municipality": F("cruisetaxform__disembarkment__disembarkment_site__municipality"),
+                "site": F("cruisetaxform__disembarkment__disembarkment_site"),
+            }
+            filter_fields = {}
+
+            qs = qs.annotate(**shortcut_fields)
+
+            for action in ("arrival", "departure"):
+                for op in ("gt", "lt"):
+                    field_value = form.cleaned_data[f"{action}_{op}"]
+                    if field_value:
+                        filter_fields[f"datetime_of_{action}__{op}"] = field_value
+
+            for field in ("municipality", "vessel_type"):
+                field_value = form.cleaned_data[field]
+                if field_value:
+                    filter_fields[f"{field}__in"] = field_value
+                    group_fields.append(field)
+            if not group_fields:
+                group_fields = ["id"]
+
+            qs = qs.filter(**filter_fields)
+            qs = qs.values(*group_fields)
+
+            qs = qs.annotate(
+                disembarkment_tax=Coalesce(Sum("cruisetaxform__disembarkment_tax"), Decimal(0)),
+                harbour_tax=Coalesce(Sum("harbour_tax"), Decimal(0)),
+                count=Count("id", distinct=True),
+            )
+
+            qs = qs.values(*output_fields)
+
+            for item in qs:
+                print(item)
+            return qs
+        return []
+
+#
+# Hvert filter (kommune, periode, skibstype osv.) kan have valgt nul eller
+# flere værdier (tidsperiode skal måske kun have en værdi).
+#
+# Tabellen skal så vise produktet af de valgte optioner,
+# dvs. hvis der er valgt 2 kommuner og tre skibstyper,
+# og alle andre filtre har 0 optioner valgt, vises 2x3=6 linjer.
+#
+# Hver linje repræsenterer så en unik kombination af optioner,
+# og data i linjen viser så summen indenfor disse optioner
+# (f.eks. antallet af krydstogtsskibe i Sermersooq, afgiften fra disse skibe osv)
+#
+#
+# søjler:
+# * Antal skibe
+# * Afgifter
+# *

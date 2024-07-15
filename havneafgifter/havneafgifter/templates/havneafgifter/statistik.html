@@ -1,0 +1,56 @@
+{% extends "havneafgifter/base.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load csp %}
+{% load django_bootstrap5 %}
+{% load render_table from django_tables2 %}
+{% load media_csp %}
+{% load django_bootstrap5 %}
+{% block content %}
+<h1>{% translate "Harbor dues list" %}</h1>
+
+<script src="{% static 'tempusdominus/popper.min.js' %}" nonce="{{request.csp_nonce}}"></script>
+<script src="{% static 'tempusdominus/tempus-dominus.min.js' %}" nonce="{{request.csp_nonce}}"></script>
+<link rel="stylesheet" href="{% static 'tempusdominus/tempus-dominus.min.css' %}" nonce="{{request.csp_nonce}}">
+<link rel="stylesheet" href="{% static 'font-awesome/css/all.css' %}" nonce="{{request.csp_nonce}}">
+
+
+<form action="" method="post" class="form">
+    {% csrf_token %}
+    {% script %}
+    {% media_csp form %}
+    {% endscript %}
+    {% bootstrap_form form alert_error_type="none" %}
+    {% bootstrap_button button_type="submit" content=_("Submit") %}
+</form>
+<script type="text/javascript" nonce="{{request.csp_nonce}}">
+    $("input.datetimepicker").each(function () {
+        new tempusDominus.TempusDominus(
+            this,
+            {
+                display: {
+                    sideBySide: true,
+                    calendarWeeks: false,
+                    buttons: {
+                        clear: true,
+                    },
+                    components: {
+                        seconds: true,
+
+                    },
+                },
+                localization: {
+                    hourCycle: "h23",
+                    startOfTheWeek: 1,
+                    format: "yyyy-MM-dd HH:mm:ss"
+                }
+
+            }
+        )
+    });
+</script>
+
+{% render_table table %}
+
+{% endblock content %}
