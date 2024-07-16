@@ -40,7 +40,7 @@ from havneafgifter.models import (
     PassengersByCountry,
     PermissionsMixin,
     ShipType,
-    Status,
+    Status, Municipality, Port,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
 
@@ -512,7 +512,7 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, For
                     if field_value:
                         filter_fields[f"datetime_of_{action}__{op}"] = field_value
 
-            for field in ("municipality", "vessel_type"):
+            for field in ("municipality", "vessel_type", "port_of_call"):
                 field_value = form.cleaned_data[field]
                 if field_value:
                     filter_fields[f"{field}__in"] = field_value
@@ -533,9 +533,16 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, For
                 count=Count("pk", distinct=True),
             )
 
-            for item in qs:
-                print(item)
-            return qs
+            items = list(qs)
+            for item in items:
+                municipality = item.get("municipality")
+                if municipality:
+                    item["municipality"] = Municipality(municipality).label
+                port_of_call = item.get("port_of_call")
+                if port_of_call:
+                    item["port_of_call"] = Port.objects.get(pk=port_of_call).name
+
+            return items
         return []
 
 #

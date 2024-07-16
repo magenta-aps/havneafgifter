@@ -29,7 +29,7 @@ from havneafgifter.models import (
     Nationality,
     ShipType,
     Status,
-    imo_validator, Municipality,
+    imo_validator, Municipality, Port,
 )
 
 
@@ -312,4 +312,8 @@ class StatisticsForm(Form):
     site = ModelMultipleChoiceField(
         queryset=DisembarkmentSite.objects.all(),
         required=False,
+    )
+    port_of_call = ModelMultipleChoiceField(
+        queryset=Port.objects.all(),
+        required=False
     )
