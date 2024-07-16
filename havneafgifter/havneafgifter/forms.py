@@ -7,13 +7,17 @@ from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
+    DateTimeField,
+    DateTimeInput,
     Form,
     HiddenInput,
     IntegerField,
     ModelForm,
+    ModelMultipleChoiceField,
+    MultipleChoiceField,
     PasswordInput,
     TextInput,
-    widgets, MultipleChoiceField, DateTimeField, ModelMultipleChoiceField, DateTimeInput,
+    widgets,
 )
 from django.forms.utils import ErrorList
 from django.utils.functional import cached_property
@@ -26,10 +30,12 @@ from havneafgifter.form_mixins import BootstrapForm
 from havneafgifter.models import (
     DisembarkmentSite,
     HarborDuesForm,
+    Municipality,
     Nationality,
+    Port,
     ShipType,
     Status,
-    imo_validator, Municipality, Port,
+    imo_validator,
 )
 
 
@@ -282,39 +288,48 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 
 class StatisticsForm(BootstrapForm):
     municipality = MultipleChoiceField(
-        label="Kommune",
+        label=_("Kommune"),
         choices=Municipality.choices,
         required=False,
     )
     arrival_gt = DateTimeField(
-        label="Ankomst efter",
+        label=_("Ankomst efter"),
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Ankomst efter"}),
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Ankomst efter")}
+        ),
     )
     arrival_lt = DateTimeField(
-        label="Ankomst før",
+        label=_("Ankomst før"),
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Ankomst før"}),
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Ankomst før")}
+        ),
     )
     departure_gt = DateTimeField(
-        label="Afrejse efter",
+        label=_("Afrejse efter"),
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Afrejse efter"}),
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Afrejse efter")}
+        ),
     )
     departure_lt = DateTimeField(
-        label="Afrejse før",
+        label=_("Afrejse før"),
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Afrejse før"}),
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Afrejse før")}
+        ),
     )
     vessel_type = MultipleChoiceField(
+        label=_("Skibstype"),
         choices=ShipType.choices,
         required=False,
     )
     site = ModelMultipleChoiceField(
+        label=_("Landgangssted"),
         queryset=DisembarkmentSite.objects.all(),
         required=False,
     )
     port_of_call = ModelMultipleChoiceField(
-        queryset=Port.objects.all(),
-        required=False
+        label=_("Havn"), queryset=Port.objects.all(), required=False
     )

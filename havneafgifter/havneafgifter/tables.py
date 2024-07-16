@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.models import HarborDuesForm, Municipality
 
@@ -11,18 +12,10 @@ class HarborDuesFormTable(tables.Table):
 
 
 class StatistikTable(tables.Table):
-    municipality = tables.Column()
-    vessel_type = tables.Column()
-    port_of_call = tables.Column()
-    site = tables.Column()
-    disembarkment_tax_sum = tables.Column()
-    harbour_tax_sum = tables.Column()
-    count = tables.Column()
-
-    # def render_municipality(self):
-    #     if self.municipality:
-    #         print(self.municipality)
-
-    # def render_municipality(self):
-    #     if self.municipality:
-    #         return Municipality.objects.get(id=self.municipality).values("name")
+    municipality = tables.Column(verbose_name=_("Kommune"))
+    vessel_type = tables.Column(verbose_name=_("Skibstype"))
+    port_of_call = tables.Column(verbose_name=_("Havn"))
+    site = tables.Column(verbose_name=_("Landgangssted"))
+    disembarkment_tax_sum = tables.Column(verbose_name=_("Landgangsafgift"))
+    harbour_tax_sum = tables.Column(verbose_name=_("Havneafgift"))
+    count = tables.Column(verbose_name=_("Antal skibe"))

@@ -13,7 +13,7 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import Sum, F, Count, Subquery, OuterRef
+from django.db.models import Count, F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
@@ -21,7 +21,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
-from django_tables2 import SingleTableView, SingleTableMixin, RequestConfig
+from django_tables2 import RequestConfig, SingleTableMixin, SingleTableView
 from sql_util.utils import SubqueryCount, SubquerySum
 
 from havneafgifter.forms import (
@@ -29,18 +29,21 @@ from havneafgifter.forms import (
     DisembarkmentForm,
     HarborDuesFormForm,
     PassengersByCountryForm,
-    PassengersTotalForm, StatisticsForm,
+    PassengersTotalForm,
+    StatisticsForm,
 )
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
     HarborDuesForm,
+    Municipality,
     Nationality,
     PassengersByCountry,
     PermissionsMixin,
+    Port,
     ShipType,
-    Status, Municipality, Port,
+    Status,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
 
@@ -482,7 +485,9 @@ class HarborDuesFormListView(
         )
 
 
-class StatisticsView(LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, FormView):
+class StatisticsView(
+    LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, FormView
+):
     form_class = StatisticsForm
     template_name = "havneafgifter/statistik.html"
     table_class = StatistikTable
@@ -501,7 +506,9 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleT
             print(f"form: {form.cleaned_data}")
             group_fields = []
             shortcut_fields = {
-                "municipality": F("cruisetaxform__disembarkment__disembarkment_site__municipality"),
+                "municipality": F(
+                    "cruisetaxform__disembarkment__disembarkment_site__municipality"
+                ),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
             }
             filter_fields = {}
@@ -526,9 +533,16 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleT
                 qs = qs.values(*group_fields).distinct()
 
             qs = qs.annotate(
-                disembarkment_tax_sum=Coalesce(Sum(Subquery(
-                    CruiseTaxForm.objects.filter(id=OuterRef("pk")).values("disembarkment_tax")
-                )), Decimal("0.00")),
+                disembarkment_tax_sum=Coalesce(
+                    Sum(
+                        Subquery(
+                            CruiseTaxForm.objects.filter(id=OuterRef("pk")).values(
+                                "disembarkment_tax"
+                            )
+                        )
+                    ),
+                    Decimal("0.00"),
+                ),
                 harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
                 count=Count("pk", distinct=True),
             )
@@ -555,6 +569,7 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleT
                 print(item)
             return items
         return []
+
 
 #
 # Hvert filter (kommune, periode, skibstype osv.) kan have valgt nul eller

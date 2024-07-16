@@ -1,6 +1,6 @@
 from csp_helpers.mixins import CSPFormMixin
 from django import forms
-from django.forms import Media, DateTimeInput
+from django.forms import DateTimeInput, Media
 from tempus_dominus.widgets import DateTimePicker as TempusDominusDateTimePicker
 
 
@@ -47,4 +47,3 @@ class BootstrapForm(CSPFormMixin, forms.Form):
         #     if "class" not in field.widget.attrs:
         #         field.widget.attrs["class"] = ""
         #     field.widget.attrs["class"] += " custom-file-input"
-

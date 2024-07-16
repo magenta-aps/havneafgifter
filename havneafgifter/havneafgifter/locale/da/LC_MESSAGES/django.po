@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-15 08:06-0100\n"
+"POT-Creation-Date: 2024-07-16 09:06-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -551,7 +551,6 @@ msgid "IMO numbers should be 7 digits"
 msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-#: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Harbor dues list"
 msgstr ""
 
@@ -603,6 +602,10 @@ msgstr "Vis PDF"
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
 msgstr "Indsend ny blanket"
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Statistik"
+msgstr ""
 
 #: havneafgifter/views.py
 msgid "Error when sending email"

@@ -305,7 +305,7 @@ CSP_DEFAULT_SRC = (
 CSP_SCRIPT_SRC_ATTR = (
     "'self'",
     "localhost:8000" if DEBUG else HOST_DOMAIN,
-    "cdnjs.cloudflare.com"
+    "cdnjs.cloudflare.com",
 )
 CSP_STYLE_SRC_ATTR = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:")

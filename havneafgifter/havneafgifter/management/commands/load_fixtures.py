@@ -3,7 +3,14 @@ import os
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from havneafgifter.models import Port, PortAuthority, PortTaxRate, ShipType, TaxRates, HarborDuesForm
+from havneafgifter.models import (
+    HarborDuesForm,
+    Port,
+    PortAuthority,
+    PortTaxRate,
+    ShipType,
+    TaxRates,
+)
 
 
 class Command(BaseCommand):
@@ -128,4 +135,3 @@ class Command(BaseCommand):
             fixture_name,
         )
         return path
-
