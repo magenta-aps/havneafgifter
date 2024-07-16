@@ -97,7 +97,7 @@
     "fields": {
         "number_of_passengers": 0,
         "pax_tax": null,
-        "disembarkment_tax": null
+        "disembarkment_tax": "100.00"
     }
 },
 {
@@ -106,7 +106,7 @@
     "fields": {
         "number_of_passengers": 0,
         "pax_tax": null,
-        "disembarkment_tax": null
+        "disembarkment_tax": "200.00"
     }
 },
 {

@@ -12,5 +12,6 @@ class HarborDuesFormTable(tables.Table):
 
 class StatistikTable(tables.Table):
     municipality = tables.Column()
-    disembarkment_tax = tables.Column()
-    harbour_tax = tables.Column()
+    disembarkment_tax_sum = tables.Column()
+    harbour_tax_sum = tables.Column()
+    count = tables.Column()

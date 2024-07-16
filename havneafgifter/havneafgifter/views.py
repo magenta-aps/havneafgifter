@@ -13,7 +13,7 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import Sum, F, Count
+from django.db.models import Sum, F, Count, Subquery, OuterRef
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
@@ -22,6 +22,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
 from django_tables2 import SingleTableView, SingleTableMixin, RequestConfig
+from sql_util.utils import SubqueryCount, SubquerySum
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -497,16 +498,13 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, For
             # qs = Disembarkment.objects.filter(
             #     cruise_tax_form__status=Status.DONE
             # )
-            print(form.cleaned_data)
+            print(f"form: {form.cleaned_data}")
             group_fields = []
-            output_fields = ["id", "municipality","disembarkment_tax","harbour_tax","count"]
             shortcut_fields = {
                 "municipality": F("cruisetaxform__disembarkment__disembarkment_site__municipality"),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
             }
             filter_fields = {}
-
-            qs = qs.annotate(**shortcut_fields)
 
             for action in ("arrival", "departure"):
                 for op in ("gt", "lt"):
@@ -519,19 +517,21 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, For
                 if field_value:
                     filter_fields[f"{field}__in"] = field_value
                     group_fields.append(field)
-            if not group_fields:
-                group_fields = ["id"]
 
+            print(f"group_fields: {group_fields}")
+
+            qs = qs.annotate(**shortcut_fields)
             qs = qs.filter(**filter_fields)
-            qs = qs.values(*group_fields)
+            if group_fields:
+                qs = qs.values(*group_fields).distinct()
 
             qs = qs.annotate(
-                disembarkment_tax=Coalesce(Sum("cruisetaxform__disembarkment_tax"), Decimal(0)),
-                harbour_tax=Coalesce(Sum("harbour_tax"), Decimal(0)),
-                count=Count("id", distinct=True),
+                disembarkment_tax_sum=Coalesce(Sum(Subquery(
+                    CruiseTaxForm.objects.filter(id=OuterRef("pk")).values("disembarkment_tax")
+                )), Decimal(0)),
+                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal(0)),
+                count=Count("pk", distinct=True),
             )
-
-            qs = qs.values(*output_fields)
 
             for item in qs:
                 print(item)
