@@ -482,7 +482,7 @@ class HarborDuesFormListView(
         )
 
 
-class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, FormView):
+class StatisticsView(LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, FormView):
     form_class = StatisticsForm
     template_name = "havneafgifter/statistik.html"
     table_class = StatistikTable
@@ -512,7 +512,7 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, For
                     if field_value:
                         filter_fields[f"datetime_of_{action}__{op}"] = field_value
 
-            for field in ("municipality", "vessel_type", "port_of_call"):
+            for field in ("municipality", "vessel_type", "port_of_call", "site"):
                 field_value = form.cleaned_data[field]
                 if field_value:
                     filter_fields[f"{field}__in"] = field_value
@@ -528,20 +528,31 @@ class StatisticsView(LoginRequiredMixin, PermissionsMixin, SingleTableMixin, For
             qs = qs.annotate(
                 disembarkment_tax_sum=Coalesce(Sum(Subquery(
                     CruiseTaxForm.objects.filter(id=OuterRef("pk")).values("disembarkment_tax")
-                )), Decimal(0)),
-                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal(0)),
+                )), Decimal("0.00")),
+                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
                 count=Count("pk", distinct=True),
             )
 
             items = list(qs)
             for item in items:
+
                 municipality = item.get("municipality")
                 if municipality:
                     item["municipality"] = Municipality(municipality).label
+
                 port_of_call = item.get("port_of_call")
                 if port_of_call:
                     item["port_of_call"] = Port.objects.get(pk=port_of_call).name
 
+                site = item.get("site")
+                if site:
+                    item["site"] = DisembarkmentSite.objects.get(pk=site).name
+
+                vessel_type = item.get("vessel_type")
+                if vessel_type:
+                    item["vessel_type"] = ShipType(vessel_type).label
+
+                print(item)
             return items
         return []
 

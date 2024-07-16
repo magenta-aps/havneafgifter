@@ -280,30 +280,31 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
         return self.initial_disembarkment_site.get_municipality_display()
 
 
-class StatisticsForm(Form):
+class StatisticsForm(BootstrapForm):
     municipality = MultipleChoiceField(
+        label="Kommune",
         choices=Municipality.choices,
         required=False,
     )
     arrival_gt = DateTimeField(
-        label="Arrival after",
+        label="Ankomst efter",
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Ankomst efter"}),
     )
     arrival_lt = DateTimeField(
-        label="Arrival before",
+        label="Ankomst før",
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Ankomst før"}),
     )
     departure_gt = DateTimeField(
-        label="Departure after",
+        label="Afrejse efter",
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Afrejse efter"}),
     )
     departure_lt = DateTimeField(
-        label="Departure before",
+        label="Afrejse før",
         required=False,
-        widget=DateTimeInput(attrs={"class":"datetimepicker"}),
+        widget=DateTimeInput(attrs={"class":"datetimepicker", "placeholder": "Afrejse før"}),
     )
     vessel_type = MultipleChoiceField(
         choices=ShipType.choices,

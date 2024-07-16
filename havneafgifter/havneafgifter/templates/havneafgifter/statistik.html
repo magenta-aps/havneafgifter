@@ -8,12 +8,13 @@
 {% load media_csp %}
 {% load django_bootstrap5 %}
 {% block content %}
-<h1>{% translate "Harbor dues list" %}</h1>
+<h1>{% translate "Statistik" %}</h1>
 
 <script src="{% static 'tempusdominus/popper.min.js' %}" nonce="{{request.csp_nonce}}"></script>
 <script src="{% static 'tempusdominus/tempus-dominus.min.js' %}" nonce="{{request.csp_nonce}}"></script>
 <link rel="stylesheet" href="{% static 'tempusdominus/tempus-dominus.min.css' %}" nonce="{{request.csp_nonce}}">
 <link rel="stylesheet" href="{% static 'font-awesome/css/all.css' %}" nonce="{{request.csp_nonce}}">
+<script src="{% static 'havneafgifter/statistik.js' %}" nonce="{{request.csp_nonce}}"></script>
 
 
 <form action="" method="post" class="form">
@@ -21,35 +22,16 @@
     {% script %}
     {% media_csp form %}
     {% endscript %}
-    {% bootstrap_form form alert_error_type="none" %}
+
+    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.municipality %}
+    {% include "havneafgifter/statistik/field_range.html" with field1=form.arrival_gt field2=form.arrival_lt label="Ankomst" %}
+    {% include "havneafgifter/statistik/field_range.html" with field1=form.departure_gt field2=form.departure_lt label="Afrejse" %}
+    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.vessel_type %}
+    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.site %}
+    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.port_of_call %}
+
     {% bootstrap_button button_type="submit" content=_("Submit") %}
 </form>
-<script type="text/javascript" nonce="{{request.csp_nonce}}">
-    $("input.datetimepicker").each(function () {
-        new tempusDominus.TempusDominus(
-            this,
-            {
-                display: {
-                    sideBySide: true,
-                    calendarWeeks: false,
-                    buttons: {
-                        clear: true,
-                    },
-                    components: {
-                        seconds: true,
-
-                    },
-                },
-                localization: {
-                    hourCycle: "h23",
-                    startOfTheWeek: 1,
-                    format: "yyyy-MM-dd HH:mm:ss"
-                }
-
-            }
-        )
-    });
-</script>
 
 {% render_table table %}
 
