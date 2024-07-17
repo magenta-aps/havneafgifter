@@ -1,7 +1,5 @@
 from csp_helpers.mixins import CSPFormMixin
 from django import forms
-from django.forms import DateTimeInput, Media
-from tempus_dominus.widgets import DateTimePicker as TempusDominusDateTimePicker
 
 
 class BootstrapForm(CSPFormMixin, forms.Form):

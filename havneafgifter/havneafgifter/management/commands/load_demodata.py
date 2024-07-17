@@ -3,14 +3,7 @@ import os
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from havneafgifter.models import (
-    HarborDuesForm,
-    Port,
-    PortAuthority,
-    PortTaxRate,
-    ShipType,
-    TaxRates,
-)
+from havneafgifter.models import HarborDuesForm
 
 
 class Command(BaseCommand):
