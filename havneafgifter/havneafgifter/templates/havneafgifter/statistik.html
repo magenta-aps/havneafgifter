@@ -17,6 +17,13 @@
 
 {% block content %}
 <h1>{% translate "Statistik" %}</h1>
+<div class="alert alert-light">
+    {% blocktranslate %}
+    Vælg feltværdier der skal summeres på.
+    Hver kombination af valgte feltværdier giver en opsummeret række af data for de havneafgift-formularer der passer på kombinationen.
+    Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, og data indgår i de øvrige summationer.
+    {% endblocktranslate %}
+</div>
 <form action="" method="get">
     {% csrf_token %}
     {% media_csp form %}

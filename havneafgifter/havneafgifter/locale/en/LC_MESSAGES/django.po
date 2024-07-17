@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-16 10:08-0100\n"
+"POT-Creation-Date: 2024-07-17 06:03-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -621,6 +621,17 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Statistik"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid ""
+"\n"
+"    Vælg feltværdier der skal summeres på.\n"
+"    Hver kombination af valgte feltværdier giver en opsummeret række af data "
+"for de havneafgift-formularer der passer på kombinationen.\n"
+"    Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, "
+"og data indgår i de øvrige summationer.\n"
+"    "
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
