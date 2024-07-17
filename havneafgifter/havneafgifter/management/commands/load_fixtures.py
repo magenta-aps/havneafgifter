@@ -109,7 +109,6 @@ class Command(BaseCommand):
                 port_tax_rate=110,
             )
 
-
     def load_disembarkment_sites(self):
         # Load 73 disembarkment sites
         path = self._get_fixture_path("initial_disembarkment_sites.json")
