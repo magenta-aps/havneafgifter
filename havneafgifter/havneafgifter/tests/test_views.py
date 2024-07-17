@@ -589,6 +589,8 @@ class StatisticsTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        print("=======================")
+        print("BEGIN")
         cls.user = User.objects.create(username="admin", is_superuser=True)
         call_command("load_fixtures", verbosity=1)
         ports = Port.objects.all().order_by("name")
