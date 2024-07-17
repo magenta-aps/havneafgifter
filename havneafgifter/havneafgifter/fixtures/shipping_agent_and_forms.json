@@ -31,7 +31,8 @@
         "datetime_of_departure": "2024-04-08T01:00:00Z",
         "gross_tonnage": 125,
         "vessel_type": "FISHER",
-        "harbour_tax": "0.00"
+        "harbour_tax": "0.00",
+        "status": "DONE"
     }
 },
 {
@@ -50,7 +51,8 @@
         "datetime_of_departure": "2024-04-15T01:00:00Z",
         "gross_tonnage": 250,
         "vessel_type": "FREIGHTER",
-        "harbour_tax": null
+        "harbour_tax": null,
+        "status": "DONE"
     }
 },
 {
@@ -69,7 +71,8 @@
         "datetime_of_departure": "2024-04-05T01:00:00Z",
         "gross_tonnage": 200,
         "vessel_type": "CRUISE",
-        "harbour_tax": null
+        "harbour_tax": null,
+        "status": "DONE"
     }
 },
 {
@@ -88,7 +91,8 @@
         "datetime_of_departure": "2024-04-02T01:00:00Z",
         "gross_tonnage": 1337,
         "vessel_type": "CRUISE",
-        "harbour_tax": null
+        "harbour_tax": null,
+        "status": "DONE"
     }
 },
 {

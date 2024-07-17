@@ -12,6 +12,7 @@ class HarborDuesFormTable(tables.Table):
 
 
 class StatistikTable(tables.Table):
+    orderable = False
     municipality = tables.Column(verbose_name=_("Kommune"))
     vessel_type = tables.Column(verbose_name=_("Skibstype"))
     port_of_call = tables.Column(verbose_name=_("Havn"))

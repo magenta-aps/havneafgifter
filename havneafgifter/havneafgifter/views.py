@@ -21,8 +21,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
-from django_tables2 import RequestConfig, SingleTableMixin, SingleTableView
-from sql_util.utils import SubqueryCount, SubquerySum
+from django_tables2 import SingleTableMixin, SingleTableView
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -496,10 +495,7 @@ class StatisticsView(
     def get_table_data(self):
         form = self.get_form()
         if form.is_valid():
-            qs = HarborDuesForm.objects.all()
-            # qs = Disembarkment.objects.filter(
-            #     cruise_tax_form__status=Status.DONE
-            # )
+            qs = HarborDuesForm.objects.filter(status=Status.DONE)
             group_fields = []
             shortcut_fields = {
                 "municipality": F(

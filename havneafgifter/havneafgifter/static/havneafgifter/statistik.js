@@ -3,7 +3,6 @@ $(function () {
         const $this = $(this);
         const field = $("[name=" + $this.data("select") + "]");
         $this.on("click", function () {
-            console.log("select",$this.data(),field);
             field.find("option").prop("selected", true);
         });
     });
@@ -11,7 +10,6 @@ $(function () {
         const $this = $(this);
         const field = $("[name=" + $this.data("deselect") + "]");
         $this.on("click", function () {
-            console.log("deselect",$this.data(),field);
             field.find("option").prop("selected", false);
         });
     });
