@@ -116,7 +116,6 @@ class Command(BaseCommand):
 
     def load_initial_rates(self):
         # Load initial data for TaxRates, PortTaxRate and DisembarkmentTaxRate
-        path = self._get_fixture_path("initial_rates.json")
         nuuk = Port.objects.get(name="Nuuk")
 
         taxrates, _ = TaxRates.objects.get_or_create(
