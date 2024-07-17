@@ -4,13 +4,11 @@ from django.views.generic import FormView
 class GetFormView(FormView):
 
     def get(self, request, *args, **kwargs):
-        if request.GET:
-            form = self.get_form()
-            if form.is_valid():
-                return self.form_valid(form)
-            else:
-                return self.form_invalid(form)
-        return super().get(request, *args, **kwargs)
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
     def form_valid(self, request, *args, **kwargs):
         return self.render_to_response(self.get_context_data())

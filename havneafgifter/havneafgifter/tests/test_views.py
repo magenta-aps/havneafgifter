@@ -589,8 +589,6 @@ class StatisticsTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print("=======================")
-        print("BEGIN")
         cls.user = User.objects.create(username="admin", is_superuser=True)
         call_command("load_fixtures", verbosity=1)
         ports = Port.objects.all().order_by("name")
@@ -648,6 +646,10 @@ class StatisticsTest(TestCase):
     def get_rows(self, **filter) -> BoundRows:
         response = self.client.get(self.url + "?" + urlencode(filter, doseq=True))
         return response.context_data["table"].rows
+
+    def test_filter_invalid(self):
+        rows = self.get_rows(municipality=800)
+        self.assertEqual(len(rows), 0)
 
     def test_no_filter(self):
         rows = self.get_rows(dummy=42)

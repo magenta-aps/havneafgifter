@@ -15,13 +15,11 @@ from havneafgifter.models import (
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        print("loading fixtures")
         self.load_ports()
         self.load_disembarkment_sites()
         self.load_initial_rates()
 
     def load_ports(self):
-        print("loading ports")
         for authority_name, authority_email in (
             ("Royal Arctic Line A/S", "ral@ral.gl"),
             ("KNI Pilersuisoq A/S", "info@kni.gl"),
@@ -61,12 +59,9 @@ class Command(BaseCommand):
             port, _ = Port.objects.get_or_create(
                 name=port_name, defaults={"portauthority": authority}
             )
-            print(f"{port.pk} loaded")
             # TODO: kobl på bruger eller gruppe
-        print("ports were loaded")
 
     def load_rates(self):
-        print("loading rates")
         if not TaxRates.objects.exists():
             tax_rates = TaxRates.objects.create(
                 pax_tax_rate=0,
@@ -114,18 +109,13 @@ class Command(BaseCommand):
                 port_tax_rate=110,
             )
 
-        print("rates loaded")
 
     def load_disembarkment_sites(self):
-        print("loading sites")
         # Load 73 disembarkment sites
         path = self._get_fixture_path("initial_disembarkment_sites.json")
         call_command("loaddata", path, verbosity=1)
-        print("sites loaded")
 
     def load_initial_rates(self):
-
-        print("loading initial rates")
         # Load initial data for TaxRates, PortTaxRate and DisembarkmentTaxRate
         path = self._get_fixture_path("initial_rates.json")
         nuuk = Port.objects.get(name="Nuuk")
@@ -208,8 +198,6 @@ class Command(BaseCommand):
             municipality=956,
             disembarkment_tax_rate="50.00",
         )
-
-        print("initial rates loaded")
 
     def _get_fixture_path(self, fixture_name: str) -> str:
         path: str = os.path.join(
