@@ -46,6 +46,7 @@ from havneafgifter.models import (
     Status,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
+from havneafgifter.view_mixins import GetFormView
 
 
 class HavneafgiftView:
@@ -486,15 +487,11 @@ class HarborDuesFormListView(
 
 
 class StatisticsView(
-    LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, FormView
+    LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, GetFormView
 ):
     form_class = StatisticsForm
     template_name = "havneafgifter/statistik.html"
     table_class = StatistikTable
-
-    def form_valid(self, request, *args, **kwargs):
-        """Handle GET requests: instantiate a blank version of the form."""
-        return self.render_to_response(self.get_context_data())
 
     def get_table_data(self):
         form = self.get_form()
@@ -503,7 +500,6 @@ class StatisticsView(
             # qs = Disembarkment.objects.filter(
             #     cruise_tax_form__status=Status.DONE
             # )
-            print(f"form: {form.cleaned_data}")
             group_fields = []
             shortcut_fields = {
                 "municipality": F(
@@ -525,12 +521,12 @@ class StatisticsView(
                     filter_fields[f"{field}__in"] = field_value
                     group_fields.append(field)
 
-            print(f"group_fields: {group_fields}")
-
             qs = qs.annotate(**shortcut_fields)
             qs = qs.filter(**filter_fields)
             if group_fields:
                 qs = qs.values(*group_fields).distinct()
+            else:
+                qs = qs.values().distinct()
 
             qs = qs.annotate(
                 disembarkment_tax_sum=Coalesce(
@@ -546,6 +542,18 @@ class StatisticsView(
                 harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
                 count=Count("pk", distinct=True),
             )
+            if not group_fields:
+                qs = qs.values(
+                    "id",
+                    "municipality",
+                    "vessel_type",
+                    "port_of_call",
+                    "site",
+                    "disembarkment_tax_sum",
+                    "harbour_tax_sum",
+                    "count",
+                )
+            qs.order_by("municipality", "vessel_type", "port_of_call", "site")
 
             items = list(qs)
             for item in items:
@@ -565,26 +573,5 @@ class StatisticsView(
                 vessel_type = item.get("vessel_type")
                 if vessel_type:
                     item["vessel_type"] = ShipType(vessel_type).label
-
-                print(item)
             return items
         return []
-
-
-#
-# Hvert filter (kommune, periode, skibstype osv.) kan have valgt nul eller
-# flere værdier (tidsperiode skal måske kun have en værdi).
-#
-# Tabellen skal så vise produktet af de valgte optioner,
-# dvs. hvis der er valgt 2 kommuner og tre skibstyper,
-# og alle andre filtre har 0 optioner valgt, vises 2x3=6 linjer.
-#
-# Hver linje repræsenterer så en unik kombination af optioner,
-# og data i linjen viser så summen indenfor disse optioner
-# (f.eks. antallet af krydstogtsskibe i Sermersooq, afgiften fra disse skibe osv)
-#
-#
-# søjler:
-# * Antal skibe
-# * Afgifter
-# *

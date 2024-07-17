@@ -3,14 +3,7 @@ import os
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from havneafgifter.models import (
-    HarborDuesForm,
-    Port,
-    PortAuthority,
-    PortTaxRate,
-    ShipType,
-    TaxRates,
-)
+from havneafgifter.models import Port, PortAuthority, PortTaxRate, ShipType, TaxRates
 
 
 class Command(BaseCommand):
@@ -18,7 +11,6 @@ class Command(BaseCommand):
         self.load_ports()
         self.load_disembarkment_sites()
         self.load_initial_rates()
-        self.load_shipping_agent_and_forms()
 
     def load_ports(self):
         for authority_name, authority_email in (
@@ -38,7 +30,7 @@ class Command(BaseCommand):
             ("Qeqertarsuaq", "KNI Pilersuisoq A/S"),
             ("Ilulissat", "Royal Arctic Line A/S"),
             ("Qasigiannguit", "Royal Arctic Line A/S"),
-            ("Aasiaat ", "Royal Arctic Line A/S"),
+            ("Aasiaat", "Royal Arctic Line A/S"),
             ("Kangaatsiaq", "KNI Pilersuisoq A/S"),
             ("Sisimiut", "Royal Arctic Line A/S"),
             ("Kangerlussuaq", "Mittarfeqarfiit"),
@@ -119,14 +111,6 @@ class Command(BaseCommand):
         # Load initial data for TaxRates, PortTaxRate and DisembarkmentTaxRate
         path = self._get_fixture_path("initial_rates.json")
         call_command("loaddata", path, verbosity=1)
-
-    def load_shipping_agent_and_forms(self):
-        # Load dummy data - a shipping agent, 2 harbor dues forms, and 2 cruise
-        # tax forms.
-        path = self._get_fixture_path("shipping_agent_and_forms.json")
-        call_command("loaddata", path, verbosity=1)
-        for form in HarborDuesForm.objects.all():
-            form.calculate_tax(save=True)
 
     def _get_fixture_path(self, fixture_name: str) -> str:
         path: str = os.path.join(
