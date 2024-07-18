@@ -458,6 +458,42 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             except HarborDuesForm.DoesNotExist:
                 return None
 
+    def get_context(self, **context):
+        print(context)
+        return super().get_context_data(
+            **{
+                **context,
+                "draft": get_object.status == Status.DRAFT,
+            }
+        )
+
+class DraftEditView(HarborDuesFormCreateView):
+    #def get_object(self, queryset=None):
+    #    pk = self.kwargs.get(self.pk_url_kwarg)
+    #    try:
+    #        return CruiseTaxForm.objects.get(pk=pk)
+    #    except CruiseTaxForm.DoesNotExist:
+    #        try:
+    #            return HarborDuesForm.objects.get(pk=pk)
+    #        except HarborDuesForm.DoesNotExist:
+    #            return None
+
+    def get_form(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            form = CruiseTaxForm.objects.get(pk=pk)
+            print(form)
+            return form
+        except CruiseTaxForm.DoesNotExist:
+            try:
+                form = HarborDuesForm.objects.get(pk=pk)
+                print(form)
+                return form
+            except HarborDuesForm.DoesNotExist:
+                return None
+
+
+
 
 class PreviewPDFView(ReceiptDetailView):
     def get(self, request, *args, **kwargs):
