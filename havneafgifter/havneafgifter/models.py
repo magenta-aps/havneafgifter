@@ -808,15 +808,29 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 action in ("view", "change")
                 and (
                     (self.port_of_call is None)
-                    or (user.port_authority == self.port_of_call.portauthority)
-                    or (user.shipping_agent == self.shipping_agent)
+                    or (
+                        user.has_group_name("PortAuthority")
+                        and user.port_authority == self.port_of_call.portauthority
+                    )
+                    or (
+                        user.has_group_name("Shipping")
+                        and user.shipping_agent == self.shipping_agent
+                    )
+                    or (
+                        user.has_group_name("Ship")
+                        and imo_validator(user.username, False)
+                        and user.username == self.vessel_imo
+                    )
                 )
             )
             or (
                 action in ("approve", "reject", "invoice")
                 and (
                     (self.port_of_call is None)
-                    or (user.port_authority == self.port_of_call.portauthority)
+                    or (
+                        user.has_group_name("PortAuthority")
+                        and user.port_authority == self.port_of_call.portauthority
+                    )
                 )
             )
         )
