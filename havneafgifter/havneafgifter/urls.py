@@ -15,6 +15,7 @@ from havneafgifter.views import (
     PreviewPDFView,
     ReceiptDetailView,
     RootView,
+    StatisticsView,
 )
 
 app_name = "havneafgifter"
@@ -100,4 +101,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
         PreviewPDFView.as_view(),
         name="receipt_detail_pdf",
     ),
+    path("blanket/statistik/", StatisticsView.as_view(), name="statistik"),
 ]

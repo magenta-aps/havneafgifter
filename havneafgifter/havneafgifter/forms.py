@@ -7,10 +7,14 @@ from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
+    DateTimeField,
+    DateTimeInput,
     Form,
     HiddenInput,
     IntegerField,
     ModelForm,
+    ModelMultipleChoiceField,
+    MultipleChoiceField,
     PasswordInput,
     TextInput,
     widgets,
@@ -26,7 +30,9 @@ from havneafgifter.form_mixins import BootstrapForm
 from havneafgifter.models import (
     DisembarkmentSite,
     HarborDuesForm,
+    Municipality,
     Nationality,
+    Port,
     ShipType,
     Status,
     imo_validator,
@@ -278,3 +284,52 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 
     def get_municipality_display(self):
         return self.initial_disembarkment_site.get_municipality_display()
+
+
+class StatisticsForm(BootstrapForm):
+    municipality = MultipleChoiceField(
+        label=_("Kommune"),
+        choices=Municipality.choices,
+        required=False,
+    )
+    arrival_gt = DateTimeField(
+        label=_("Ankomst efter"),
+        required=False,
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Ankomst efter")}
+        ),
+    )
+    arrival_lt = DateTimeField(
+        label=_("Ankomst før"),
+        required=False,
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Ankomst før")}
+        ),
+    )
+    departure_gt = DateTimeField(
+        label=_("Afrejse efter"),
+        required=False,
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Afrejse efter")}
+        ),
+    )
+    departure_lt = DateTimeField(
+        label=_("Afrejse før"),
+        required=False,
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Afrejse før")}
+        ),
+    )
+    vessel_type = MultipleChoiceField(
+        label=_("Skibstype"),
+        choices=ShipType.choices,
+        required=False,
+    )
+    site = ModelMultipleChoiceField(
+        label=_("Landgangssted"),
+        queryset=DisembarkmentSite.objects.all(),
+        required=False,
+    )
+    port_of_call = ModelMultipleChoiceField(
+        label=_("Havn"), queryset=Port.objects.all(), required=False
+    )

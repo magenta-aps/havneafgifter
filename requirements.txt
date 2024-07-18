@@ -13,7 +13,7 @@ pysaml2==7.5.0
 beautifulsoup4==4.12.2
 requests==2.31.0
 types-requests==2.31.0.20240218
-weasyprint==61.2
+weasyprint==62.3
 django-weasyprint==2.3.0
 django-csp==3.8
 django-csp[jinja2]
@@ -23,3 +23,5 @@ django-countries==7.6.1
 django-select2==8.1.2
 xmltodict>=0.12.0
 django-tables2==2.7.0
+django-tempus-dominus==5.1.2.17
+django-sql-utils==0.7.0

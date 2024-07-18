@@ -1,4 +1,7 @@
+from datetime import datetime
+from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
+from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
 from django.contrib import messages
@@ -9,6 +12,7 @@ from django.forms import BaseFormSet
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django_tables2.rows import BoundRows
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
@@ -18,9 +22,11 @@ from havneafgifter.models import (
     HarborDuesForm,
     Nationality,
     PassengersByCountry,
+    Port,
     PortAuthority,
     ShippingAgent,
     ShipType,
+    Status,
     User,
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
@@ -576,3 +582,261 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
         self.view.setup(request)
         self.view.get(request)
         self.assertNotIn(self.harbor_dues_form, self.view.get_queryset())
+
+
+class StatisticsTest(TestCase):
+    url = reverse("havneafgifter:statistik")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create(username="admin", is_superuser=True)
+        call_command("load_fixtures", verbosity=1)
+        ports = Port.objects.all().order_by("name")
+        cls.form1 = HarborDuesForm.objects.create(
+            status=Status.DONE,
+            port_of_call=ports[0],
+            nationality=Nationality.DENMARK,
+            vessel_name="Testbåd 1",
+            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0),
+            datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
+            gross_tonnage=1000,
+            vessel_type=ShipType.FREIGHTER,
+            harbour_tax=Decimal("40000.00"),
+        )
+        cls.form2 = CruiseTaxForm.objects.create(
+            status=Status.DONE,
+            port_of_call=ports[0],
+            nationality=Nationality.NORWAY,
+            vessel_name="Testbåd 2",
+            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0),
+            datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
+            gross_tonnage=1000,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("40000.00"),
+            pax_tax=Decimal("3000.00"),
+            disembarkment_tax=Decimal("20000.00"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form2,
+            number_of_passengers=1,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+        )
+        cls.form3 = CruiseTaxForm.objects.create(
+            status=Status.DONE,
+            port_of_call=ports[1],
+            nationality=Nationality.NORWAY,
+            vessel_name="Testbåd 3",
+            datetime_of_arrival=datetime(2025, 7, 1, 0, 0, 0),
+            datetime_of_departure=datetime(2025, 7, 15, 0, 0, 0),
+            gross_tonnage=1000,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("50000.00"),
+            pax_tax=Decimal("8000.00"),
+            disembarkment_tax=Decimal("25000.00"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form3,
+            number_of_passengers=2,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def get_rows(self, **filter) -> BoundRows:
+        response = self.client.get(self.url + "?" + urlencode(filter, doseq=True))
+        return response.context_data["table"].rows
+
+    def test_filter_invalid(self):
+        rows = self.get_rows(municipality=800)
+        self.assertEqual(len(rows), 0)
+
+    def test_no_filter(self):
+        rows = self.get_rows(dummy=42)
+        self.assertEqual(len(rows), 3)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "id": self.form1.id,
+                "port_of_call": "Aasiaat",
+                "vessel_type": "Freighter",
+                "municipality": None,
+                "site": None,
+                "disembarkment_tax_sum": Decimal("0.00"),
+                "harbour_tax_sum": self.form1.harbour_tax,
+                "count": 1,
+            },
+        )
+        self.assertDictEqual(
+            rows[1].record,
+            {
+                "id": self.form2.id,
+                "port_of_call": "Aasiaat",
+                "vessel_type": "Cruise ship",
+                "municipality": "Avannaata",
+                "site": "Qaanaq",
+                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "harbour_tax_sum": self.form2.harbour_tax,
+                "count": 1,
+            },
+        )
+        self.assertDictEqual(
+            rows[2].record,
+            {
+                "id": self.form3.id,
+                "port_of_call": "Ilulissat",
+                "vessel_type": "Cruise ship",
+                "municipality": "Avannaata",
+                "site": "Qaanaq",
+                "disembarkment_tax_sum": self.form3.disembarkment_tax,
+                "harbour_tax_sum": self.form3.harbour_tax,
+                "count": 1,
+            },
+        )
+
+    def test_filter_arrival(self):
+        rows = self.get_rows(arrival_gt=datetime(2025, 1, 1, 0, 0, 0))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].record["id"], self.form3.id)
+
+        rows = self.get_rows(arrival_gt=datetime(2024, 6, 1, 0, 0, 0))
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[0].record["id"], self.form1.id)
+        self.assertEqual(rows[1].record["id"], self.form2.id)
+        self.assertEqual(rows[2].record["id"], self.form3.id)
+
+        rows = self.get_rows(
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
+            arrival_lt=datetime(2024, 7, 5, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0].record["id"], self.form1.id)
+        self.assertEqual(rows[1].record["id"], self.form2.id)
+
+        rows = self.get_rows(
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
+            arrival_lt=datetime(2024, 6, 15, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 0)
+
+    def test_filter_departure(self):
+        rows = self.get_rows(departure_gt=datetime(2025, 1, 1, 0, 0, 0))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].record["id"], self.form3.id)
+
+        rows = self.get_rows(departure_gt=datetime(2024, 7, 1, 0, 0, 0))
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[0].record["id"], self.form1.id)
+        self.assertEqual(rows[1].record["id"], self.form2.id)
+        self.assertEqual(rows[2].record["id"], self.form3.id)
+
+        rows = self.get_rows(
+            departure_gt=datetime(2024, 6, 1, 0, 0, 0),
+            departure_lt=datetime(2024, 7, 25, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0].record["id"], self.form1.id)
+        self.assertEqual(rows[1].record["id"], self.form2.id)
+
+        rows = self.get_rows(
+            departure_gt=datetime(2024, 6, 1, 0, 0, 0),
+            departure_lt=datetime(2024, 6, 15, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 0)
+
+    def test_filter_municipality(self):
+        rows = self.get_rows(municipality=960)
+        self.assertEqual(len(rows), 1)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "municipality": "Avannaata",
+                "disembarkment_tax_sum": self.form2.disembarkment_tax
+                + self.form3.disembarkment_tax,
+                "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
+                "count": 2,
+            },
+        )
+
+    def test_filter_vessel_type(self):
+        rows = self.get_rows(vessel_type="CRUISE")
+        self.assertEqual(len(rows), 1)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "vessel_type": "Cruise ship",
+                "disembarkment_tax_sum": self.form2.disembarkment_tax
+                + self.form3.disembarkment_tax,
+                "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
+                "count": 2,
+            },
+        )
+
+        rows = self.get_rows(vessel_type="FREIGHTER")
+        self.assertEqual(len(rows), 1)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "vessel_type": "Freighter",
+                "disembarkment_tax_sum": Decimal(0),
+                "harbour_tax_sum": self.form1.harbour_tax,
+                "count": 1,
+            },
+        )
+
+        rows = self.get_rows(vessel_type="FISHER")
+        self.assertEqual(len(rows), 0)
+
+    def test_filter_site(self):
+        rows = self.get_rows(site=DisembarkmentSite.objects.get(name="Qaanaq").pk)
+        self.assertEqual(len(rows), 1)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "site": "Qaanaq",
+                "disembarkment_tax_sum": self.form2.disembarkment_tax
+                + self.form3.disembarkment_tax,
+                "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
+                "count": 2,
+            },
+        )
+
+        rows = self.get_rows(site=DisembarkmentSite.objects.get(name="Qeqertat").pk)
+        self.assertEqual(len(rows), 0)
+
+    def test_filter_port(self):
+        ports = Port.objects.all().order_by("name")
+        port1 = ports[0]
+        port2 = ports[1]
+        rows = self.get_rows(port_of_call=port1.pk)
+        self.assertEqual(len(rows), 1)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "port_of_call": port1.name,
+                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
+                "count": 2,
+            },
+        )
+
+        rows = self.get_rows(port_of_call=[port1.pk, port2.pk])
+        self.assertEqual(len(rows), 2)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "port_of_call": port2.name,
+                "disembarkment_tax_sum": self.form3.disembarkment_tax,
+                "harbour_tax_sum": self.form3.harbour_tax,
+                "count": 1,
+            },
+        )
+        self.assertDictEqual(
+            rows[1].record,
+            {
+                "port_of_call": port1.name,
+                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
+                "count": 2,
+            },
+        )
