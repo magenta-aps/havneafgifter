@@ -101,6 +101,11 @@ class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             imo_validator("9074729")
         except ValidationError:
             self.fail("Got validation error on correct IMO")
+        self.assertFalse(imo_validator("1234", False))
+        self.assertFalse(imo_validator("abcdefg", False))
+        self.assertFalse(imo_validator("123456A", False))
+        self.assertFalse(imo_validator("9074721", False))
+        self.assertTrue(imo_validator("9074729", False))
 
     def test_get_port_tax_rate(self):
         tax_rates = TaxRates.objects.all().first()

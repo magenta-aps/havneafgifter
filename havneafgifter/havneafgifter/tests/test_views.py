@@ -561,6 +561,13 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
         self.view.get(request)
         self.assertIn(self.harbor_dues_form, self.view.get_queryset())
 
+    def test_list_ship(self):
+        request = self.request_factory.get("")
+        request.user = self.ship_user
+        self.view.setup(request)
+        self.view.get(request)
+        self.assertIn(self.harbor_dues_form, self.view.get_queryset())
+
     def test_list_other_agent(self):
         request = self.request_factory.get("")
         request.user = User.objects.create(
