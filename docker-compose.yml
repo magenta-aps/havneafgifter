@@ -27,6 +27,7 @@ services:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - LOAD_FIXTURES=true
+      - LOAD_DEMODATA=true
       - TEST=true
       - HOME=/tmp/
     network_mode: "host"

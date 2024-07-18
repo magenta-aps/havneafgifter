@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from csp_helpers.mixins import CSPViewMixin
 from django.conf import settings
 from django.contrib import messages
@@ -11,13 +13,15 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count, F, OuterRef, Subquery, Sum
+from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
-from django_tables2 import SingleTableView
+from django_tables2 import SingleTableMixin, SingleTableView
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -25,19 +29,23 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    StatisticsForm,
 )
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
     HarborDuesForm,
+    Municipality,
     Nationality,
     PassengersByCountry,
     PermissionsMixin,
+    Port,
     ShipType,
     Status,
 )
-from havneafgifter.tables import HarborDuesFormTable
+from havneafgifter.tables import HarborDuesFormTable, StatistikTable
+from havneafgifter.view_mixins import GetFormView
 
 
 class HavneafgiftView:
@@ -475,3 +483,91 @@ class HarborDuesFormListView(
         return HarborDuesForm.filter_user_permissions(
             HarborDuesForm.objects.all(), self.request.user, "view"
         )
+
+
+class StatisticsView(
+    LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, GetFormView
+):
+    form_class = StatisticsForm
+    template_name = "havneafgifter/statistik.html"
+    table_class = StatistikTable
+
+    def get_table_data(self):
+        form = self.get_form()
+        if form.is_valid():
+            qs = HarborDuesForm.objects.filter(status=Status.DONE)
+            group_fields = []
+            shortcut_fields = {
+                "municipality": F(
+                    "cruisetaxform__disembarkment__disembarkment_site__municipality"
+                ),
+                "site": F("cruisetaxform__disembarkment__disembarkment_site"),
+            }
+            filter_fields = {}
+
+            for action in ("arrival", "departure"):
+                for op in ("gt", "lt"):
+                    field_value = form.cleaned_data[f"{action}_{op}"]
+                    if field_value:
+                        filter_fields[f"datetime_of_{action}__{op}"] = field_value
+
+            for field in ("municipality", "vessel_type", "port_of_call", "site"):
+                field_value = form.cleaned_data[field]
+                if field_value:
+                    filter_fields[f"{field}__in"] = field_value
+                    group_fields.append(field)
+
+            qs = qs.annotate(**shortcut_fields)
+            qs = qs.filter(**filter_fields)
+            if group_fields:
+                qs = qs.values(*group_fields).distinct()
+            else:
+                qs = qs.values().distinct()
+
+            qs = qs.annotate(
+                disembarkment_tax_sum=Coalesce(
+                    Sum(
+                        Subquery(
+                            CruiseTaxForm.objects.filter(id=OuterRef("pk")).values(
+                                "disembarkment_tax"
+                            )
+                        )
+                    ),
+                    Decimal("0.00"),
+                ),
+                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
+                count=Count("pk", distinct=True),
+            )
+            if not group_fields:
+                qs = qs.values(
+                    "id",
+                    "municipality",
+                    "vessel_type",
+                    "port_of_call",
+                    "site",
+                    "disembarkment_tax_sum",
+                    "harbour_tax_sum",
+                    "count",
+                )
+            qs.order_by("municipality", "vessel_type", "port_of_call", "site")
+
+            items = list(qs)
+            for item in items:
+
+                municipality = item.get("municipality")
+                if municipality:
+                    item["municipality"] = Municipality(municipality).label
+
+                port_of_call = item.get("port_of_call")
+                if port_of_call:
+                    item["port_of_call"] = Port.objects.get(pk=port_of_call).name
+
+                site = item.get("site")
+                if site:
+                    item["site"] = DisembarkmentSite.objects.get(pk=site).name
+
+                vessel_type = item.get("vessel_type")
+                if vessel_type:
+                    item["vessel_type"] = ShipType(vessel_type).label
+            return items
+        return []

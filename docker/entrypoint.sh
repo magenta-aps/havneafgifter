@@ -12,6 +12,7 @@ MAKEMESSAGES=${MAKEMESSAGES:=false}
 COMPILEMESSAGES=${COMPILEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 LOAD_FIXTURES=${LOAD_FIXTURES:=false}
+LOAD_DEMODATA=${LOAD_DEMODATA:=false}
 CREATE_GROUPS=${CREATE_GROUPS:=false}
 CREATE_DUMMY_ADMIN=${CREATE_DUMMY_ADMIN:=false}
 CREATE_DUMMY_USERS=${CREATE_DUMMY_USERS:=false}
@@ -32,6 +33,11 @@ fi
 if [ "${LOAD_FIXTURES}" = true ]; then
   echo 'loading fixtures'
   python manage.py load_fixtures
+fi
+
+if [ "${LOAD_DEMODATA}" = true ]; then
+  echo 'loading demodata'
+  python manage.py load_demodata
 fi
 
 if [ "${CREATE_GROUPS}" = true ]; then
