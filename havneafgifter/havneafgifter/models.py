@@ -323,6 +323,15 @@ def imo_validator(value: str):
         raise ValidationError("IMO Check failed")
 
 
+def imo_validator_bool(value: str) -> bool:
+    # We could do this with an optional param to imo_validator, but MyPy complains
+    try:
+        imo_validator(value)
+    except ValidationError:
+        return False
+    return True
+
+
 class PortAuthority(PermissionsMixin, models.Model):
     class Meta:
         ordering = ["name"]
@@ -776,6 +785,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 filter |= Q(port_of_call__portauthority__isnull=False) & Q(
                     port_of_call__portauthority_id=user.port_authority_id
                 )
+            if user.has_group_name("Ship") and imo_validator_bool(user.username):
+                filter |= Q(vessel_imo=user.username)
+
             if filter.children:
                 return qs.filter(filter)
 
@@ -797,15 +809,29 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 action in ("view", "change")
                 and (
                     (self.port_of_call is None)
-                    or (user.port_authority == self.port_of_call.portauthority)
-                    or (user.shipping_agent == self.shipping_agent)
+                    or (
+                        user.has_group_name("PortAuthority")
+                        and user.port_authority == self.port_of_call.portauthority
+                    )
+                    or (
+                        user.has_group_name("Shipping")
+                        and user.shipping_agent == self.shipping_agent
+                    )
+                    or (
+                        user.has_group_name("Ship")
+                        and imo_validator_bool(user.username)
+                        and user.username == self.vessel_imo
+                    )
                 )
             )
             or (
                 action in ("approve", "reject", "invoice")
                 and (
                     (self.port_of_call is None)
-                    or (user.port_authority == self.port_of_call.portauthority)
+                    or (
+                        user.has_group_name("PortAuthority")
+                        and user.port_authority == self.port_of_call.portauthority
+                    )
                 )
             )
         )
