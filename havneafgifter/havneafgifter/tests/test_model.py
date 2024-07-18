@@ -24,6 +24,7 @@ from havneafgifter.models import (
     Status,
     TaxRates,
     imo_validator,
+    imo_validator_bool,
 )
 from havneafgifter.receipts import CruiseTaxFormReceipt, HarborDuesFormReceipt
 from havneafgifter.tests.mixins import HarborDuesFormMixin
@@ -101,11 +102,11 @@ class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             imo_validator("9074729")
         except ValidationError:
             self.fail("Got validation error on correct IMO")
-        self.assertFalse(imo_validator("1234", False))
-        self.assertFalse(imo_validator("abcdefg", False))
-        self.assertFalse(imo_validator("123456A", False))
-        self.assertFalse(imo_validator("9074721", False))
-        self.assertTrue(imo_validator("9074729", False))
+        self.assertFalse(imo_validator_bool("1234"))
+        self.assertFalse(imo_validator_bool("abcdefg"))
+        self.assertFalse(imo_validator_bool("123456A"))
+        self.assertFalse(imo_validator_bool("9074721"))
+        self.assertTrue(imo_validator_bool("9074729"))
 
     def test_get_port_tax_rate(self):
         tax_rates = TaxRates.objects.all().first()

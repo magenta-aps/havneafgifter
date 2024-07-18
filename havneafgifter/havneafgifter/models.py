@@ -313,18 +313,21 @@ class ShippingAgent(PermissionsMixin, models.Model):
         return action == "change" and not from_group and user.shipping_agent == self
 
 
-def imo_validator(value: str, raise_error: bool = True) -> bool:
+def imo_validator(value: str):
+    if len(value) != 7:
+        raise ValidationError("IMO has incorrect length (must be 7 digits)")
+    if not re.match(r"\d{7}", value):
+        raise ValidationError("IMO has incorrect content (must be 7 digits)")
+    # https://en.wikipedia.org/wiki/IMO_number
+    if sum([int(value[i]) * (7 - i) for i in range(0, 6)]) % 10 != int(value[6]):
+        raise ValidationError("IMO Check failed")
+
+
+def imo_validator_bool(value: str) -> bool:
+    # We could do this with an optional param to imo_validator, but MyPy complains
     try:
-        if len(value) != 7:
-            raise ValidationError("IMO has incorrect length (must be 7 digits)")
-        if not re.match(r"\d{7}", value):
-            raise ValidationError("IMO has incorrect content (must be 7 digits)")
-        # https://en.wikipedia.org/wiki/IMO_number
-        if sum([int(value[i]) * (7 - i) for i in range(0, 6)]) % 10 != int(value[6]):
-            raise ValidationError("IMO Check failed")
+        imo_validator(value)
     except ValidationError:
-        if raise_error:
-            raise
         return False
     return True
 
@@ -782,9 +785,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 filter |= Q(port_of_call__portauthority__isnull=False) & Q(
                     port_of_call__portauthority_id=user.port_authority_id
                 )
-            if user.has_group_name("Ship") and imo_validator(
-                user.username, raise_error=False
-            ):
+            if user.has_group_name("Ship") and imo_validator_bool(user.username):
                 filter |= Q(vessel_imo=user.username)
 
             if filter.children:
@@ -818,7 +819,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     )
                     or (
                         user.has_group_name("Ship")
-                        and imo_validator(user.username, False)
+                        and imo_validator_bool(user.username)
                         and user.username == self.vessel_imo
                     )
                 )
