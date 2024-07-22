@@ -458,6 +458,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             except HarborDuesForm.DoesNotExist:
                 return None
 
+
 class DraftEditView(HarborDuesFormCreateView, UpdateView):
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
@@ -472,11 +473,12 @@ class DraftEditView(HarborDuesFormCreateView, UpdateView):
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form.status != "DRAFT":
-            return HttpResponseRedirect(reverse("havneafgifter:receipt_detail_html",
-                kwargs={"pk": form.pk})
+            return HttpResponseRedirect(
+                reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
             )
         else:
             return super().get(self, request, *args, **kwargs)
+
 
 class PreviewPDFView(ReceiptDetailView):
     def get(self, request, *args, **kwargs):
@@ -572,7 +574,6 @@ class StatisticsView(
 
             items = list(qs)
             for item in items:
-
                 municipality = item.get("municipality")
                 if municipality:
                     item["municipality"] = Municipality(municipality).label
