@@ -1,13 +1,30 @@
 from csp_helpers.mixins import CSPViewMixin
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
-from havneafgifter.forms import HarborDuesFormForm
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
 
-# from havneafgifter.views import HavneAfgiftView
+
+class HavneafgiftView:
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{
+                **context,
+                "version": settings.VERSION,
+            }
+        )
+
+    def get_redirect_for_form(
+        self,
+        viewname: str,
+        form: HarborDuesForm | CruiseTaxForm,
+    ):
+        return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
 
 
 class _SendEmailMixin:
@@ -64,11 +81,8 @@ class GetFormView(FormView):
 class HarborDuesFormMixin(
     LoginRequiredMixin,
     CSPViewMixin,
-    _SendEmailMixin,  # HavneafgiftView
+    _SendEmailMixin,
 ):
-    model = HarborDuesForm
-    form_class = HarborDuesFormForm
-
     def get_initial(self):
         initial = {}
         # Attempting to call group_names on a User that is not logged in

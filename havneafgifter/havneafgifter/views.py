@@ -43,24 +43,28 @@ from havneafgifter.models import (
     Status,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
-from havneafgifter.view_mixins import GetFormView, HarborDuesFormMixin, _SendEmailMixin
+from havneafgifter.view_mixins import (
+    GetFormView,
+    HarborDuesFormMixin,
+    HavneafgiftView,
+    _SendEmailMixin,
+)
 
-
-class HavneafgiftView:
-    def get_context_data(self, **context):
-        return super().get_context_data(
-            **{
-                **context,
-                "version": settings.VERSION,
-            }
-        )
-
-    def get_redirect_for_form(
-        self,
-        viewname: str,
-        form: HarborDuesForm | CruiseTaxForm,
-    ):
-        return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
+# class HavneafgiftView:
+#     def get_context_data(self, **context):
+#         return super().get_context_data(
+#             **{
+#                 **context,
+#                 "version": settings.VERSION,
+#             }
+#         )
+#
+#     def get_redirect_for_form(
+#         self,
+#         viewname: str,
+#         form: HarborDuesForm | CruiseTaxForm,
+#     ):
+#         return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
 
 
 class RootView(RedirectView):
@@ -148,7 +152,6 @@ class PostLoginView(RedirectView):
 
 class HarborDuesFormCreateView(
     HarborDuesFormMixin,
-    HavneafgiftView,
     CreateView,
 ):
     model = HarborDuesForm
@@ -384,7 +387,10 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return None
 
 
-class DraftEditView(HarborDuesFormMixin, HavneafgiftView, UpdateView):
+class DraftEditView(HarborDuesFormMixin, UpdateView):
+    model = HarborDuesForm
+    form_class = HarborDuesFormForm
+
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
         try:
