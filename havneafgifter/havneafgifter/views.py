@@ -45,7 +45,7 @@ from havneafgifter.models import (
     Status,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
-from havneafgifter.view_mixins import GetFormView
+from havneafgifter.view_mixins import GetFormView, HarborDuesFormMixin, _SendEmailMixin
 
 
 class HavneafgiftView:
@@ -148,86 +148,87 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
-class _SendEmailMixin:
-    def _send_email(
-        self,
-        form: HarborDuesForm | CruiseTaxForm,
-        request,
-    ) -> None:
-        email_message, status = form.send_email()
-        messages.add_message(
-            request,
-            messages.SUCCESS if status == 1 else messages.ERROR,
-            (
-                self._get_success_message(form)
-                if status == 1
-                else _("Error when sending email")
-            ),
-        )
-
-    def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm):
-        return _(
-            "Thank you for submitting this form. "
-            "Your harbour dues form has now been received by the port authority "
-            "and the Greenlandic Tax Authority."
-        )
+#class _SendEmailMixin:
+#    def _send_email(
+#        self,
+#        form: HarborDuesForm | CruiseTaxForm,
+#        request,
+#    ) -> None:
+#        email_message, status = form.send_email()
+#        messages.add_message(
+#            request,
+#            messages.SUCCESS if status == 1 else messages.ERROR,
+#            (
+#                self._get_success_message(form)
+#                if status == 1
+#                else _("Error when sending email")
+#            ),
+#        )
+#
+#    def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm):
+#        return _(
+#            "Thank you for submitting this form. "
+#            "Your harbour dues form has now been received by the port authority "
+#            "and the Greenlandic Tax Authority."
+#        )
 
 
 class HarborDuesFormCreateView(
-    LoginRequiredMixin, CSPViewMixin, _SendEmailMixin, HavneafgiftView, CreateView
+        # LoginRequiredMixin, CSPViewMixin, _SendEmailMixin, HavneafgiftView, CreateView
+    HarborDuesFormMixin, HavneafgiftView, CreateView,
 ):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
-    def get_initial(self):
-        initial = {}
-        # Attempting to call group_names on a User that is not logged in
-        # will blow up, because that'd be an AnonymousUser,
-        # not our own implementation
-        if "Ship" in self.request.user.group_names:
-            initial["vessel_imo"] = self.request.user.username
-        return initial
+    # def get_initial(self):
+    #     initial = {}
+    #     # Attempting to call group_names on a User that is not logged in
+    #     # will blow up, because that'd be an AnonymousUser,
+    #     # not our own implementation
+    #     if "Ship" in self.request.user.group_names:
+    #         initial["vessel_imo"] = self.request.user.username
+    #     return initial
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user_is_ship"] = "Ship" in self.request.user.group_names
-        return kwargs
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     kwargs["user_is_ship"] = "Ship" in self.request.user.group_names
+    #     return kwargs
 
-    def form_valid(self, form):
-        harbor_dues_form = form.save(commit=False)
-        if harbor_dues_form.vessel_type == ShipType.CRUISE:
-            # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
-            # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
-            cruise_tax_form = CruiseTaxForm.objects.create(
-                **{
-                    k: v
-                    for k, v in harbor_dues_form.__dict__.items()
-                    if not k.startswith("_")  # skip `_state`, etc.
-                }
-            )
-            if cruise_tax_form.has_port_of_call:
-                # Send user to next step - filling out passenger tax info
-                return self.get_redirect_for_form(
-                    "havneafgifter:passenger_tax_create",
-                    cruise_tax_form,
-                )
-            else:
-                # Send user to final step - filling out environmental tax info
-                return self.get_redirect_for_form(
-                    "havneafgifter:environmental_tax_create",
-                    cruise_tax_form,
-                )
-        else:
-            # User is all done filling out data for this vessel
-            harbor_dues_form.save()
-            if harbor_dues_form.status != Status.DRAFT:
-                # Send email to relevant recipients
-                self._send_email(harbor_dues_form, self.request)
-            # Go to detail view to display result.
-            return self.get_redirect_for_form(
-                "havneafgifter:receipt_detail_html",
-                harbor_dues_form,
-            )
+    # def form_valid(self, form):
+    #     harbor_dues_form = form.save(commit=False)
+    #     if harbor_dues_form.vessel_type == ShipType.CRUISE:
+    #         # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
+    #         # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
+    #         cruise_tax_form = CruiseTaxForm.objects.create(
+    #             **{
+    #                 k: v
+    #                 for k, v in harbor_dues_form.__dict__.items()
+    #                 if not k.startswith("_")  # skip `_state`, etc.
+    #             }
+    #         )
+    #         if cruise_tax_form.has_port_of_call:
+    #             # Send user to next step - filling out passenger tax info
+    #             return self.get_redirect_for_form(
+    #                 "havneafgifter:passenger_tax_create",
+    #                 cruise_tax_form,
+    #             )
+    #         else:
+    #             # Send user to final step - filling out environmental tax info
+    #             return self.get_redirect_for_form(
+    #                 "havneafgifter:environmental_tax_create",
+    #                 cruise_tax_form,
+    #             )
+    #     else:
+    #        # User is all done filling out data for this vessel
+    #        harbor_dues_form.save()
+    #        if harbor_dues_form.status != Status.DRAFT:
+    #            # Send email to relevant recipients
+    #            self._send_email(harbor_dues_form, self.request)
+    #        # Go to detail view to display result.
+    #        return self.get_redirect_for_form(
+    #            "havneafgifter:receipt_detail_html",
+    #            harbor_dues_form,
+    #        )
 
 
 class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
@@ -459,7 +460,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return None
 
 
-class DraftEditView(HarborDuesFormCreateView, UpdateView):
+class DraftEditView(HarborDuesFormMixin, HavneafgiftView, UpdateView):
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
         try:
@@ -471,8 +472,7 @@ class DraftEditView(HarborDuesFormCreateView, UpdateView):
                 return None
 
     def get(self, request, *args, **kwargs):
-        form = self.get_object()
-        if form.status != "DRAFT":
+        if self.get_object().status != "DRAFT":
             return HttpResponseRedirect(
                 reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
             )
