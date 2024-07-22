@@ -83,9 +83,11 @@ table.table-striped td:first-child {
                 <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-success">
                     {% translate 'View PDF' %}
                 </a>
-                <a href="{% url 'havneafgifter:draft_edit' pk=form.pk %}" class"btn btn-primary">
+                {% if form.status == "DRAFT" %}
+                <a href="{% url 'havneafgifter:draft_edit' pk=form.pk %}" class="btn btn-primary ms-2">
                     {% translate 'Edit draft' %}
                 </a>
+                {% endif %}
                 <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary ms-2 ms-auto">
                     {% translate 'Submit new form' %}
                 </a>

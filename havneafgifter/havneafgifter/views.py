@@ -20,7 +20,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
-from django.views.generic.edit import CreateView, FormView
+from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_tables2 import SingleTableMixin, SingleTableView
 
 from havneafgifter.forms import (
@@ -459,6 +459,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return None
 
     def get_context(self, **context):
+        print("GREAT BIG FISH!!!!!")
         print(context)
         return super().get_context_data(
             **{
@@ -467,33 +468,25 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             }
         )
 
-class DraftEditView(HarborDuesFormCreateView):
-    #def get_object(self, queryset=None):
-    #    pk = self.kwargs.get(self.pk_url_kwarg)
-    #    try:
-    #        return CruiseTaxForm.objects.get(pk=pk)
-    #    except CruiseTaxForm.DoesNotExist:
-    #        try:
-    #            return HarborDuesForm.objects.get(pk=pk)
-    #        except HarborDuesForm.DoesNotExist:
-    #            return None
-
-    def get_form(self, queryset=None):
+class DraftEditView(HarborDuesFormCreateView, UpdateView):
+    def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
         try:
-            form = CruiseTaxForm.objects.get(pk=pk)
-            print(form)
-            return form
+            return CruiseTaxForm.objects.get(pk=pk)
         except CruiseTaxForm.DoesNotExist:
             try:
-                form = HarborDuesForm.objects.get(pk=pk)
-                print(form)
-                return form
+                return HarborDuesForm.objects.get(pk=pk)
             except HarborDuesForm.DoesNotExist:
                 return None
 
-
-
+    def get(self, request, *args, **kwargs):
+        form = self.get_object()
+        if form.status != "DRAFT":
+            return HttpResponseRedirect(reverse("havneafgifter:receipt_detail_html",
+                kwargs={"pk": form.pk})
+            )
+        else:
+            return super().get(self, request, *args, **kwargs)
 
 class PreviewPDFView(ReceiptDetailView):
     def get(self, request, *args, **kwargs):
