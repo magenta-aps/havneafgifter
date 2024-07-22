@@ -3,9 +3,11 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from havneafgifter.models import HarborDuesForm, CruiseTaxForm, ShipType, Status
+
 from havneafgifter.forms import HarborDuesFormForm
-#from havneafgifter.views import HavneAfgiftView
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
+
+# from havneafgifter.views import HavneAfgiftView
 
 
 class _SendEmailMixin:
@@ -32,8 +34,8 @@ class _SendEmailMixin:
             "and the Greenlandic Tax Authority."
         )
 
-class GetFormView(FormView):
 
+class GetFormView(FormView):
     def get(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
@@ -58,11 +60,14 @@ class GetFormView(FormView):
             )
         return kwargs
 
+
 class HarborDuesFormMixin(
-    LoginRequiredMixin, CSPViewMixin, _SendEmailMixin, # HavneafgiftView
+    LoginRequiredMixin,
+    CSPViewMixin,
+    _SendEmailMixin,  # HavneafgiftView
 ):
     model = HarborDuesForm
-    form_class= HarborDuesFormForm
+    form_class = HarborDuesFormForm
 
     def get_initial(self):
         initial = {}
