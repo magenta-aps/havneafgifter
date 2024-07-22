@@ -458,16 +458,6 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             except HarborDuesForm.DoesNotExist:
                 return None
 
-    def get_context(self, **context):
-        print("GREAT BIG FISH!!!!!")
-        print(context)
-        return super().get_context_data(
-            **{
-                **context,
-                "draft": get_object.status == Status.DRAFT,
-            }
-        )
-
 class DraftEditView(HarborDuesFormCreateView, UpdateView):
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
