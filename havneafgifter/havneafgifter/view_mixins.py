@@ -82,6 +82,7 @@ class HarborDuesFormMixin(
     LoginRequiredMixin,
     CSPViewMixin,
     _SendEmailMixin,
+    HavneafgiftView,
 ):
     def get_initial(self):
         initial = {}

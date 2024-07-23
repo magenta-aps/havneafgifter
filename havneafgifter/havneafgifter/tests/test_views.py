@@ -152,7 +152,9 @@ class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     )
     def test_send_email_produces_message(self, status, expected_message_class):
         instance = _SendEmailMixin()
-        with patch("havneafgifter.views.messages.add_message") as mock_add_message:
+        with patch(
+            "havneafgifter.view_mixins.messages.add_message"
+        ) as mock_add_message:
             with patch(
                 "havneafgifter.models.HarborDuesForm.send_email",
                 return_value=(Mock(), status),
