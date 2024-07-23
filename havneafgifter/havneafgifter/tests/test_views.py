@@ -849,3 +849,37 @@ class StatisticsTest(TestCase):
                 "count": 2,
             },
         )
+
+
+class TestDraftEditView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.user = User.objects.create(username="Test McTesterson")
+
+    def test_get_draft_form(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                "havneafgifter:draft_edit",
+                kwargs={"pk": self.harbor_dues_draft_form.pk},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_redirect_from_non_draft_form(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                "havneafgifter:draft_edit",
+                kwargs={"pk": self.harbor_dues_form.pk},
+            )
+        )
+        self.assertEqual(
+            response.headers["Location"],
+            reverse(
+                "havneafgifter:receipt_detail_html",
+                kwargs={"pk": self.harbor_dues_form.pk},
+            ),
+        )
