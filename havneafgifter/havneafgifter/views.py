@@ -50,22 +50,6 @@ from havneafgifter.view_mixins import (
     _SendEmailMixin,
 )
 
-# class HavneafgiftView:
-#     def get_context_data(self, **context):
-#         return super().get_context_data(
-#             **{
-#                 **context,
-#                 "version": settings.VERSION,
-#             }
-#         )
-#
-#     def get_redirect_for_form(
-#         self,
-#         viewname: str,
-#         form: HarborDuesForm | CruiseTaxForm,
-#     ):
-#         return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
-
 
 class RootView(RedirectView):
     def get_redirect_url(self):
