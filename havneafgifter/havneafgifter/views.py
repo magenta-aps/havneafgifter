@@ -403,6 +403,13 @@ class DraftEditView(HarborDuesFormMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         form = self.get_object()
+        if not form:
+            return HttpResponseRedirect(
+                reverse(
+                    "havneafgifter:receipt_detail_html",
+                    kwargs={"pk": self.kwargs.get(self.pk_url_kwarg)},
+                )
+            )
         if form.status != "DRAFT":
             return HttpResponseRedirect(
                 reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})

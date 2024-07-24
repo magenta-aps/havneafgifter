@@ -883,3 +883,19 @@ class TestDraftEditView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
                 kwargs={"pk": self.harbor_dues_form.pk},
             ),
         )
+
+    def test_redirect_from_nonexistent_form(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                "havneafgifter:draft_edit",
+                kwargs={"pk": 987654321987},
+            )
+        )
+        self.assertEqual(
+            response.headers["Location"],
+            reverse(
+                "havneafgifter:receipt_detail_html",
+                kwargs={"pk": 987654321987},
+            ),
+        )
