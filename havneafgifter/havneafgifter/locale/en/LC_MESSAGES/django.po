@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 06:03-0100\n"
+"POT-Creation-Date: 2024-07-24 09:37-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -507,6 +507,22 @@ msgstr ""
 msgid "Source code"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Harbour Dues/Port Tax"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "IMO numbers should be 7 digits"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
@@ -518,11 +534,6 @@ msgid ""
 "passengers on board at the time of disembarkment, regardless of how many "
 "passengers disembark. Register total number of passengers on board at the "
 "time of disembarkation."
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Submit"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/error.html
@@ -560,14 +571,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/login_timeout.html
 msgid "Det anvendte login er timet ud. Prøv at logge ind igen."
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Harbour Dues/Port Tax"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "IMO numbers should be 7 digits"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
@@ -616,6 +619,10 @@ msgid "View PDF"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Edit draft"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
 msgstr ""
 
@@ -646,11 +653,11 @@ msgstr ""
 msgid "Søg"
 msgstr ""
 
-#: havneafgifter/views.py
+#: havneafgifter/view_mixins.py
 msgid "Error when sending email"
 msgstr ""
 
-#: havneafgifter/views.py
+#: havneafgifter/view_mixins.py
 msgid ""
 "Thank you for submitting this form. Your harbour dues form has now been "
 "received by the port authority and the Greenlandic Tax Authority."

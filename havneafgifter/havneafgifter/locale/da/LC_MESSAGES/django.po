@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 06:03-0100\n"
+"POT-Creation-Date: 2024-07-24 09:37-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -520,6 +520,22 @@ msgstr "Version"
 msgid "Source code"
 msgstr "Kildekode"
 
+#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Harbour Dues/Port Tax"
+msgstr "Havneafgift"
+
+#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
+msgstr "Indsend"
+
+#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "IMO numbers should be 7 digits"
+msgstr "IMO-numre skal være på 7 cifre"
+
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
@@ -540,11 +556,6 @@ msgstr ""
 "Vær opmærksom på at miljø- og vedligeholdelsesafgifter vedrører <b>alle</b> "
 "passagerer ombord på tidspunktet for ilandsætningen, uanset hvor mange "
 "passagerer, der ilandsættes."
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Submit"
-msgstr "Indsend"
 
 #: havneafgifter/templates/havneafgifter/error/error.html
 #, fuzzy
@@ -586,14 +597,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/error/login_timeout.html
 msgid "Det anvendte login er timet ud. Prøv at logge ind igen."
 msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Harbour Dues/Port Tax"
-msgstr "Havneafgift"
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "IMO numbers should be 7 digits"
-msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "Harbor dues list"
@@ -645,6 +648,10 @@ msgid "View PDF"
 msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Edit draft"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
 msgstr "Indsend ny blanket"
 
@@ -675,11 +682,11 @@ msgstr ""
 msgid "Søg"
 msgstr ""
 
-#: havneafgifter/views.py
+#: havneafgifter/view_mixins.py
 msgid "Error when sending email"
 msgstr "Fejl under afsendelse af email"
 
-#: havneafgifter/views.py
+#: havneafgifter/view_mixins.py
 msgid ""
 "Thank you for submitting this form. Your harbour dues form has now been "
 "received by the port authority and the Greenlandic Tax Authority."
