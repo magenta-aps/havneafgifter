@@ -5,10 +5,10 @@ from django.views.generic import TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from havneafgifter.views import (
-    DraftEditView,
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
+    HarborDuesFormUpdateView,
     LoginView,
     LogoutView,
     PassengerTaxCreateView,
@@ -99,7 +99,7 @@ urlpatterns: List[URLResolver | URLPattern] = [
     ),
     path(
         "blanket/<int:pk>/rediger/",
-        DraftEditView.as_view(),
+        HarborDuesFormUpdateView.as_view(),
         name="draft_edit",
     ),
     path(

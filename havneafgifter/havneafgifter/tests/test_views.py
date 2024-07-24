@@ -851,7 +851,7 @@ class StatisticsTest(TestCase):
         )
 
 
-class TestDraftEditView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

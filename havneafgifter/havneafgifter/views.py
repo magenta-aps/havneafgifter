@@ -371,7 +371,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return None
 
 
-class DraftEditView(HarborDuesFormMixin, UpdateView):
+class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
