@@ -96,7 +96,15 @@ class HarborDuesFormMixin:
                     "gross_tonnage",
                     "vessel_type",
                 )
-            }
+            },
+        )
+        cls.harbor_dues_draft_form = HarborDuesForm.objects.create(
+            status=Status.DRAFT.value,
+            **{
+                k: v
+                for k, v in cls.harbor_dues_form_data.items()
+                if k not in ("status")
+            },
         )
 
     @classmethod

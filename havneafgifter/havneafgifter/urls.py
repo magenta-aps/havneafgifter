@@ -8,6 +8,7 @@ from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
+    HarborDuesFormUpdateView,
     LoginView,
     LogoutView,
     PassengerTaxCreateView,
@@ -95,6 +96,11 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/<int:pk>/",
         ReceiptDetailView.as_view(),
         name="receipt_detail_html",
+    ),
+    path(
+        "blanket/<int:pk>/rediger/",
+        HarborDuesFormUpdateView.as_view(),
+        name="draft_edit",
     ),
     path(
         "blanket/pdf/<int:pk>/",
