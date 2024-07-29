@@ -113,26 +113,31 @@ table.table-striped td:first-child {
 
         <table class="table table-bordered receipt">
             <tbody>
+                {% if form.has_port_of_call %}
                 <tr>
-                    {% if form.has_port_of_call %}
                     <th scope="row">
                         Umiarsualivik nunaliffik
                         <br>
                         Port of call
                     </th>
-                    <td class="table-active">
+                    <td class="table-active" colspan="3">
                         {{ form.port_of_call|default_if_none:"" }}
                     </td>
-                    {% endif %}
+                </tr>
+                {% endif %}
+
+                {% if form.nationality %}
+                <tr>
                     <th scope="row">
                         Sumiuussuseq
                         <br>
                         Nationality
                     </th>
-                    <td class="table-active"{% if not form.has_port_of_call %} colspan="3"{% endif %}>
-                        {{ form.get_nationality_display }}
+                    <td class="table-active" colspan="3">
+                        {{ form.get_nationality_display|default_if_none:"-" }}
                     </td>
                 </tr>
+                {% endif %}
 
                 <tr>
                     <th scope="row">

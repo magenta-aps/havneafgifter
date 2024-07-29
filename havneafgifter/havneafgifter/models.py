@@ -487,6 +487,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         max_length=2,
         null=True,
         blank=True,
+        choices=Nationality,
         verbose_name=_("Vessel nationality"),
     )
 
