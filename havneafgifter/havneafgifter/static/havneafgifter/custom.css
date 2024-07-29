@@ -26,9 +26,15 @@
 .select2-selection__arrow b {
     display: none;
 }
+
 .card {
     width: 40rem;
 }
 .form-label {
     font-weight: bold;
+}
+
+/* Emphasise form receipt help texts */
+table.receipt td p {
+    font-style: italic;
 }
