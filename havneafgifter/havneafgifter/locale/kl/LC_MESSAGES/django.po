@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-24 09:37-0100\n"
+"POT-Creation-Date: 2024-07-30 08:26-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -606,11 +606,16 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 #: havneafgifter/templates/havneafgifter/login.html
+#: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 msgid "Log in"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/login.html
 msgid "Log in using MitID"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Forgot your password?"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
@@ -668,6 +673,81 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Søg"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/password_requirements.html
+msgid ""
+"Passwords must be at least 8 characters, and cannot consist of only digits. "
+"Passwords cannot be too similar to your name, username or email address. "
+"Avoid using very common passwords."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
+#: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
+#: havneafgifter/templates/havneafgifter/user/password/reset_done.html
+msgid "Password reset"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
+msgid ""
+"Forgotten your password? Enter your email address below, and we’ll email "
+"instructions for setting a new one."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
+msgid "Email address:"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
+msgid "Reset my password"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
+msgid "Your password has been set.  You may go ahead and log in now."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
+msgid "Password reset confirmation"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
+msgid "New password:"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
+msgid "Confirm password:"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
+msgid "Change my password"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_done.html
+msgid ""
+"We’ve emailed you instructions for setting your password, if an account "
+"exists with the email you entered. You should receive them shortly."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_done.html
+msgid ""
+"If you don’t receive an email, please make sure you’ve entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_done.html
+msgid "Return to login"
 msgstr ""
 
 #: havneafgifter/view_mixins.py
