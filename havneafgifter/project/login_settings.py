@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 
 import saml2
@@ -34,6 +35,15 @@ LOGIN_WHITELISTED_URLS = [
     LOGOUT_REDIRECT_URL,
     reverse_lazy("havneafgifter:root"),
     reverse_lazy("saml_metadata_override"),
+    # Whitelist simple "password reset" URLs (taking no URL kwargs)
+    reverse_lazy("password_reset"),
+    reverse_lazy("password_reset_done"),
+    reverse_lazy("password_reset_complete"),
+    # Whitelist complex "password reset" URL (taking URL kwargs)
+    re.compile(r"/password/reset/[^/]+/[^/]+/"),
+    # Whitelist the Django "set_language" view, so it works even outside
+    # authenticated contexts (e.g. when doing a password reset.)
+    reverse_lazy("set_language"),
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
