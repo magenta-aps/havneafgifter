@@ -18,17 +18,21 @@
         const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
         const grossTonnageInput = $("#id_gross_tonnage");
         const vesselTypeSelect = $("#id_vessel_type");
-        const submitButton = $("button[type=submit]");
+        const submitButton = $("button[type=submit][value=NEW]");
+        const submitDraftButton = $("button[type=submit][value=DRAFT]");
 
         const toggleButtonText = function (state) {
-            let buttonText = gettext("Submit");
+            let submitButtonText = gettext("Save");
+            let submitDraftButtonText = gettext("Save as draft");
             if (state) {
-                buttonText = gettext("Continue");
+                submitButtonText = gettext("Continue");
+                submitDraftButtonText = gettext("Continue as draft");
             }
-            submitButton.text(buttonText);
+            submitButton.text(submitButtonText);
+            submitDraftButton.text(submitDraftButtonText);
         }
 
-        // Update text on submit button depending on the selected vessel type.
+        // Update text on submit buttons, depending on the selected vessel type.
         vesselTypeSelect.on("change", function () {
             const vesselType = $(this).val();
             const state = vesselType === "CRUISE";
