@@ -74,8 +74,6 @@
     {{ form.media.css }}
     {{ form.media.js }}
 
-    {% bootstrap_field form.status %}
-
     <div class="row">
         <div class="col-9">
             {% bootstrap_field form.port_of_call %}
@@ -94,7 +92,10 @@
     {% endif %}
 
     {% bootstrap_form form exclude="port_of_call,no_port_of_call,status" alert_error_type="none" %}
-    {% bootstrap_button button_type="submit" content=_("Submit") %}
+
+    {# Pass `status=NEW` or `status=DRAFT` depending on which submit button is used #}
+    {% bootstrap_button button_type="submit" name="status" value="NEW" content=_("Save") %}
+    {% bootstrap_button button_type="submit" name="status" value="DRAFT" content=_("Save as draft") %}
 </form>
 <script nonce="{{request.csp_nonce}}">
     $("[name={{form.vessel_imo.name}}]").on("invalid", function () {
