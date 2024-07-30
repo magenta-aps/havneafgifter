@@ -52,13 +52,13 @@ fi
 
 if [ "${CREATE_DUMMY_USERS}" = true ]; then
   echo 'creating tax user'
-  ./manage.py createuser tax tax -s -g TaxAuthority
+  ./manage.py createuser tax tax -g TaxAuthority
   echo 'creating shipping user'
-  ./manage.py createuser shipping shipping -s -g Shipping --shipping-agent Agenten
+  ./manage.py createuser shipping shipping -g Shipping --shipping-agent Agenten
   echo 'creating ship user'
-  ./manage.py createuser 9074729 ship -s -g Ship
+  ./manage.py createuser 9074729 ship -g Ship
   echo 'creating portauthority user'
-  ./manage.py createuser portauthority portauthority -s -g PortAuthority --port-authority Royal Arctic Line A/S
+  ./manage.py createuser portauthority portauthority -g PortAuthority --port-authority Royal Arctic Line A/S
 fi
 
 python manage.py createcachetable
