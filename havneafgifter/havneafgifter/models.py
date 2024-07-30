@@ -27,6 +27,7 @@ from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
+from django_countries import countries
 
 from havneafgifter.data import DateTimeRange
 
@@ -487,7 +488,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         max_length=2,
         null=True,
         blank=True,
-        choices=Nationality,
+        choices=countries,
         verbose_name=_("Vessel nationality"),
     )
 
