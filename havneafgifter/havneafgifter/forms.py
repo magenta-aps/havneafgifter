@@ -22,6 +22,7 @@ from django.forms import (
 from django.forms.utils import ErrorList
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from django_countries import countries
 from django_select2.forms import Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
 
@@ -92,10 +93,12 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_departure": HTML5DateWidget(),
         }
 
+    _vessel_nationality_choices = [("", "---")] + list(countries)
+
     nationality = ChoiceField(
         required=False,
-        choices=[("", "---")] + list(Nationality.choices),
-        widget=Select2Widget(choices=[("", "---")] + list(Nationality.choices)),
+        choices=_vessel_nationality_choices,
+        widget=Select2Widget(choices=_vessel_nationality_choices),
     )
 
     vessel_imo = DynamicField(
