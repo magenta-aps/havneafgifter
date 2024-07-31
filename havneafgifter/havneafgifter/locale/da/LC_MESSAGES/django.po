@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-30 11:51-0100\n"
+"POT-Creation-Date: 2024-07-31 07:32-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -534,6 +534,7 @@ msgstr ""
 "passagerer, der ilandsættes."
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Submit"
 msgstr "Indsend"
 
@@ -581,10 +582,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Harbour Dues/Port Tax"
 msgstr "Havneafgift"
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Save"
-msgstr "Gem"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Save as draft"
