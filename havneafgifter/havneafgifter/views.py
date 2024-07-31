@@ -401,6 +401,9 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
         else:
             return super().get(self, request, *args, **kwargs)
 
+    def get_template_names(self):
+        return ["havneafgifter/harborduesform_form.html"]
+
 
 class PreviewPDFView(ReceiptDetailView):
     def get(self, request, *args, **kwargs):

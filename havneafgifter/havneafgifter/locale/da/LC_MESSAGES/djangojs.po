@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-24 09:37-0100\n"
+"POT-Creation-Date: 2024-07-31 07:32-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,16 +18,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Submit"
-msgstr "Indsend"
+msgstr ""
 
-#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Save as draft"
+msgstr "Gem som kladde"
+
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Continue"
 msgstr "Fortsæt"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Continue as draft"
+msgstr "Fortsæt som kladde"
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Ankomst"

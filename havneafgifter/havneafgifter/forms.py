@@ -120,15 +120,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("No port of call"),
     )
 
-    status = ChoiceField(
-        required=False,
-        choices=[
-            (Status.NEW, _("No")),
-            (Status.DRAFT, _("Yes")),
-        ],
-        label=_("Draft"),
-    )
-
     def __init__(self, user_is_ship=False, *args, **kwargs):
         self.user_is_ship = user_is_ship
         super().__init__(*args, **kwargs)

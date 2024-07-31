@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-30 08:26-0100\n"
+"POT-Creation-Date: 2024-07-31 07:32-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,18 +63,6 @@ msgstr "IMO-nummer"
 #: havneafgifter/forms.py
 msgid "No port of call"
 msgstr "Ingen ankomsthavn"
-
-#: havneafgifter/forms.py
-msgid "No"
-msgstr ""
-
-#: havneafgifter/forms.py
-msgid "Yes"
-msgstr ""
-
-#: havneafgifter/forms.py havneafgifter/models.py
-msgid "Draft"
-msgstr ""
 
 #: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
@@ -308,11 +296,15 @@ msgstr "Andet land"
 
 #: havneafgifter/models.py
 msgid "New"
-msgstr ""
+msgstr "Ny"
+
+#: havneafgifter/models.py
+msgid "Draft"
+msgstr "Kladde"
 
 #: havneafgifter/models.py
 msgid "Done"
-msgstr ""
+msgstr "Afsluttet"
 
 #: havneafgifter/models.py
 msgid "Northeast Greenland National Park"
@@ -520,22 +512,6 @@ msgstr "Version"
 msgid "Source code"
 msgstr "Kildekode"
 
-#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Harbour Dues/Port Tax"
-msgstr "Havneafgift"
-
-#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Submit"
-msgstr "Indsend"
-
-#: havneafgifter/templates/havneafgifter/cruisetaxform_form.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "IMO numbers should be 7 digits"
-msgstr "IMO-numre skal være på 7 cifre"
-
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
@@ -556,6 +532,11 @@ msgstr ""
 "Vær opmærksom på at miljø- og vedligeholdelsesafgifter vedrører <b>alle</b> "
 "passagerer ombord på tidspunktet for ilandsætningen, uanset hvor mange "
 "passagerer, der ilandsættes."
+
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
+msgstr "Indsend"
 
 #: havneafgifter/templates/havneafgifter/error/error.html
 #, fuzzy
@@ -597,6 +578,18 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/error/login_timeout.html
 msgid "Det anvendte login er timet ud. Prøv at logge ind igen."
 msgstr ""
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Harbour Dues/Port Tax"
+msgstr "Havneafgift"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Save as draft"
+msgstr "Gem som kladde"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "IMO numbers should be 7 digits"
+msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "Harbor dues list"
