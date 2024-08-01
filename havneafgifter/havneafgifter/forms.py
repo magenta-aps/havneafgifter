@@ -1,7 +1,6 @@
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
-from django.contrib.auth.forms import UsernameField
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import RegexValidator
 from django.forms import (
@@ -71,13 +70,17 @@ class HTML5DateWidget(widgets.Input):
     template_name = "django/forms/widgets/datetime.html"
 
 
-class SignupVesselForm(CSPFormMixin, ModelForm):
+class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
+    # By inheriting from `BaseUserCreationForm`, this form takes care of
+    # asking the user to repeat their desired password, checking that they are
+    # identical.
+    # It also takes care of hashing the password when creating the `User` object.
+
     class Meta:
         model = User
         fields = [
             "username",  # used for saving IMO number
             "organization",  # used for saving vessel name
-            "password",
             "first_name",
             "last_name",
             "email",
@@ -99,12 +102,6 @@ class SignupVesselForm(CSPFormMixin, ModelForm):
         label=_("Vessel name"),
     )
 
-    password = CharField(
-        widget=PasswordInput(),
-        validators=[validate_password],
-        label=_("Password"),
-    )
-
     first_name = CharField(
         required=True,
         max_length=150,
@@ -122,13 +119,6 @@ class SignupVesselForm(CSPFormMixin, ModelForm):
         widget=EmailInput(attrs={"autocomplete": "email"}),
         label=_("Email"),
     )
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])
-        if commit:
-            user.save()
-        return user
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):

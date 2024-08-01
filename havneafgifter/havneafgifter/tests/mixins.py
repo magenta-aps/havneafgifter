@@ -51,7 +51,8 @@ class HarborDuesFormMixin:
         # Valid data for creating a "ship user" `User` instance
         cls.ship_user_form_data = {
             "username": "1234567",  # must be valid IMO number
-            "password": "hunter2_",  # must be suitably complex
+            "password1": "hunter2_",  # must be suitably complex
+            "password2": "hunter2_",  # must be identical to `password1`
             "organization": "Skibsnavn",  # contains vessel name
             "first_name": "Fornavn",
             "last_name": "Efternavn",
