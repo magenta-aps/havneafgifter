@@ -48,6 +48,16 @@ class HarborDuesFormMixin:
         cls.ship_user = User.objects.create(username="9074729")
         cls.ship_user.groups.add(Group.objects.get(name="Ship"))
 
+        # Valid data for creating a "ship user" `User` instance
+        cls.ship_user_form_data = {
+            "username": "1234567",  # must be valid IMO number
+            "password": "hunter2_",  # must be suitably complex
+            "organization": "Skibsnavn",  # contains vessel name
+            "first_name": "Fornavn",
+            "last_name": "Efternavn",
+            "email": "contact@example.org",
+        }
+
         # Valid data for creating a `HarborDuesForm` (or `CruiseTaxForm`) instance
         cls.harbor_dues_form_data = {
             "port_of_call": cls.port,

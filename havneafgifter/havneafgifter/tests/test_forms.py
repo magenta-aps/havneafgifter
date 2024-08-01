@@ -1,6 +1,7 @@
 import copy
 from datetime import datetime, timezone
 
+from django.contrib.auth.hashers import is_password_usable
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.utils import ErrorList
 from django.test import SimpleTestCase, TestCase
@@ -11,9 +12,21 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    SignupVesselForm,
 )
 from havneafgifter.models import DisembarkmentSite, Nationality, Port, Status
 from havneafgifter.tests.mixins import HarborDuesFormMixin
+
+
+class TestSignupVesselForm(HarborDuesFormMixin, TestCase):
+    def test_form_save_hashes_password(self):
+        # Arrange
+        instance = SignupVesselForm(data=self.ship_user_form_data)
+        # Act
+        user = instance.save()
+        # Assert
+        user.refresh_from_db()
+        self.assertTrue(is_password_usable(user.password))
 
 
 class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
@@ -96,7 +109,7 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
     def test_form_clean_does_nothing_if_draft(self):
         data = copy.copy(self.harbor_dues_form_form_data)
         data["status"] = Status.DRAFT.value
-        form = HarborDuesFormForm(data=data)
+        form = self._get_form_instance(data)
         self.assertTrue(form.is_valid())
         result = form.clean()
         self.assertEqual(data, result)
@@ -105,7 +118,7 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         # Submit data that will lead to violating a database constraint
         data = copy.copy(self.harbor_dues_form_data)
         data["gross_tonnage"] = None
-        form = HarborDuesFormForm(data=data)
+        form = self._get_form_instance(data)
         # We expect the `form.save(...)` to raise ValueError in this case
         try:
             form.save(commit=False)
@@ -123,8 +136,22 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
                 ErrorList(),  # empty error list
             )
 
+    def test_get_vessel_name_and_imo_from_user(self):
+        # If form is instantiated with a `User` that is a "ship user", the fields
+        # `vessel_name` and `vessel_imo` are pre-filled using data from the `User`.
+        form = HarborDuesFormForm(self.ship_user, data=self.harbor_dues_form_data)
+        self.assertEqual(
+            form.fields["vessel_name"].initial, self.ship_user.organization
+        )
+        self.assertEqual(form.fields["vessel_imo"].initial, self.ship_user.username)
+
+    def _get_form_instance(self, data):
+        # We use `self.shipping_agent_user` here to get a "normal" user
+        # (i.e., not a "ship user".)
+        return HarborDuesFormForm(self.shipping_agent_user, data=data)
+
     def _assert_form_has_error(self, data, code):
-        form = HarborDuesFormForm(data=data)
+        form = self._get_form_instance(data)
         # Trigger form validation
         form.is_valid()
         # Assert that our validation error is raised
