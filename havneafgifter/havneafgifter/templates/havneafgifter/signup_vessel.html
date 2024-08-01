@@ -4,11 +4,11 @@
 {% load django_bootstrap5 %}
 
 {% block title %}
-{% translate "Create new vessel user" %}
+{% translate "Register vessel to report harbour dues" %}
 {% endblock %}
 
 {% block content %}
-<h1>{% translate "Create new vessel user" %}</h1>
+<h1>{% translate "Register vessel to report harbour dues" %}</h1>
 <form action="{% url 'havneafgifter:signup-vessel' %}" method="post" class="form">
     {% csrf_token %}
     {{ form.media.css }}
