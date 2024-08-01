@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-31 07:32-0100\n"
+"POT-Creation-Date: 2024-08-01 08:18-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,6 +59,22 @@ msgstr "Kodeord"
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "IMO-number"
 msgstr "IMO-nummer"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel name"
+msgstr "Skibets navn"
+
+#: havneafgifter/forms.py
+msgid "First name"
+msgstr "Fornavn"
+
+#: havneafgifter/forms.py
+msgid "Last name"
+msgstr "Efternavn"
+
+#: havneafgifter/forms.py
+msgid "Email"
+msgstr ""
 
 #: havneafgifter/forms.py
 msgid "No port of call"
@@ -351,10 +367,6 @@ msgid "Vessel nationality"
 msgstr "Skibets nationalitet"
 
 #: havneafgifter/models.py
-msgid "Vessel name"
-msgstr "Skibets navn"
-
-#: havneafgifter/models.py
 msgid "Vessel owner"
 msgstr "Skibets ejer"
 
@@ -621,6 +633,11 @@ msgstr "Log ind med MitID"
 msgid "Forgot your password?"
 msgstr "Glemt dit kodeord?"
 
+#: havneafgifter/templates/havneafgifter/login.html
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Create new vessel user"
+msgstr "Opret ny skibsbruger"
+
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
 msgstr "Krydstogtskibe: passagerafgift"
@@ -652,6 +669,14 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
 msgstr "Indsend ny blanket"
+
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Contact person details"
+msgstr "Kontaktperson-detaljer"
+
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Create"
+msgstr "Opret"
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Statistik"
@@ -772,3 +797,7 @@ msgid ""
 msgstr ""
 "Tak fordi du indsendte denne blanket. Din blanket er nu modtaget af "
 "havnemyndigheden og den grønlandske skattestyrelse."
+
+#: havneafgifter/views.py
+msgid "Please sign in using the IMO number as username"
+msgstr "Log venligst ind med IMO-nummeret som brugernavn"

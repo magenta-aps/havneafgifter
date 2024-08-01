@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-31 07:32-0100\n"
+"POT-Creation-Date: 2024-08-01 08:18-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,6 +56,22 @@ msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "IMO-number"
+msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel name"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "First name"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Last name"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Email"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -345,10 +361,6 @@ msgid "Vessel nationality"
 msgstr ""
 
 #: havneafgifter/models.py
-msgid "Vessel name"
-msgstr ""
-
-#: havneafgifter/models.py
 msgid "Vessel owner"
 msgstr ""
 
@@ -594,6 +606,11 @@ msgstr ""
 msgid "Forgot your password?"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/login.html
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Create new vessel user"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
 msgstr ""
@@ -622,6 +639,14 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Contact person details"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Create"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
@@ -734,4 +759,8 @@ msgstr ""
 msgid ""
 "Thank you for submitting this form. Your harbour dues form has now been "
 "received by the port authority and the Greenlandic Tax Authority."
+msgstr ""
+
+#: havneafgifter/views.py
+msgid "Please sign in using the IMO number as username"
 msgstr ""

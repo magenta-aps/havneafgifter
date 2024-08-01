@@ -84,18 +84,9 @@ class HarborDuesFormMixin(
     _SendEmailMixin,
     HavneafgiftView,
 ):
-    def get_initial(self):
-        initial = {}
-        # Attempting to call group_names on a User that is not logged in
-        # will blow up, because that'd be an AnonymousUser,
-        # not our own implementation
-        if "Ship" in self.request.user.group_names:
-            initial["vessel_imo"] = self.request.user.username
-        return initial
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["user_is_ship"] = "Ship" in self.request.user.group_names
+        kwargs["user"] = self.request.user
         return kwargs
 
     def form_valid(self, form):
