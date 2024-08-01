@@ -1,0 +1,21 @@
+{% extends "havneafgifter/base.html" %}
+
+{% load i18n %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+{% translate "Register vessel to report harbour dues" %}
+{% endblock %}
+
+{% block content %}
+<h1>{% translate "Register vessel to report harbour dues" %}</h1>
+<form action="{% url 'havneafgifter:signup-vessel' %}" method="post" class="form">
+    {% csrf_token %}
+    {{ form.media.css }}
+    {{ form.media.js }}
+    {% bootstrap_form form exclude='first_name,last_name,email' %}
+    <h2>{% translate 'Contact person details' %}</h2>
+    {% bootstrap_form form exclude='organization,username,password1,password2' %}
+    {% bootstrap_button button_type="submit" content=_("Create") %}
+</form>
+{% endblock content %}

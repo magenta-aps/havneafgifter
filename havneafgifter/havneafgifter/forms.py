@@ -1,6 +1,6 @@
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
-from django.contrib.auth.forms import UsernameField
+from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import RegexValidator
 from django.forms import (
@@ -9,6 +9,8 @@ from django.forms import (
     ChoiceField,
     DateTimeField,
     DateTimeInput,
+    EmailField,
+    EmailInput,
     Form,
     HiddenInput,
     IntegerField,
@@ -35,6 +37,7 @@ from havneafgifter.models import (
     Port,
     ShipType,
     Status,
+    User,
     imo_validator,
 )
 
@@ -65,6 +68,57 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
 class HTML5DateWidget(widgets.Input):
     input_type = "datetime-local"
     template_name = "django/forms/widgets/datetime.html"
+
+
+class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
+    # By inheriting from `BaseUserCreationForm`, this form takes care of
+    # asking the user to repeat their desired password, checking that they are
+    # identical.
+    # It also takes care of hashing the password when creating the `User` object.
+
+    class Meta:
+        model = User
+        fields = [
+            "username",  # used for saving IMO number
+            "organization",  # used for saving vessel name
+            "first_name",
+            "last_name",
+            "email",
+        ]
+
+    username = CharField(
+        min_length=0,
+        max_length=7,
+        validators=[
+            RegexValidator(r"\d{7}"),
+            imo_validator,
+        ],
+        label=_("IMO-number"),
+    )
+
+    organization = CharField(
+        required=True,
+        max_length=100,
+        label=_("Vessel name"),
+    )
+
+    first_name = CharField(
+        required=True,
+        max_length=150,
+        label=_("First name"),
+    )
+
+    last_name = CharField(
+        required=True,
+        max_length=150,
+        label=_("Last name"),
+    )
+
+    email = EmailField(
+        max_length=254,
+        widget=EmailInput(attrs={"autocomplete": "email"}),
+        label=_("Email"),
+    )
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
@@ -101,6 +155,15 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         widget=Select2Widget(choices=_vessel_nationality_choices),
     )
 
+    vessel_name = DynamicField(
+        CharField,
+        required=False,
+        max_length=255,
+        label=_("Vessel name"),
+        initial=lambda form: form._user.organization if form.user_is_ship else "",
+        disabled=lambda form: form.user_is_ship,
+    )
+
     vessel_imo = DynamicField(
         CharField,
         min_length=0,
@@ -110,6 +173,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             imo_validator,
         ],
         label=_("IMO-number"),
+        initial=lambda form: form._user.username if form.user_is_ship else "",
         disabled=lambda form: form.user_is_ship,
         required=False,
     )
@@ -120,9 +184,13 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("No port of call"),
     )
 
-    def __init__(self, user_is_ship=False, *args, **kwargs):
-        self.user_is_ship = user_is_ship
+    def __init__(self, user: User, *args, **kwargs):
+        self._user = user
         super().__init__(*args, **kwargs)
+
+    @property
+    def user_is_ship(self) -> bool:
+        return "Ship" in self._user.group_names
 
     def clean(self):
         cleaned_data = super().clean()

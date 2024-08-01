@@ -37,9 +37,35 @@ from havneafgifter.views import (
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
+    SignupVesselView,
     _CruiseTaxFormSetView,
     _SendEmailMixin,
 )
+
+
+class TestSignupVesselView(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = SignupVesselView()
+
+    def test_form_valid(self):
+        # Arrange
+        form = self.instance.form_class(data=self.ship_user_form_data)
+        self.instance.setup(self.request_factory.get(""))
+        with patch("havneafgifter.views.messages.success") as mock_success:
+            # Act
+            response = self.instance.form_valid(form)
+            # Assert: new `User` object is member of `Ship` group
+            self.assertIn("Ship", self.instance.object.group_names)
+            # Assert: a message is displayed to the user
+            mock_success.assert_called_once()
+            # Assert: we are redirected to the expected view
+            self.assertIsInstance(response, HttpResponseRedirect)
+            self.assertEqual(
+                response.url, reverse("havneafgifter:harbor_dues_form_create")
+            )
 
 
 class TestRootView(TestCase):

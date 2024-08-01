@@ -44,6 +44,8 @@ LOGIN_WHITELISTED_URLS = [
     # Whitelist the Django "set_language" view, so it works even outside
     # authenticated contexts (e.g. when doing a password reset.)
     reverse_lazy("set_language"),
+    # Whitelist "vessel signup" page which requires unauthenticated access
+    reverse_lazy("havneafgifter:signup-vessel"),
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
