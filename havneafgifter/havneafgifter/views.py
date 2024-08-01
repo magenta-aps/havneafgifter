@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from csp_helpers.mixins import CSPViewMixin
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import (
     BACKEND_SESSION_KEY,
     REDIRECT_FIELD_NAME,
@@ -10,6 +11,7 @@ from django.contrib.auth import (
     logout,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Subquery, Sum
@@ -17,6 +19,7 @@ from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_tables2 import SingleTableMixin, SingleTableView
@@ -27,6 +30,7 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    SignupVesselForm,
     StatisticsForm,
 )
 from havneafgifter.models import (
@@ -68,6 +72,29 @@ class RootView(RedirectView):
         if "Ship" in self.request.user.group_names:
             return reverse("havneafgifter:harbor_dues_form_create")
         # TODO: redirect to a list view?
+        return reverse("havneafgifter:harbor_dues_form_create")
+
+
+class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
+    template_name = "havneafgifter/signup_vessel.html"
+    form_class = SignupVesselForm
+
+    def form_valid(self, form):
+        # Save `User` object - This also populates `self.object`
+        response = super().form_valid(form)
+
+        # Add `User` object to the `Group` called `Ship`, making the user a ship user
+        ship_group = Group.objects.get(name="Ship")
+        self.object.groups.add(ship_group)
+
+        # Instruct user and then send them to the login page
+        messages.success(
+            self.request,
+            _("Please sign in using the IMO number as username"),
+        )
+        return response
+
+    def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_create")
 
 
@@ -134,10 +161,7 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
-class HarborDuesFormCreateView(
-    HarborDuesFormMixin,
-    CreateView,
-):
+class HarborDuesFormCreateView(HarborDuesFormMixin, CreateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
