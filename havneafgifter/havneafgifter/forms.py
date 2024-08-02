@@ -136,7 +136,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_departure",
             "gross_tonnage",
             "vessel_type",
-            "status",
         ]
         localized_fields = [
             "datetime_of_arrival",
@@ -182,6 +181,11 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=False,
         initial=False,
         label=_("No port of call"),
+    )
+
+    status = ChoiceField(
+        required=True,
+        choices=Status.choices,
     )
 
     def __init__(self, user: User, *args, **kwargs):
@@ -254,6 +258,8 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 ),
                 code="port_of_call_requires_arrival_and_departure_dates",
             )
+
+        return cleaned_data
 
     def user_visible_non_field_errors(self) -> ErrorList | None:
         non_field_errors = self.errors.get(NON_FIELD_ERRORS)

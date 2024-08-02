@@ -115,9 +115,12 @@ class HarborDuesFormMixin(
                 )
         else:
             # User is all done filling out data for this vessel
+            status = form.cleaned_data.get("status")
+            if status == Status.NEW:
+                harbor_dues_form.submit_for_review()
             harbor_dues_form.save()
-            if harbor_dues_form.status != Status.DRAFT:
-                # Send email to relevant recipients
+            # Send email to relevant recipients
+            if status == Status.NEW:
                 self._send_email(harbor_dues_form, self.request)
             # Go to detail view to display result.
             return self.get_redirect_for_form(
