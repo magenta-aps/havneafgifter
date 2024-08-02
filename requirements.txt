@@ -25,3 +25,4 @@ xmltodict>=0.12.0
 django-tables2==2.7.0
 django-tempus-dominus==5.1.2.17
 django-sql-utils==0.7.0
+django-fsm==2.8.2

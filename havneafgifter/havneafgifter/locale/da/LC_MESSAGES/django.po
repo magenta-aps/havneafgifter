@@ -311,12 +311,20 @@ msgid "Other"
 msgstr "Andet land"
 
 #: havneafgifter/models.py
+msgid "Draft"
+msgstr "Kladde"
+
+#: havneafgifter/models.py
 msgid "New"
 msgstr "Ny"
 
 #: havneafgifter/models.py
-msgid "Draft"
-msgstr "Kladde"
+msgid "Approved"
+msgstr "Godkendt"
+
+#: havneafgifter/models.py
+msgid "Rejected"
+msgstr "Afvist"
 
 #: havneafgifter/models.py
 msgid "Done"

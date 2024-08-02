@@ -28,6 +28,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
+from django_fsm import FSMField, transition
 
 from havneafgifter.data import DateTimeRange
 
@@ -281,9 +282,11 @@ class Nationality(models.TextChoices):
 
 
 class Status(models.TextChoices):
-    NEW = ("NEW", _("New"))
     DRAFT = ("DRAFT", _("Draft"))
-    DONE = ("DONE", _("Done"))
+    NEW = ("NEW", _("New"))  # means: "submitted for review"
+    APPROVED = ("APPROVED", _("Approved"))
+    REJECTED = ("REJECTED", _("Rejected"))
+    DONE = ("DONE", _("Done"))  # TODO: replace with `CLOSED` or similar?
 
 
 class Municipality(models.IntegerChoices):
@@ -492,9 +495,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             ),
         ]
 
-    status = models.CharField(
-        default=Status.NEW,
+    status = FSMField(
+        default=Status.DRAFT,
         choices=Status.choices,
+        protected=True,
         verbose_name=_("Draft status"),
     )
 
@@ -603,6 +607,18 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         storage=pdf_storage,
         verbose_name=_("PDF file"),
     )
+
+    @transition(field=status, source=[Status.DRAFT, Status.REJECTED], target=Status.NEW)
+    def submit_for_review(self):
+        pass
+
+    @transition(field=status, source=Status.NEW, target=Status.APPROVED)
+    def approve(self):
+        pass
+
+    @transition(field=status, source=Status.NEW, target=Status.REJECTED)
+    def reject(self):
+        pass
 
     def __str__(self) -> str:
         port_of_call = self.port_of_call or _("no port of call")
