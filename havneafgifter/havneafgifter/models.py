@@ -614,11 +614,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @transition(field=status, source=Status.NEW, target=Status.APPROVED)
     def approve(self):
-        pass
+        pass  # pragma: no cover
 
     @transition(field=status, source=Status.NEW, target=Status.REJECTED)
     def reject(self):
-        pass
+        pass  # pragma: no cover
 
     def __str__(self) -> str:
         port_of_call = self.port_of_call or _("no port of call")

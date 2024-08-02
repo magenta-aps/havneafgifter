@@ -450,7 +450,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             # expected.
             mock_send.assert_called_once_with(fail_silently=False)
             # Assert that the generated PDF is also saved locally
-            instance.refresh_from_db()
+            instance = HarborDuesForm.objects.get(pk=instance.pk)  # refresh from DB
             self.assertIsInstance(instance.pdf, File)
             self.assertEqual(instance.pdf.name, instance.get_pdf_filename())
 

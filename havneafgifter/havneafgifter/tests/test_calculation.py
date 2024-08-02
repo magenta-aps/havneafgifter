@@ -362,7 +362,7 @@ class CalculationTest(TestCase):
                 "harbour_tax": Decimal("660000.00"),  # 15 days * 40000 tons * 1.10 kr
             },
         )
-        self.harborduesform1.refresh_from_db()
+        self._refresh_from_db(self.harborduesform1)
         self.assertEqual(self.harborduesform1.harbour_tax, Decimal("4136000.00"))
 
     def test_calculate_harbour_tax_2(self):
@@ -402,7 +402,7 @@ class CalculationTest(TestCase):
                 "harbour_tax": Decimal("1320000.00"),  # 15 days * 40000 tons * 2.20 kr
             },
         )
-        self.harborduesform2.refresh_from_db()
+        self._refresh_from_db(self.harborduesform2)
         self.assertEqual(self.harborduesform2.harbour_tax, Decimal("8272000.00"))
 
     def test_calculate_harbour_tax_3(self):
@@ -442,12 +442,11 @@ class CalculationTest(TestCase):
                 "harbour_tax": Decimal("105000.00"),  # 3 weeks * 50000 tons * 0.70 kr
             },
         )
-        self.harborduesform3.refresh_from_db()
+        self._refresh_from_db(self.harborduesform3)
         self.assertEqual(self.harborduesform3.harbour_tax, Decimal("560000.00"))
 
     def test_calculate_harbor_tax4(self):
         calculation: dict = self.harborduesform4.calculate_harbour_tax()
-        print(calculation)
         self.assertEqual(
             calculation["harbour_tax"], Decimal("392.00")
         )  # 8 days * 10 tons (round up to 70) * 0.70
@@ -488,7 +487,7 @@ class CalculationTest(TestCase):
                 "tax": Decimal("400.00"),  # 100 people * 40 kr
             },
         )
-        self.harborduesform1.refresh_from_db()
+        self._refresh_from_db(self.harborduesform1)
         self.assertEqual(self.harborduesform1.disembarkment_tax, Decimal("1000.00"))
 
     def test_calculate_passenger_tax(self):
@@ -517,9 +516,14 @@ class CalculationTest(TestCase):
         )
         # Act: calculate all three taxes and refresh object from DB
         instance.calculate_tax()
-        instance.refresh_from_db()
+        self._refresh_from_db(instance)
         # Assert no harbour tax or pax tax is due
         self.assertIsNone(instance.harbour_tax)
         self.assertIsNone(instance.pax_tax)
         # Assert that disembarkment tax is due (10 passengers * 30 DKK == 300 DKK)
         self.assertEqual(instance.disembarkment_tax, Decimal("300"))
+
+    def _refresh_from_db(
+        self, obj: HarborDuesForm | CruiseTaxForm
+    ) -> HarborDuesForm | CruiseTaxForm:
+        return obj._meta.model.objects.get(pk=obj.pk)
