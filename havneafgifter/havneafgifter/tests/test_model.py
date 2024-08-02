@@ -3,8 +3,10 @@ from decimal import Decimal
 from unittest.mock import ANY, patch
 
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import translation
@@ -23,6 +25,8 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+    User,
+    UserType,
     imo_validator,
     imo_validator_bool,
 )
@@ -178,6 +182,63 @@ class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             instance = self.harbor_dues_form
         instance.vessel_type = vessel_type
         self.assertEqual(instance.tax_per_gross_ton, expected_tax_per_gross_ton)
+
+
+class TestUserType(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("create_groups", verbosity=1)
+
+        cls.shipping_agent = ShippingAgent.objects.create(
+            name="Smith", email="smith@matrix.net"
+        )
+        cls.port_authority = PortAuthority.objects.create(
+            name="Royal Arctic Line A/S", email="ral@ral.dk"
+        )
+        cls.port = Port.objects.create(
+            name="Upernavik", portauthority=cls.port_authority
+        )
+
+        cls.superuser_user = User.objects.create(
+            username="superuser_user", is_superuser=True
+        )
+        cls.staff_user = User.objects.create(username="staff_user", is_staff=True)
+        cls.agent_user = User.objects.create(
+            username="agent_user", shipping_agent=cls.shipping_agent
+        )
+        cls.agent_user.groups.add(Group.objects.get(name="Shipping"))
+
+        cls.port_manager_user = User.objects.create(
+            username="manager", port_authority=cls.port_authority
+        )
+        cls.port_manager_user.groups.add(Group.objects.get(name="PortAuthority"))
+
+        cls.tax_user = User.objects.create(username="skattefar")
+        cls.tax_user.groups.add(Group.objects.get(name="TaxAuthority"))
+
+    def test_admin(self):
+        user = self.staff_user
+        self.assertEqual(user.user_type, UserType.ADMIN)
+
+    def test_superuser(self):
+        user = self.superuser_user
+        self.assertEqual(user.user_type, UserType.SUPERUSER)
+
+    def test_port_authority(self):
+        user = self.port_manager_user
+        self.assertEqual(user.user_type, UserType.PORT_AUTHORITY)
+
+    def test_shipping_agent(self):
+        user = self.agent_user
+        self.assertEqual(user.user_type, UserType.SHIPPING_AGENT)
+
+    def test_tax_authority(self):
+        user = self.tax_user
+        self.assertEqual(user.user_type, UserType.TAX_AUTHORITY)
+
+    def test_ship(self):
+        user = self.agent_user
+        self.assertEqual(user.user_type, UserType.SHIPPING_AGENT)
 
 
 class TestShippingAgent(TestCase):
