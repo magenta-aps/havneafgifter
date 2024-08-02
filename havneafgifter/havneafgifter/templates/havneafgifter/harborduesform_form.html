@@ -66,7 +66,7 @@
         // POSTed to server, even if it is disabled.
         form.on("submit", function (evt) {
             // Lets the user cancel the submission in case they meant to save as a draft
-            if (shippingAgent.val()) {
+            if ("{{user.user_type}}" === "ship" && shippingAgent.val()) {
                 // TODO: Add translations
                 return confirm(gettext("You have added a shipping agent without saving as a draft. \n\nDo you want to continue?"));
             }

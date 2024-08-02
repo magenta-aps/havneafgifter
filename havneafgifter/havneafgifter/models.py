@@ -160,6 +160,17 @@ class User(AbstractUser):
     def has_group_name(self, name):
         return self.groups.filter(name=name).exists()
 
+    @property
+    def user_type(self):
+        if self.shipping_agent:
+            return "shipping_agent"
+
+        if self.has_group_name("Ship"):
+            return "ship"
+
+        # Fallback to the user's first group
+        return self.group_names[0] if self.group_names else ""
+
 
 class PermissionsMixin(models.Model):
     class Meta:
