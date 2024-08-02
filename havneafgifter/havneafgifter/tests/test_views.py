@@ -87,7 +87,7 @@ class TestRootView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response.headers["Location"],
-            reverse("havneafgifter:harbor_dues_form_create"),
+            reverse("havneafgifter:harbor_dues_form_list"),
         )
 
     def test_redirect_shipping(self):
@@ -98,7 +98,7 @@ class TestRootView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response.headers["Location"],
-            reverse("havneafgifter:harbor_dues_form_create"),
+            reverse("havneafgifter:harbor_dues_form_list"),
         )
 
     def test_saml(self):
@@ -121,7 +121,7 @@ class TestRootView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response.headers["Location"],
-            reverse("havneafgifter:harbor_dues_form_create"),
+            reverse("havneafgifter:harbor_dues_form_list"),
         )
 
 

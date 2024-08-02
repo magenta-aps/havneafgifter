@@ -70,9 +70,8 @@ class RootView(RedirectView):
             if not self.request.user.is_authenticated:
                 return reverse("havneafgifter:login")
         if "Ship" in self.request.user.group_names:
-            return reverse("havneafgifter:harbor_dues_form_create")
-        # TODO: redirect to a list view?
-        return reverse("havneafgifter:harbor_dues_form_create")
+            return reverse("havneafgifter:harbor_dues_form_list")
+        return reverse("havneafgifter:harbor_dues_form_list")
 
 
 class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
