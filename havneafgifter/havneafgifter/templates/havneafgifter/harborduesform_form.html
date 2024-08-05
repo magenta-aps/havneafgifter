@@ -18,6 +18,7 @@
         const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
         const grossTonnageInput = $("#id_gross_tonnage");
         const vesselTypeSelect = $("#id_vessel_type");
+        const shippingAgent = $("#id_shipping_agent");
         const submitButton = $("button[type=submit][value=NEW]");
         const submitDraftButton = $("button[type=submit][value=DRAFT]");
 
@@ -64,6 +65,11 @@
         // Hook form submit, so we can ensure that vessel type field is still
         // POSTed to server, even if it is disabled.
         form.on("submit", function (evt) {
+            // Lets the user cancel the submission in case they meant to save as a draft
+            if ("{{user.user_type}}" === "ship" && shippingAgent.val()) {
+                // TODO: Add translations
+                return confirm(gettext("You have added a shipping agent without saving as a draft. \n\nDo you want to continue?"));
+            }
             vesselTypeSelect.attr("disabled", null);
         });
     });

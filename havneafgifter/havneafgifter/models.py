@@ -160,6 +160,26 @@ class User(AbstractUser):
     def has_group_name(self, name):
         return self.groups.filter(name=name).exists()
 
+    @property
+    def user_type(self):
+        if self.is_staff:
+            return UserType.ADMIN
+
+        if self.is_superuser:
+            return UserType.SUPERUSER
+
+        if self.has_group_name("TaxAuthority"):
+            return UserType.TAX_AUTHORITY
+
+        if self.has_group_name("PortAuthority"):
+            return UserType.PORT_AUTHORITY
+
+        if self.shipping_agent:
+            return UserType.SHIPPING_AGENT
+
+        if self.has_group_name("Ship"):
+            return UserType.SHIP
+
 
 class PermissionsMixin(models.Model):
     class Meta:
@@ -273,6 +293,15 @@ class Municipality(models.IntegerChoices):
     QEQERTALIK = 959, "Qeqertalik"
     AVANNAATA = 960, "Avannaata"
     NATIONAL_PARK = 961, _("Northeast Greenland National Park")
+
+
+class UserType(models.Model):
+    ADMIN = "admin"
+    SUPERUSER = "superuser"
+    TAX_AUTHORITY = "tax_authority"
+    PORT_AUTHORITY = "port_authority"
+    SHIPPING_AGENT = "shipping_agent"
+    SHIP = "ship"
 
 
 class ShippingAgent(PermissionsMixin, models.Model):
