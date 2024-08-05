@@ -61,54 +61,6 @@ class Command(BaseCommand):
             )
             # TODO: kobl på bruger eller gruppe
 
-    def load_rates(self):
-        if not TaxRates.objects.exists():
-            tax_rates = TaxRates.objects.create(
-                pax_tax_rate=0,
-                start_date=None,
-                end_date=None,
-            )
-            PortTaxRate.objects.create(
-                tax_rates=tax_rates,
-                port=None,
-                vessel_type=None,
-                gt_start=0,
-                gt_end=None,
-                port_tax_rate=70,
-            )
-            PortTaxRate.objects.create(
-                tax_rates=tax_rates,
-                port=None,
-                vessel_type=ShipType.CRUISE,
-                gt_start=0,
-                gt_end=30_000,
-                port_tax_rate=110,
-            )
-            PortTaxRate.objects.create(
-                tax_rates=tax_rates,
-                port=None,
-                vessel_type=ShipType.CRUISE,
-                gt_start=30_000,
-                gt_end=None,
-                port_tax_rate=220,
-            )
-            PortTaxRate.objects.create(
-                tax_rates=tax_rates,
-                port=Port.objects.get(name="Nuuk"),
-                vessel_type=ShipType.CRUISE,
-                gt_start=0,
-                gt_end=30_000,
-                port_tax_rate=0,
-            )
-            PortTaxRate.objects.create(
-                tax_rates=tax_rates,
-                port=Port.objects.get(name="Nuuk"),
-                vessel_type=ShipType.CRUISE,
-                gt_start=30_000,
-                gt_end=None,
-                port_tax_rate=110,
-            )
-
     def load_disembarkment_sites(self):
         # Load 73 disembarkment sites
         path = self._get_fixture_path("initial_disembarkment_sites.json")
@@ -117,6 +69,7 @@ class Command(BaseCommand):
     def load_initial_rates(self):
         # Load initial data for TaxRates, PortTaxRate and DisembarkmentTaxRate
         nuuk = Port.objects.get(name="Nuuk")
+        kangerlussuaq = Port.objects.get(name="Kangerlussuaq")
 
         taxrates, _ = TaxRates.objects.get_or_create(
             pax_tax_rate="50.00",
@@ -164,7 +117,24 @@ class Command(BaseCommand):
             vessel_type="CRUISE",
             gt_start=30000,
             gt_end=None,
-            port_tax_rate="1.10",
+            port_tax_rate="0.70",
+        )
+        PortTaxRate.objects.get_or_create(
+            tax_rates=taxrates,
+            port=kangerlussuaq,
+            vessel_type="CRUISE",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate="0.00",
+            round_gross_ton_up_to=70,
+        )
+        PortTaxRate.objects.get_or_create(
+            tax_rates=taxrates,
+            port=kangerlussuaq,
+            vessel_type="CRUISE",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate="0.70",
         )
         DisembarkmentTaxRate.objects.create(
             tax_rates=taxrates,
