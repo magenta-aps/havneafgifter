@@ -892,6 +892,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 )
             )
             or (
+                action == "submit_for_review"
+                and (
+                    user.has_group_name("Ship")
+                    or user.has_group_name("Shipping")
+                    or user.is_staff
+                )
+            )
+            or (
                 action in ("approve", "reject", "invoice")
                 and (
                     (self.port_of_call is None)

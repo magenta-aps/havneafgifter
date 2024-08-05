@@ -9,7 +9,11 @@ from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.forms import BaseFormSet
-from django.http import HttpResponseNotFound, HttpResponseRedirect
+from django.http import (
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+)
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django_tables2.rows import BoundRows
@@ -203,7 +207,6 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.instance = cls.view_class()
-        cls.user = User.objects.create(username="Test Testersen")
 
     @parametrize(
         "vessel_type,no_port_of_call,model_class,next_view_name",
@@ -266,23 +269,37 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         field = soup.find("input", attrs={"name": "vessel_imo"})
         self.assertEqual(field.attrs.get("value"), self.ship_user.username)
 
-    def test_sends_email_and_displays_confirmation_message_on_submit(self):
+    @parametrize(
+        "username,permitted",
+        [
+            ("shipping_agent", True),
+            ("port_auth", False),
+        ],
+    )
+    def test_sends_email_and_displays_confirmation_message_on_submit(
+        self, username, permitted
+    ):
         """When a form is completed (for other vessel types than cruise ships),
         the receipt must be emailed to the relevant recipients, and a confirmation
         message must be displayed to the user submitting the form.
         """
+        user = User.objects.get(username=username)
         with patch.object(self.instance, "_send_email") as mock_send_email:
-            request = self._post_form(self.harbor_dues_form_data_pk)
-            self.instance.post(request)
-            # Assert that we call the `_send_email` method as expected
-            mock_send_email.assert_called_once_with(
-                HarborDuesForm.objects.latest("pk"),
-                request,
-            )
+            request = self._post_form(self.harbor_dues_form_data_pk, user)
+            response = self.instance.post(request)
+            if permitted:
+                # Assert that we call the `_send_email` method as expected
+                mock_send_email.assert_called_once_with(
+                    HarborDuesForm.objects.latest("pk"),
+                    request,
+                )
+            else:
+                # Assert that we receive a 403 error response
+                self.assertIsInstance(response, HttpResponseForbidden)
 
-    def _post_form(self, data):
+    def _post_form(self, data, user):
         request = self.request_factory.post("", data=data)
-        request.user = self.user
+        request.user = user
         self.instance.request = request
         return request
 

@@ -519,6 +519,27 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             instance.mail_subject, f"Talippoq: {instance.pk:05} ({instance.date})"
         )
 
+    @parametrize(
+        "username,expected_result",
+        [
+            # Ship users can submit for review
+            ("9074729", True),
+            # Shipping agents can submit for review
+            ("shipping_agent", True),
+            # Port authority users cannot submit for review
+            ("port_auth", False),
+        ],
+    )
+    def test_permission_to_submit_for_review(self, username, expected_result):
+        # Arrange
+        user = User.objects.get(username=username)
+        # Act
+        actual_result = self.harbor_dues_draft_form._has_permission(
+            user, "submit_for_review", False
+        )
+        # Assert
+        self.assertEqual(actual_result, expected_result)
+
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
     def test_has_port_of_call(self):

@@ -2,10 +2,11 @@ from csp_helpers.mixins import CSPViewMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
+from django_fsm import has_transition_perm
 
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
 
@@ -91,6 +92,18 @@ class HarborDuesFormMixin(
 
     def form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
+
+        if not has_transition_perm(
+            harbor_dues_form.submit_for_review,
+            self.request.user,
+        ):
+            return HttpResponseForbidden(
+                _(
+                    "You do not have the required permissions to submit "
+                    "harbor dues forms for review"
+                )
+            )
+
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
