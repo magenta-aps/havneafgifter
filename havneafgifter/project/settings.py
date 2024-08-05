@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "csp_helpers",
     "metrics",
     "tempus_dominus",
+    "simple_history",
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "csp.middleware.CSPMiddleware",
     "django_session_timeout.middleware.SessionTimeoutMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = [

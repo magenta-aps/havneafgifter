@@ -29,6 +29,8 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_fsm import FSMField, transition
+from simple_history.models import HistoricalRecords
+from simple_history.utils import update_change_reason
 
 from havneafgifter.data import DateTimeRange
 
@@ -495,6 +497,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             ),
         ]
 
+    history = HistoricalRecords(
+        history_change_reason_field=models.TextField(null=True),
+        related_name="harbor_dues_form_history_entries",
+    )
+
     status = FSMField(
         default=Status.DRAFT,
         choices=Status.choices,
@@ -608,17 +615,30 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("PDF file"),
     )
 
-    @transition(field=status, source=[Status.DRAFT, Status.REJECTED], target=Status.NEW)
+    @transition(
+        field=status,
+        source=[Status.DRAFT, Status.REJECTED],
+        target=Status.NEW,
+        permission=lambda instance, user: instance._has_permission(
+            user, "submit_for_review", False
+        ),
+    )
     def submit_for_review(self):
-        pass
+        self._change_reason = Status.NEW.label
 
     @transition(field=status, source=Status.NEW, target=Status.APPROVED)
     def approve(self):
-        pass  # pragma: no cover
+        self._change_reason = Status.APPROVED.label
 
     @transition(field=status, source=Status.NEW, target=Status.REJECTED)
     def reject(self):
-        pass  # pragma: no cover
+        self._change_reason = Status.REJECTED.label
+
+    def save(self, *args, **kwargs):
+        initial = self.pk is None
+        super().save(*args, **kwargs)
+        if initial:
+            update_change_reason(self, Status.DRAFT.label)
 
     def __str__(self) -> str:
         port_of_call = self.port_of_call or _("no port of call")
@@ -906,6 +926,11 @@ class CruiseTaxForm(HarborDuesForm):
         decimal_places=2,
         max_digits=12,
         verbose_name=_("Calculated disembarkment tax"),
+    )
+
+    history = HistoricalRecords(
+        history_change_reason_field=models.TextField(null=True),
+        related_name="cruise_tax_form_history_entries",
     )
 
     def calculate_tax(self, save: bool = True):
