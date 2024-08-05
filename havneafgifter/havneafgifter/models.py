@@ -295,13 +295,13 @@ class Municipality(models.IntegerChoices):
     NATIONAL_PARK = 961, _("Northeast Greenland National Park")
 
 
-class UserType(models.Model):
-    ADMIN = "admin"
-    SUPERUSER = "superuser"
-    TAX_AUTHORITY = "tax_authority"
-    PORT_AUTHORITY = "port_authority"
-    SHIPPING_AGENT = "shipping_agent"
-    SHIP = "ship"
+class UserType(models.TextChoices):
+    ADMIN = "admin", _("administrator")
+    SUPERUSER = "superuser", _("superuser")
+    TAX_AUTHORITY = "tax_authority", _("tax authority")
+    PORT_AUTHORITY = "port_authority", _("port authority")
+    SHIPPING_AGENT = "shipping_agent", _("shipping agent")
+    SHIP = "ship", _("ship")
 
 
 class ShippingAgent(PermissionsMixin, models.Model):
