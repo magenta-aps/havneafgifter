@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-01 11:31-0100\n"
+"POT-Creation-Date: 2024-08-06 13:09-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -325,6 +325,36 @@ msgstr "Afsluttet"
 #: havneafgifter/models.py
 msgid "Northeast Greenland National Park"
 msgstr "Nordøstgrønlands nationalpark"
+
+#: havneafgifter/models.py
+msgid "administrator"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "superuser"
+msgstr ""
+
+#: havneafgifter/models.py
+#, fuzzy
+#| msgid "Tax Authority"
+msgid "tax authority"
+msgstr "Skattestyrelsen"
+
+#: havneafgifter/models.py
+#, fuzzy
+#| msgid "Port authority company name"
+msgid "port authority"
+msgstr "Havnemyndighedens navn"
+
+#: havneafgifter/models.py
+#, fuzzy
+#| msgid "Shipping agent"
+msgid "shipping agent"
+msgstr "Shippingagent"
+
+#: havneafgifter/models.py
+msgid "ship"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Name"
