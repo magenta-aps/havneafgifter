@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="modal fade" id="{% block modal_id %}{% endblock %}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% block modal_title %}{% endblock %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Close' %}"></button>
+            </div>
+            <form method="post" action="{% block modal_submit_url %}{% endblock %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {% block modal_body %}
+                    {% endblock %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate 'Close' %}</button>
+                    {% block modal_ok_button %}
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% translate 'Save' %}</button>
+                    {% endblock %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

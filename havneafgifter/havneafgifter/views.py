@@ -17,11 +17,17 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import (
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+)
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
+from django_fsm import has_transition_perm
 from django_tables2 import SingleTableMixin, SingleTableView
 
 from havneafgifter.forms import (
@@ -30,6 +36,7 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    ReasonForm,
     SignupVesselForm,
     StatisticsForm,
 )
@@ -441,6 +448,62 @@ class PreviewPDFView(ReceiptDetailView):
             receipt.pdf,
             content_type="application/pdf",
         )
+
+
+class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.all(),
+            self.request.user,
+            "approve",
+        )
+
+    def post(self, request, *args, **kwargs):
+        harbor_dues_form = self.get_object()
+        if not has_transition_perm(harbor_dues_form.approve, request.user):
+            return HttpResponseForbidden(
+                _(
+                    "You do not have the required permissions to approve "
+                    "harbor dues forms"
+                )
+            )
+        harbor_dues_form.approve()
+        harbor_dues_form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
+
+
+class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+    form_class = ReasonForm
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.all(),
+            self.request.user,
+            "reject",
+        )
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        harbor_dues_form = self.get_object()
+        if not has_transition_perm(harbor_dues_form.reject, self.request.user):
+            return HttpResponseForbidden(
+                _(
+                    "You do not have the required permissions to reject "
+                    "harbor dues forms"
+                )
+            )
+        harbor_dues_form.reject(reason=form.cleaned_data["reason"])
+        harbor_dues_form.save()
+        return response
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
 
 
 class HarborDuesFormListView(

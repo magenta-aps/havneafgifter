@@ -1,0 +1,25 @@
+{% extends 'havneafgifter/bootstrap/modal.html' %}
+
+{% load i18n %}
+
+{% block modal_id %}approveModal{% endblock %}
+{% block modal_title %}{% translate 'Approve' %}{% endblock %}
+
+{% block modal_body %}
+<p>
+    {% blocktrans trimmed %}
+    Do you want to approve this form?
+    {% endblocktrans %}
+</p>
+<p>
+    {% blocktrans trimmed %}
+    This will notify the submitter of the form that the form has been accepted.
+    {% endblocktrans %}
+</p>
+{% endblock %}
+
+{% block modal_submit_url %}{% url 'havneafgifter:approve' pk=form.pk %}{% endblock %}
+
+{% block modal_ok_button %}
+<button type="submit" class="btn btn-primary" data-bs-dismiss="modal">{% translate 'Approve' %}</button>
+{% endblock %}

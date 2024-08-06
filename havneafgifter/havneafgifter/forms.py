@@ -18,6 +18,7 @@ from django.forms import (
     ModelMultipleChoiceField,
     MultipleChoiceField,
     PasswordInput,
+    Textarea,
     TextInput,
     widgets,
 )
@@ -351,6 +352,18 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 
     def get_municipality_display(self):
         return self.initial_disembarkment_site.get_municipality_display()
+
+
+class ReasonForm(DynamicFormMixin, CSPFormMixin, ModelForm):
+    class Meta:
+        model = HarborDuesForm
+        fields = []
+
+    reason = CharField(
+        required=True,
+        widget=Textarea(),
+        label=_("Reason"),
+    )
 
 
 class StatisticsForm(BootstrapForm):

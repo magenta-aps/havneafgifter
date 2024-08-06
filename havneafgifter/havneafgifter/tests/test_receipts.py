@@ -49,7 +49,14 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
         instance: Receipt = Receipt(mock_form)
         result = instance.html
         mock_template.render.assert_called_once_with(
-            Context({"form": mock_form, "base": _PDF_BASE_TEMPLATE}),
+            Context(
+                {
+                    "form": mock_form,
+                    "base": _PDF_BASE_TEMPLATE,
+                    "can_approve": False,
+                    "can_reject": False,
+                }
+            ),
         )
         self.assertIs(result, mock_template.render.return_value)
 
@@ -66,7 +73,10 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
     @patch.object(Engine, "get_template")
     def test_get_context_data(self, mock_get_template):
         instance: Receipt = Receipt(Mock())
-        self.assertDictEqual(instance.get_context_data(), {})
+        self.assertDictEqual(
+            instance.get_context_data(),
+            {"can_approve": False, "can_reject": False},
+        )
 
 
 class TestHarborDuesFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
@@ -86,6 +96,8 @@ class TestHarborDuesFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
                 "ShipType": ShipType,
                 "PASSENGER_OR_FISHER": (ShipType.PASSENGER, ShipType.FISHER),
                 "FREIGHTER_OR_OTHER": (ShipType.FREIGHTER, ShipType.OTHER),
+                "can_approve": True,
+                "can_reject": True,
             },
         )
 
@@ -100,7 +112,10 @@ class TestCruiseTaxFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
 
     def test_get_context_data(self):
         result: dict = self.instance.get_context_data()
-        self.assertListEqual(list(result.keys()), ["disembarkment_tax_items"])
+        self.assertListEqual(
+            list(result.keys()),
+            ["disembarkment_tax_items", "can_approve", "can_reject"],
+        )
         self.assertListEqual(
             result["disembarkment_tax_items"],
             self.cruise_tax_form.calculate_disembarkment_tax()["details"],

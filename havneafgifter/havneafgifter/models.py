@@ -644,11 +644,25 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def submit_for_review(self):
         self._change_reason = Status.NEW.label
 
-    @transition(field=status, source=Status.NEW, target=Status.APPROVED)
+    @transition(
+        field=status,
+        source=Status.NEW,
+        target=Status.APPROVED,
+        permission=lambda instance, user: instance._has_permission(
+            user, "approve", False
+        ),
+    )
     def approve(self):
         self._change_reason = Status.APPROVED.label
 
-    @transition(field=status, source=Status.NEW, target=Status.REJECTED)
+    @transition(
+        field=status,
+        source=Status.NEW,
+        target=Status.REJECTED,
+        permission=lambda instance, user: instance._has_permission(
+            user, "reject", False
+        ),
+    )
     def reject(self, reason: str):
         self._rejection_reason = reason
         self._change_reason = Status.REJECTED.label
@@ -912,11 +926,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
             or (
                 action == "submit_for_review"
-                and (
-                    user.has_group_name("Ship")
-                    or user.has_group_name("Shipping")
-                    or user.is_staff
-                )
+                and (user.has_group_name("Ship") or user.has_group_name("Shipping"))
             )
             or (
                 action in ("approve", "reject", "invoice")

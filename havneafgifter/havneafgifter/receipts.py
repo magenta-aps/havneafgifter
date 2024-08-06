@@ -4,7 +4,7 @@ from django.template import Context, Engine, RequestContext, Template
 from django.utils.safestring import SafeString
 from django_weasyprint.utils import django_url_fetcher
 
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
 
 _PDF_BASE_TEMPLATE: str = "havneafgifter/pdf/base.html"
 
@@ -58,7 +58,16 @@ class Receipt:
         return document.write_pdf()
 
     def get_context_data(self) -> dict:
-        return {}
+        return {
+            "can_approve": self._get_can_approve(),
+            "can_reject": self._get_can_reject(),
+        }
+
+    def _get_can_approve(self) -> bool:
+        return self.form.status == Status.NEW
+
+    def _get_can_reject(self) -> bool:
+        return self.form.status == Status.NEW
 
 
 class HarborDuesFormReceipt(Receipt):
@@ -73,10 +82,12 @@ class HarborDuesFormReceipt(Receipt):
         super().__init__(form, base=base, request=request)
 
     def get_context_data(self) -> dict:
+        context = super().get_context_data()
         return {
             "ShipType": ShipType,
             "PASSENGER_OR_FISHER": (ShipType.PASSENGER, ShipType.FISHER),
             "FREIGHTER_OR_OTHER": (ShipType.FREIGHTER, ShipType.OTHER),
+            **context,
         }
 
 
@@ -92,7 +103,9 @@ class CruiseTaxFormReceipt(Receipt):
         super().__init__(form, base=base, request=request)
 
     def get_context_data(self) -> dict:
+        context = super().get_context_data()
         disembarkment_tax: dict = self.form.calculate_disembarkment_tax(save=False)
         return {
             "disembarkment_tax_items": disembarkment_tax["details"],
+            **context,
         }
