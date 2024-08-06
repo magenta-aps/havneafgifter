@@ -21,6 +21,7 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.template.defaultfilters import date
 from django.templatetags.l10n import localize
 from django.utils import translation
@@ -30,6 +31,7 @@ from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_fsm import FSMField, transition
 from simple_history.models import HistoricalRecords
+from simple_history.signals import pre_create_historical_record
 from simple_history.utils import update_change_reason
 
 from havneafgifter.data import DateTimeRange
@@ -420,6 +422,20 @@ class Port(PermissionsMixin, models.Model):
             return self.name
 
 
+class Reason(models.Model):
+    """Abstract model class used to enhance the history entries for
+    `HarborDuesForm` and `CruiseTaxForm`.
+    """
+
+    class Meta:
+        abstract = True
+
+    reason_text = models.TextField(
+        null=True,
+        verbose_name=_("Reason text"),
+    )
+
+
 class HarborDuesForm(PermissionsMixin, models.Model):
     class Meta:
         constraints = [
@@ -498,8 +514,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         ]
 
     history = HistoricalRecords(
+        bases=[Reason],
         history_change_reason_field=models.TextField(null=True),
         related_name="harbor_dues_form_history_entries",
+        excluded_fields=["harbour_tax", "pdf"],  # exclude system-maintained fields
     )
 
     status = FSMField(
@@ -631,7 +649,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         self._change_reason = Status.APPROVED.label
 
     @transition(field=status, source=Status.NEW, target=Status.REJECTED)
-    def reject(self):
+    def reject(self, reason: str):
+        self._rejection_reason = reason
         self._change_reason = Status.REJECTED.label
 
     def save(self, *args, **kwargs):
@@ -937,8 +956,16 @@ class CruiseTaxForm(HarborDuesForm):
     )
 
     history = HistoricalRecords(
+        bases=[Reason],
         history_change_reason_field=models.TextField(null=True),
         related_name="cruise_tax_form_history_entries",
+        # Exclude system-maintained fields
+        excluded_fields=[
+            "harbour_tax",
+            "pax_tax",
+            "disembarkment_tax",
+            "pdf",
+        ],
     )
 
     def calculate_tax(self, save: bool = True):
@@ -1319,3 +1346,12 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
         municipality = self.get_municipality_display()
         rate = self.disembarkment_tax_rate
         return f"{tax_rates}, {municipality}, {rate}"
+
+
+@receiver(pre_create_historical_record, sender=HarborDuesForm.history.model)
+def pre_create_historical_record_callback(
+    sender, signal, instance, history_instance, **kwargs
+):
+    reason = getattr(instance, "_rejection_reason", None)
+    if reason is not None:
+        history_instance.reason_text = reason
