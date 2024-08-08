@@ -327,7 +327,7 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
         cls.request_factory = RequestFactory()
         cls.get_request = cls.request_factory.get("")
         cls.instance = cls.view_class()
-        cls.instance._cruise_tax_form = cls.cruise_tax_form
+        cls.instance._cruise_tax_form = cls.cruise_tax_draft_form
 
     def test_setup(self):
         with patch.object(CruiseTaxForm.objects, "get") as mock_get:
@@ -370,7 +370,7 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         # Create an existing `PassengersByCountry` object (which is updated during
         # the test.)
         cls._existing_passengers_by_country = PassengersByCountry.objects.create(
-            cruise_tax_form=cls.cruise_tax_form,
+            cruise_tax_form=cls.cruise_tax_draft_form,
             nationality=Nationality.BELGIUM,
             number_of_passengers=10,
         )
@@ -421,19 +421,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         # Assert: verify that the specified `PassengersByCountry` objects are
         # created.
         self.assertQuerySetEqual(
-            self.cruise_tax_form.passengers_by_country.values(
+            self.cruise_tax_draft_form.passengers_by_country.values(
                 "cruise_tax_form",
                 "nationality",
                 "number_of_passengers",
             ),
             [
                 {
-                    "cruise_tax_form": self.cruise_tax_form.pk,
+                    "cruise_tax_form": self.cruise_tax_draft_form.pk,
                     "nationality": Nationality.AUSTRALIA.value,
                     "number_of_passengers": 42,
                 },
                 {
-                    "cruise_tax_form": self.cruise_tax_form.pk,
+                    "cruise_tax_form": self.cruise_tax_draft_form.pk,
                     "nationality": Nationality.BELGIUM.value,
                     "number_of_passengers": 42,
                 },
@@ -465,7 +465,7 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
         cls._disembarkment_site_1 = DisembarkmentSite.objects.first()
         cls._disembarkment_site_2 = DisembarkmentSite.objects.all()[1]
         cls._existing_disembarkment = Disembarkment.objects.create(
-            cruise_tax_form=cls.cruise_tax_form,
+            cruise_tax_form=cls.cruise_tax_draft_form,
             disembarkment_site=cls._disembarkment_site_1,
             number_of_passengers=10,
         )
@@ -506,6 +506,8 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             {"number_of_passengers": 42},
             # Add new entry for next disembarkment site (index 1)
             {"number_of_passengers": 42},
+            # Submit cruise tax form for review
+            status=Status.NEW.value,
         )
         with patch.object(self.instance, "_send_email") as mock_send_email:
             # Act: trigger DB insert logic
@@ -513,14 +515,14 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             # Assert: verify that the specified `Disembarkment` objects are
             # created.
             self.assertQuerySetEqual(
-                self.cruise_tax_form.disembarkment_set.values(
+                self.cruise_tax_draft_form.disembarkment_set.values(
                     "cruise_tax_form",
                     "disembarkment_site",
                     "number_of_passengers",
                 ).order_by("disembarkment_site__pk"),
                 [
                     {
-                        "cruise_tax_form": self.cruise_tax_form.pk,
+                        "cruise_tax_form": self.cruise_tax_draft_form.pk,
                         "disembarkment_site": ds.pk,
                         "number_of_passengers": 42,
                     }

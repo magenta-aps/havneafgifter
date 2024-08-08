@@ -90,11 +90,19 @@ class HarborDuesFormMixin:
             },
         }
 
+        # Harbor dues form objects (NEW and DRAFT)
         cls.harbor_dues_form = HarborDuesForm.objects.create(
             **cls.harbor_dues_form_data
         )
+        cls.harbor_dues_draft_form = HarborDuesForm.objects.create(
+            **{k: v for k, v in cls.harbor_dues_form_data.items() if k != "status"},
+        )
 
+        # Cruise tax form objects (NEW and DRAFT, and NEW without port of call)
         cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.harbor_dues_form_data)
+        cls.cruise_tax_draft_form = CruiseTaxForm.objects.create(
+            **{k: v for k, v in cls.harbor_dues_form_data.items() if k != "status"},
+        )
         cls.cruise_tax_form_without_port_of_call = CruiseTaxForm.objects.create(
             vessel_type=ShipType.CRUISE,
             **{
@@ -109,9 +117,6 @@ class HarborDuesFormMixin:
                     "vessel_type",
                 )
             },
-        )
-        cls.harbor_dues_draft_form = HarborDuesForm.objects.create(
-            **{k: v for k, v in cls.harbor_dues_form_data.items() if k != "status"},
         )
 
     @classmethod

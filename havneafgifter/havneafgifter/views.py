@@ -325,9 +325,9 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
         ).delete()
 
         # User is now all done filling out data for cruise ship.
-        # Send email to relevant recipients.
-        if self._cruise_tax_form.status != Status.DRAFT:
-            self._send_email(self._cruise_tax_form, self.request)
+        # Handle `status` (DRAFT or NEW) and send email if NEW.
+        self._handle_status()
+
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
@@ -372,6 +372,13 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
             }
             for disembarkment_site in DisembarkmentSite.objects.all()
         ]
+
+    def _handle_status(self):
+        status = self.request.POST.get("status")
+        if status == Status.NEW.value:
+            self._cruise_tax_form.submit_for_review()
+            self._cruise_tax_form.save()
+            self._send_email(self._cruise_tax_form, self.request)
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):

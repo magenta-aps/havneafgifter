@@ -131,10 +131,11 @@ class HarborDuesFormMixin(
             status = form.cleaned_data.get("status")
             if status == Status.NEW:
                 harbor_dues_form.submit_for_review()
-            harbor_dues_form.save()
-            # Send email to relevant recipients
-            if status == Status.NEW:
+                harbor_dues_form.save()
                 self._send_email(harbor_dues_form, self.request)
+            else:
+                harbor_dues_form.save()
+
             # Go to detail view to display result.
             return self.get_redirect_for_form(
                 "havneafgifter:receipt_detail_html",
