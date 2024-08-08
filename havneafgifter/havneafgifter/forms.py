@@ -11,6 +11,7 @@ from django.forms import (
     DateTimeInput,
     EmailField,
     EmailInput,
+    Field,
     Form,
     HiddenInput,
     IntegerField,
@@ -357,7 +358,7 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 class ReasonForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     class Meta:
         model = HarborDuesForm
-        fields = []
+        fields: list[Field] = []
 
     reason = CharField(
         required=True,
