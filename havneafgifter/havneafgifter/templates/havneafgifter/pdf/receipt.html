@@ -9,6 +9,7 @@ SPDX-License-Identifier: MPL-2.0
 {% load l10n %}
 {% load i18n %}
 {% load bootstrap_modal %}
+{% load bootstrap_status_badge %}
 
 {% block extra_css %}
 @page {
@@ -107,7 +108,7 @@ table.table-striped td:first-child {
             </nav>
         </div>
         <div class="col-3">
-            <span class="badge bg-secondary">{{ form.get_status_display }}</span>
+            {% bootstrap_status_badge form %}
         </div>
     </div>
 </div>
