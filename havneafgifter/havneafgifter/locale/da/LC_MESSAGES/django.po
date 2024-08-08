@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-07 06:37-0100\n"
+"POT-Creation-Date: 2024-08-08 07:57-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -113,6 +113,10 @@ msgid ""
 msgstr ""
 "Det samlede antal passagerer stemmer ikke med summen af antal passagerer af "
 "hver nationalitet"
+
+#: havneafgifter/forms.py
+msgid "Reason"
+msgstr "Begrundelse"
 
 #: havneafgifter/forms.py havneafgifter/tables.py
 msgid "Kommune"
@@ -389,6 +393,10 @@ msgid "Port name"
 msgstr "Havnens navn"
 
 #: havneafgifter/models.py
+msgid "Reason text"
+msgstr "Begrundelse (tekst)"
+
+#: havneafgifter/models.py
 msgid "Draft status"
 msgstr ""
 
@@ -562,6 +570,51 @@ msgstr "Version"
 msgid "Source code"
 msgstr "Kildekode"
 
+#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#, fuzzy
+#| msgid "Approved"
+msgid "Approve"
+msgstr "Godkend"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
+msgid "Do you want to approve this form?"
+msgstr "Ønsker du at godkende denne blanket?"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
+msgid ""
+"This will notify the submitter of the form that the form has been accepted."
+msgstr ""
+"Dette vil informere indsenderen af blanketten om at blanketten er blevet "
+"accepteret."
+
+#: havneafgifter/templates/havneafgifter/bootstrap/modal.html
+msgid "Close"
+msgstr "Luk"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/modal.html
+msgid "Save"
+msgstr "Gem"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#, fuzzy
+#| msgid "Rejected"
+msgid "Reject"
+msgstr "Afvis"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+msgid "Do you want to reject this form?"
+msgstr "Ønsker du at afvise denne blanket?"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+msgid ""
+"This will notify the submitter of the form that the form has been rejected. "
+"The rejection reason will be shared with the submitter."
+msgstr ""
+"Dette vil informere indsenderen af blanketten om at blanketten er blevet "
+"afvist. Begrundelsen vil blive delt med indsenderen."
+
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
@@ -587,6 +640,11 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Submit"
 msgstr "Indsend"
+
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Save as draft"
+msgstr "Gem som kladde"
 
 #: havneafgifter/templates/havneafgifter/error/error.html
 #, fuzzy
@@ -632,10 +690,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Harbour Dues/Port Tax"
 msgstr "Havneafgift"
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Save as draft"
-msgstr "Gem som kladde"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "IMO numbers should be 7 digits"
@@ -836,6 +890,20 @@ msgstr ""
 "Tak fordi du indsendte denne blanket. Din blanket er nu modtaget af "
 "havnemyndigheden og den grønlandske skattestyrelse."
 
+#: havneafgifter/view_mixins.py
+msgid ""
+"You do not have the required permissions to submit harbor dues forms for "
+"review"
+msgstr "Du har ikke de fornødne rettigheder til at indsende en blanket"
+
 #: havneafgifter/views.py
 msgid "Please sign in using the IMO number as username"
 msgstr "Log venligst ind med IMO-nummeret som brugernavn"
+
+#: havneafgifter/views.py
+msgid "You do not have the required permissions to approve harbor dues forms"
+msgstr "Du har ikke de fornødne rettigheder til at godkende blanketter"
+
+#: havneafgifter/views.py
+msgid "You do not have the required permissions to reject harbor dues forms"
+msgstr "Du har ikke de fornødne rettigheder til at afvise blanketter"
