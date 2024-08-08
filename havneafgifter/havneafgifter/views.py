@@ -18,6 +18,7 @@ from django.db.models import Count, F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import (
+    Http404,
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
@@ -27,7 +28,6 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
-from django_fsm import has_transition_perm
 from django_tables2 import SingleTableMixin, SingleTableView
 
 from havneafgifter.forms import (
@@ -462,20 +462,25 @@ class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
 
     def get_queryset(self):
         return HarborDuesForm.filter_user_permissions(
-            HarborDuesForm.objects.all(),
+            HarborDuesForm.objects.filter(status=Status.NEW),
             self.request.user,
             "approve",
         )
 
     def post(self, request, *args, **kwargs):
-        harbor_dues_form = self.get_object()
-        if not has_transition_perm(harbor_dues_form.approve, request.user):
+        # If we cannot get the specified `HarborDuesForm` object, it is probably
+        # because we don't have the required `approve` permission.
+        try:
+            harbor_dues_form = self.get_object()
+        except Http404:
             return HttpResponseForbidden(
                 _(
                     "You do not have the required permissions to approve "
                     "harbor dues forms"
                 )
             )
+        # There is no form to fill for "approve" actions, so it does not make sense to
+        # implement `form_valid`. Instead, we just perform the object update here.
         harbor_dues_form.approve()
         harbor_dues_form.save()
         return HttpResponseRedirect(self.get_success_url())
@@ -490,21 +495,29 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
 
     def get_queryset(self):
         return HarborDuesForm.filter_user_permissions(
-            HarborDuesForm.objects.all(),
+            HarborDuesForm.objects.filter(status=Status.NEW),
             self.request.user,
             "reject",
         )
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        harbor_dues_form = self.get_object()
-        if not has_transition_perm(harbor_dues_form.reject, self.request.user):
+    def post(self, request, *args, **kwargs):
+        # If we cannot get the specified `HarborDuesForm` object, it is probably
+        # because we don't have the required `approve` permission.
+        try:
+            self.object = self.get_object()
+        except Http404:
             return HttpResponseForbidden(
                 _(
                     "You do not have the required permissions to reject "
                     "harbor dues forms"
                 )
             )
+        # Call `form_valid` if `ReasonForm` is indeed valid
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        harbor_dues_form = self.object
         harbor_dues_form.reject(reason=form.cleaned_data["reason"])
         harbor_dues_form.save()
         return response

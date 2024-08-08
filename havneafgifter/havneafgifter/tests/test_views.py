@@ -36,12 +36,14 @@ from havneafgifter.models import (
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
+    ApproveView,
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
+    RejectView,
     SignupVesselView,
     _CruiseTaxFormSetView,
     _SendEmailMixin,
@@ -200,7 +202,17 @@ class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
                 )
 
 
-class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class PostFormMixin:
+    def _post_form(self, data, user):
+        request = self.request_factory.post("", data=data)
+        request.user = user
+        self.instance.request = request
+        return request
+
+
+class TestHarborDuesFormCreateView(
+    ParametrizedTestCase, HarborDuesFormMixin, PostFormMixin, TestCase
+):
     view_class = HarborDuesFormCreateView
 
     @classmethod
@@ -310,12 +322,6 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
             else:
                 # Assert that we receive a 403 error response
                 self.assertIsInstance(response, HttpResponseForbidden)
-
-    def _post_form(self, data, user):
-        request = self.request_factory.post("", data=data)
-        request.user = user
-        self.instance.request = request
-        return request
 
 
 class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
@@ -958,3 +964,79 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
                 kwargs={"pk": 987654321987},
             ),
         )
+
+
+class TestActionViewMixin(HarborDuesFormMixin, PostFormMixin):
+    view_class = None  # must be overridden by subclass
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = cls.view_class()
+
+    def _setup(self, data, user):
+        request = self._post_form(data, user)
+        self.instance.setup(request, pk=self.harbor_dues_form.pk)
+        return request
+
+    def _assert_redirects_to_list_view(self, response):
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response.url, reverse("havneafgifter:harbor_dues_form_list"))
+
+    def test_get_queryset(self):
+        self._setup({}, self.port_authority_user)
+        self.assertQuerySetEqual(
+            self.instance.get_queryset(),
+            HarborDuesForm.objects.filter(
+                port_of_call__portauthority=self.port_authority_user.port_authority,
+                status=Status.NEW,
+            ),
+            ordered=False,
+        )
+
+
+class TestApproveView(TestActionViewMixin, TestCase):
+    view_class = ApproveView
+
+    def test_post(self):
+        # Arrange
+        request = self._setup({}, self.port_authority_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
+        self.assertEqual(harbor_dues_form.status, Status.APPROVED.value)
+        self._assert_redirects_to_list_view(response)
+
+    def test_post_not_permitted(self):
+        # Arrange
+        request = self._setup({}, self.shipping_agent_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)
+
+
+class TestRejectView(TestActionViewMixin, TestCase):
+    view_class = RejectView
+
+    def test_post(self):
+        # Arrange
+        request = self._setup(
+            {"reason": "There is no reason"}, self.port_authority_user
+        )
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
+        self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
+        self._assert_redirects_to_list_view(response)
+
+    def test_post_not_permitted(self):
+        # Arrange
+        request = self._setup({}, self.shipping_agent_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)
