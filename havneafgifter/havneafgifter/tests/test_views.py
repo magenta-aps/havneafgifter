@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
@@ -270,29 +271,42 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         self.assertEqual(field.attrs.get("value"), self.ship_user.username)
 
     @parametrize(
-        "username,permitted",
+        "username,status,permitted,email_expected",
         [
-            ("shipping_agent", True),
-            ("port_auth", False),
+            ("shipping_agent", Status.DRAFT.value, True, False),
+            ("shipping_agent", Status.NEW.value, True, True),
+            ("port_auth", Status.DRAFT.value, False, False),
+            ("port_auth", Status.NEW.value, False, False),
         ],
     )
     def test_sends_email_and_displays_confirmation_message_on_submit(
-        self, username, permitted
+        self,
+        username,
+        status,
+        permitted,
+        email_expected,
     ):
         """When a form is completed (for other vessel types than cruise ships),
         the receipt must be emailed to the relevant recipients, and a confirmation
         message must be displayed to the user submitting the form.
         """
+        # Arrange
+        data = copy.copy(self.harbor_dues_form_data_pk)
+        data["status"] = status
         user = User.objects.get(username=username)
         with patch.object(self.instance, "_send_email") as mock_send_email:
-            request = self._post_form(self.harbor_dues_form_data_pk, user)
+            # Act
+            request = self._post_form(data, user)
             response = self.instance.post(request)
+            # Assert
             if permitted:
-                # Assert that we call the `_send_email` method as expected
-                mock_send_email.assert_called_once_with(
-                    HarborDuesForm.objects.latest("pk"),
-                    request,
-                )
+                self.assertIsInstance(response, HttpResponseRedirect)
+                if email_expected:
+                    # Assert that we call the `_send_email` method as expected
+                    mock_send_email.assert_called_once_with(
+                        HarborDuesForm.objects.latest("pk"),
+                        request,
+                    )
             else:
                 # Assert that we receive a 403 error response
                 self.assertIsInstance(response, HttpResponseForbidden)
