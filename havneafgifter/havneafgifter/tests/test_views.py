@@ -924,7 +924,7 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         cls.user = User.objects.create(username="Test McTesterson")
 
     def test_get_draft_form(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.shipping_agent_user)
         response = self.client.get(
             reverse(
                 "havneafgifter:draft_edit",

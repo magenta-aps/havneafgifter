@@ -431,7 +431,7 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
                     kwargs={"pk": self.kwargs.get(self.pk_url_kwarg)},
                 )
             )
-        if form.status != "DRAFT":
+        if not form._has_permission(request.user, "change", False):
             return HttpResponseRedirect(
                 reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
             )
