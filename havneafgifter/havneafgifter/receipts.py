@@ -2,9 +2,10 @@ import weasyprint
 from django.http import HttpRequest
 from django.template import Context, Engine, RequestContext, Template
 from django.utils.safestring import SafeString
+from django_fsm import has_transition_perm
 from django_weasyprint.utils import django_url_fetcher
 
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status, User
 
 _PDF_BASE_TEMPLATE: str = "havneafgifter/pdf/base.html"
 
@@ -32,12 +33,7 @@ class Receipt:
 
         # Use `RequestContext` if `request` is passed. This is necessary when rendering
         # HTML output that also contains a `{% csrf_token %}`.
-        self._context: Context | RequestContext
-        context_args: dict = {"form": form, **self.get_context_data()}
-        if request is not None:
-            self._context = RequestContext(request, context_args)
-        else:
-            self._context = Context(context_args)
+        self._context: Context | RequestContext = self._get_template_context(request)
 
         # Dynamic base template
         self._context["base"] = base
@@ -63,11 +59,27 @@ class Receipt:
             "can_reject": self._get_can_reject(),
         }
 
+    def _get_template_context(
+        self, request: HttpRequest | None
+    ) -> Context | RequestContext:
+        self._user: User | None = request.user if request is not None else None
+        context_args: dict = {"form": self.form, **self.get_context_data()}
+        if request is not None:
+            return RequestContext(request, context_args)
+        else:
+            return Context(context_args)
+
     def _get_can_approve(self) -> bool:
-        return self.form.status == Status.NEW
+        return self._is_permitted_for_user(self.form.approve)
 
     def _get_can_reject(self) -> bool:
-        return self.form.status == Status.NEW
+        return self._is_permitted_for_user(self.form.reject)
+
+    def _is_permitted_for_user(self, method: callable) -> bool:
+        if self._user is not None:
+            return has_transition_perm(method, self._user)
+        else:
+            return self.form.status == Status.NEW
 
 
 class HarborDuesFormReceipt(Receipt):
