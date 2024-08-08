@@ -1362,6 +1362,7 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
 def pre_create_historical_record_callback(
     sender, signal, instance, history_instance, **kwargs
 ):
+    # Save the rejection reason on the corresponding `HistoricalHarborDuesForm`
     reason = getattr(instance, "_rejection_reason", None)
     if reason is not None:
         history_instance.reason_text = reason
