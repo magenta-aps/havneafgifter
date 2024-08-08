@@ -53,6 +53,8 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                 {
                     "form": mock_form,
                     "base": _PDF_BASE_TEMPLATE,
+                    "can_create": False,
+                    "can_edit": False,
                     "can_approve": False,
                     "can_reject": False,
                 }
@@ -75,7 +77,12 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
         instance: Receipt = Receipt(Mock())
         self.assertDictEqual(
             instance.get_context_data(),
-            {"can_approve": False, "can_reject": False},
+            {
+                "can_create": False,
+                "can_edit": False,
+                "can_approve": False,
+                "can_reject": False,
+            },
         )
 
 
@@ -96,6 +103,8 @@ class TestHarborDuesFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
                 "ShipType": ShipType,
                 "PASSENGER_OR_FISHER": (ShipType.PASSENGER, ShipType.FISHER),
                 "FREIGHTER_OR_OTHER": (ShipType.FREIGHTER, ShipType.OTHER),
+                "can_create": False,
+                "can_edit": True,
                 "can_approve": True,
                 "can_reject": True,
             },
@@ -114,7 +123,13 @@ class TestCruiseTaxFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
         result: dict = self.instance.get_context_data()
         self.assertListEqual(
             list(result.keys()),
-            ["disembarkment_tax_items", "can_approve", "can_reject"],
+            [
+                "disembarkment_tax_items",
+                "can_create",
+                "can_edit",
+                "can_approve",
+                "can_reject",
+            ],
         )
         self.assertListEqual(
             result["disembarkment_tax_items"],

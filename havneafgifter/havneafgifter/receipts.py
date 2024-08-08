@@ -8,7 +8,14 @@ from django.utils.safestring import SafeString
 from django_fsm import has_transition_perm
 from django_weasyprint.utils import django_url_fetcher
 
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status, User
+from havneafgifter.models import (
+    CruiseTaxForm,
+    HarborDuesForm,
+    ShipType,
+    Status,
+    User,
+    UserType,
+)
 
 _PDF_BASE_TEMPLATE: str = "havneafgifter/pdf/base.html"
 
@@ -58,6 +65,8 @@ class Receipt:
 
     def get_context_data(self) -> dict:
         return {
+            "can_create": self._get_can_create(),
+            "can_edit": self._get_can_edit(),
             "can_approve": self._get_can_approve(),
             "can_reject": self._get_can_reject(),
         }
@@ -73,6 +82,15 @@ class Receipt:
             return RequestContext(request, context_args)
         else:
             return Context(context_args)
+
+    def _get_can_create(self) -> bool:
+        if self._user is None:
+            return False
+        else:
+            return self._user.user_type in (UserType.SHIP, UserType.SHIPPING_AGENT)
+
+    def _get_can_edit(self) -> bool:
+        return self._is_permitted_for_user(self.form.submit_for_review)
 
     def _get_can_approve(self) -> bool:
         return self._is_permitted_for_user(self.form.approve)
