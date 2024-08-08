@@ -78,9 +78,9 @@ table.table-striped td:first-child {
 {% block object_actions %}
 {# This block is only rendered when outputting HTML (not PDF) #}
 <div class="container">
-    <div class="row pt-3 pb-3 mb-3" style="border-bottom: 1px solid #eee">
+    <div class="row pt-3 pb-3 mb-3">
         <div class="col-12">
-            <nav class="navbar" >
+            <nav class="navbar">
                 <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-primary">
                     {% translate 'View PDF' %}
                 </a>
@@ -103,6 +103,9 @@ table.table-striped td:first-child {
                     {% translate 'Submit new form' %}
                 </a>
             </nav>
+        </div>
+        <div class="col-3">
+            <span class="badge bg-secondary">{{ form.get_status_display }}</span>
         </div>
     </div>
 </div>
