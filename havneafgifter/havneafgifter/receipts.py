@@ -1,4 +1,7 @@
+from typing import Callable
+
 import weasyprint
+from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.template import Context, Engine, RequestContext, Template
 from django.utils.safestring import SafeString
@@ -62,7 +65,9 @@ class Receipt:
     def _get_template_context(
         self, request: HttpRequest | None
     ) -> Context | RequestContext:
-        self._user: User | None = request.user if request is not None else None
+        self._user: User | AnonymousUser | None = (
+            getattr(request, "user", None) if request is not None else None
+        )
         context_args: dict = {"form": self.form, **self.get_context_data()}
         if request is not None:
             return RequestContext(request, context_args)
@@ -75,7 +80,7 @@ class Receipt:
     def _get_can_reject(self) -> bool:
         return self._is_permitted_for_user(self.form.reject)
 
-    def _is_permitted_for_user(self, method: callable) -> bool:
+    def _is_permitted_for_user(self, method: Callable) -> bool:
         if self._user is not None:
             return has_transition_perm(method, self._user)
         else:
