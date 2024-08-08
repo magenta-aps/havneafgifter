@@ -84,10 +84,13 @@ class Receipt:
             return Context(context_args)
 
     def _get_can_create(self) -> bool:
-        if self._user is None:
+        user_type: UserType | None = (
+            getattr(self._user, "user_type", None) if self._user is not None else None
+        )
+        if user_type is None:
             return False
         else:
-            return self._user.user_type in (UserType.SHIP, UserType.SHIPPING_AGENT)
+            return user_type in (UserType.SHIP, UserType.SHIPPING_AGENT)
 
     def _get_can_edit(self) -> bool:
         return self._is_permitted_for_user(self.form.submit_for_review)
