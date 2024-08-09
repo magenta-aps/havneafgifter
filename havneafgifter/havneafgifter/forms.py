@@ -11,6 +11,7 @@ from django.forms import (
     DateTimeInput,
     EmailField,
     EmailInput,
+    Field,
     Form,
     HiddenInput,
     IntegerField,
@@ -18,6 +19,7 @@ from django.forms import (
     ModelMultipleChoiceField,
     MultipleChoiceField,
     PasswordInput,
+    Textarea,
     TextInput,
     widgets,
 )
@@ -136,7 +138,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_departure",
             "gross_tonnage",
             "vessel_type",
-            "status",
         ]
         localized_fields = [
             "datetime_of_arrival",
@@ -182,6 +183,11 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=False,
         initial=False,
         label=_("No port of call"),
+    )
+
+    status = ChoiceField(
+        required=True,
+        choices=Status.choices,
     )
 
     def __init__(self, user: User, *args, **kwargs):
@@ -254,6 +260,8 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 ),
                 code="port_of_call_requires_arrival_and_departure_dates",
             )
+
+        return cleaned_data
 
     def user_visible_non_field_errors(self) -> ErrorList | None:
         non_field_errors = self.errors.get(NON_FIELD_ERRORS)
@@ -345,6 +353,18 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 
     def get_municipality_display(self):
         return self.initial_disembarkment_site.get_municipality_display()
+
+
+class ReasonForm(DynamicFormMixin, CSPFormMixin, ModelForm):
+    class Meta:
+        model = HarborDuesForm
+        fields: list[Field] = []
+
+    reason = CharField(
+        required=True,
+        widget=Textarea(),
+        label=_("Reason"),
+    )
 
 
 class StatisticsForm(BootstrapForm):

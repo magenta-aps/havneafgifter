@@ -114,9 +114,10 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         result = form.clean()
         self.assertEqual(data, result)
 
-    def test_user_visible_non_field_errors(self):
+    def test_user_visible_non_field_errors_is_empty(self):
         # Submit data that will lead to violating a database constraint
         data = copy.copy(self.harbor_dues_form_data)
+        data["status"] = Status.NEW.value
         data["gross_tonnage"] = None
         form = self._get_form_instance(data)
         # We expect the `form.save(...)` to raise ValueError in this case
@@ -158,6 +159,10 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         with self.assertRaises(ValidationError) as exc:
             form.clean()
             self.assertEqual(exc.code, code)
+        # Assert that our validation error is user-visible
+        self.assertFalse(
+            form.user_visible_non_field_errors() == ErrorList()  # empty error list
+        )
 
 
 class TestPassengersByCountryForm(TestCase):

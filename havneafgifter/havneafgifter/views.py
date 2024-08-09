@@ -17,7 +17,13 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+)
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -30,6 +36,7 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    ReasonForm,
     SignupVesselForm,
     StatisticsForm,
 )
@@ -318,9 +325,9 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
         ).delete()
 
         # User is now all done filling out data for cruise ship.
-        # Send email to relevant recipients.
-        if self._cruise_tax_form.status != Status.DRAFT:
-            self._send_email(self._cruise_tax_form, self.request)
+        # Handle `status` (DRAFT or NEW) and send email if NEW.
+        self._handle_status()
+
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
@@ -365,6 +372,13 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
             }
             for disembarkment_site in DisembarkmentSite.objects.all()
         ]
+
+    def _handle_status(self):
+        status = self.request.POST.get("status")
+        if status == Status.NEW.value:
+            self._cruise_tax_form.submit_for_review()
+            self._cruise_tax_form.save()
+            self._send_email(self._cruise_tax_form, self.request)
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
@@ -417,7 +431,7 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
                     kwargs={"pk": self.kwargs.get(self.pk_url_kwarg)},
                 )
             )
-        if form.status != "DRAFT":
+        if not form._has_permission(request.user, "change", False):
             return HttpResponseRedirect(
                 reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
             )
@@ -441,6 +455,75 @@ class PreviewPDFView(ReceiptDetailView):
             receipt.pdf,
             content_type="application/pdf",
         )
+
+
+class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.filter(status=Status.NEW),
+            self.request.user,
+            "approve",
+        )
+
+    def post(self, request, *args, **kwargs):
+        # If we cannot get the specified `HarborDuesForm` object, it is probably
+        # because we don't have the required `approve` permission.
+        try:
+            harbor_dues_form = self.get_object()
+        except Http404:
+            return HttpResponseForbidden(
+                _(
+                    "You do not have the required permissions to approve "
+                    "harbor dues forms"
+                )
+            )
+        # There is no form to fill for "approve" actions, so it does not make sense to
+        # implement `form_valid`. Instead, we just perform the object update here.
+        harbor_dues_form.approve()
+        harbor_dues_form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
+
+
+class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+    form_class = ReasonForm
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.filter(status=Status.NEW),
+            self.request.user,
+            "reject",
+        )
+
+    def post(self, request, *args, **kwargs):
+        # If we cannot get the specified `HarborDuesForm` object, it is probably
+        # because we don't have the required `approve` permission.
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return HttpResponseForbidden(
+                _(
+                    "You do not have the required permissions to reject "
+                    "harbor dues forms"
+                )
+            )
+        # Call `form_valid` if `ReasonForm` is indeed valid
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        harbor_dues_form = self.object
+        harbor_dues_form.reject(reason=form.cleaned_data["reason"])
+        harbor_dues_form.save()
+        return response
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
 
 
 class HarborDuesFormListView(
