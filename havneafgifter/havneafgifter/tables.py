@@ -9,6 +9,7 @@ class HarborDuesFormTable(tables.Table):
 
     class Meta:
         model = HarborDuesForm
+        exclude = ("vessel_master", "vessel_owner", "nationality", "harbour_tax")
 
 
 class StatistikTable(tables.Table):
