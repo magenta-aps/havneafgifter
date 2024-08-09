@@ -450,7 +450,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             # expected.
             mock_send.assert_called_once_with(fail_silently=False)
             # Assert that the generated PDF is also saved locally
-            instance.refresh_from_db()
+            instance = HarborDuesForm.objects.get(pk=instance.pk)  # refresh from DB
             self.assertIsInstance(instance.pdf, File)
             self.assertEqual(instance.pdf.name, instance.get_pdf_filename())
 
@@ -517,6 +517,62 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         instance.save()
         self.assertEqual(
             instance.mail_subject, f"Talippoq: {instance.pk:05} ({instance.date})"
+        )
+
+    @parametrize(
+        "action,username,expected_result",
+        [
+            # 1. "submit_for_review"
+            #   Ship users can submit for review
+            ("submit_for_review", "9074729", True),
+            #   Shipping agents can submit for review
+            ("submit_for_review", "shipping_agent", True),
+            #   Port authority users cannot submit for review
+            ("submit_for_review", "port_auth", False),
+            # 2. "approve"
+            #   Ship users cannot approve
+            ("approve", "9074729", False),
+            #   Shipping agents cannot approve
+            ("approve", "shipping_agent", False),
+            #   Port authority users can approve
+            ("approve", "port_auth", True),
+            # 3. "reject"
+            #   Ship users cannot reject
+            ("reject", "9074729", False),
+            #   Shipping agents cannot reject
+            ("reject", "shipping_agent", False),
+            #   Port authority users can reject
+            ("reject", "port_auth", True),
+        ],
+    )
+    def test_transition_permissions(self, action, username, expected_result):
+        # Arrange
+        user = User.objects.get(username=username)
+        # Act
+        actual_result = self.harbor_dues_draft_form._has_permission(user, action, False)
+        # Assert
+        self.assertEqual(actual_result, expected_result)
+
+    def test_approve_transition(self):
+        # Act
+        self.harbor_dues_form.approve()
+        self.harbor_dues_form.save()
+        # Assert
+        self.assertEqual(self.harbor_dues_form._change_reason, Status.APPROVED.label)
+
+    def test_reject_transition(self):
+        # Arrange
+        reason = "Afvist fordi der mangler noget"
+        # Act
+        self.harbor_dues_form.reject(reason=reason)
+        self.harbor_dues_form.save()
+        # Assert
+        self.assertEqual(self.harbor_dues_form._change_reason, Status.REJECTED.label)
+        # Assert that the rejection reason is saved as part of the history
+        self.assertQuerySetEqual(
+            self.harbor_dues_form.history.filter(status=Status.REJECTED),
+            [reason],
+            transform=lambda obj: obj.reason_text,
         )
 
 

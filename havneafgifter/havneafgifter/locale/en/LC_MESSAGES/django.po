@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-07 06:37-0100\n"
+"POT-Creation-Date: 2024-08-09 06:46-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,6 +106,10 @@ msgstr ""
 msgid ""
 "The total number of passengers does not match the sum of passengers by each "
 "nationality"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Reason"
 msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/tables.py
@@ -305,11 +309,19 @@ msgid "Other"
 msgstr ""
 
 #: havneafgifter/models.py
+msgid "Draft"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "New"
 msgstr ""
 
 #: havneafgifter/models.py
-msgid "Draft"
+msgid "Approved"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Rejected"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -366,6 +378,10 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Port name"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Reason text"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -535,6 +551,43 @@ msgstr ""
 msgid "Source code"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Approve"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
+msgid "Do you want to approve this form?"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
+msgid ""
+"This will notify the submitter of the form that the form has been accepted."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/modal.html
+msgid "Close"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/modal.html
+msgid "Save"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Reject"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+msgid "Do you want to reject this form?"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+msgid ""
+"This will notify the submitter of the form that the form has been rejected. "
+"The rejection reason will be shared with the submitter."
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
@@ -551,6 +604,11 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Submit"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Save as draft"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/error.html
@@ -592,10 +650,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Harbour Dues/Port Tax"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Save as draft"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
@@ -658,7 +712,7 @@ msgid "View PDF"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Edit draft"
+msgid "Edit"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
@@ -785,6 +839,20 @@ msgid ""
 "received by the port authority and the Greenlandic Tax Authority."
 msgstr ""
 
+#: havneafgifter/view_mixins.py
+msgid ""
+"You do not have the required permissions to submit harbor dues forms for "
+"review"
+msgstr ""
+
 #: havneafgifter/views.py
 msgid "Please sign in using the IMO number as username"
+msgstr ""
+
+#: havneafgifter/views.py
+msgid "You do not have the required permissions to approve harbor dues forms"
+msgstr ""
+
+#: havneafgifter/views.py
+msgid "You do not have the required permissions to reject harbor dues forms"
 msgstr ""

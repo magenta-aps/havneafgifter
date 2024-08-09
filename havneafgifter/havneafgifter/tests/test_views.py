@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
@@ -9,7 +10,11 @@ from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.forms import BaseFormSet
-from django.http import HttpResponseNotFound, HttpResponseRedirect
+from django.http import (
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+)
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django_tables2.rows import BoundRows
@@ -31,12 +36,14 @@ from havneafgifter.models import (
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
+    ApproveView,
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
+    RejectView,
     SignupVesselView,
     _CruiseTaxFormSetView,
     _SendEmailMixin,
@@ -195,7 +202,17 @@ class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
                 )
 
 
-class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class PostFormMixin:
+    def _post_form(self, data, user):
+        request = self.request_factory.post("", data=data)
+        request.user = user
+        self.instance.request = request
+        return request
+
+
+class TestHarborDuesFormCreateView(
+    ParametrizedTestCase, HarborDuesFormMixin, PostFormMixin, TestCase
+):
     view_class = HarborDuesFormCreateView
 
     @classmethod
@@ -203,7 +220,6 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.instance = cls.view_class()
-        cls.user = User.objects.create(username="Test Testersen")
 
     @parametrize(
         "vessel_type,no_port_of_call,model_class,next_view_name",
@@ -266,25 +282,46 @@ class TestHarborDuesFormCreateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         field = soup.find("input", attrs={"name": "vessel_imo"})
         self.assertEqual(field.attrs.get("value"), self.ship_user.username)
 
-    def test_sends_email_and_displays_confirmation_message_on_submit(self):
+    @parametrize(
+        "username,status,permitted,email_expected",
+        [
+            ("shipping_agent", Status.DRAFT.value, True, False),
+            ("shipping_agent", Status.NEW.value, True, True),
+            ("port_auth", Status.DRAFT.value, False, False),
+            ("port_auth", Status.NEW.value, False, False),
+        ],
+    )
+    def test_sends_email_and_displays_confirmation_message_on_submit(
+        self,
+        username,
+        status,
+        permitted,
+        email_expected,
+    ):
         """When a form is completed (for other vessel types than cruise ships),
         the receipt must be emailed to the relevant recipients, and a confirmation
         message must be displayed to the user submitting the form.
         """
+        # Arrange
+        data = copy.copy(self.harbor_dues_form_data_pk)
+        data["status"] = status
+        user = User.objects.get(username=username)
         with patch.object(self.instance, "_send_email") as mock_send_email:
-            request = self._post_form(self.harbor_dues_form_data_pk)
-            self.instance.post(request)
-            # Assert that we call the `_send_email` method as expected
-            mock_send_email.assert_called_once_with(
-                HarborDuesForm.objects.latest("pk"),
-                request,
-            )
-
-    def _post_form(self, data):
-        request = self.request_factory.post("", data=data)
-        request.user = self.user
-        self.instance.request = request
-        return request
+            # Act
+            request = self._post_form(data, user)
+            response = self.instance.post(request)
+            # Assert
+            if permitted:
+                self.assertIsInstance(response, HttpResponseRedirect)
+                if email_expected:
+                    # Assert that we call the `_send_email` method as expected
+                    mock_send_email.assert_called_once_with(
+                        HarborDuesForm.objects.latest("pk"),
+                        request,
+                    )
+            else:
+                # Assert that we receive a 403 error response
+                self.assertIsInstance(response, HttpResponseForbidden)
 
 
 class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
@@ -296,7 +333,7 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
         cls.request_factory = RequestFactory()
         cls.get_request = cls.request_factory.get("")
         cls.instance = cls.view_class()
-        cls.instance._cruise_tax_form = cls.cruise_tax_form
+        cls.instance._cruise_tax_form = cls.cruise_tax_draft_form
 
     def test_setup(self):
         with patch.object(CruiseTaxForm.objects, "get") as mock_get:
@@ -339,7 +376,7 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         # Create an existing `PassengersByCountry` object (which is updated during
         # the test.)
         cls._existing_passengers_by_country = PassengersByCountry.objects.create(
-            cruise_tax_form=cls.cruise_tax_form,
+            cruise_tax_form=cls.cruise_tax_draft_form,
             nationality=Nationality.BELGIUM,
             number_of_passengers=10,
         )
@@ -390,19 +427,19 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         # Assert: verify that the specified `PassengersByCountry` objects are
         # created.
         self.assertQuerySetEqual(
-            self.cruise_tax_form.passengers_by_country.values(
+            self.cruise_tax_draft_form.passengers_by_country.values(
                 "cruise_tax_form",
                 "nationality",
                 "number_of_passengers",
             ),
             [
                 {
-                    "cruise_tax_form": self.cruise_tax_form.pk,
+                    "cruise_tax_form": self.cruise_tax_draft_form.pk,
                     "nationality": Nationality.AUSTRALIA.value,
                     "number_of_passengers": 42,
                 },
                 {
-                    "cruise_tax_form": self.cruise_tax_form.pk,
+                    "cruise_tax_form": self.cruise_tax_draft_form.pk,
                     "nationality": Nationality.BELGIUM.value,
                     "number_of_passengers": 42,
                 },
@@ -434,7 +471,7 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
         cls._disembarkment_site_1 = DisembarkmentSite.objects.first()
         cls._disembarkment_site_2 = DisembarkmentSite.objects.all()[1]
         cls._existing_disembarkment = Disembarkment.objects.create(
-            cruise_tax_form=cls.cruise_tax_form,
+            cruise_tax_form=cls.cruise_tax_draft_form,
             disembarkment_site=cls._disembarkment_site_1,
             number_of_passengers=10,
         )
@@ -475,6 +512,8 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             {"number_of_passengers": 42},
             # Add new entry for next disembarkment site (index 1)
             {"number_of_passengers": 42},
+            # Submit cruise tax form for review
+            status=Status.NEW.value,
         )
         with patch.object(self.instance, "_send_email") as mock_send_email:
             # Act: trigger DB insert logic
@@ -482,14 +521,14 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             # Assert: verify that the specified `Disembarkment` objects are
             # created.
             self.assertQuerySetEqual(
-                self.cruise_tax_form.disembarkment_set.values(
+                self.cruise_tax_draft_form.disembarkment_set.values(
                     "cruise_tax_form",
                     "disembarkment_site",
                     "number_of_passengers",
                 ).order_by("disembarkment_site__pk"),
                 [
                     {
-                        "cruise_tax_form": self.cruise_tax_form.pk,
+                        "cruise_tax_form": self.cruise_tax_draft_form.pk,
                         "disembarkment_site": ds.pk,
                         "number_of_passengers": 42,
                     }
@@ -885,7 +924,7 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         cls.user = User.objects.create(username="Test McTesterson")
 
     def test_get_draft_form(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.shipping_agent_user)
         response = self.client.get(
             reverse(
                 "havneafgifter:draft_edit",
@@ -925,3 +964,79 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
                 kwargs={"pk": 987654321987},
             ),
         )
+
+
+class TestActionViewMixin(HarborDuesFormMixin, PostFormMixin):
+    view_class = None  # must be overridden by subclass
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = cls.view_class()
+
+    def _setup(self, data, user):
+        request = self._post_form(data, user)
+        self.instance.setup(request, pk=self.harbor_dues_form.pk)
+        return request
+
+    def _assert_redirects_to_list_view(self, response):
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response.url, reverse("havneafgifter:harbor_dues_form_list"))
+
+    def test_get_queryset(self):
+        self._setup({}, self.port_authority_user)
+        self.assertQuerySetEqual(
+            self.instance.get_queryset(),
+            HarborDuesForm.objects.filter(
+                port_of_call__portauthority=self.port_authority_user.port_authority,
+                status=Status.NEW,
+            ),
+            ordered=False,
+        )
+
+
+class TestApproveView(TestActionViewMixin, TestCase):
+    view_class = ApproveView
+
+    def test_post(self):
+        # Arrange
+        request = self._setup({}, self.port_authority_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
+        self.assertEqual(harbor_dues_form.status, Status.APPROVED.value)
+        self._assert_redirects_to_list_view(response)
+
+    def test_post_not_permitted(self):
+        # Arrange
+        request = self._setup({}, self.shipping_agent_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)
+
+
+class TestRejectView(TestActionViewMixin, TestCase):
+    view_class = RejectView
+
+    def test_post(self):
+        # Arrange
+        request = self._setup(
+            {"reason": "There is no reason"}, self.port_authority_user
+        )
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
+        self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
+        self._assert_redirects_to_list_view(response)
+
+    def test_post_not_permitted(self):
+        # Arrange
+        request = self._setup({}, self.shipping_agent_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)

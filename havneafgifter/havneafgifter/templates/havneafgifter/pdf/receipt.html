@@ -8,6 +8,8 @@ SPDX-License-Identifier: MPL-2.0
 
 {% load l10n %}
 {% load i18n %}
+{% load bootstrap_modal %}
+{% load bootstrap_status_badge %}
 
 {% block extra_css %}
 @page {
@@ -77,24 +79,45 @@ table.table-striped td:first-child {
 {% block object_actions %}
 {# This block is only rendered when outputting HTML (not PDF) #}
 <div class="container">
-    <div class="row pt-3 pb-3 mb-3" style="border-bottom: 1px solid #eee">
+    <div class="row pt-3 pb-3 mb-3">
         <div class="col-12">
-            <nav class="navbar" >
-                <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-success">
+            <nav class="navbar navbar-expand-lg">
+                <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-primary">
                     {% translate 'View PDF' %}
                 </a>
-                {% if form.status == "DRAFT" %}
+                {% if can_edit %}
                 <a href="{% url 'havneafgifter:draft_edit' pk=form.pk %}" class="btn btn-primary ms-2">
-                    {% translate 'Edit draft' %}
+                    {% translate 'Edit' %}
                 </a>
                 {% endif %}
+                {% if can_approve %}
+                <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#approveModal">
+                    {% translate 'Approve' %}
+                </button>
+                {% endif %}
+                {% if can_reject %}
+                <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                    {% translate 'Reject' %}
+                </button>
+                {% endif %}
+                {% if can_create %}
                 <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary ms-2 ms-auto">
                     {% translate 'Submit new form' %}
                 </a>
+                {% endif %}
             </nav>
+        </div>
+        <div class="col-3">
+            {% bootstrap_status_badge form %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+{{ block.super }}
+{% approve_form_modal form %}
+{% reject_form_modal form %}
 {% endblock %}
 
 {% block content %}

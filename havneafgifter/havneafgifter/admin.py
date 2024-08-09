@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
+from simple_history.admin import SimpleHistoryAdmin
 
 from havneafgifter.models import (
     CruiseTaxForm,
@@ -21,7 +22,7 @@ from havneafgifter.models import (
 
 
 @admin.register(HarborDuesForm)
-class HarborDuesFormAdmin(admin.ModelAdmin):
+class HarborDuesFormAdmin(SimpleHistoryAdmin):
     list_filter = [
         "port_of_call",
         "nationality",

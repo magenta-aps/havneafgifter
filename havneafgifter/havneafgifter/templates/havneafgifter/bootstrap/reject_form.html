@@ -1,0 +1,45 @@
+{% extends 'havneafgifter/bootstrap/modal.html' %}
+
+{% load i18n %}
+{% load django_bootstrap5 %}
+
+{% block modal_id %}rejectModal{% endblock %}
+{% block modal_title %}{% translate 'Reject' %}{% endblock %}
+
+{% block modal_body %}
+<p>
+    {% blocktrans trimmed %}
+    Do you want to reject this form?
+    {% endblocktrans %}
+</p>
+<p>
+    {% blocktrans trimmed %}
+    This will notify the submitter of the form that the form has been rejected.
+    The rejection reason will be shared with the submitter.
+    {% endblocktrans %}
+</p>
+<p>
+    {% bootstrap_form reason_form %}
+</p>
+{% endblock %}
+
+{% block modal_submit_url %}{% url 'havneafgifter:reject' pk=form.pk %}{% endblock %}
+
+{% block modal_ok_button %}
+<button type="submit" class="btn btn-danger" data-bs-dismiss="modal" disabled>{% translate 'Reject' %}</button>
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    // Disable the submit button as long as the required input field(s) are not yet
+    // filled out.
+    $(".form-control[required]").on("keyup", function (evt) {
+        const submit = $("button[type=submit]");
+        const value = $(this).val();  // current value in input field
+        if (value !== "") {
+            submit.attr("disabled", null);
+        } else {
+            submit.attr("disabled", "disabled");
+        }
+    });
+})();
+</script>
+{% endblock %}
