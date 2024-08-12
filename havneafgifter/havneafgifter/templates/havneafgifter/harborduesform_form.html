@@ -22,22 +22,21 @@
         const submitButton = $("button[type=submit][value=NEW]");
         const submitDraftButton = $("button[type=submit][value=DRAFT]");
 
-        const toggleButtonText = function (state) {
-            let submitButtonText = gettext("Submit");
-            let submitDraftButtonText = gettext("Save as draft");
+        const toggleSubmitButton = function (state) {
             if (state) {
-                submitButtonText = gettext("Continue");
-                submitDraftButtonText = gettext("Continue as draft");
+                submitButton.addClass("d-none");
+                submitDraftButton.text(gettext("Continue"));
+            } else {
+                submitButton.removeClass("d-none");
+                submitDraftButton.text(gettext("Save as draft"));
             }
-            submitButton.text(submitButtonText);
-            submitDraftButton.text(submitDraftButtonText);
         }
 
         // Update text on submit buttons, depending on the selected vessel type.
         vesselTypeSelect.on("change", function () {
             const vesselType = $(this).val();
             const state = vesselType === "CRUISE";
-            toggleButtonText(state);
+            toggleSubmitButton(state);
         });
 
         // Disable "port of call", etc. inputs, if "no port of call" is selected.
@@ -59,19 +58,26 @@
                 vesselTypeSelect.val("CRUISE");
             }
 
-            toggleButtonText(disabled === "disabled");
+            toggleSubmitButton(disabled === "disabled" || vesselType.val() === "CRUISE");
         });
 
-        // Hook form submit, so we can ensure that vessel type field is still
-        // POSTed to server, even if it is disabled.
+        // Hook form submit
         form.on("submit", function (evt) {
             // Lets the user cancel the submission in case they meant to save as a draft
             if ("{{user.user_type}}" === "ship" && shippingAgent.val()) {
                 // TODO: Add translations
                 return confirm(gettext("You have added a shipping agent without saving as a draft. \n\nDo you want to continue?"));
             }
+
+            // Ensure that potentially disabled fields are still POSTed to server
+            portOfCallSelect.attr("disabled", null);
+            datetimeInputs.attr("disabled", null);
+            grossTonnageInput.attr("disabled", null);
             vesselTypeSelect.attr("disabled", null);
         });
+
+        const vesselType = vesselTypeSelect.val();
+        toggleSubmitButton(vesselType === "CRUISE");
     });
 })();
 </script>
