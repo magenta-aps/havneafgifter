@@ -549,7 +549,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         # Arrange
         user = User.objects.get(username=username)
         # Act
-        actual_result = self.harbor_dues_draft_form._has_permission(user, action, False)
+        actual_result = self.harbor_dues_draft_form.has_permission(user, action, False)
         # Assert
         self.assertEqual(actual_result, expected_result)
 
