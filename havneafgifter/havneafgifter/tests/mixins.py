@@ -89,7 +89,6 @@ class HarborDuesFormMixin:
                 if k not in ("port_of_call", "shipping_agent")
             },
         }
-
         # Harbor dues form objects (NEW and DRAFT)
         cls.harbor_dues_form = HarborDuesForm.objects.create(
             **cls.harbor_dues_form_data
@@ -98,23 +97,26 @@ class HarborDuesFormMixin:
             **{k: v for k, v in cls.harbor_dues_form_data.items() if k != "status"},
         )
 
+        # Valid data for creating a `CruiseTaxForm` instance
+        cls.cruise_tax_form_data = {
+            **cls.harbor_dues_form_data,
+            **{"vessel_type": ShipType.CRUISE.value},
+        }
         # Cruise tax form objects (NEW and DRAFT, and NEW without port of call)
-        cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.harbor_dues_form_data)
+        cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.cruise_tax_form_data)
         cls.cruise_tax_draft_form = CruiseTaxForm.objects.create(
-            **{k: v for k, v in cls.harbor_dues_form_data.items() if k != "status"},
+            **{k: v for k, v in cls.cruise_tax_form_data.items() if k != "status"},
         )
         cls.cruise_tax_form_without_port_of_call = CruiseTaxForm.objects.create(
-            vessel_type=ShipType.CRUISE,
             **{
                 k: v
-                for k, v in cls.harbor_dues_form_data.items()
+                for k, v in cls.cruise_tax_form_data.items()
                 if k
                 not in (
                     "port_of_call",
                     "datetime_of_arrival",
                     "datetime_of_departure",
                     "gross_tonnage",
-                    "vessel_type",
                 )
             },
         )
