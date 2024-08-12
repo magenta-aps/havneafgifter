@@ -47,7 +47,7 @@ msgid "This user belongs to"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Username"
+msgid "Username or IMO number"
 msgstr ""
 
 #: havneafgifter/forms.py

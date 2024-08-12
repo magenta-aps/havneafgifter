@@ -50,7 +50,7 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
             attrs={
                 "autofocus": True,
                 "class": "form-control",
-                "placeholder": _("Username"),
+                "placeholder": _("Username or IMO number"),
             }
         )
     )

@@ -49,8 +49,8 @@ msgid "This user belongs to"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Username"
-msgstr "Brugernavn"
+msgid "Username or IMO number"
+msgstr "Brugernavn eller IMO-nummer"
 
 #: havneafgifter/forms.py
 msgid "Password"
