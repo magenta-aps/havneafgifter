@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-09 13:10-0100\n"
+"POT-Creation-Date: 2024-08-12 14:03-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,6 +75,14 @@ msgstr "Efternavn"
 #: havneafgifter/forms.py
 msgid "Email"
 msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Arrival date/time"
+msgstr "Ankomstdato og -tidspunkt"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Departure date/time"
+msgstr "Afgangsdato og -tidspunkt"
 
 #: havneafgifter/forms.py
 msgid "No port of call"
@@ -423,14 +431,6 @@ msgstr "Skibets kaptajn"
 #: havneafgifter/models.py
 msgid "Shipping agent"
 msgstr "Shippingagent"
-
-#: havneafgifter/models.py
-msgid "Arrival date/time"
-msgstr "Ankomstdato og -tidspunkt"
-
-#: havneafgifter/models.py
-msgid "Departure date/time"
-msgstr "Afgangsdato og -tidspunkt"
 
 #: havneafgifter/models.py
 msgid "Gross tonnage"
