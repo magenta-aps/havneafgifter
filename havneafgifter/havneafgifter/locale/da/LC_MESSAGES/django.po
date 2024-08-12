@@ -756,7 +756,7 @@ msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Edit"
-msgstr ""
+msgstr "Rediger"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
