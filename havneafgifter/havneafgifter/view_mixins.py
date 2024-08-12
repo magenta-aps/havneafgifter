@@ -107,13 +107,7 @@ class HarborDuesFormMixin(
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
-            cruise_tax_form, created = CruiseTaxForm.objects.update_or_create(
-                **{
-                    k: v
-                    for k, v in harbor_dues_form.__dict__.items()
-                    if not k.startswith("_")  # skip `_state`, etc.
-                }
-            )
+            cruise_tax_form = self._create_or_update_cruise_tax_form(harbor_dues_form)
             if cruise_tax_form.has_port_of_call:
                 # Send user to next step - filling out passenger tax info
                 return self.get_redirect_for_form(
@@ -141,3 +135,30 @@ class HarborDuesFormMixin(
                 "havneafgifter:receipt_detail_html",
                 harbor_dues_form,
             )
+
+    def _create_or_update_cruise_tax_form(
+        self, harbor_dues_form: HarborDuesForm
+    ) -> CruiseTaxForm:
+        field_vals = {
+            k: v
+            for k, v in harbor_dues_form.__dict__.items()
+            if not k.startswith("_")  # skip `_state`, etc.
+        }
+
+        if harbor_dues_form.pk is None:
+            # The `HarborDuesForm` has not yet been saved to the database.
+            # If we create the corresponding `CruiseTaxForm`, the corresponding
+            # `HarborDuesForm` will be created automatically.
+            return CruiseTaxForm.objects.create(**field_vals)
+        else:
+            # A `CruiseTaxForm` object already exists for this PK.
+            # Update all its fields (except `status`.)
+            cruise_tax_form = CruiseTaxForm.objects.get(
+                harborduesform_ptr=harbor_dues_form.pk
+            )
+            for k, v in field_vals.items():
+                if k == "status":
+                    continue
+                setattr(cruise_tax_form, k, v)
+            cruise_tax_form.save()
+            return cruise_tax_form

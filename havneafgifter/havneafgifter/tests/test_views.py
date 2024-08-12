@@ -926,43 +926,57 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
     def test_get_draft_form(self):
         self.client.force_login(self.shipping_agent_user)
         response = self.client.get(
-            reverse(
-                "havneafgifter:draft_edit",
-                kwargs={"pk": self.harbor_dues_draft_form.pk},
-            )
+            self._get_update_view_url(self.harbor_dues_draft_form.pk)
         )
         self.assertEqual(response.status_code, 200)
 
     def test_redirect_from_non_draft_form(self):
         self.client.force_login(self.user)
-        response = self.client.get(
-            reverse(
-                "havneafgifter:draft_edit",
-                kwargs={"pk": self.harbor_dues_form.pk},
-            )
-        )
-        self.assertEqual(
-            response.headers["Location"],
-            reverse(
-                "havneafgifter:receipt_detail_html",
-                kwargs={"pk": self.harbor_dues_form.pk},
-            ),
-        )
+        response = self.client.get(self._get_update_view_url(self.harbor_dues_form.pk))
+        self._assert_redirects_to_receipt(response, self.harbor_dues_form.pk)
 
     def test_redirect_from_nonexistent_form(self):
         self.client.force_login(self.user)
-        response = self.client.get(
-            reverse(
-                "havneafgifter:draft_edit",
-                kwargs={"pk": 987654321987},
-            )
+        nonexistent_id = 987654321987
+        response = self.client.get(self._get_update_view_url(nonexistent_id))
+        self._assert_redirects_to_receipt(response, nonexistent_id)
+
+    def test_update_cruise_tax_form(self):
+        # Arrange
+        self.client.force_login(self.shipping_agent_user)
+        # Act
+        response = self.client.post(
+            self._get_update_view_url(self.cruise_tax_draft_form.pk),
+            {
+                "status": Status.DRAFT.value,
+                "vessel_type": ShipType.CRUISE.value,
+                "no_port_of_call": True,
+                "vessel_name": "Peder Dingo",
+            },
         )
-        self.assertEqual(
-            response.headers["Location"],
-            reverse(
-                "havneafgifter:receipt_detail_html",
-                kwargs={"pk": 987654321987},
-            ),
+        # Assert
+        cruise_tax_form = CruiseTaxForm.objects.get(pk=self.cruise_tax_draft_form.pk)
+        self.assertEqual(cruise_tax_form.status, Status.DRAFT)
+        self.assertEqual(cruise_tax_form.vessel_name, "Peder Dingo")
+        self._assert_redirects_to_next_step(response, self.cruise_tax_draft_form.pk)
+
+    def _get_update_view_url(self, pk: int) -> str:
+        return reverse("havneafgifter:draft_edit", kwargs={"pk": pk})
+
+    def _assert_redirects_to_view(self, response, viewname: str, pk: int) -> None:
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response.url, reverse(viewname, kwargs={"pk": pk}))
+
+    def _assert_redirects_to_receipt(self, response, pk: int) -> None:
+        self._assert_redirects_to_view(
+            response, "havneafgifter:receipt_detail_html", pk
+        )
+
+    def _assert_redirects_to_next_step(self, response, pk: int) -> None:
+        self._assert_redirects_to_view(
+            response,
+            "havneafgifter:environmental_tax_create",
+            pk,
         )
 
 
