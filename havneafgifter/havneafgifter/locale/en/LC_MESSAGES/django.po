@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-12 14:03-0100\n"
+"POT-Creation-Date: 2024-08-13 07:09-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgid "This user belongs to"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Username"
+msgid "Username or IMO number"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -72,6 +72,10 @@ msgstr ""
 
 #: havneafgifter/forms.py
 msgid "Email"
+msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Nationality"
 msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
@@ -465,10 +469,6 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Calculated disembarkment tax"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Nationality"
 msgstr ""
 
 #: havneafgifter/models.py

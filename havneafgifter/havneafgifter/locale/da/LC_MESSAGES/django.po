@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-12 14:03-0100\n"
+"POT-Creation-Date: 2024-08-13 07:09-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,8 +49,8 @@ msgid "This user belongs to"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Username"
-msgstr "Brugernavn"
+msgid "Username or IMO number"
+msgstr "Brugernavn eller IMO-nummer"
 
 #: havneafgifter/forms.py
 msgid "Password"
@@ -75,6 +75,10 @@ msgstr "Efternavn"
 #: havneafgifter/forms.py
 msgid "Email"
 msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Nationality"
+msgstr "Nationalitet"
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Arrival date/time"
@@ -485,10 +489,6 @@ msgid "Calculated disembarkment tax"
 msgstr "Beregnet ilandsætnings-afgift"
 
 #: havneafgifter/models.py
-msgid "Nationality"
-msgstr "Nationalitet"
-
-#: havneafgifter/models.py
 msgid "Number of passengers from nationality"
 msgstr "Antal passagerer fra nationaliteten"
 
@@ -756,7 +756,7 @@ msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Edit"
-msgstr ""
+msgstr "Rediger"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Submit new form"
