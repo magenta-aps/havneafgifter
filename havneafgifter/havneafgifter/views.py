@@ -14,7 +14,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, F, OuterRef, Subquery, Sum
+from django.db.models import (
+    Case,
+    Count,
+    F,
+    IntegerField,
+    OuterRef,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory
 from django.http import (
@@ -531,10 +541,22 @@ class HarborDuesFormListView(
 ):
     table_class = HarborDuesFormTable
 
+    custom_order = [Status.DRAFT, Status.NEW, Status.DONE]
+    ordering_criteria = Case(
+        *[
+            When(status=name, then=Value(index))
+            for index, name in enumerate(custom_order)
+        ],
+        default=Value(
+            len(custom_order)
+        ),  # Default order value for names not in the custom_order list
+        output_field=IntegerField(),
+    )
+
     def get_queryset(self):
         return HarborDuesForm.filter_user_permissions(
             HarborDuesForm.objects.all(), self.request.user, "view"
-        )
+        ).order_by(self.ordering_criteria, "-date")
 
 
 class StatisticsView(
