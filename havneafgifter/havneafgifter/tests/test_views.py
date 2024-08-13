@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.forms import BaseFormSet
 from django.http import (
+    HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
     HttpResponseRedirect,
@@ -202,16 +203,27 @@ class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
                 )
 
 
-class PostFormMixin:
+class RequestMixin:
+    # This mixin expects:
+    # `self.instance` is an instance of the view that is being tested
+    # `self.request_factory` is a `RequestFactory` instance.
+
+    def _get(self, user):
+        request = self.request_factory.get("")
+        return self._authenticate_request(request, user)
+
     def _post_form(self, data, user):
         request = self.request_factory.post("", data=data)
+        return self._authenticate_request(request, user)
+
+    def _authenticate_request(self, request, user):
         request.user = user
         self.instance.request = request
         return request
 
 
 class TestHarborDuesFormCreateView(
-    ParametrizedTestCase, HarborDuesFormMixin, PostFormMixin, TestCase
+    ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
 ):
     view_class = HarborDuesFormCreateView
 
@@ -324,24 +336,37 @@ class TestHarborDuesFormCreateView(
                 self.assertIsInstance(response, HttpResponseForbidden)
 
 
-class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
+class TestCruiseTaxFormSetView(
+    ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
+):
     view_class = _CruiseTaxFormSetView
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
+        cls._unprivileged_user = User.objects.create(username="unprivileged")
         cls.request_factory = RequestFactory()
-        cls.get_request = cls.request_factory.get("")
         cls.instance = cls.view_class()
         cls.instance._cruise_tax_form = cls.cruise_tax_draft_form
 
-    def test_setup(self):
-        with patch.object(CruiseTaxForm.objects, "get") as mock_get:
-            self.instance.setup(self.get_request, pk=0)
-            mock_get.assert_called_once_with(pk=0)
+    @parametrize(
+        "username,is_draft,can_access",
+        [
+            ("shipping_agent", True, True),
+            ("shipping_agent", False, False),
+            ("port_auth", True, True),
+            ("port_auth", False, False),
+        ],
+    )
+    def test_setup(self, username: str, is_draft: bool, can_access: bool):
+        user, obj = self._call_setup(username, is_draft)
+        if can_access:
+            self.assertEqual(self.instance._cruise_tax_form, obj)
+        else:
+            self.assertIsNone(self.instance._cruise_tax_form)
 
     def _assert_get_form_returns_expected_formset(self):
-        self.instance.request = self.get_request
+        self._get(self.shipping_agent_user)
         formset = self.instance.get_form()
         self.assertIsInstance(formset, BaseFormSet)
         self.assertIs(formset.form, self.view_class.form_class)
@@ -350,11 +375,31 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
         self.assertEqual(formset.extra, 0)
 
     def _assert_get_context_data_includes_formset(self, name):
-        self.instance.request = self.get_request
+        self._get(self.shipping_agent_user)
         context_data = self.instance.get_context_data()
         self.assertIsInstance(context_data[name], BaseFormSet)
 
-    def _post_formset(self, *form_items, prefix="form", **extra):
+    def _assert_response(
+        self,
+        username: str,
+        expected_response_class: type[HttpResponse],
+        **extra,
+    ):
+        user, obj = self._call_setup(username, True)
+        get_response = self.instance.get(self._get(user))
+        post_response = self.instance.post(self._post_formset(user=user, **extra))
+        self.assertIsInstance(get_response, expected_response_class)
+        self.assertIn("no-cache", get_response.headers["Cache-Control"])
+        self.assertIn("must-revalidate", get_response.headers["Cache-Control"])
+        self.assertIsInstance(post_response, expected_response_class)
+
+    def _call_setup(self, username: str, is_draft: bool) -> tuple[User, CruiseTaxForm]:
+        user = User.objects.get(username=username)
+        obj = self.cruise_tax_draft_form if is_draft else self.cruise_tax_form
+        self.instance.setup(self._get(user), pk=obj.pk)
+        return user, obj
+
+    def _post_formset(self, *form_items, prefix="form", user=None, **extra):
         data = {
             "form-TOTAL_FORMS": len(form_items),
             "form-INITIAL_FORMS": len(form_items),
@@ -363,7 +408,7 @@ class TestCruiseTaxFormSetView(HarborDuesFormMixin, TestCase):
         for idx, item in enumerate(form_items):
             for key, val in item.items():
                 data[f"{prefix}-{idx}-{key}"] = val
-        self.instance.request = self.request_factory.post("", data=data)
+        self._post_form(data, user or self.shipping_agent_user)
         return self.instance.request
 
 
@@ -381,11 +426,23 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
             number_of_passengers=10,
         )
 
+    def test_permissions_checked(self):
+        self._assert_response(
+            self.shipping_agent_user.username,
+            HttpResponse,
+            total_number_of_passengers=0,
+        )
+        self._assert_response(
+            self._unprivileged_user.username,
+            HttpResponseForbidden,
+            total_number_of_passengers=0,
+        )
+
     def test_get_form_returns_expected_formset(self):
         self._assert_get_form_returns_expected_formset()
 
     def test_get_form_kwargs_populates_initial(self):
-        self.instance.request = self.get_request
+        self.instance.request = self._get(self.shipping_agent_user)
         form_kwargs = self.instance.get_form_kwargs()
         self.assertListEqual(
             form_kwargs["initial"],
@@ -476,11 +533,15 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             number_of_passengers=10,
         )
 
+    def test_permissions_checked(self):
+        self._assert_response(self.shipping_agent_user.username, HttpResponse)
+        self._assert_response(self._unprivileged_user.username, HttpResponseForbidden)
+
     def test_get_form_returns_expected_formset(self):
         self._assert_get_form_returns_expected_formset()
 
     def test_get_form_kwargs_populates_initial(self):
-        self.instance.request = self.get_request
+        self.instance.request = self._get(self.shipping_agent_user)
         form_kwargs = self.instance.get_form_kwargs()
         self.assertListEqual(
             form_kwargs["initial"],
@@ -986,7 +1047,7 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
         )
 
 
-class TestActionViewMixin(HarborDuesFormMixin, PostFormMixin):
+class TestActionViewMixin(HarborDuesFormMixin, RequestMixin):
     view_class = None  # must be overridden by subclass
 
     @classmethod

@@ -189,7 +189,29 @@ class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self._cruise_tax_form = CruiseTaxForm.objects.get(pk=kwargs["pk"])
+        pk = kwargs["pk"]
+        qs = CruiseTaxForm.filter_user_permissions(
+            CruiseTaxForm.objects.filter(pk=pk, status=Status.DRAFT),
+            request.user,
+            "view",
+        )
+        try:
+            self._cruise_tax_form = qs.get(pk=pk)
+        except CruiseTaxForm.DoesNotExist:
+            self._cruise_tax_form = None
+
+    def get(self, request, *args, **kwargs):
+        response = self._check_permission() or super().get(request, *args, **kwargs)
+        # Ensure that when/if users go back to this view from the receipt page,
+        # their browser does not show a cached response (which may present them with a
+        # seemingly "editable" form that cannot be submitted if the form status is NEW.
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        return response
+
+    def post(self, request, *args, **kwargs):
+        return self._check_permission() or super().post(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         factory = formset_factory(
@@ -199,6 +221,12 @@ class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
             extra=0,
         )
         return factory(**self.get_form_kwargs())
+
+    def _check_permission(self):
+        if self._cruise_tax_form is None:
+            return HttpResponseForbidden(
+                _("You do not have permission to edit this cruise tax form")
+            )
 
 
 class PassengerTaxCreateView(_CruiseTaxFormSetView):
