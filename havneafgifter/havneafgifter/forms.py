@@ -178,6 +178,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     datetime_of_arrival = DynamicField(
         DateTimeField,
+        required=False,
         widget=HTML5DateWidget(),
         initial=lambda form: (
             form.instance.datetime_of_arrival.isoformat()
@@ -190,6 +191,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     datetime_of_departure = DynamicField(
         DateTimeField,
         widget=HTML5DateWidget(),
+        required=False,
         initial=lambda form: (
             form.instance.datetime_of_departure.isoformat()
             if form.instance.datetime_of_departure
