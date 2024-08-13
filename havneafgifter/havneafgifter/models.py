@@ -637,7 +637,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         field=status,
         source=[Status.DRAFT, Status.REJECTED],
         target=Status.NEW,
-        permission=lambda instance, user: instance._has_permission(
+        permission=lambda instance, user: instance.has_permission(
             user, "submit_for_review", False
         ),
     )
@@ -648,7 +648,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         field=status,
         source=Status.NEW,
         target=Status.APPROVED,
-        permission=lambda instance, user: instance._has_permission(
+        permission=lambda instance, user: instance.has_permission(
             user, "approve", False
         ),
     )
@@ -659,7 +659,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         field=status,
         source=Status.NEW,
         target=Status.REJECTED,
-        permission=lambda instance, user: instance._has_permission(
+        permission=lambda instance, user: instance.has_permission(
             user, "reject", False
         ),
     )

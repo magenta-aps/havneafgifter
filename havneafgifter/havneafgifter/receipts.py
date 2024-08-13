@@ -90,7 +90,11 @@ class Receipt:
         if user_type is None:
             return False
         else:
-            return user_type in (UserType.SHIP, UserType.SHIPPING_AGENT)
+            return user_type in (
+                UserType.SHIP,
+                UserType.SHIPPING_AGENT,
+                UserType.SUPERUSER,
+            )
 
     def _get_can_edit(self) -> bool:
         return self._is_permitted_for_user(self.form.submit_for_review)
