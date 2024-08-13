@@ -7,8 +7,8 @@
 {% block content %}
 <h1>{% translate "Harbor dues list" %}</h1>
 
-<a href="opret">
-  <button type="submit" class="btn btn-primary">{% translate 'Create new' %}</button>
+<a href="{% url 'havneafgifter:harbor_dues_form_create' %}">
+    <button type="submit" class="btn btn-primary">{% translate 'Create new' %}</button>
 </a>
 
 {% render_table table %}
