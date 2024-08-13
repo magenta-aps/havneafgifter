@@ -13,3 +13,15 @@ License: MIT
 Files: havneafgifter/havneafgifter/static/bootstrap/*
 Copyright: 2011-2021 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
 License: MIT
+
+Files: havneafgifter/havneafgifter/static/font-awesome/webfonts/*.eot havneafgifter/havneafgifter/static/font-awesome/webfonts/*.ttf havneafgifter/havneafgifter/static/font-awesome/webfonts/*.woff havneafgifter/havneafgifter/static/font-awesome/webfonts/*.woff2
+Copyright: 2011-2021 @fontawesome (https://fontawesome.com)
+License: OFL-1.1
+
+Files: havneafgifter/havneafgifter/static/font-awesome/css/*
+Copyright: 2011-2021 @fontawesome (https://fontawesome.com)
+License: MIT
+
+Files: havneafgifter/havneafgifter/static/font-awesome/webfonts/*.svg
+Copyright: 2011-2021 @fontawesome (https://fontawesome.com)
+License: CC-BY-4.0

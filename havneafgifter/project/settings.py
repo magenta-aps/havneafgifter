@@ -33,7 +33,7 @@ DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
-HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
+HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://talippoq.aka.gl")
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[]"))
 
 
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -68,7 +69,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django_mitid_auth.middleware.LoginManager",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "csp.middleware.CSPMiddleware",
     "django_session_timeout.middleware.SessionTimeoutMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
