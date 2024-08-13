@@ -27,9 +27,11 @@
     display: none;
 }
 
+/* card.html base template */
 .card {
-    width: 40rem;
+    width: 45rem;
 }
+
 .form-label {
     font-weight: bold;
 }

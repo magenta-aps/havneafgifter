@@ -50,7 +50,7 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
             attrs={
                 "autofocus": True,
                 "class": "form-control",
-                "placeholder": _("Username"),
+                "placeholder": _("Username or IMO number"),
             }
         )
     )
@@ -150,6 +150,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=False,
         choices=_vessel_nationality_choices,
         widget=Select2Widget(choices=_vessel_nationality_choices),
+        label=_("Nationality"),
     )
 
     vessel_name = DynamicField(
