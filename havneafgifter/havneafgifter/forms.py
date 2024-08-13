@@ -143,10 +143,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_arrival",
             "datetime_of_departure",
         ]
-        widgets = {
-            "datetime_of_arrival": HTML5DateWidget(),
-            "datetime_of_departure": HTML5DateWidget(),
-        }
 
     _vessel_nationality_choices = [("", "---")] + list(countries)
 
@@ -177,6 +173,28 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         initial=lambda form: form._user.username if form.user_is_ship else "",
         disabled=lambda form: form.user_is_ship,
         required=False,
+    )
+
+    datetime_of_arrival = DynamicField(
+        DateTimeField,
+        widget=HTML5DateWidget(),
+        initial=lambda form: (
+            form.instance.datetime_of_arrival.isoformat()
+            if form.instance.datetime_of_arrival
+            else None
+        ),
+        label=_("Arrival date/time"),
+    )
+
+    datetime_of_departure = DynamicField(
+        DateTimeField,
+        widget=HTML5DateWidget(),
+        initial=lambda form: (
+            form.instance.datetime_of_departure.isoformat()
+            if form.instance.datetime_of_departure
+            else None
+        ),
+        label=_("Departure date/time"),
     )
 
     no_port_of_call = BooleanField(

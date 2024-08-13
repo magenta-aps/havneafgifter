@@ -951,6 +951,12 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
                 "status": Status.DRAFT.value,
                 "vessel_type": ShipType.CRUISE.value,
                 "no_port_of_call": True,
+                "datetime_of_arrival": self.cruise_tax_form_data[
+                    "datetime_of_arrival"
+                ].isoformat(),
+                "datetime_of_departure": self.cruise_tax_form_data[
+                    "datetime_of_departure"
+                ].isoformat(),
                 "vessel_name": "Peder Dingo",
             },
         )
