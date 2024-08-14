@@ -1,6 +1,7 @@
 import copy
 from datetime import datetime
 from decimal import Decimal
+from unittest import TestCase
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlencode
 
@@ -34,6 +35,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     User,
+    TaxRates,
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
@@ -48,6 +50,7 @@ from havneafgifter.views import (
     SignupVesselView,
     _CruiseTaxFormSetView,
     _SendEmailMixin,
+    HarborTaxRateListView,
 )
 
 
@@ -187,11 +190,11 @@ class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     def test_send_email_produces_message(self, status, expected_message_class):
         instance = _SendEmailMixin()
         with patch(
-            "havneafgifter.view_mixins.messages.add_message"
+                "havneafgifter.view_mixins.messages.add_message"
         ) as mock_add_message:
             with patch(
-                "havneafgifter.models.HarborDuesForm.send_email",
-                return_value=(Mock(), status),
+                    "havneafgifter.models.HarborDuesForm.send_email",
+                    return_value=(Mock(), status),
             ) as mock_send_email:
                 instance._send_email(
                     self.harbor_dues_form,
@@ -247,35 +250,35 @@ class TestHarborDuesFormCreateView(
         [
             # Test 1: user creates harbor dues form and is sent directly to receipt
             (
-                ShipType.FREIGHTER,
-                False,
-                HarborDuesForm,
-                "havneafgifter:receipt_detail_html",
+                    ShipType.FREIGHTER,
+                    False,
+                    HarborDuesForm,
+                    "havneafgifter:receipt_detail_html",
             ),
             # Test 2: user creates cruise tax form with a port of call, and is sent to
             # the passenger tax form.
             (
-                ShipType.CRUISE,
-                False,
-                CruiseTaxForm,
-                "havneafgifter:passenger_tax_create",
+                    ShipType.CRUISE,
+                    False,
+                    CruiseTaxForm,
+                    "havneafgifter:passenger_tax_create",
             ),
             # Test 3: user creates cruise tax form without a port of call, and is sent
             # to the environmental tax form.
             (
-                ShipType.CRUISE,
-                True,
-                CruiseTaxForm,
-                "havneafgifter:environmental_tax_create",
+                    ShipType.CRUISE,
+                    True,
+                    CruiseTaxForm,
+                    "havneafgifter:environmental_tax_create",
             ),
         ],
     )
     def test_creates_model_instance_depending_on_vessel_type(
-        self,
-        vessel_type,
-        no_port_of_call,
-        model_class,
-        next_view_name,
+            self,
+            vessel_type,
+            no_port_of_call,
+            model_class,
+            next_view_name,
     ):
         self.client.force_login(self.shipping_agent_user)
         # Arrange: set up POST data
@@ -313,11 +316,11 @@ class TestHarborDuesFormCreateView(
         ],
     )
     def test_sends_email_and_displays_confirmation_message_on_submit(
-        self,
-        username,
-        status,
-        permitted,
-        email_expected,
+            self,
+            username,
+            status,
+            permitted,
+            email_expected,
     ):
         """When a form is completed (for other vessel types than cruise ships),
         the receipt must be emailed to the relevant recipients, and a confirmation
@@ -601,9 +604,9 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                         "number_of_passengers": 42,
                     }
                     for ds in [
-                        self._disembarkment_site_1,
-                        self._disembarkment_site_2,
-                    ]
+                    self._disembarkment_site_1,
+                    self._disembarkment_site_2,
+                ]
                 ],
             )
             # Assert: verify that we call the `_send_email` method as expected
@@ -902,7 +905,7 @@ class StatisticsTest(TestCase):
             {
                 "municipality": "Avannaata",
                 "disembarkment_tax_sum": self.form2.disembarkment_tax
-                + self.form3.disembarkment_tax,
+                                         + self.form3.disembarkment_tax,
                 "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
                 "count": 2,
             },
@@ -916,7 +919,7 @@ class StatisticsTest(TestCase):
             {
                 "vessel_type": "Cruise ship",
                 "disembarkment_tax_sum": self.form2.disembarkment_tax
-                + self.form3.disembarkment_tax,
+                                         + self.form3.disembarkment_tax,
                 "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
                 "count": 2,
             },
@@ -945,7 +948,7 @@ class StatisticsTest(TestCase):
             {
                 "site": "Qaanaq",
                 "disembarkment_tax_sum": self.form2.disembarkment_tax
-                + self.form3.disembarkment_tax,
+                                         + self.form3.disembarkment_tax,
                 "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
                 "count": 2,
             },
@@ -1139,3 +1142,27 @@ class TestRejectView(TestActionViewMixin, TestCase):
         response = self.instance.post(request)
         # Assert
         self.assertIsInstance(response, HttpResponseForbidden)
+
+
+class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
+    view_class = HarborTaxRateListView
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = cls.view_class()
+        cls.taxrate = TaxRates.objects.create(start_datetime=datetime.now())
+
+    def _setup(self, user):
+        get_request = self.request_factory.get("")
+        get_request.user = user
+        self.instance.setup(get_request)
+        return get_request
+
+    def test_get_queryset(self):
+        request = self._setup(self.ship_user)
+        response = self.instance.get(request)
+        rows = response.context_data["table"].rows
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].record, self.taxrate)
