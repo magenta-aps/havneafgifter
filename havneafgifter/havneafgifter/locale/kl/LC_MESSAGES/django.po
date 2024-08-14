@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-13 07:09-0100\n"
+"POT-Creation-Date: 2024-08-13 12:45-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -553,6 +553,16 @@ msgid "Havneafgifter"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Create new"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "My forms"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
 msgid "Log out"
 msgstr ""
 
@@ -730,10 +740,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Edit"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Submit new form"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html

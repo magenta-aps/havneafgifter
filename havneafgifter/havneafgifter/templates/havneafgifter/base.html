@@ -25,8 +25,14 @@ SPDX-License-Identifier: MPL-2.0
 <body>
     {% block header %}
     <header>
-        <nav class="nav flex-column flex-sm-row p-1 bg-dark" data-bs-theme="dark">
-            <span class="m-2 pt-2 ms-auto">
+        <nav class="nav navbar flex-column flex-sm-row p-1 bg-dark" data-bs-theme="dark">
+            <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="nav-link">
+                {% translate 'Create new' %}
+            </a>
+            <a href="{% url 'havneafgifter:harbor_dues_form_list' %}" class="nav-link">
+                {% translate 'My forms' %}
+            </a>
+            <span class="navbar-text m-2 pt-2 ms-auto">
                 {{user.first_name}} {{user.last_name}}
             </span>
             {% if user.is_authenticated %}
