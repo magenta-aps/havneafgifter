@@ -47,7 +47,7 @@ fi
 
 if [ "${CREATE_DUMMY_ADMIN}" = true ]; then
   echo 'creating superuser'
-  DJANGO_SUPERUSER_PASSWORD=admin DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@admin.admin ./manage.py createsuperuser --noinput
+  ./manage.py createuser admin admin -S
 fi
 
 if [ "${CREATE_DUMMY_USERS}" = true ]; then
