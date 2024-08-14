@@ -17,7 +17,7 @@ from django.http import (
     HttpResponseNotFound,
     HttpResponseRedirect,
 )
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
 from django.urls import reverse
 from django_tables2.rows import BoundRows
 from unittest_parametrize import ParametrizedTestCase, parametrize
