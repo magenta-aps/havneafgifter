@@ -39,7 +39,7 @@ class Command(BaseCommand):
             ("Aasiaat", "Royal Arctic Line A/S"),
             ("Kangaatsiaq", "KNI Pilersuisoq A/S"),
             ("Sisimiut", "Royal Arctic Line A/S"),
-            ("Kangerlussuaq", "Mittarfeqarfiit"),
+            ("Kangerlussuaq", "Sikuki Harbour A/S"),
             ("Maniitsoq", "Royal Arctic Line A/S"),
             ("Nuuk", "Sikuki Harbour A/S"),
             ("Paamiut", "Royal Arctic Line A/S"),
