@@ -9,6 +9,7 @@ class Command(BaseCommand):
         parser.add_argument("username", type=str)
         parser.add_argument("password", type=str)
         parser.add_argument("-s", "--is_staff", action="store_true")
+        parser.add_argument("-S", "--is_superuser", action="store_true")
         parser.add_argument("-g", "--groups", type=str, nargs="+")
         parser.add_argument("--port-authority", type=str, nargs="+")
         parser.add_argument("--shipping-agent", type=str, nargs="+")
@@ -18,7 +19,7 @@ class Command(BaseCommand):
             username=options["username"],
             defaults={
                 "is_staff": options["is_staff"],
-                "is_superuser": False,
+                "is_superuser": options["is_superuser"],
             },
         )
         password = options["password"]

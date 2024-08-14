@@ -17,6 +17,7 @@ RUN mkdir /app && \
     groupadd -g 75170 -r havneafgifter && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75170 --no-log-init -r -g havneafgifter -G certificate_exporter havneafgifter && \
+    chown -R havneafgifter:havneafgifter /app && \
     chown -R havneafgifter:havneafgifter /static && \
     chmod a+w /static && \
     chown -R havneafgifter:havneafgifter /var/cache/havneafgift && \
