@@ -726,7 +726,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return self.vessel_type != ShipType.CRUISE or self.port_of_call is not None
 
     def get_pdf_filename(self) -> str:
-        return f"{self.form_id}.pdf"
+        if self.pdf and self.pdf.name:
+            return self.pdf.name
+        else:
+            return f"{self.form_id}.pdf"
 
     def calculate_tax(self, save: bool = True):
         self.calculate_harbour_tax(save=save)
