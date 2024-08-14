@@ -62,7 +62,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
 )
-from havneafgifter.tables import HarborDuesFormTable, StatistikTable
+from havneafgifter.tables import HarborDuesFormTable, StatistikTable, TaxRateTable
 from havneafgifter.view_mixins import (
     CacheControlMixin,
     GetFormView,
@@ -584,6 +584,15 @@ class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableVie
         return HarborDuesForm.filter_user_permissions(
             HarborDuesForm.objects.all(), self.request.user, "view"
         ).order_by(self.ordering_criteria, "-date")
+
+
+class HarborTaxRateListView(LoginRequiredMixin, PermissionsMixin, SingleTableView):
+    table_class = TaxRateTable
+
+    def get_queryset(self):
+        return TaxRates.filter_user_permissions(
+            TaxRates.objects.all(), self.request.user, "view"
+        ).order_by("start_datetime")
 
 
 class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetFormView):
