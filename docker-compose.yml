@@ -17,7 +17,7 @@ services:
     depends_on:
       - havneafgifter-db
     volumes:
-      - ./havneafgifter/:/app
+      - ./havneafgifter/:/app:rw
       - ./mypy.ini:/mypy.ini:ro
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
       - ./log/havneafgifter.log:/log/havneafgifter.log:rw

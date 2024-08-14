@@ -742,6 +742,10 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Submit new form"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 msgid "Contact person details"
 msgstr ""

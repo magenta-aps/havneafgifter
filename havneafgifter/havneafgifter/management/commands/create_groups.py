@@ -55,35 +55,47 @@ class Command(BaseCommand):
         cruisetaxform_contenttype = ContentType.objects.get_for_model(
             CruiseTaxForm, for_concrete_model=False
         )
-        Permission.objects.create(
+        Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="approve_harborduesform",
-            name="Can approve harborduesforms",
+            defaults={
+                "name":"Can approve harborduesforms",
+            }
         )
-        Permission.objects.create(
+        Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="reject_harborduesform",
-            name="Can reject harborduesforms",
+            defaults={
+                "name":"Can reject harborduesforms",
+            }
         )
-        Permission.objects.create(
+        Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="invoice_harborduesform",
-            name="Can invoice harborduesforms",
+            defaults={
+                "name":"Can invoice harborduesforms",
+            }
         )
-        Permission.objects.create(
+        Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="approve_cruisetaxform",
-            name="Can approve cruisetaxforms",
+            defaults={
+                "name":"Can approve cruisetaxforms",
+            }
         )
-        Permission.objects.create(
+        Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="reject_cruisetaxform",
-            name="Can reject cruisetaxforms",
+            defaults={
+                "name":"Can reject cruisetaxforms",
+            }
         )
-        Permission.objects.create(
+        Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="invoice_cruisetaxform",
-            name="Can invoice cruisetaxforms",
+            defaults={
+                "name":"Can invoice cruisetaxforms",
+            }
         )
 
     def setup_port_authority(self):
