@@ -59,43 +59,43 @@ class Command(BaseCommand):
             content_type=harborduesform_contenttype,
             codename="approve_harborduesform",
             defaults={
-                "name":"Can approve harborduesforms",
-            }
+                "name": "Can approve harborduesforms",
+            },
         )
         Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="reject_harborduesform",
             defaults={
-                "name":"Can reject harborduesforms",
-            }
+                "name": "Can reject harborduesforms",
+            },
         )
         Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="invoice_harborduesform",
             defaults={
-                "name":"Can invoice harborduesforms",
-            }
+                "name": "Can invoice harborduesforms",
+            },
         )
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="approve_cruisetaxform",
             defaults={
-                "name":"Can approve cruisetaxforms",
-            }
+                "name": "Can approve cruisetaxforms",
+            },
         )
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="reject_cruisetaxform",
             defaults={
-                "name":"Can reject cruisetaxforms",
-            }
+                "name": "Can reject cruisetaxforms",
+            },
         )
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="invoice_cruisetaxform",
             defaults={
-                "name":"Can invoice cruisetaxforms",
-            }
+                "name": "Can invoice cruisetaxforms",
+            },
         )
 
     def setup_port_authority(self):
