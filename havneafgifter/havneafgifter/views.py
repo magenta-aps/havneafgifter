@@ -65,6 +65,7 @@ from havneafgifter.models import (
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
 from havneafgifter.view_mixins import (
+    CacheControlMixin,
     GetFormView,
     HarborDuesFormMixin,
     HavneafgiftView,
@@ -177,19 +178,41 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
-class HarborDuesFormCreateView(HarborDuesFormMixin, CreateView):
+class HarborDuesFormCreateView(HarborDuesFormMixin, CacheControlMixin, CreateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return self.prevent_response_caching(response)
 
-class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
+
+class _CruiseTaxFormSetView(
+    LoginRequiredMixin, CacheControlMixin, HavneafgiftView, FormView
+):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self._cruise_tax_form = CruiseTaxForm.objects.get(pk=kwargs["pk"])
+        pk = kwargs["pk"]
+        qs = CruiseTaxForm.filter_user_permissions(
+            CruiseTaxForm.objects.filter(pk=pk, status=Status.DRAFT),
+            request.user,
+            "view",
+        )
+        try:
+            self._cruise_tax_form = qs.get(pk=pk)
+        except CruiseTaxForm.DoesNotExist:
+            self._cruise_tax_form = None
+
+    def get(self, request, *args, **kwargs):
+        response = self._check_permission() or super().get(request, *args, **kwargs)
+        return self.prevent_response_caching(response)
+
+    def post(self, request, *args, **kwargs):
+        return self._check_permission() or super().post(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         factory = formset_factory(
@@ -199,6 +222,12 @@ class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
             extra=0,
         )
         return factory(**self.get_form_kwargs())
+
+    def _check_permission(self):
+        if self._cruise_tax_form is None:
+            return HttpResponseForbidden(
+                _("This form was already submitted and can no longer be edited")
+            )
 
 
 class PassengerTaxCreateView(_CruiseTaxFormSetView):
@@ -418,7 +447,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return None
 
 
-class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
+class HarborDuesFormUpdateView(HarborDuesFormMixin, CacheControlMixin, UpdateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
@@ -446,7 +475,8 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
                 reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
             )
         else:
-            return super().get(self, request, *args, **kwargs)
+            response = super().get(self, request, *args, **kwargs)
+            return self.prevent_response_caching(response)
 
     def get_template_names(self):
         return ["havneafgifter/harborduesform_form.html"]
