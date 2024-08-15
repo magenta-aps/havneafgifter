@@ -913,6 +913,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             return filter_by_port_authority & filter_by_port
 
     def _has_port_authority_permission(self, user: User) -> bool:
+        # Shortcut check if various nullable fields are indeed NULL
+        if self.port_of_call is None:
+            return False
+        if getattr(self.port_of_call, "portauthority", None) is None:
+            return False
+        if user.port_authority is None:
+            return False
+
         if user.port is None:
             # This port authority user has access to *all* ports belonging to the
             # port authority.

@@ -532,6 +532,29 @@ class CruiseTaxFormPermissionTest(PermissionTest):
             set(),
         )
 
+    def test_has_port_authority_permission_handles_nullable_fields(self):
+        # 1. Test `User` without `PortAuthority`
+        user_without_port_authority = User(port_authority=None)
+        self.assertFalse(
+            self.item._has_port_authority_permission(user_without_port_authority)
+        )
+        # 2. Test form without a port of call
+        form_without_port_of_call = CruiseTaxForm(port_of_call=None)
+        self.assertFalse(
+            form_without_port_of_call._has_port_authority_permission(
+                self.port_manager_user
+            )
+        )
+        # 3. Test form whose port of call has no `PortAuthority`
+        form_without_port_authority = CruiseTaxForm(
+            port_of_call=Port(name="Port", portauthority=None)
+        )
+        self.assertFalse(
+            form_without_port_authority._has_port_authority_permission(
+                self.port_manager_user
+            )
+        )
+
 
 class CruiseTaxFormPortUserPermissionTest(PermissionTest):
     @classmethod
