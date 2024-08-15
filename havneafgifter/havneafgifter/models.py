@@ -165,6 +165,24 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
     )
 
+    def clean(self):
+        if self.port is not None:
+            if self.port_authority is None:
+                raise ValidationError(
+                    _("You must specify a port authority if a port is specified")
+                )
+            else:
+                port_belongs_to_port_authority = self.port_authority.port_set.filter(
+                    pk=self.port.pk
+                ).exists()
+                if not port_belongs_to_port_authority:
+                    raise ValidationError(
+                        _(
+                            "The port specified must belong to the selected "
+                            "port authority"
+                        )
+                    )
+
     @property
     def group_names(self):
         return [group.name for group in self.groups.all()]
