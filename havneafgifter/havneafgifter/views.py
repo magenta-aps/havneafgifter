@@ -61,6 +61,7 @@ from havneafgifter.models import (
     Port,
     ShipType,
     Status,
+    TaxRates,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable, TaxRateTable
 from havneafgifter.view_mixins import (
@@ -586,7 +587,7 @@ class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableVie
         ).order_by(self.ordering_criteria, "-date")
 
 
-class HarborTaxRateListView(LoginRequiredMixin, PermissionsMixin, SingleTableView):
+class HarborTaxRateListView(LoginRequiredMixin, SingleTableView):
     table_class = TaxRateTable
 
     def get_queryset(self):
