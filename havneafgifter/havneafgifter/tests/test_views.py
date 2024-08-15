@@ -1151,7 +1151,11 @@ class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.instance = cls.view_class()
+        # Below two taxrates are added. The second one is 1 hour in the future.
         cls.taxrate = TaxRates.objects.create(start_datetime=datetime.now())
+        cls.taxrate2 = TaxRates.objects.create(
+            start_datetime=datetime.now().replace(hour=(datetime.now().hour + 1) % 24)
+        )
 
     def _setup(self, user):
         get_request = self.request_factory.get("")
@@ -1163,5 +1167,10 @@ class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
         request = self._setup(self.ship_user)
         response = self.instance.get(request)
         rows = response.context_data["table"].rows
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0].record, self.taxrate)
+        self.assertEqual(len(rows), 2)  # check if both rates were added
+        self.assertEqual(
+            rows[0].record, self.taxrate
+        )  # check that the objects are actually the same
+        self.assertEqual(rows[1].record, self.taxrate2)
+        # check that the entries are ordered by start_datetime
+        self.assertLess(rows[0].record.start_datetime, rows[1].record.start_datetime)
