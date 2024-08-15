@@ -163,12 +163,12 @@ class PermissionTest(TestCase):
             )
             self.assertTrue(
                 item.has_permission(user, action, False),
-                f"{classname}.has_permissions for user '{user}', "
+                f"{classname}.has_permission for user '{user}', "
                 f"action '{action}' did not return True",
             )
             self.assertTrue(
                 user.has_perm(perm_name, item),
-                f"User.has_permissions for user '{user}' on object "
+                f"User.has_perm for user '{user}' on object "
                 f"'{item}', action '{action}' did not return True",
             )
             self.assertIn(
@@ -186,12 +186,12 @@ class PermissionTest(TestCase):
             )
             self.assertFalse(
                 item.has_permission(user, action, False),
-                f"{classname}.has_permissions for user '{user}', "
+                f"{classname}.has_permission for user '{user}', "
                 f"action '{action}' did not return False",
             )
             self.assertFalse(
                 user.has_perm(perm_name, item),
-                f"User.has_permissions for user '{user}' on object "
+                f"User.has_perm for user '{user}' on object "
                 f"'{item}', action '{action}' did not return False",
             )
             self.assertNotIn(
@@ -455,7 +455,7 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "approve", True)
         self._test_access(user, self.item, "reject", True)
         self._test_access(user, self.item, "invoice", True)
-        # Portmanager may not see or change form for another port
+        # Portmanager may not see or change form from another port authority
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
