@@ -1,7 +1,6 @@
 import copy
 from datetime import datetime
 from decimal import Decimal
-from unittest import TestCase
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlencode
 
@@ -17,7 +16,7 @@ from django.http import (
     HttpResponseNotFound,
     HttpResponseRedirect,
 )
-from django.test import RequestFactory
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django_tables2.rows import BoundRows
 from unittest_parametrize import ParametrizedTestCase, parametrize
