@@ -150,6 +150,13 @@ class User(AbstractUser):
         related_name="users",
         on_delete=models.SET_NULL,
     )
+    port = models.ForeignKey(
+        "Port",
+        null=True,
+        blank=True,
+        related_name="users",
+        on_delete=models.SET_NULL,
+    )
     shipping_agent = models.ForeignKey(
         "ShippingAgent",
         null=True,
