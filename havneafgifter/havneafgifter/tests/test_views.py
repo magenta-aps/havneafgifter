@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlencode
@@ -1154,7 +1154,7 @@ class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
         # Below two taxrates are added. The second one is 1 hour in the future.
         cls.taxrate = TaxRates.objects.create(start_datetime=datetime.now())
         cls.taxrate2 = TaxRates.objects.create(
-            start_datetime=datetime.now().replace(hour=(datetime.now().hour + 1) % 24)
+            start_datetime=datetime.now() + timedelta(seconds=3600)
         )
 
     def _setup(self, user):
@@ -1174,3 +1174,5 @@ class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
         self.assertEqual(rows[1].record, self.taxrate2)
         # check that the entries are ordered by start_datetime
         self.assertLess(rows[0].record.start_datetime, rows[1].record.start_datetime)
+        # check that the previous end_datetime is inferred as expected
+        self.assertEqual(rows[0].record.end_datetime, rows[1].record.start_datetime)
