@@ -2,7 +2,7 @@ from csp_helpers.mixins import CSPViewMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
@@ -162,3 +162,14 @@ class HarborDuesFormMixin(
                 setattr(cruise_tax_form, k, v)
             cruise_tax_form.save()
             return cruise_tax_form
+
+
+class CacheControlMixin:
+    def prevent_response_caching(self, response: HttpResponse) -> HttpResponse:
+        # Ensure that when/if users go back to this view from the receipt page,
+        # their browser does not show a cached response (which may present them with a
+        # seemingly "editable" form that cannot be submitted if the form status is NEW.
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        return response
