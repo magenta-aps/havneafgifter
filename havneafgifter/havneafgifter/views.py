@@ -226,7 +226,7 @@ class _CruiseTaxFormSetView(
     def _check_permission(self):
         if self._cruise_tax_form is None:
             return HttpResponseForbidden(
-                _("You do not have permission to edit this cruise tax form")
+                _("This form was already submitted and can no longer be edited")
             )
 
 

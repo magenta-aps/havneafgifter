@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-14 07:33-0100\n"
+"POT-Creation-Date: 2024-08-15 06:54-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -904,6 +904,11 @@ msgstr "Du har ikke de fornødne rettigheder til at indsende en blanket"
 #: havneafgifter/views.py
 msgid "Please sign in using the IMO number as username"
 msgstr "Log venligst ind med IMO-nummeret som brugernavn"
+
+#: havneafgifter/views.py
+msgid "This form was already submitted and can no longer be edited"
+msgstr ""
+"Denne blanket er allerede blevet indsendt, og kan ikke længere redigeres"
 
 #: havneafgifter/views.py
 msgid "You do not have the required permissions to approve harbor dues forms"
