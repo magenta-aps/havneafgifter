@@ -68,10 +68,21 @@ class PermissionTest(TestCase):
         )
         cls.agent_user.groups.add(Group.objects.get(name="Shipping"))
 
+        # Port authority user which can access all forms related to *all* ports managed
+        # by this port authority.
         cls.port_manager_user = User.objects.create(
             username="manager", port_authority=cls.port_authority
         )
         cls.port_manager_user.groups.add(Group.objects.get(name="PortAuthority"))
+
+        # Port authority user which can access all forms related to *all* ports managed
+        # by this port authority.
+        cls.port_user = User.objects.create(
+            username="port",
+            port_authority=cls.port_authority,
+            port=cls.port,
+        )
+        cls.port_user.groups.add(Group.objects.get(name="PortAuthority"))
 
         cls.tax_user = User.objects.create(username="skattefar")
         cls.tax_user.groups.add(Group.objects.get(name="TaxAuthority"))
@@ -520,6 +531,40 @@ class CruiseTaxFormPermissionTest(PermissionTest):
             self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
+
+
+class CruiseTaxFormPortUserPermissionTest(PermissionTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.port_other.portauthority = cls.port_authority
+        cls.port_other.save()
+
+    @property
+    def item(self):
+        return self.form
+
+    @property
+    def other_item(self):
+        # This form has the same port authority, but a different port than `self.item`
+        return self.form_other
+
+    def test_port_user(self):
+        user = self.port_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", True)
+        self._test_access(user, self.item, "reject", True)
+        self._test_access(user, self.item, "invoice", True)
+        # Port user may not see or change form from another port within the same
+        # port authority.
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
 
 
 class PassengersByCountryPermissionTest(PermissionTest):
