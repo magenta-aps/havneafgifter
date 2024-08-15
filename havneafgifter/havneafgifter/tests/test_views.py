@@ -221,6 +221,10 @@ class RequestMixin:
         self.instance.request = request
         return request
 
+    def _assert_response_prevents_caching(self, response):
+        self.assertIn("no-cache", response.headers["Cache-Control"])
+        self.assertIn("must-revalidate", response.headers["Cache-Control"])
+
 
 class TestHarborDuesFormCreateView(
     ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
@@ -232,6 +236,11 @@ class TestHarborDuesFormCreateView(
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.instance = cls.view_class()
+
+    def test_response_prevents_caching(self):
+        self.client.force_login(self.shipping_agent_user)
+        response = self.client.get(reverse("havneafgifter:harbor_dues_form_create"))
+        self._assert_response_prevents_caching(response)
 
     @parametrize(
         "vessel_type,no_port_of_call,model_class,next_view_name",
@@ -389,9 +398,8 @@ class TestCruiseTaxFormSetView(
         get_response = self.instance.get(self._get(user))
         post_response = self.instance.post(self._post_formset(user=user, **extra))
         self.assertIsInstance(get_response, expected_response_class)
-        self.assertIn("no-cache", get_response.headers["Cache-Control"])
-        self.assertIn("must-revalidate", get_response.headers["Cache-Control"])
         self.assertIsInstance(post_response, expected_response_class)
+        self._assert_response_prevents_caching(get_response)
 
     def _call_setup(self, username: str, is_draft: bool) -> tuple[User, CruiseTaxForm]:
         user = User.objects.get(username=username)
@@ -977,7 +985,9 @@ class StatisticsTest(TestCase):
         )
 
 
-class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestHarborDuesFormUpdateView(
+    ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
+):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -990,6 +1000,7 @@ class TestHarborDuesFormUpdateView(ParametrizedTestCase, HarborDuesFormMixin, Te
             self._get_update_view_url(self.harbor_dues_draft_form.pk)
         )
         self.assertEqual(response.status_code, 200)
+        self._assert_response_prevents_caching(response)
 
     def test_redirect_from_non_draft_form(self):
         self.client.force_login(self.user)

@@ -65,6 +65,7 @@ from havneafgifter.models import (
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable
 from havneafgifter.view_mixins import (
+    CacheControlMixin,
     GetFormView,
     HarborDuesFormMixin,
     HavneafgiftView,
@@ -177,12 +178,18 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
-class HarborDuesFormCreateView(HarborDuesFormMixin, CreateView):
+class HarborDuesFormCreateView(HarborDuesFormMixin, CacheControlMixin, CreateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return self.prevent_response_caching(response)
 
-class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
+
+class _CruiseTaxFormSetView(
+    LoginRequiredMixin, CacheControlMixin, HavneafgiftView, FormView
+):
     """Shared base class for views that create a set of model objects related
     to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
     """
@@ -202,13 +209,7 @@ class _CruiseTaxFormSetView(LoginRequiredMixin, HavneafgiftView, FormView):
 
     def get(self, request, *args, **kwargs):
         response = self._check_permission() or super().get(request, *args, **kwargs)
-        # Ensure that when/if users go back to this view from the receipt page,
-        # their browser does not show a cached response (which may present them with a
-        # seemingly "editable" form that cannot be submitted if the form status is NEW.
-        response.headers["Cache-Control"] = (
-            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
-        )
-        return response
+        return self.prevent_response_caching(response)
 
     def post(self, request, *args, **kwargs):
         return self._check_permission() or super().post(request, *args, **kwargs)
@@ -446,7 +447,7 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return None
 
 
-class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
+class HarborDuesFormUpdateView(HarborDuesFormMixin, CacheControlMixin, UpdateView):
     model = HarborDuesForm
     form_class = HarborDuesFormForm
 
@@ -474,7 +475,8 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, UpdateView):
                 reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
             )
         else:
-            return super().get(self, request, *args, **kwargs)
+            response = super().get(self, request, *args, **kwargs)
+            return self.prevent_response_caching(response)
 
     def get_template_names(self):
         return ["havneafgifter/harborduesform_form.html"]
