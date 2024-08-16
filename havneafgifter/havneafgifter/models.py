@@ -210,6 +210,27 @@ class User(AbstractUser):
         if self.has_group_name("Ship"):
             return UserType.SHIP
 
+    @property
+    def display_name(self) -> str:
+        if self.user_type == UserType.SHIP:
+            # "<IMO number> / <Vessel name>"
+            return f"{self.username} / {self.organization}"
+        elif self.user_type == UserType.SHIPPING_AGENT:
+            # "<Username> / <Agent name>"
+            return f"{self.username} / {self.shipping_agent.name}"
+        elif self.user_type == UserType.PORT_AUTHORITY:
+            if self.port is None:
+                # "<Authority name> / admin"
+                return f"{self.port_authority.name} / admin"
+            else:
+                # "<Port name> / <Authority name>"
+                return f"{self.port.name} / {self.port_authority.name}"
+        elif self.user_type == UserType.TAX_AUTHORITY:
+            # "AKA - <E-mail>"
+            return f"AKA - {self.email}"
+        else:
+            return self.username
+
 
 class PermissionsMixin(models.Model):
     class Meta:

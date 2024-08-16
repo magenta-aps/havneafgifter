@@ -26,7 +26,7 @@ class HarborDuesFormMixin:
         cls._load_initial_disembarkment_sites()
 
         cls.port_authority = PortAuthority.objects.create(
-            email="portauthority@example.org"
+            name="Havnemyndighed 1", email="portauthority@example.org"
         )
         cls.port = Port.objects.create(
             name="Nordhavn", portauthority=cls.port_authority
@@ -35,17 +35,26 @@ class HarborDuesFormMixin:
             name="Agent", email="shipping@example.org"
         )
 
+        cls.tax_authority_user = User.objects.create(
+            username="tax", email="tax@example.org"
+        )
+        cls.tax_authority_user.groups.add(Group.objects.get(name="TaxAuthority"))
         cls.port_authority_user = User.objects.create(
             username="port_auth", port_authority=cls.port_authority
         )
-        cls.port_authority_user.groups.add(Group.objects.get(name="PortAuthority"))
+        cls.port_user = User.objects.create(
+            username="port_user",
+            port_authority=cls.port_authority,
+            port=cls.port,
+        )
+        for user in (cls.port_authority_user, cls.port_user):
+            user.groups.add(Group.objects.get(name="PortAuthority"))
 
         cls.shipping_agent_user = User.objects.create(
             username="shipping_agent", shipping_agent=cls.shipping_agent
         )
         cls.shipping_agent_user.groups.add(Group.objects.get(name="Shipping"))
-
-        cls.ship_user = User.objects.create(username="9074729")
+        cls.ship_user = User.objects.create(username="9074729", organization="Mary")
         cls.ship_user.groups.add(Group.objects.get(name="Ship"))
 
         # Valid data for creating a "ship user" `User` instance
