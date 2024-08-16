@@ -790,6 +790,14 @@ class StatisticsTest(TestCase):
         response = self.client.get(self.url + "?" + urlencode(filter, doseq=True))
         return response.context_data["table"].rows
 
+    def test_no_access(self):
+        user = User.objects.create(username="intruder", is_superuser=False)
+        self.client.force_login(user)
+        response = self.client.get(
+            self.url + "?" + urlencode({"municipality": 800}, doseq=True)
+        )
+        self.assertEqual(response.status_code, 403)
+
     def test_filter_invalid(self):
         rows = self.get_rows(municipality=800)
         self.assertEqual(len(rows), 0)
