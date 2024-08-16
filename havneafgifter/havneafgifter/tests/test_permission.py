@@ -68,10 +68,21 @@ class PermissionTest(TestCase):
         )
         cls.agent_user.groups.add(Group.objects.get(name="Shipping"))
 
+        # Port authority user which can access all forms related to *all* ports managed
+        # by this port authority.
         cls.port_manager_user = User.objects.create(
             username="manager", port_authority=cls.port_authority
         )
         cls.port_manager_user.groups.add(Group.objects.get(name="PortAuthority"))
+
+        # Port authority user which can access all forms related to *all* ports managed
+        # by this port authority.
+        cls.port_user = User.objects.create(
+            username="port",
+            port_authority=cls.port_authority,
+            port=cls.port,
+        )
+        cls.port_user.groups.add(Group.objects.get(name="PortAuthority"))
 
         cls.tax_user = User.objects.create(username="skattefar")
         cls.tax_user.groups.add(Group.objects.get(name="TaxAuthority"))
@@ -152,12 +163,12 @@ class PermissionTest(TestCase):
             )
             self.assertTrue(
                 item.has_permission(user, action, False),
-                f"{classname}.has_permissions for user '{user}', "
+                f"{classname}.has_permission for user '{user}', "
                 f"action '{action}' did not return True",
             )
             self.assertTrue(
                 user.has_perm(perm_name, item),
-                f"User.has_permissions for user '{user}' on object "
+                f"User.has_perm for user '{user}' on object "
                 f"'{item}', action '{action}' did not return True",
             )
             self.assertIn(
@@ -175,12 +186,12 @@ class PermissionTest(TestCase):
             )
             self.assertFalse(
                 item.has_permission(user, action, False),
-                f"{classname}.has_permissions for user '{user}', "
+                f"{classname}.has_permission for user '{user}', "
                 f"action '{action}' did not return False",
             )
             self.assertFalse(
                 user.has_perm(perm_name, item),
-                f"User.has_permissions for user '{user}' on object "
+                f"User.has_perm for user '{user}' on object "
                 f"'{item}', action '{action}' did not return False",
             )
             self.assertNotIn(
@@ -444,7 +455,7 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "approve", True)
         self._test_access(user, self.item, "reject", True)
         self._test_access(user, self.item, "invoice", True)
-        # Portmanager may not see or change form for another port
+        # Portmanager may not see or change form from another port authority
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
@@ -520,6 +531,63 @@ class CruiseTaxFormPermissionTest(PermissionTest):
             self.backend.get_group_permissions(user, self.other_item),
             set(),
         )
+
+    def test_has_port_authority_permission_handles_nullable_fields(self):
+        # 1. Test `User` without `PortAuthority`
+        user_without_port_authority = User(port_authority=None)
+        self.assertFalse(
+            self.item._has_port_authority_permission(user_without_port_authority)
+        )
+        # 2. Test form without a port of call
+        form_without_port_of_call = CruiseTaxForm(port_of_call=None)
+        self.assertFalse(
+            form_without_port_of_call._has_port_authority_permission(
+                self.port_manager_user
+            )
+        )
+        # 3. Test form whose port of call has no `PortAuthority`
+        form_without_port_authority = CruiseTaxForm(
+            port_of_call=Port(name="Port", portauthority=None)
+        )
+        self.assertFalse(
+            form_without_port_authority._has_port_authority_permission(
+                self.port_manager_user
+            )
+        )
+
+
+class CruiseTaxFormPortUserPermissionTest(PermissionTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.port_other.portauthority = cls.port_authority
+        cls.port_other.save()
+
+    @property
+    def item(self):
+        return self.form
+
+    @property
+    def other_item(self):
+        # This form has the same port authority, but a different port than `self.item`
+        return self.form_other
+
+    def test_port_user(self):
+        user = self.port_user
+        self._test_access(user, self.item, "view", True)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "approve", True)
+        self._test_access(user, self.item, "reject", True)
+        self._test_access(user, self.item, "invoice", True)
+        # Port user may not see or change form from another port within the same
+        # port authority.
+        self._test_access(user, self.other_item, "view", False)
+        self._test_access(user, self.other_item, "change", False)
+        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "approve", False)
+        self._test_access(user, self.other_item, "reject", False)
+        self._test_access(user, self.other_item, "invoice", False)
 
 
 class PassengersByCountryPermissionTest(PermissionTest):

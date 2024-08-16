@@ -216,7 +216,10 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
-        (_("This user belongs to"), {"fields": ("port_authority", "shipping_agent")}),
+        (
+            _("This user belongs to"),
+            {"fields": ("port_authority", "port", "shipping_agent")},
+        ),
     )
     list_display = (
         "username",

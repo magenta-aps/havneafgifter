@@ -184,6 +184,30 @@ class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         self.assertEqual(instance.tax_per_gross_ton, expected_tax_per_gross_ton)
 
 
+class TestUser(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.other_port_authority = PortAuthority.objects.create(
+            email="other@example.org"
+        )
+
+    def test_port_user_must_have_port_authority(self):
+        instance = User(port=self.port, port_authority=None)
+        with self.assertRaisesRegex(
+            ValidationError, "specify a port authority if a port is specified"
+        ):
+            instance.clean()
+
+    def test_port_must_belong_to_port_authority(self):
+        instance = User(port=self.port, port_authority=self.other_port_authority)
+        with self.assertRaisesRegex(
+            ValidationError,
+            "port specified must belong to the selected port authority",
+        ):
+            instance.clean()
+
+
 class TestUserType(TestCase):
     @classmethod
     def setUpTestData(cls):
