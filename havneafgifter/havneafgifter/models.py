@@ -212,22 +212,33 @@ class User(AbstractUser):
 
     @property
     def display_name(self) -> str:
+        # Ship users
         if self.user_type == UserType.SHIP:
             # "<IMO number> / <Vessel name>"
             return f"{self.username} / {self.organization}"
-        elif self.user_type == UserType.SHIPPING_AGENT:
+        # Shipping agent users
+        elif (
+            self.user_type == UserType.SHIPPING_AGENT
+            and self.shipping_agent is not None
+        ):
             # "<Username> / <Agent name>"
             return f"{self.username} / {self.shipping_agent.name}"
-        elif self.user_type == UserType.PORT_AUTHORITY:
+        # Port authority users: admin and individual port users
+        elif (
+            self.user_type == UserType.PORT_AUTHORITY
+            and self.port_authority is not None
+        ):
             if self.port is None:
                 # "<Authority name> / admin"
                 return f"{self.port_authority.name} / admin"
             else:
                 # "<Port name> / <Authority name>"
                 return f"{self.port.name} / {self.port_authority.name}"
+        # Tax authority users
         elif self.user_type == UserType.TAX_AUTHORITY:
             # "AKA - <E-mail>"
             return f"AKA - {self.email}"
+        # Any other user type (including `None`)
         else:
             return self.username
 
