@@ -33,7 +33,7 @@ SPDX-License-Identifier: MPL-2.0
                 {% translate 'My forms' %}
             </a>
             <span class="navbar-text m-2 pt-2 ms-auto">
-                {{user.first_name}} {{user.last_name}}
+                {{ user.display_name }}
             </span>
             {% if user.is_authenticated %}
             <a href="{% url 'havneafgifter:logout' %}" class="btn btn-primary mx-1 my-2" id="logout-link">
