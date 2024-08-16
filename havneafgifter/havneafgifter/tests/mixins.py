@@ -56,6 +56,7 @@ class HarborDuesFormMixin:
         cls.shipping_agent_user.groups.add(Group.objects.get(name="Shipping"))
         cls.ship_user = User.objects.create(username="9074729", organization="Mary")
         cls.ship_user.groups.add(Group.objects.get(name="Ship"))
+        cls.unprivileged_user = User.objects.create(username="unprivileged")
 
         # Valid data for creating a "ship user" `User` instance
         cls.ship_user_form_data = {
