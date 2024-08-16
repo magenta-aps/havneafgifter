@@ -242,6 +242,31 @@ class User(AbstractUser):
         else:
             return self.username
 
+    @property
+    def can_create(self) -> bool:
+        user_type: UserType | None = getattr(self, "user_type", None)
+        if user_type is None:
+            return False
+        else:
+            return user_type in (
+                UserType.SHIP,
+                UserType.SHIPPING_AGENT,
+                UserType.SUPERUSER,
+            )
+
+    @property
+    def can_view_list(self) -> bool:
+        # All user types can see (links to the) form list (for now.)
+        return True
+
+    @property
+    def can_view_statistics(self) -> bool:
+        user_type: UserType | None = getattr(self, "user_type", None)
+        if user_type is None:
+            return False
+        else:
+            return user_type == UserType.TAX_AUTHORITY
+
 
 class PermissionsMixin(models.Model):
     class Meta:

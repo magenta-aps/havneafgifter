@@ -353,7 +353,6 @@ class TestCruiseTaxFormSetView(
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls._unprivileged_user = User.objects.create(username="unprivileged")
         cls.request_factory = RequestFactory()
         cls.instance = cls.view_class()
         cls.instance._cruise_tax_form = cls.cruise_tax_draft_form
@@ -441,7 +440,7 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
             total_number_of_passengers=0,
         )
         self._assert_response(
-            self._unprivileged_user.username,
+            self.unprivileged_user.username,
             HttpResponseForbidden,
             total_number_of_passengers=0,
         )
@@ -543,7 +542,7 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
 
     def test_permissions_checked(self):
         self._assert_response(self.shipping_agent_user.username, HttpResponse)
-        self._assert_response(self._unprivileged_user.username, HttpResponseForbidden)
+        self._assert_response(self.unprivileged_user.username, HttpResponseForbidden)
 
     def test_get_form_returns_expected_formset(self):
         self._assert_get_form_returns_expected_formset()

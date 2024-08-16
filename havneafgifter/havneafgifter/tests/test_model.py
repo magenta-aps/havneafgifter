@@ -227,6 +227,35 @@ class TestUser(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         actual_display_name = user.display_name
         self.assertEqual(actual_display_name, expected_display_name)
 
+    @parametrize(
+        "username,can_create,can_view_list,can_view_statistics",
+        [
+            # Ship user
+            ("9074729", True, True, False),
+            # Shipping user
+            ("shipping_agent", True, True, False),
+            # Port authority user
+            ("port_auth", False, True, False),
+            # Port user
+            ("port_user", False, True, False),
+            # Tax authority user
+            ("tax", False, True, True),
+            # User without user type
+            ("unprivileged", False, True, False),
+        ],
+    )
+    def test_can_create_etc(
+        self,
+        username: str | None,
+        can_create: bool,
+        can_view_list: bool,
+        can_view_statistics: bool,
+    ):
+        user = User.objects.get(username=username)
+        self.assertEqual(can_create, user.can_create)
+        self.assertEqual(can_view_list, user.can_view_list)
+        self.assertEqual(can_view_statistics, user.can_view_statistics)
+
 
 class TestUserType(TestCase):
     @classmethod
