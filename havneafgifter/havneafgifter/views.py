@@ -58,7 +58,6 @@ from havneafgifter.models import (
     Municipality,
     Nationality,
     PassengersByCountry,
-    PermissionsMixin,
     Port,
     ShipType,
     Status,
@@ -566,9 +565,7 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         return reverse("havneafgifter:harbor_dues_form_list")
 
 
-class HarborDuesFormListView(
-    LoginRequiredMixin, PermissionsMixin, HavneafgiftView, SingleTableView
-):
+class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableView):
     table_class = HarborDuesFormTable
 
     custom_order = [Status.DRAFT, Status.NEW, Status.DONE]
@@ -589,12 +586,20 @@ class HarborDuesFormListView(
         ).order_by(self.ordering_criteria, "-date")
 
 
-class StatisticsView(
-    LoginRequiredMixin, PermissionsMixin, CSPViewMixin, SingleTableMixin, GetFormView
-):
+class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetFormView):
     form_class = StatisticsForm
     template_name = "havneafgifter/statistik.html"
     table_class = StatistikTable
+
+    def dispatch(self, request, *args, **kwargs):
+        if (
+            "havneafgifter.view_harborduesform"
+            not in request.user.get_all_permissions()
+        ):
+            return HttpResponseForbidden(
+                _("You do not have the required permissions to view statistics")
+            )
+        return super().dispatch(request, *args, **kwargs)
 
     def get_table_data(self):
         form = self.get_form()
