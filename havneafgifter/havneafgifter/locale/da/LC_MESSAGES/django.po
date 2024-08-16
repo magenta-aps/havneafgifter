@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-15 06:54-0100\n"
+"POT-Creation-Date: 2024-08-15 10:35-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -169,6 +169,14 @@ msgstr "Havnemyndighed for skibe uden ankomsthavn"
 #: havneafgifter/models.py
 msgid "Tax Authority"
 msgstr "Skattestyrelsen"
+
+#: havneafgifter/models.py
+msgid "You must specify a port authority if a port is specified"
+msgstr "Angiv venligst en havnemyndighed, hvis en havn er valgt"
+
+#: havneafgifter/models.py
+msgid "The port specified must belong to the selected port authority"
+msgstr "Angiv venligst en havn, der administreres af den valgte havnemyndighed"
 
 #: havneafgifter/models.py
 msgid "Freighter"

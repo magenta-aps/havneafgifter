@@ -47,7 +47,7 @@ fi
 
 if [ "${CREATE_DUMMY_ADMIN}" = true ]; then
   echo 'creating superuser'
-  ./manage.py createuser admin admin -S
+  ./manage.py createuser admin admin -sS
 fi
 
 if [ "${CREATE_DUMMY_USERS}" = true ]; then

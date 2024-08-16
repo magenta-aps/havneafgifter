@@ -150,6 +150,13 @@ class User(AbstractUser):
         related_name="users",
         on_delete=models.SET_NULL,
     )
+    port = models.ForeignKey(
+        "Port",
+        null=True,
+        blank=True,
+        related_name="users",
+        on_delete=models.SET_NULL,
+    )
     shipping_agent = models.ForeignKey(
         "ShippingAgent",
         null=True,
@@ -157,6 +164,24 @@ class User(AbstractUser):
         related_name="users",
         on_delete=models.SET_NULL,
     )
+
+    def clean(self):
+        if self.port is not None:
+            if self.port_authority is None:
+                raise ValidationError(
+                    _("You must specify a port authority if a port is specified")
+                )
+            else:
+                port_belongs_to_port_authority = self.port_authority.port_set.filter(
+                    pk=self.port.pk
+                ).exists()
+                if not port_belongs_to_port_authority:
+                    raise ValidationError(
+                        _(
+                            "The port specified must belong to the selected "
+                            "port authority"
+                        )
+                    )
 
     @property
     def group_names(self):
@@ -871,6 +896,43 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return recipient_list.recipient_emails
 
     @classmethod
+    def _get_port_authority_filter(cls, user: User) -> Q:
+        filter_by_port_authority: Q = Q(
+            port_of_call__portauthority__isnull=False,
+            port_of_call__portauthority_id=user.port_authority_id,
+        )
+
+        if user.port is None:
+            # This port authority user has access to *all* ports belonging to the
+            # port authority.
+            return filter_by_port_authority
+        else:
+            # This port authority user has access to *a specific* port belonging to the
+            # port authority.
+            filter_by_port: Q = Q(port_of_call=user.port)
+            return filter_by_port_authority & filter_by_port
+
+    def _has_port_authority_permission(self, user: User) -> bool:
+        # Shortcut check if various nullable fields are indeed NULL
+        if self.port_of_call is None:
+            return False
+        if getattr(self.port_of_call, "portauthority", None) is None:
+            return False
+        if user.port_authority is None:
+            return False
+
+        if user.port is None:
+            # This port authority user has access to *all* ports belonging to the
+            # port authority.
+            return user.port_authority == self.port_of_call.portauthority
+        else:
+            # This port authority user has access to *a specific* port belonging to the
+            # port authority.
+            return (user.port_authority == self.port_of_call.portauthority) and (
+                user.port == self.port_of_call
+            )
+
+    @classmethod
     def _filter_user_permissions(
         cls, qs: QuerySet, user: User, action: str
     ) -> QuerySet | None:
@@ -885,9 +947,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     shipping_agent_id=user.shipping_agent_id
                 )
             if user.has_group_name("PortAuthority"):
-                filter |= Q(port_of_call__portauthority__isnull=False) & Q(
-                    port_of_call__portauthority_id=user.port_authority_id
-                )
+                filter |= cls._get_port_authority_filter(user)
             if user.has_group_name("Ship") and imo_validator_bool(user.username):
                 filter |= Q(vessel_imo=user.username)
 
@@ -900,10 +960,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             "invoice",
         ):
             if user.has_group_name("PortAuthority"):
-                return qs.filter(
-                    port_of_call__portauthority__isnull=False,
-                    port_of_call__portauthority_id=user.port_authority_id,
-                )
+                return qs.filter(cls._get_port_authority_filter(user))
         return qs.none()
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
@@ -914,7 +971,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     (self.port_of_call is None)
                     or (
                         user.has_group_name("PortAuthority")
-                        and user.port_authority == self.port_of_call.portauthority
+                        and self._has_port_authority_permission(user)
                     )
                     or (
                         user.has_group_name("Shipping")
@@ -937,7 +994,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     (self.port_of_call is None)
                     or (
                         user.has_group_name("PortAuthority")
-                        and user.port_authority == self.port_of_call.portauthority
+                        and self._has_port_authority_permission(user)
                     )
                 )
             )
