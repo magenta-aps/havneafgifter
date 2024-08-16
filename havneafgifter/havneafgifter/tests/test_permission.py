@@ -19,6 +19,7 @@ from havneafgifter.models import (
     PortTaxRate,
     ShippingAgent,
     ShipType,
+    Status,
     TaxRates,
     User,
 )
@@ -92,6 +93,7 @@ class PermissionTest(TestCase):
             username="lazy_bastard", is_active=False
         )
         cls.form = CruiseTaxForm.objects.create(
+            status=Status.NEW,
             port_of_call=cls.port,
             nationality=Nationality.DENMARK,
             vessel_name="Naglfar",
@@ -106,6 +108,7 @@ class PermissionTest(TestCase):
             number_of_passengers=5000,
         )
         cls.form_other = CruiseTaxForm.objects.create(
+            status=Status.NEW,
             port_of_call=cls.port_other,
             nationality=Nationality.DENMARK,
             vessel_name="Naglfar",

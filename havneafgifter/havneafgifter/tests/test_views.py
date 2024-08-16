@@ -362,7 +362,7 @@ class TestCruiseTaxFormSetView(
         [
             ("shipping_agent", True, True),
             ("shipping_agent", False, False),
-            ("port_auth", True, True),
+            ("port_auth", True, False),
             ("port_auth", False, False),
         ],
     )
