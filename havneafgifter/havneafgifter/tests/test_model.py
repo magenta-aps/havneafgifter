@@ -184,7 +184,7 @@ class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         self.assertEqual(instance.tax_per_gross_ton, expected_tax_per_gross_ton)
 
 
-class TestUser(HarborDuesFormMixin, TestCase):
+class TestUser(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -206,6 +206,26 @@ class TestUser(HarborDuesFormMixin, TestCase):
             "port specified must belong to the selected port authority",
         ):
             instance.clean()
+
+    @parametrize(
+        "username,expected_display_name",
+        [
+            # Ship user
+            ("9074729", "9074729 / Mary"),
+            # Shipping user
+            ("shipping_agent", "shipping_agent / Agent"),
+            # Port authority user
+            ("port_auth", "Havnemyndighed 1 / admin"),
+            # Port user
+            ("port_user", "Nordhavn / Havnemyndighed 1"),
+            # Tax authority user
+            ("tax", "AKA - tax@example.org"),
+        ],
+    )
+    def test_display_name(self, username, expected_display_name):
+        user = User.objects.get(username=username)
+        actual_display_name = user.display_name
+        self.assertEqual(actual_display_name, expected_display_name)
 
 
 class TestUserType(TestCase):
