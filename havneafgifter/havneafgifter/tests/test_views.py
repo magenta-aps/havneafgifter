@@ -1,5 +1,4 @@
 import copy
-from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
@@ -52,6 +51,7 @@ from havneafgifter.views import (
     RejectView,
     SignupVesselView,
     TaxRateDetailView,
+    TaxRateListView,
     _CruiseTaxFormSetView,
     _SendEmailMixin,
 )
@@ -1148,7 +1148,7 @@ class TestRejectView(TestActionViewMixin, TestCase):
 
 
 class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
-    view_class = HarborTaxRateListView
+    view_class = TaxRateListView
 
     @classmethod
     def setUpTestData(cls):
@@ -1236,11 +1236,9 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.client.force_login(self.ship_user)
 
     def test_the_thing_with_parameter(self):
-        print(TaxRates.objects.filter(pk=self.tax_rate.pk))
         response = self.client.get(
             reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk})
         )
-        print(response.content.decode("utf-8"))
         soup = BeautifulSoup(response.content, "html.parser")
         self.assertIn("somesitename", soup.get_text())
         self.assertIn("Kujalleq", soup.get_text())

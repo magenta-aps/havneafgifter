@@ -587,7 +587,7 @@ class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableVie
         ).order_by(self.ordering_criteria, "-date")
 
 
-class HarborTaxRateListView(LoginRequiredMixin, SingleTableView):
+class TaxRateListView(LoginRequiredMixin, SingleTableView):
     table_class = TaxRateTable
 
     def get_queryset(self):
