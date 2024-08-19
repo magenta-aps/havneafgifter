@@ -28,6 +28,31 @@
 
     <button class="btn btn-success my-2" type="submit">{% translate "Gem" %}</button>
 
+
+    <table class="borderless-table">
+        <thead>
+        <tr>
+            <th>{% translate "Afgifter pr. bruttoton" %}</th>
+            <th>{% translate "Fra (ton)" %}</th>
+            <th>{% translate "Til (ton)" %}</th>
+            <th>{% translate "Rund op til (ton)" %}</th>
+            <th>{% translate "Sats" %}</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for form in port_formset %}
+            <tr>
+                <td>{{form.instance.pk}}</td>
+                <td>{{form.gt_start}}</td>
+                <td>{{form.gt_end}}</td>
+                <td>{{form.round_gross_ton_up_to}}</td>
+                <td>{{form.port_tax_rate}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
 </form>
 
 

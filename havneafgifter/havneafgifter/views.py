@@ -41,6 +41,7 @@ from havneafgifter.forms import (
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    PortTaxRateFormSet,
     ReasonForm,
     SignupVesselForm,
     StatisticsForm,
@@ -803,3 +804,11 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
     form_class = TaxRateForm
     template_name = "havneafgifter/taxrateform.html"
     success_url = reverse_lazy("havneafgifter:edit_taxrate", kwargs={"pk": 1})
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{**kwargs, "port_formset": self.get_port_formset()}
+        )
+
+    def get_port_formset(self):
+        return PortTaxRateFormSet(self.request.POST or None, instance=self.object)

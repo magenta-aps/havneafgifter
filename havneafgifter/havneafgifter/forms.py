@@ -25,6 +25,7 @@ from django.forms import (
     TextInput,
     widgets,
 )
+from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -40,6 +41,7 @@ from havneafgifter.models import (
     Municipality,
     Nationality,
     Port,
+    PortTaxRate,
     ShippingAgent,
     ShipType,
     Status,
@@ -597,3 +599,14 @@ class TaxRateForm(ModelForm, BootstrapForm):
     class Meta:
         model = TaxRates
         exclude = ["end_datetime"]
+
+
+class PortTaxRateForm(ModelForm, BootstrapForm):
+    class Meta:
+        model = PortTaxRate
+        exclude = ["tax_rates"]
+
+
+PortTaxRateFormSet = inlineformset_factory(
+    parent_model=TaxRates, model=PortTaxRate, form=PortTaxRateForm, extra=0
+)
