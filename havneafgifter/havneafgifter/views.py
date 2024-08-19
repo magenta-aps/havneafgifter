@@ -569,7 +569,7 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
 class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableView):
     table_class = HarborDuesFormTable
 
-    custom_order = [Status.DRAFT, Status.NEW, Status.DONE]
+    custom_order = [Status.DRAFT, Status.NEW, Status.APPROVED, Status.REJECTED]
     ordering_criteria = Case(
         *[
             When(status=name, then=Value(index))
@@ -614,7 +614,7 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
     def get_table_data(self):
         form = self.get_form()
         if form.is_valid():
-            qs = HarborDuesForm.objects.filter(status=Status.DONE)
+            qs = HarborDuesForm.objects.filter(status=Status.APPROVED)
             group_fields = []
             shortcut_fields = {
                 "municipality": F(

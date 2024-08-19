@@ -737,7 +737,7 @@ class StatisticsTest(TestCase):
         call_command("load_fixtures", verbosity=1)
         ports = Port.objects.all().order_by("name")
         cls.form1 = HarborDuesForm.objects.create(
-            status=Status.DONE,
+            status=Status.APPROVED,
             port_of_call=ports[0],
             nationality=Nationality.DENMARK,
             vessel_name="Testbåd 1",
@@ -748,7 +748,7 @@ class StatisticsTest(TestCase):
             harbour_tax=Decimal("40000.00"),
         )
         cls.form2 = CruiseTaxForm.objects.create(
-            status=Status.DONE,
+            status=Status.APPROVED,
             port_of_call=ports[0],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 2",
@@ -766,7 +766,7 @@ class StatisticsTest(TestCase):
             disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
         )
         cls.form3 = CruiseTaxForm.objects.create(
-            status=Status.DONE,
+            status=Status.APPROVED,
             port_of_call=ports[1],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 3",

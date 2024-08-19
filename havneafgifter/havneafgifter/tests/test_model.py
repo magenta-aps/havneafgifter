@@ -352,16 +352,11 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         [
             (Status.NEW, "port_of_call", True),
             (Status.DRAFT, "port_of_call", False),
-            (Status.DONE, "port_of_call", True),
             (Status.NEW, "gross_tonnage", True),
             (Status.DRAFT, "gross_tonnage", False),
-            (Status.DONE, "gross_tonnage", True),
-            (Status.DONE, "datetime_of_arrival", True),
             (Status.DRAFT, "datetime_of_arrival", False),
-            (Status.DONE, "datetime_of_arrival", True),
             (Status.NEW, "datetime_of_departure", True),
             (Status.DRAFT, "datetime_of_departure", False),
-            (Status.DONE, "datetime_of_departure", True),
         ],
     )
     def test_fields_only_nullable_for_drafts(self, status, field, required):
