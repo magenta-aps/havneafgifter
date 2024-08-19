@@ -21,8 +21,8 @@ from havneafgifter.views import (
     SignupVesselView,
     StatisticsView,
     TaxRateDetailView,
-    TaxRateListView,
     TaxRateFormView,
+    TaxRateListView,
 )
 
 app_name = "havneafgifter"
