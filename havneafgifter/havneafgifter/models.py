@@ -954,20 +954,23 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @classmethod
     def _get_port_authority_filter(cls, user: User) -> Q:
-        filter_by_port_authority: Q = Q(
+        base_filter: Q = Q(
+            # 1. Port authority users cannot see DRAFT forms
+            status__in=[Status.NEW, Status.APPROVED, Status.REJECTED, Status.DONE],
+            # 2. Port authority users can only see forms whose port of call is a port
+            # managed by the port authority in question.
             port_of_call__portauthority__isnull=False,
             port_of_call__portauthority_id=user.port_authority_id,
         )
-
         if user.port is None:
             # This port authority user has access to *all* ports belonging to the
             # port authority.
-            return filter_by_port_authority
+            return base_filter
         else:
             # This port authority user has access to *a specific* port belonging to the
             # port authority.
             filter_by_port: Q = Q(port_of_call=user.port)
-            return filter_by_port_authority & filter_by_port
+            return base_filter & filter_by_port
 
     def _has_port_authority_permission(self, user: User) -> bool:
         # Shortcut check if various nullable fields are indeed NULL
@@ -976,6 +979,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         if getattr(self.port_of_call, "portauthority", None) is None:
             return False
         if user.port_authority is None:
+            return False
+
+        # Shortcut check if form status is DRAFT:
+        if self.status == Status.DRAFT:
             return False
 
         if user.port is None:
