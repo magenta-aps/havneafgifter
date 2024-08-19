@@ -146,6 +146,19 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         )
         self.assertEqual(form.fields["vessel_imo"].initial, self.ship_user.username)
 
+    def test_shipping_agent_field_is_locked_for_shipping_agents(self):
+        # If form is instantiated with a `User` that is a "shipping agent user", the
+        # field `shipping_agent` is locked, containing the `ShippingAgent` that the
+        # `User` belongs to.
+        form = HarborDuesFormForm(
+            self.shipping_agent_user, data=self.harbor_dues_form_data
+        )
+        self.assertEqual(
+            form.fields["shipping_agent"].initial,
+            self.shipping_agent_user.shipping_agent,
+        )
+        self.assertTrue(form.fields["shipping_agent"].disabled)
+
     def _get_form_instance(self, data):
         # We use `self.shipping_agent_user` here to get a "normal" user
         # (i.e., not a "ship user".)

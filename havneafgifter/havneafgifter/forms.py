@@ -15,6 +15,7 @@ from django.forms import (
     Form,
     HiddenInput,
     IntegerField,
+    ModelChoiceField,
     ModelForm,
     ModelMultipleChoiceField,
     MultipleChoiceField,
@@ -37,6 +38,7 @@ from havneafgifter.models import (
     Municipality,
     Nationality,
     Port,
+    ShippingAgent,
     ShipType,
     Status,
     User,
@@ -176,6 +178,15 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=False,
     )
 
+    shipping_agent = DynamicField(
+        ModelChoiceField,
+        required=False,
+        queryset=ShippingAgent.objects.all(),
+        initial=lambda form: (form._shipping_agent if form._shipping_agent else None),
+        disabled=lambda form: form._shipping_agent is not None,
+        label=_("Shipping agent"),
+    )
+
     datetime_of_arrival = DynamicField(
         DateTimeField,
         required=False,
@@ -213,6 +224,11 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     def __init__(self, user: User, *args, **kwargs):
         self._user = user
+        self._shipping_agent = (
+            user.shipping_agent
+            if user.shipping_agent is not None and user.has_group_name("Shipping")
+            else None
+        )
         super().__init__(*args, **kwargs)
 
     @property
