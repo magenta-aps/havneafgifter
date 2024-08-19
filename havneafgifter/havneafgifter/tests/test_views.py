@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
 from django.contrib import messages
@@ -45,7 +46,6 @@ from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
-    HarborTaxRateListView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -1190,7 +1190,13 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         super().setUpTestData()
         cls.tax_rate = TaxRates.objects.create(
             start_datetime=datetime(
-                year=2023, month=10, day=5, hour=14, minute=30, second=0, tzinfo=ZoneInfo("America/Nuuk")
+                year=2023,
+                month=10,
+                day=5,
+                hour=14,
+                minute=30,
+                second=0,
+                tzinfo=ZoneInfo("America/Nuuk"),
             )
         )
 
