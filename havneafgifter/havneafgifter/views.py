@@ -13,7 +13,7 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.db.models import (
     Case,
     Count,
@@ -44,6 +44,7 @@ from havneafgifter.forms import (
     ReasonForm,
     SignupVesselForm,
     StatisticsForm,
+    TaxRateForm,
 )
 from havneafgifter.mails import OnApproveMail, OnRejectMail, OnSubmitForReviewMail
 from havneafgifter.models import (
@@ -797,3 +798,10 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
                     item["vessel_type"] = ShipType(vessel_type).label
             return items
         return []
+
+
+class TaxRateFormView(LoginRequiredMixin, UpdateView):
+    model = TaxRates
+    form_class = TaxRateForm
+    template_name = "havneafgifter/taxrateform.html"
+    success_url = reverse_lazy("havneafgifter:edit_taxrate", kwargs={"pk": 1})

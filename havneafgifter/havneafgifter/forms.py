@@ -43,6 +43,7 @@ from havneafgifter.models import (
     ShippingAgent,
     ShipType,
     Status,
+    TaxRates,
     User,
     Vessel,
     imo_validator,
@@ -590,3 +591,9 @@ class StatisticsForm(BootstrapForm):
     port_of_call = ModelMultipleChoiceField(
         label=_("Havn"), queryset=Port.objects.all(), required=False
     )
+
+
+class TaxRateForm(ModelForm, BootstrapForm):
+    class Meta:
+        model = TaxRates
+        exclude = ["end_datetime"]
