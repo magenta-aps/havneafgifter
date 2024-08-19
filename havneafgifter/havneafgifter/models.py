@@ -922,7 +922,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             with translation.override(lang_code):
                 context = {
                     "date": localize(self.date),
-                    "agent": self.shipping_agent.name,
+                    "agent": self.shipping_agent.name if self.shipping_agent else "",
                 }
                 if self.vessel_type == ShipType.CRUISE:
                     text = (
