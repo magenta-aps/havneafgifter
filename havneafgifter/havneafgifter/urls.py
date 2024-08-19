@@ -21,6 +21,7 @@ from havneafgifter.views import (
     RootView,
     SignupVesselView,
     StatisticsView,
+    TaxRateDetailView,
 )
 
 app_name = "havneafgifter"
@@ -128,4 +129,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
     ),
     path("blanket/statistik/", StatisticsView.as_view(), name="statistik"),
     path("sats", HarborTaxRateListView.as_view(), name="tax_rate_list"),
+    path("sats/<int:pk>", TaxRateDetailView.as_view(), name="tax_rate_details"),
 ]

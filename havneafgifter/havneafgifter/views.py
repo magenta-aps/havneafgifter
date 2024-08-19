@@ -596,6 +596,25 @@ class HarborTaxRateListView(LoginRequiredMixin, SingleTableView):
         ).order_by("start_datetime")
 
 
+class TaxRateDetailView(LoginRequiredMixin, DetailView):
+    model = TaxRates
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "port_tax_rates": self.object.port_tax_rates.order_by(
+                    F("vessel_type").asc(nulls_first=True),
+                    F("port").asc(nulls_first=True),
+                ),
+                "disembarkment_tax_rates": self.object.disembarkment_tax_rates.order_by(
+                    F("municipality").asc(nulls_first=True),
+                    F("disembarkment_site").asc(nulls_first=True),
+                ),
+            }
+        )
+
+
 class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetFormView):
     form_class = StatisticsForm
     template_name = "havneafgifter/statistik.html"

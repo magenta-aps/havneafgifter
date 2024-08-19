@@ -1438,6 +1438,16 @@ class PortTaxRate(PermissionsMixin, models.Model):
         gt_end = self.gt_end
         return f"{tax_rates}, {port}, {vessel_type}, {gt_start} t - {gt_end} t"
 
+    @property
+    def name(self):
+        vessel_label = (
+            ShipType[self.vessel_type].label
+            if self.vessel_type
+            else _("Enhver skibstype")
+        )
+        port = self.port.name if self.port else _("enhver havn")
+        return f"{vessel_label}, {port}"
+
 
 class DisembarkmentTaxRate(PermissionsMixin, models.Model):
     class Meta:
@@ -1480,6 +1490,16 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
         municipality = self.get_municipality_display()
         rate = self.disembarkment_tax_rate
         return f"{tax_rates}, {municipality}, {rate}"
+
+    @property
+    def name(self):
+        municipality = self.get_municipality_display()
+        disembarkment_site = (
+            self.disembarkment_site.name
+            if self.disembarkment_site
+            else _("ethvert ilandsætningssted")
+        )
+        return f"{municipality}, {disembarkment_site}"
 
 
 @receiver(pre_create_historical_record, sender=HarborDuesForm.history.model)
