@@ -17,6 +17,7 @@ class HavneafgiftView:
             **{
                 **context,
                 "version": settings.VERSION,
+                "contact_email": settings.CONTACT_EMAIL,
             }
         )
 

@@ -21,6 +21,7 @@ from project.util import strtobool
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 VERSION = os.environ.get("COMMIT_TAG", "")
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
