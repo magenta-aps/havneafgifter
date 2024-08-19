@@ -1,0 +1,24 @@
+{% extends 'havneafgifter/bootstrap/modal.html' %}
+
+{% load i18n %}
+
+{% block modal_id %}#informShipUserOnSubmitModal{% endblock %}
+{% block modal_title %}{% translate 'Warning' %}{% endblock %}
+
+{% block modal_body %}
+<p>
+    {% blocktrans trimmed %}
+    Please note: when a form is submitted, it can no longer be edited.
+    {% endblocktrans %}
+</p>
+<p>
+    {% blocktrans trimmed %}
+    When submitted, the form will be sent directly to the relevant port authority.
+    If you prefer sending the form to your shipping agent, use "Save as draft" instead.
+    {% endblocktrans %}
+</p>
+{% endblock %}
+
+{% block modal_ok_button %}
+<button type="submit" class="btn btn-primary" name="confirm" value="NEW" data-bs-dismiss="modal">{% translate 'Submit' %}</button>
+{% endblock %}

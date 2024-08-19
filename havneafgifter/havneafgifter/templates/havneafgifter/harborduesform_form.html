@@ -1,7 +1,9 @@
 {% extends "havneafgifter/base.html" %}
 
 {% load i18n %}
+{% load static %}
 {% load django_bootstrap5 %}
+{% load bootstrap_modal %}
 
 {% block title %}
 {% translate "Harbour Dues/Port Tax" %}
@@ -9,10 +11,11 @@
 
 {% block extra_headers %}
 <script nonce="{{ request.csp_nonce }}" src="{% url 'javascript-catalog' %}"></script>
+<script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_actions.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     $(document).ready(function () {
-        const form = $("form");
+        const form = $("form#main");
         const noPortOfCallCheckbox = $("#id_no_port_of_call");
         const portOfCallSelect = $("#id_port_of_call")
         const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
@@ -63,12 +66,6 @@
 
         // Hook form submit
         form.on("submit", function (evt) {
-            // Lets the user cancel the submission in case they meant to save as a draft
-            if ("{{user.user_type}}" === "ship" && shippingAgent.val()) {
-                // TODO: Add translations
-                return confirm(gettext("You have added a shipping agent without saving as a draft. \n\nDo you want to continue?"));
-            }
-
             // Ensure that potentially disabled fields are still POSTed to server
             portOfCallSelect.attr("disabled", null);
             datetimeInputs.attr("disabled", null);
@@ -86,7 +83,7 @@
 
 {% block content %}
 <h1>{% translate "Harbour Dues/Port Tax" %}</h1>
-<form action="." method="post" class="form">
+<form action="." method="post" class="form" id="main" data-user-type="{{ user.user_type }}">
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
@@ -113,7 +110,12 @@
     {# Pass `status=NEW` or `status=DRAFT` depending on which submit button is used #}
     {% bootstrap_button button_type="submit" name="status" value="NEW" content=_("Submit") %}
     {% bootstrap_button button_type="submit" name="status" value="DRAFT" content=_("Save as draft") %}
+    <input type="hidden" name="status" />
 </form>
+{# Popups for ship users #}
+{% inform_ship_user_on_save_modal object %}
+{% inform_ship_user_on_submit_modal object %}
+
 <script nonce="{{request.csp_nonce}}">
     $("[name={{form.vessel_imo.name}}]").on("invalid", function () {
         if (this.validity.tooShort || this.validity.tooLong) {
