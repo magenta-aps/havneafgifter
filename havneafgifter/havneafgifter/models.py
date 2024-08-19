@@ -369,7 +369,7 @@ class Nationality(models.TextChoices):
 
 class Status(models.TextChoices):
     DRAFT = ("DRAFT", _("Draft"))
-    NEW = ("NEW", _("New"))  # means: "submitted for review"
+    NEW = ("NEW", _("Awaiting approval"))  # NEW is kept to align with other products
     APPROVED = ("APPROVED", _("Approved"))
     REJECTED = ("REJECTED", _("Rejected"))
     # TODO: DONE or something similar will be introduced when the system
