@@ -230,7 +230,7 @@
         "gross_tonnage": 200,
         "vessel_type": "FREIGHTER",
         "harbour_tax": null,
-        "status": "NEW"
+        "status": "APPROVED"
     }
 }
 

@@ -418,9 +418,9 @@ msgstr "Begrundelse (tekst)"
 
 #: havneafgifter/models.py
 #, fuzzy
-#| msgid "Statistik"
+#| msgid "Status"
 msgid "Status"
-msgstr "Statistik"
+msgstr "Status"
 
 #: havneafgifter/models.py
 #, fuzzy
