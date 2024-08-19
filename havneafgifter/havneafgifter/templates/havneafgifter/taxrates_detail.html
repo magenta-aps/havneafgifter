@@ -1,0 +1,74 @@
+{% extends "havneafgifter/base.html" %}
+
+{% load i18n %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<h1>{% translate "Tax Rate Details" %}</h1>
+
+<table class="table table-bordered">
+
+    <tbody>
+
+    <tr>
+        <th>{% translate "Start date" %}</th>
+        <td>{{object.start_datetime|date:"Y-m-d H:i:s (O)"}}</td>
+    </tr>
+
+    <tr>
+        <th>{% translate "End date" %}</th>
+        <td>{{object.end_datetime|default_if_none:"-"}}</td>
+    </tr>
+
+    <tr>
+        <th>{% translate "Passenger tax rate" %}</th>
+        <td>{{object.pax_tax_rate}}</td>
+    </tr>
+
+    </tbody>
+</table>
+
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <th>Afgifter pr. bruttoton:</th>
+        <th>Fra (ton)</th>
+        <th>Til (ton)</th>
+        <th>Rund op til (ton)</th>
+        <th>Sats (DKK)</th>
+    </tr>
+    {% for port_tax_rate in port_tax_rates %}
+    <tr>
+        <td>{{port_tax_rate.name}}</td>
+        <td>{{port_tax_rate.gt_start}}</td>
+        <td>{{port_tax_rate.gt_end|default_if_none:"∞"}}</td>
+        <td>{{port_tax_rate.round_gross_ton_up_to|default:""}}</td>
+        <td>{{port_tax_rate.port_tax_rate}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <th>Afgifter pr. ilandsætningssted:</th>
+        <th>Sats (DKK)</th>
+    </tr>
+    {% for disembarkment_tax_rate in disembarkment_tax_rates %}
+    <tr>
+        <td>{{disembarkment_tax_rate.name}}</td>
+        <td>{{disembarkment_tax_rate.disembarkment_tax_rate}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+<hr/>
+
+<a href="#" class="btn btn-primary">{% translate 'Edit' %}</a>
+<a href="#" class="btn btn-primary">{% translate 'Clone' %}</a>
+<a href="#" class="btn btn-danger">{% translate 'Delete' %}</a>
+
+{% endblock content %}

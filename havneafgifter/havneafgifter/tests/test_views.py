@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
 from django.contrib import messages
@@ -25,11 +26,13 @@ from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
+    DisembarkmentTaxRate,
     HarborDuesForm,
     Nationality,
     PassengersByCountry,
     Port,
     PortAuthority,
+    PortTaxRate,
     ShippingAgent,
     ShipType,
     Status,
@@ -42,12 +45,13 @@ from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
-    HarborTaxRateListView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
     RejectView,
     SignupVesselView,
+    TaxRateDetailView,
+    TaxRateListView,
     _CruiseTaxFormSetView,
     _SendEmailMixin,
 )
@@ -1144,7 +1148,7 @@ class TestRejectView(TestActionViewMixin, TestCase):
 
 
 class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
-    view_class = HarborTaxRateListView
+    view_class = TaxRateListView
 
     @classmethod
     def setUpTestData(cls):
@@ -1176,3 +1180,74 @@ class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
         self.assertLess(rows[0].record.start_datetime, rows[1].record.start_datetime)
         # check that the previous end_datetime is inferred as expected
         self.assertEqual(rows[0].record.end_datetime, rows[1].record.start_datetime)
+
+
+class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
+    view_class = TaxRateDetailView
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tax_rate = TaxRates.objects.create(
+            start_datetime=datetime(
+                year=2023,
+                month=10,
+                day=5,
+                hour=14,
+                minute=30,
+                second=0,
+                tzinfo=ZoneInfo("America/Nuuk"),
+            )
+        )
+
+        cls.disembarkment_site = DisembarkmentSite.objects.create(
+            name="somesitename",
+            municipality=1,
+            is_outside_populated_areas=True,
+        )
+
+        cls.portauthority = PortAuthority.objects.create(
+            name="Test Portauthority", email="testportauthority@legitemail.com"
+        )
+
+        cls.port = Port.objects.create(
+            name="Test Port Name", portauthority=cls.portauthority
+        )
+
+        cls.disembarkment_tax_rates = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disembarkment_site,
+            municipality=955,
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.port_tax_rates = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port,
+            vessel_type="OTHER",
+            gt_start=30000,
+            gt_end=40000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.ship_user)
+
+    def test_the_thing_with_parameter(self):
+        response = self.client.get(
+            reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk})
+        )
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertIn("somesitename", soup.get_text())
+        self.assertIn("Kujalleq", soup.get_text())
+        self.assertIn("Other vessel", soup.get_text())
+        self.assertIn("Test Port Name", soup.get_text())
+        self.assertIn("30000", soup.get_text())
+        self.assertIn("40000", soup.get_text())
+        self.assertIn("70", soup.get_text())
+        self.assertIn("25.00", soup.get_text())
+        self.assertIn("2.00", soup.get_text())
+        self.assertIn("None", soup.get_text())
+        self.assertIn("2023-10-05 14:30:00 (-0200)", soup.get_text())
