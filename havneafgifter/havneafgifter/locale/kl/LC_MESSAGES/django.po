@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-19 05:38-0100\n"
+"POT-Creation-Date: 2024-08-19 07:27-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,6 +79,10 @@ msgstr ""
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Nationality"
 msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Shipping agent"
+msgstr "Umiarsuaatileqatigiiffik"
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Arrival date/time"
@@ -431,10 +435,6 @@ msgstr "Piginnittoq"
 #: havneafgifter/models.py
 msgid "Vessel captain"
 msgstr "Umiarsuup naalagaa"
-
-#: havneafgifter/models.py
-msgid "Shipping agent"
-msgstr "Umiarsuaatileqatigiiffik"
 
 #: havneafgifter/models.py
 msgid "Gross tonnage"
