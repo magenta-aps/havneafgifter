@@ -1236,8 +1236,9 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.client.force_login(self.ship_user)
 
     def test_the_thing_with_parameter(self):
+        print(TaxRates.objects.filter(pk=self.tax_rate.pk))
         response = self.client.get(
-            reverse("havneafgifter:tax_rate_details", kwargs={"pk": 1})
+            reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk})
         )
         print(response.content.decode("utf-8"))
         soup = BeautifulSoup(response.content, "html.parser")
