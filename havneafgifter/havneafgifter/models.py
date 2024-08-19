@@ -252,6 +252,7 @@ class User(AbstractUser):
                 UserType.SHIP,
                 UserType.SHIPPING_AGENT,
                 UserType.SUPERUSER,
+                UserType.ADMIN,
             )
 
     @property
@@ -265,7 +266,7 @@ class User(AbstractUser):
         if user_type is None:
             return False
         else:
-            return user_type == UserType.TAX_AUTHORITY
+            return user_type in (UserType.TAX_AUTHORITY, UserType.ADMIN)
 
 
 class PermissionsMixin(models.Model):

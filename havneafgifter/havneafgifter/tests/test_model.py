@@ -230,6 +230,8 @@ class TestUser(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @parametrize(
         "username,can_create,can_view_list,can_view_statistics",
         [
+            # User without user type
+            ("unprivileged", False, True, False),
             # Ship user
             ("9074729", True, True, False),
             # Shipping user
@@ -240,8 +242,8 @@ class TestUser(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             ("port_user", False, True, False),
             # Tax authority user
             ("tax", False, True, True),
-            # User without user type
-            ("unprivileged", False, True, False),
+            # Admin user
+            ("admin", True, True, True),
         ],
     )
     def test_can_create_etc(

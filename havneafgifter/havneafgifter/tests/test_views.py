@@ -625,7 +625,7 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
         super().setUpTestData()
         cls.request_factory = RequestFactory()
         cls.view = ReceiptDetailView()
-        cls.user = User.objects.create(username="admin", is_superuser=True)
+        cls.user = User.objects.get(username="admin")
 
     def test_get_object_returns_harbor_dues_form(self):
         self.view.kwargs = {"pk": self.harbor_dues_form.pk}
@@ -683,7 +683,7 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
 
     def test_list_admin(self):
         request = self.request_factory.get("")
-        request.user = User.objects.create(username="admin", is_superuser=True)
+        request.user = User.objects.get(username="admin")
         self.view.setup(request)
         self.view.get(request)
         self.assertIn(self.harbor_dues_form, self.view.get_queryset())

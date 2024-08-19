@@ -35,6 +35,11 @@ class HarborDuesFormMixin:
             name="Agent", email="shipping@example.org"
         )
 
+        cls.admin_user = User.objects.create(
+            username="admin",
+            is_staff=True,
+            is_superuser=True,
+        )
         cls.tax_authority_user = User.objects.create(
             username="tax", email="tax@example.org"
         )
