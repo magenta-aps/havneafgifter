@@ -558,6 +558,10 @@ class CruiseTaxFormPermissionTest(PermissionTest):
             )
         )
 
+    def test_has_port_authority_permission_excludes_draft(self):
+        draft = CruiseTaxForm(status=Status.DRAFT, port_of_call=self.port)
+        self.assertFalse(draft._has_port_authority_permission(self.port_manager_user))
+
 
 class CruiseTaxFormPortUserPermissionTest(PermissionTest):
     @classmethod

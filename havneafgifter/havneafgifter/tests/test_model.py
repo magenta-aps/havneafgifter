@@ -593,36 +593,47 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         )
 
     @parametrize(
-        "action,username,expected_result",
+        "status,action,username,expected_result",
         [
             # 1. "submit_for_review"
-            #   Ship users can submit for review
-            ("submit_for_review", "9074729", True),
-            #   Shipping agents can submit for review
-            ("submit_for_review", "shipping_agent", True),
-            #   Port authority users cannot submit for review
-            ("submit_for_review", "port_auth", False),
+            #   Ship users can submit drafts for review
+            (Status.DRAFT, "submit_for_review", "9074729", True),
+            #   Shipping agents can submit drafts for review
+            (Status.DRAFT, "submit_for_review", "shipping_agent", True),
+            #   Port authority users cannot submit drafts for review
+            (Status.DRAFT, "submit_for_review", "port_auth", False),
             # 2. "approve"
-            #   Ship users cannot approve
-            ("approve", "9074729", False),
-            #   Shipping agents cannot approve
-            ("approve", "shipping_agent", False),
-            #   Port authority users can approve
-            ("approve", "port_auth", True),
+            #   Ship users cannot approve forms submitted for review
+            (Status.NEW, "approve", "9074729", False),
+            #   Shipping agents cannot approve forms submitted for review
+            (Status.NEW, "approve", "shipping_agent", False),
+            #   Port authority users can approve forms submitted for review
+            (Status.NEW, "approve", "port_auth", True),
             # 3. "reject"
-            #   Ship users cannot reject
-            ("reject", "9074729", False),
-            #   Shipping agents cannot reject
-            ("reject", "shipping_agent", False),
-            #   Port authority users can reject
-            ("reject", "port_auth", True),
+            #   Ship users cannot reject forms submitted for review
+            (Status.NEW, "reject", "9074729", False),
+            #   Shipping agents cannot reject forms submitted for review
+            (Status.NEW, "reject", "shipping_agent", False),
+            #   Port authority users can reject forms submitted for review
+            (Status.NEW, "reject", "port_auth", True),
         ],
     )
-    def test_transition_permissions(self, action, username, expected_result):
+    def test_transition_permissions(
+        self,
+        status: Status,
+        action: str,
+        username: str,
+        expected_result: str,
+    ):
         # Arrange
         user = User.objects.get(username=username)
+        form = (
+            self.harbor_dues_draft_form
+            if status == Status.DRAFT
+            else self.harbor_dues_form
+        )
         # Act
-        actual_result = self.harbor_dues_draft_form.has_permission(user, action, False)
+        actual_result = form.has_permission(user, action, False)
         # Assert
         self.assertEqual(actual_result, expected_result)
 
