@@ -10,6 +10,7 @@ from havneafgifter.views import (
     HarborDuesFormCreateView,
     HarborDuesFormListView,
     HarborDuesFormUpdateView,
+    HarborTaxRateListView,
     LoginView,
     LogoutView,
     PassengerTaxCreateView,
@@ -126,4 +127,5 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="receipt_detail_pdf",
     ),
     path("blanket/statistik/", StatisticsView.as_view(), name="statistik"),
+    path("sats", HarborTaxRateListView.as_view(), name="tax_rate_list"),
 ]
