@@ -25,7 +25,7 @@
             {% ifchanged form.get_municipality_display %}
                 <h2>{{ form.get_municipality_display }}</h2>
             {% endifchanged %}
-            {% bootstrap_field form.number_of_passengers layout="horizontal" horizontal_label_class="col-9" horizontal_field_class="col-3" %}
+            {% bootstrap_field form.number_of_passengers placeholder="0" layout="horizontal" horizontal_label_class="col-9" horizontal_field_class="col-3" %}
         {% endfor %}
     </div>
     {# Pass `status=NEW` or `status=DRAFT` depending on which submit button is used #}

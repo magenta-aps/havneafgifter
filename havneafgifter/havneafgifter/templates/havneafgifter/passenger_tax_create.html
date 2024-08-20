@@ -18,7 +18,7 @@
         {# Formset asking for number of passenger of each nationality #}
         {% bootstrap_form passengers_by_country_formset.management_form %}
         {% for form in passengers_by_country_formset.forms %}
-            {% bootstrap_field form.number_of_passengers layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
+            {% bootstrap_field form.number_of_passengers placeholder="0" layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         {% endfor %}
     </div>
     {% bootstrap_button button_type="submit" content=_("Continue") %}

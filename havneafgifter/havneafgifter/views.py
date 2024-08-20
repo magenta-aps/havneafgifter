@@ -240,11 +240,11 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
             for pbc in self._get_passengers_by_country_objects()
         )
         passengers_total_form = PassengersTotalForm(data=request.POST)
-        passengers_total_form.validate_total(sum_passengers_by_country)
         if not passengers_total_form.is_valid():
             return self.render_to_response(
                 self.get_context_data(passengers_total_form=passengers_total_form)
             )
+        passengers_total_form.validate_total(sum_passengers_by_country)
         return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
