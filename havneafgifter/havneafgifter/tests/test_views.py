@@ -58,6 +58,8 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateListView,
     _CruiseTaxFormSetView,
+    _SendEmailMixin,
+    TaxRateFormView,
 )
 
 
@@ -1371,3 +1373,23 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.assertIn("2.00", soup.get_text())
         self.assertIn("None", soup.get_text())
         self.assertIn("2023-10-05 18:30:00 (+0200)", soup.get_text())
+
+"""
+Testing goals:
+
+- The rendered table contains the expected values
+- The shown values are sorted as expected (vessel_type, harbor_name)
+- Absence of delete button in first row
+- First row containing the "None, None" name
+"""
+
+class TestTaxRateFormView(TestCase):
+    view_class = TaxRateFormView
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+    def test_rendering(self):
+        self.fail()
+
