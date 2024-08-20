@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-19 14:33-0100\n"
+"POT-Creation-Date: 2024-08-20 11:51-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -539,8 +539,20 @@ msgid "Round GT up to"
 msgstr ""
 
 #: havneafgifter/models.py
+msgid "Enhver skibstype"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "enhver havn"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Disembarkment tax rate"
 msgstr "Ilandsætnings-afgift"
+
+#: havneafgifter/models.py
+msgid "ethvert ilandsætningssted"
+msgstr ""
 
 #: havneafgifter/tables.py
 msgid "Landgangsafgift"
@@ -778,6 +790,7 @@ msgid "View PDF"
 msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Edit"
 msgstr "Rediger"
 
@@ -814,6 +827,38 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Søg"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "Tax Rate Details"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+#, fuzzy
+#| msgid "Important dates"
+msgid "Start date"
+msgstr "Vigtige datoer"
+
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "End date"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+#, fuzzy
+#| msgid "Passenger ship"
+msgid "Passenger tax rate"
+msgstr "Passagerskib"
+
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "Clone"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "Delete"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/taxrates_list.html
+msgid "Harbor tax rate list"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/user/password/password_requirements.html
@@ -923,6 +968,10 @@ msgstr "Log venligst ind med IMO-nummeret som brugernavn"
 msgid "This form was already submitted and can no longer be edited"
 msgstr ""
 "Denne blanket er allerede blevet indsendt, og kan ikke længere redigeres"
+
+#: havneafgifter/views.py
+msgid "Invalid data in passenger count list"
+msgstr ""
 
 #: havneafgifter/views.py
 msgid "You do not have the required permissions to approve harbor dues forms"
