@@ -417,8 +417,6 @@ msgid "Reason text"
 msgstr "Begrundelse (tekst)"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Status"
 msgid "Status"
 msgstr "Status"
 
