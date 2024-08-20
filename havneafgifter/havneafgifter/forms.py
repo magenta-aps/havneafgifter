@@ -341,6 +341,8 @@ class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
     )
     number_of_passengers = DynamicField(
         IntegerField,
+        required=True,
+        min_value=0,
         label=lambda form: form.initial["nationality"].label,
     )
     pk = IntegerField(

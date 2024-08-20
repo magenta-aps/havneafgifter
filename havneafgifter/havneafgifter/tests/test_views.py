@@ -13,6 +13,7 @@ from django.core.management import call_command
 from django.forms import BaseFormSet
 from django.http import (
     HttpResponse,
+    HttpResponseBadRequest,
     HttpResponseForbidden,
     HttpResponseNotFound,
     HttpResponseRedirect,
@@ -528,6 +529,15 @@ class TestPassengerTaxCreateView(TestCruiseTaxFormSetView):
         passengers_by_country_formset = context_data["passengers_by_country_formset"]
         self.assertFalse(passengers_total_form.is_valid())
         self.assertTrue(passengers_by_country_formset.is_valid())
+
+    def test_total_number_of_passengers_wrong_input(self):
+        request = self._post_formset(
+            {"number_of_passengers": 40},
+            {"number_of_passengers": "hello"},
+            total_number_of_passengers=100,
+        )
+        response = self.instance.post(request)
+        self.assertIsInstance(response, HttpResponseBadRequest)
 
 
 class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):

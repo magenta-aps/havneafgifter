@@ -13,7 +13,7 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import (
     Case,
     Count,
@@ -30,6 +30,7 @@ from django.forms import formset_factory
 from django.http import (
     Http404,
     HttpResponse,
+    HttpResponseBadRequest,
     HttpResponseForbidden,
     HttpResponseNotFound,
     HttpResponseRedirect,
@@ -235,10 +236,13 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
     form_class = PassengersByCountryForm
 
     def post(self, request, *args, **kwargs):
-        sum_passengers_by_country = sum(
-            pbc.number_of_passengers
-            for pbc in self._get_passengers_by_country_objects()
-        )
+        try:
+            sum_passengers_by_country = sum(
+                pbc.number_of_passengers
+                for pbc in self._get_passengers_by_country_objects()
+            )
+        except ValidationError as e:
+            return HttpResponseBadRequest(e.message)
         passengers_total_form = PassengersTotalForm(data=request.POST)
         passengers_total_form.validate_total(sum_passengers_by_country)
         if not passengers_total_form.is_valid():
@@ -297,6 +301,8 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
 
     def _get_passengers_by_country_objects(self) -> list[PassengersByCountry]:
         formset = self.get_form()
+        if not formset.is_valid():
+            raise ValidationError(_("Invalid data in passenger count list"))
         return [
             PassengersByCountry(
                 cruise_tax_form=self._cruise_tax_form,
