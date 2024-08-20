@@ -14,7 +14,7 @@ from havneafgifter.forms import (
     PassengersTotalForm,
     SignupVesselForm,
 )
-from havneafgifter.models import DisembarkmentSite, Nationality, Port, Status
+from havneafgifter.models import DisembarkmentSite, Nationality, Port, Status, Vessel
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
@@ -27,6 +27,15 @@ class TestSignupVesselForm(HarborDuesFormMixin, TestCase):
         # Assert
         user.refresh_from_db()
         self.assertTrue(is_password_usable(user.password))
+
+    def test_form_save_creates_vessel(self):
+        # Arrange
+        instance = SignupVesselForm(data=self.ship_user_form_data)
+        # Act
+        user = instance.save()
+        # Assert
+        self.assertIsInstance(user.vessel, Vessel)
+        self.assertEqual(user.vessel.imo, user.username)
 
 
 class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
@@ -137,14 +146,28 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
                 ErrorList(),  # empty error list
             )
 
-    def test_get_vessel_name_and_imo_from_user(self):
+    def test_get_vessel_info_for_ship_user(self):
         # If form is instantiated with a `User` that is a "ship user", the fields
-        # `vessel_name` and `vessel_imo` are pre-filled using data from the `User`.
+        # `vessel_name`, `vessel_imo`, etc. are pre-filled using data from
+        # `user.vessel`.
         form = HarborDuesFormForm(self.ship_user, data=self.harbor_dues_form_data)
-        self.assertEqual(
-            form.fields["vessel_name"].initial, self.ship_user.organization
+        self._assert_form_field_initial(form, "vessel_name", self.ship_user_vessel.name)
+        self._assert_form_field_initial(form, "vessel_imo", self.ship_user_vessel.imo)
+        self._assert_form_field_initial(
+            form, "vessel_owner", self.ship_user_vessel.owner
         )
-        self.assertEqual(form.fields["vessel_imo"].initial, self.ship_user.username)
+        self._assert_form_field_initial(
+            form, "vessel_master", self.ship_user_vessel.master
+        )
+        self._assert_form_field_initial(form, "vessel_type", self.ship_user_vessel.type)
+        self._assert_form_field_initial(
+            form, "gross_tonnage", self.ship_user_vessel.gross_tonnage
+        )
+        # If form is instantiated with a `User` that is a "ship user", the fields
+        # `vessel_imo`, `vessel_type` and `gross_tonnage` are locked (= disabled.)
+        self._assert_form_field_disabled(form, "vessel_imo")
+        self._assert_form_field_disabled(form, "vessel_type")
+        self._assert_form_field_disabled(form, "gross_tonnage")
 
     def test_shipping_agent_field_is_locked_for_shipping_agents(self):
         # If form is instantiated with a `User` that is a "shipping agent user", the
@@ -176,6 +199,12 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         self.assertFalse(
             form.user_visible_non_field_errors() == ErrorList()  # empty error list
         )
+
+    def _assert_form_field_initial(self, form, field, value):
+        self.assertEqual(form.fields[field].initial, value)
+
+    def _assert_form_field_disabled(self, form, field):
+        self.assertTrue(form.fields[field].disabled)
 
 
 class TestPassengersByCountryForm(TestCase):
