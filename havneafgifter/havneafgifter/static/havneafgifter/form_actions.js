@@ -1,13 +1,31 @@
 (function () {
     $(document).ready(function () {
-        const onSaveModal = new bootstrap.Modal(document.getElementById("#informShipUserOnSaveModal"), {});
-        const onSubmitModal = new bootstrap.Modal(document.getElementById("#informShipUserOnSubmitModal"), {});
+        const onSaveShippingAgentModal = new bootstrap.Modal(
+            document.getElementById("#informShipUserOnSaveShippingAgentModal"), {}
+        );
+        const onSaveNoShippingAgentModal = new bootstrap.Modal(
+            document.getElementById("#informShipUserOnSaveNoShippingAgentModal"), {}
+        );
+        const onSubmitModal = new bootstrap.Modal(
+            document.getElementById("#informShipUserOnSubmitModal"), {}
+        );
+
         const forms = $("form");
         const mainForm = $("form#main");
         const hiddenStatus = $("input[name=status]", mainForm);
+        const shippingAgentInput = $("#id_shipping_agent", mainForm);
+        const shippingAgentData = mainForm.data("shipping-agent");
         const userType = mainForm.data("user-type");
+
         let name;
         let value;
+
+        const noShippingAgent = function () {
+            if (shippingAgentData === "") {
+                return true;
+            }
+            return (shippingAgentInput.val() === null) || (shippingAgentInput.val() === "");
+        }
 
         // Hook buttons submitting form
         $("form button[type=submit]").on("click", function (evt) {
@@ -35,7 +53,13 @@
                 let modal;
 
                 if (value === "DRAFT") {
-                    modal = onSaveModal;
+                    // If a shipping agent is selected, show appropriate modal, and
+                    // vice versa.
+                    if (noShippingAgent()) {
+                        modal = onSaveNoShippingAgentModal;
+                    } else {
+                        modal = onSaveShippingAgentModal;
+                    }
                 } else if (value === "NEW") {
                     modal = onSubmitModal;
                 }

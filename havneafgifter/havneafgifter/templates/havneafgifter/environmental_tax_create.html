@@ -16,7 +16,7 @@
 
 {% block content %}
 <h1>{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h1>
-<form action="." method="post" class="form" id="main" data-user-type="{{ user.user_type }}">
+<form action="." method="post" class="form" id="main" data-user-type="{{ user.user_type }}"  data-shipping-agent="{{ object.shipping_agent.pk }}">
     {% csrf_token %}
     <div class="alert alert-info" role="alert">
         {% blocktrans trimmed %}
@@ -41,6 +41,7 @@
     <input type="hidden" name="status" />
 </form>
 {# Popups for ship users #}
-{% inform_ship_user_on_save_modal object %}
+{% inform_ship_user_on_save_shipping_agent_modal object %}
+{% inform_ship_user_on_save_no_shipping_agent_modal object %}
 {% inform_ship_user_on_submit_modal object %}
 {% endblock content %}

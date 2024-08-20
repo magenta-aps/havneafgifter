@@ -28,10 +28,20 @@ def reject_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
 
 
 @register.inclusion_tag(
-    "havneafgifter/bootstrap/inform_ship_user_on_save.html",
+    "havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html",
     takes_context=True,
 )
-def inform_ship_user_on_save_modal(
+def inform_ship_user_on_save_shipping_agent_modal(
+    context, form: HarborDuesForm | CruiseTaxForm
+) -> dict:
+    return {"form": form}
+
+
+@register.inclusion_tag(
+    "havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html",
+    takes_context=True,
+)
+def inform_ship_user_on_save_no_shipping_agent_modal(
     context, form: HarborDuesForm | CruiseTaxForm
 ) -> dict:
     return {"form": form}
