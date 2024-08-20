@@ -9,7 +9,7 @@ from io import BytesIO
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.mail import EmailMessage
@@ -954,6 +954,18 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def mail_recipients(self) -> list[str]:
         recipient_list: MailRecipientList = MailRecipientList(self)
         return recipient_list.recipient_emails
+
+    @cached_property
+    def latest_rejection(self):
+        if self.status == Status.REJECTED:
+            try:
+                return self.history.filter(
+                    status=Status.REJECTED,
+                    reason_text__isnull=False,
+                ).latest("history_date")
+            except ObjectDoesNotExist:
+                # No matching history entry
+                return None
 
     @classmethod
     def _get_port_authority_filter(cls, user: User) -> Q:

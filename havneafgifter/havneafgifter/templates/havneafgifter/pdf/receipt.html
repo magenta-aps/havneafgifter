@@ -110,6 +110,27 @@ table.table-striped td:first-child {
         <div class="col-3">
             {% bootstrap_status_badge form %}
         </div>
+        {% if form.latest_rejection %}
+        <div class="col-12 pt-3">
+            <div class="alert alert-danger">
+                {% with user=form.latest_rejection.history_user.display_name %}
+                {% with date=form.latest_rejection.history_date|date|localize %}
+                <p>
+                    {% blocktrans trimmed with user=user date=date %}
+                    Rejected by "{{ user }}" on {{ date }}
+                    {% endblocktrans %}
+                </p>
+                <p>
+                    <b>{% translate 'Message' %}:</b>
+                </p>
+                <p>
+                    {{ form.latest_rejection.reason_text|linebreaksbr }}
+                </p>
+                {% endwith %}
+                {% endwith %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
