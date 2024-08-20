@@ -32,7 +32,7 @@
         "gross_tonnage": 125,
         "vessel_type": "FISHER",
         "harbour_tax": "0.00",
-        "status": "DONE"
+        "status": "NEW"
     }
 },
 {
@@ -52,7 +52,7 @@
         "gross_tonnage": 250,
         "vessel_type": "FREIGHTER",
         "harbour_tax": null,
-        "status": "DONE"
+        "status": "NEW"
     }
 },
 {
@@ -72,7 +72,7 @@
         "gross_tonnage": 200,
         "vessel_type": "CRUISE",
         "harbour_tax": null,
-        "status": "DONE"
+        "status": "NEW"
     }
 },
 {
@@ -92,7 +92,7 @@
         "gross_tonnage": 1337,
         "vessel_type": "CRUISE",
         "harbour_tax": null,
-        "status": "DONE"
+        "status": "NEW"
     }
 },
 {
@@ -230,7 +230,7 @@
         "gross_tonnage": 200,
         "vessel_type": "FREIGHTER",
         "harbour_tax": null,
-        "status": "DONE"
+        "status": "APPROVED"
     }
 }
 

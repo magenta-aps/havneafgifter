@@ -372,7 +372,9 @@ class Status(models.TextChoices):
     NEW = ("NEW", _("New"))  # means: "submitted for review"
     APPROVED = ("APPROVED", _("Approved"))
     REJECTED = ("REJECTED", _("Rejected"))
-    DONE = ("DONE", _("Done"))  # TODO: replace with `CLOSED` or similar?
+    # TODO: DONE or something similar will be introduced when the system
+    # handles invoicing. For now, we won't be needing it.
+    # DONE = ("DONE", _("Done"))
 
 
 class Municipality(models.IntegerChoices):
@@ -606,14 +608,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         default=Status.DRAFT,
         choices=Status.choices,
         protected=True,
-        verbose_name=_("Draft status"),
+        verbose_name=_("Status"),
     )
 
     date = models.DateField(
         null=False,
         blank=False,
         auto_now_add=True,
-        verbose_name=_("Form submission date"),
+        verbose_name=_("Submission date"),
     )
 
     port_of_call = models.ForeignKey(
@@ -956,7 +958,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def _get_port_authority_filter(cls, user: User) -> Q:
         base_filter: Q = Q(
             # 1. Port authority users cannot see DRAFT forms
-            status__in=[Status.NEW, Status.APPROVED, Status.REJECTED, Status.DONE],
+            status__in=[Status.NEW, Status.APPROVED, Status.REJECTED],
             # 2. Port authority users can only see forms whose port of call is a port
             # managed by the port authority in question.
             port_of_call__portauthority__isnull=False,
