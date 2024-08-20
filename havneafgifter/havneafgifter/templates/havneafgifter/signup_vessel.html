@@ -13,9 +13,15 @@
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
-    {% bootstrap_form form exclude='first_name,last_name,email' %}
+
+    {% bootstrap_form_errors form %}
+
+    <h2>{% translate 'Vessel details' %}</h2>
+    {% bootstrap_form form exclude='password1,password2,first_name,last_name,email' %}
+
     <h2>{% translate 'Contact person details' %}</h2>
-    {% bootstrap_form form exclude='organization,username,password1,password2' %}
+    {% bootstrap_form form exclude='username,type,name,owner,master,gross_tonnage' %}
+
     {% bootstrap_button button_type="submit" content=_("Create") %}
 </form>
 {% endblock content %}

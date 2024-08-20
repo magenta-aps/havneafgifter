@@ -18,6 +18,7 @@ from havneafgifter.models import (
     ShipType,
     TaxRates,
     User,
+    Vessel,
 )
 
 
@@ -285,3 +286,8 @@ class CustomUserAdmin(UserAdmin):
 
     def group_list(self, obj):
         return ", ".join([group.name for group in obj.groups.all()])
+
+
+@admin.register(Vessel)
+class VesselAdmin(admin.ModelAdmin):
+    list_display = ("imo", "user", "name", "type")
