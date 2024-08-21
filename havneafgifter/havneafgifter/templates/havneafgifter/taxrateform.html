@@ -1,11 +1,18 @@
 {% extends "havneafgifter/base.html" %}
 
+{% load static %}
 {% load i18n %}
 {% load django_bootstrap5 %}
+
+{% block extra_headers %}
+    <script src="{% static 'havneafgifter/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
+{% endblock %}
 
 {% block content %}
     <h1>Redigér afgift, sats eller periode</h1>
     <form method="post">
+        {{ port_formset.management_form }}
+        {{ disembarkmentrate_formset.management_form }}
         {% csrf_token %}
 
         <div class="row">
@@ -36,10 +43,10 @@
                 <th>{% translate "Til (ton)" %}</th>
                 <th>{% translate "Rund op til (ton)" %}</th>
                 <th>{% translate "Sats" %}</th>
-                <th> </th>
+                <th></th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="port_formset_tbody">
             {% for form in port_formset %}
                 <tr>
                     <td>{{ form.instance.name }}</td>
@@ -56,32 +63,49 @@
             {% endfor %}
             </tbody>
 
-
+            {% with form=port_formset.empty_form %}
+                <tbody class="d-none">
+                <tr id="port_formset_prototype">
+                    <td>{{ form.instance.name }}</td>
+                    <td>{{ form.gt_start }}</td>
+                    <td>{{ form.gt_end }}</td>
+                    <td>{{ form.round_gross_ton_up_to }}</td>
+                    <td>{{ form.port_tax_rate }}</td>
+                    <td class="text-end">
+                        {% if form.instance.can_delete %}
+                            <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                </tbody>
+            {% endwith %}
         </table>
 
-        <button class="btn btn-success my-2" type="button">{% translate "Tilføj Havneafgiftssats (modal?)" %}</button>
+        <button class="btn btn-success my-2"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#addporttaxrate_modal">
+            {% translate "Tilføj Havneafgiftssats" %}
+        </button>
 
         <hr>
 
         <table class="table table-borderless table-striped" id="disembarkment_rate_table">
-
             <thead>
             <tr>
                 <th>{% translate "Afgifter pr. ilandsætningssted" %}</th>
                 <th>{% translate "Sats (DKK)" %}</th>
-                <th> </th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             {% for site in disembarkmentrate_formset %}
                 <tr>
-
                     <td>{{ site.instance.name }}</td>
                     <td>{{ site.disembarkment_tax_rate }}</td>
                     <td class="text-end">
                         <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
                     </td>
-
                 </tr>
             {% endfor %}
             </tbody>
@@ -89,13 +113,122 @@
         </table>
 
         <button class="btn btn-success my-2"
-                type="button">{% translate "Tilføj Ilandsætningsafgiftssats (modal?)" %}</button>
-
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#add_disembarkmentsite_rate_modal">
+            {% translate "Tilføj Ilandsætningsafgiftssats" %}
+        </button>
         <hr>
-
         <button class="btn btn-success my-2" type="submit">{% translate "Gem ændringer" %}</button>
 
     </form>
-
-
 {% endblock content %}
+
+
+{% block modals %}
+    <div id="addporttaxrate_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% translate "Tilføj havneafgifts sats" %}</h5>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="new_vesseltype">{% translate "Skibstype" %}</label>
+                        </div>
+                        <div class="col-9">
+                            <select id="new_vesseltype">
+                                {% for type, label in vessel_type_choices %}
+                                    <option value="{{ type }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row py-1">
+                        <div class="col-3">
+                            <label for="new_port">{% translate "Havn" %}</label>
+                        </div>
+                        <div class="col-9">
+                            <select id="new_port">
+                                {% for pk, name in port_choices %}
+                                    <option value="{{ pk }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="new_port_tax_rate_submit">{% translate "Tilføj" %}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annulér" %}</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add_disembarkmentsite_rate_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">{% translate "Tilføj ilandsætningsafgit sats" %}</h5></div>
+
+                <div class="modal-body">
+                    <div class="row py-1">
+                        <div class="col-4">
+                            <label for="new_municipality">{% translate "Kommune" %}</label>
+                        </div>
+                        <div class="col-8">
+                            <select id="new_municipality">
+                                {% for pk, name in municipality_choices %}
+                                    <option value="{{ pk }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row py-1">
+                        <div class="col-4">
+                            <label for="new_disembsite">{% translate "Ilandsætningssted" %}</label>
+                        </div>
+                        <div class="col-8">
+                            <select id="new_disembsite">
+                                {% for pk, name, municipality, is_outside_populated_areas in disembarkmentsite_choices %}
+                                    <option value="{{ pk }}">{{ name }}</option>
+                                    {#
+                                    TODO: FILTER BY OPTIONS WHERE SELECTION IN municipality_choices MATCHES municipality HERE
+                                    #}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row py-1">
+                        <div class="col-4">
+                            <label for="new_disembrate">{% translate "Ilandsætningssted" %}</label>
+                        </div>
+                        <div class="col-8">
+                            <input type="number" min="0.00" step="0.01" placeholder="{% translate "Beløb" %}" id="new_disembrate">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="new_port_tax_rate_submit">{% translate "Tilføj" %}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annulér" %}</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

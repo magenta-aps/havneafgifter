@@ -608,7 +608,7 @@ class PortTaxRateForm(ModelForm, BootstrapForm):
         exclude = ["tax_rates"]
 
 
-class DisembarkmentRateForm(ModelForm, BootstrapForm):
+class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
     class Meta:
         model = DisembarkmentTaxRate
         exclude = ["tax_rates"]
@@ -621,6 +621,6 @@ PortTaxRateFormSet = inlineformset_factory(
 DisembarkmentTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,
     model=DisembarkmentTaxRate,
-    form=DisembarkmentRateForm,
+    form=DisembarkmentTaxRateForm,
     extra=0,
 )
