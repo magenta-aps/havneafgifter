@@ -38,6 +38,7 @@ from django_tables2 import SingleTableMixin, SingleTableView
 from havneafgifter.forms import (
     AuthenticationForm,
     DisembarkmentForm,
+    DisembarkmentTaxRateFormSet,
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
@@ -809,8 +810,38 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            **{**kwargs, "port_formset": self.get_port_formset()}
+            **{
+                **kwargs,
+                "port_formset": self.get_port_formset(),
+                "disembarkmentrate_formset": self.get_disembarkmentrate_formset(),
+            }
         )
 
     def get_port_formset(self):
         return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
+
+    def get_disembarkmentrate_formset(self):
+        return DisembarkmentTaxRateFormSet(
+            self.request.POST or None, instance=self.object
+        )
+
+
+# ADDED DISEMBARKMENTRATE FORM TO GET THAT DATA INTO THE VIEW AS WELL
+# added DisembarkmentTaxRateFormSet to forms.py to make the DisembarkmentRateForm
+# accessible like the port rate
+
+# added get_disembarmentrate_formset() to get the formset, and be able to pass it
+# as kwargs
+
+# hvordan oversættes {{ form.instance.name }} entries ?
+# hvordan ønskes det at sortering og gruppering skal fingere
+# sortering i testen ser anderledes ud end i sats/1/edit - er data'ene bare sat i
+# databasen i "sorteret rækkefølge" ?
+
+
+# skal model.DisembarkmentSite have name som computed property, så passende tekst
+# vises, hvis is_outside_populated_areas er true?
+
+
+# implementering af |date:"Y-m-d H:i:s (O)" i taxrateform.html virker ikke
+# skal den evt være en datepicker?

@@ -173,10 +173,10 @@ class User(AbstractUser):
                 UserType.ADMIN,
             )
 
-    @property
-    def can_view_list(self) -> bool:
-        # All user types can see (links to the) form list (for now.)
-        return True
+	@property
+	def can_view_list(self) -> bool:
+		# All user types can see (links to the) form list (for now.)
+		return True
 
     @property
     def can_view_statistics(self) -> bool:
@@ -1309,6 +1309,10 @@ class PortTaxRate(PermissionsMixin, models.Model):
         gt_start = self.gt_start
         gt_end = self.gt_end
         return f"{tax_rates}, {port}, {vessel_type}, {gt_start} t - {gt_end} t"
+
+    @property
+    def can_delete(self):
+        return self.port is not None or self.vessel_type is not None
 
     @property
     def name(self):
