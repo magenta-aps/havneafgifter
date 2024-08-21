@@ -1841,30 +1841,3 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             f"{self.disemb_tr5.disembarkment_tax_rate:.2f}",
         )
         self.assertEqual(disembarkment_tax_rates_table_content[4][" "], "Slet sats")
-
-
-"""
-Testing goals:
-
-✓  The rendered table contains the expected values
-?  The shown values are sorted as expected (vessel_type, harbor_name)
-✓  Absence of delete button in first row
-✓  First row containing the "None, None" name
-[] Changes being made to the object
-[] (Changes being saved to db?)
-[] Changes being shown after reload
-
-Issues:
-[] "Tillægssted udenfor beboet område" isn't shown in the name, unless manually entered.
-    Can we expect the user to enter that manually?
-    Should this be a computed name, setting it if the bool is True?
-
-[]  Cleanup lines 1452-1459 ?
-
-[]  Maybe document html_table_to_dict() ?
-
-[]  Should TestTaxRateFormView (and other taxrate related tests) be seperated into 
-    individual .py files? This file is getting chunky.
-
-[]  Remove this before merging to where someone will see it.
-"""
