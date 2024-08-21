@@ -37,6 +37,7 @@ from havneafgifter.form_mixins import BootstrapForm
 from havneafgifter.models import (
     CruiseTaxForm,
     DisembarkmentSite,
+    DisembarkmentTaxRate,
     HarborDuesForm,
     Municipality,
     Nationality,
@@ -607,6 +608,19 @@ class PortTaxRateForm(ModelForm, BootstrapForm):
         exclude = ["tax_rates"]
 
 
+class DisembarkmentRateForm(ModelForm, BootstrapForm):
+    class Meta:
+        model = DisembarkmentTaxRate
+        exclude = ["tax_rates"]
+
+
 PortTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates, model=PortTaxRate, form=PortTaxRateForm, extra=0
+)
+
+DisembarkmentTaxRateFormSet = inlineformset_factory(
+    parent_model=TaxRates,
+    model=DisembarkmentTaxRate,
+    form=DisembarkmentRateForm,
+    extra=0,
 )
