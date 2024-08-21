@@ -814,6 +814,10 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
                 **kwargs,
                 "port_formset": self.get_port_formset(),
                 "disembarkmentrate_formset": self.get_disembarkmentrate_formset(),
+                "vessel_type_choices": ShipType.choices,
+                "port_choices": [ (port.pk, port.name) for port in Port.objects.order_by("name") ],
+                "municipality_choices": DisembarkmentSite.municipality.field.choices,
+                "disembarkmentsite_choices": [ (ds.pk, ds.name, ds.municipality, ds.is_outside_populated_areas) for ds in DisembarkmentSite.objects.order_by("municipality", "name") ],
             }
         )
 
@@ -824,3 +828,5 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return DisembarkmentTaxRateFormSet(
             self.request.POST or None, instance=self.object
         )
+
+
