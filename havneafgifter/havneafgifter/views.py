@@ -824,24 +824,3 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return DisembarkmentTaxRateFormSet(
             self.request.POST or None, instance=self.object
         )
-
-
-# ADDED DISEMBARKMENTRATE FORM TO GET THAT DATA INTO THE VIEW AS WELL
-# added DisembarkmentTaxRateFormSet to forms.py to make the DisembarkmentRateForm
-# accessible like the port rate
-
-# added get_disembarmentrate_formset() to get the formset, and be able to pass it
-# as kwargs
-
-# hvordan oversættes {{ form.instance.name }} entries ?
-# hvordan ønskes det at sortering og gruppering skal fingere
-# sortering i testen ser anderledes ud end i sats/1/edit - er data'ene bare sat i
-# databasen i "sorteret rækkefølge" ?
-
-
-# skal model.DisembarkmentSite have name som computed property, så passende tekst
-# vises, hvis is_outside_populated_areas er true?
-
-
-# implementering af |date:"Y-m-d H:i:s (O)" i taxrateform.html virker ikke
-# skal den evt være en datepicker?
