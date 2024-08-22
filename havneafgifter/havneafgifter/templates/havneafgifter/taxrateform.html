@@ -48,33 +48,38 @@
             </thead>
             <tbody id="port_formset_tbody">
             {% for form in port_formset %}
-                <tr>
-                    <td>{{ form.instance.name }}</td>
+                <tr class="align-middle">
+                    <td>
+                        {{ form.instance.name }}
+                    </td>
                     <td>{{ form.gt_start }}</td>
                     <td>{{ form.gt_end }}</td>
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
                         {% if form.instance.can_delete %}
-                            <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                            <button class="btn btn-danger" type="button">{% translate "Slet sats" %}
+                        </button>
                         {% endif %}
+                        {{ form.port }}
+                        {{ form.vessel_type }}
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
 
             {% with form=port_formset.empty_form %}
-                <tbody class="d-none">
-                <tr id="port_formset_prototype">
-                    <td>{{ form.instance.name }}</td>
+                <tbody class="d-none" id="port_formset_prototype">
+                <tr class="align-middle">
+                    <td data-form-field="label">{{ form.instance.name }}</td>
                     <td>{{ form.gt_start }}</td>
                     <td>{{ form.gt_end }}</td>
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
-                        {% if form.instance.can_delete %}
-                            <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
-                        {% endif %}
+                        <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        {{ form.port }}
+                        {{ form.vessel_type }}
                     </td>
                 </tr>
                 </tbody>
@@ -98,17 +103,34 @@
                 <th></th>
             </tr>
             </thead>
-            <tbody>
-            {% for site in disembarkmentrate_formset %}
+            <tbody id="disembarkment_formset_tbody">
+            {% for form in disembarkmentrate_formset %}
                 <tr>
-                    <td>{{ site.instance.name }}</td>
-                    <td>{{ site.disembarkment_tax_rate }}</td>
+                    <td>{{ form.instance.name }}</td>
+                    <td>{{ form.disembarkment_tax_rate }}</td>
                     <td class="text-end">
                         <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        {{ form.municipality }}
+                        {{ form.disembarkment_site }}
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
+
+
+            {% with form=disembarkmentrate_formset.empty_form %}
+                <tbody class="d-none" id="disembarkment_formset_prototype">
+                <tr class="align-middle">
+                    <td data-form-field="label">{{ site.instance.name }}</td>
+                    <td>{{ form.disembarkment_tax_rate }}</td>
+                    <td class="text-end">
+                        <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        {{ form.municipality }}
+                        {{ form.disembarkment_site }}
+                    </td>
+                </tr>
+                </tbody>
+            {% endwith %}
 
         </table>
 
@@ -167,7 +189,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="new_port_tax_rate_submit">{% translate "Tilføj" %}</button>
+                    <button type="button" class="btn btn-success" id="new_port_tax_rate_submit" data-bs-dismiss="modal">{% translate "Tilføj" %}</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annullér" %}</button>
                 </div>
 
@@ -175,6 +197,19 @@
             </div>
         </div>
     </div>
+    <script nonce="{{ request.csp_nonce }}">
+    $(function() {
+        const formset = $("#port_formset_tbody").formset("port_tax_rates", $("#port_formset_prototype"));
+        $("#new_port_tax_rate_submit").on("click", function () {
+            const newRow = formset.addForm();
+            newRow.find("[data-form-field=label]").text(
+                $("#new_vesseltype").find("option:selected").text() + ", " + $("#new_port").find("option:selected").text()
+            );
+            newRow.find("[name$=-port]").val($("#new_port").val());
+            newRow.find("[name$=-vessel_type]").val($("#new_vesseltype").val());
+        });
+    });
+    </script>
 
 
     <div id="add_disembarkmentsite_rate_modal" class="modal fade">
@@ -215,7 +250,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="new_port_tax_rate_submit">{% translate "Tilføj" %}</button>
+                    <button type="button" class="btn btn-success" id="new_disembsite_submit" data-bs-dismiss="modal">{% translate "Tilføj" %}</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annullér" %}</button>
                 </div>
 
@@ -243,5 +278,19 @@
     $("#new_municipality").on("change", on_municipality_update);
     on_municipality_update.call($("#new_municipality"));
     {% endverbatim %}
+    </script>
+
+    <script nonce="{{ request.csp_nonce }}">
+    $(function() {
+        const formset = $("#disembarkment_formset_tbody").formset("disembarkment_tax_rates", $("#disembarkment_formset_prototype"));
+        $("#new_disembsite_submit").on("click", function () {
+            const newRow = formset.addForm();
+            newRow.find("[data-form-field=label]").text(
+                $("#new_municipality").find("option:selected").text() + ", " + $("#new_disembsite").find("option:selected").text()
+            );
+            newRow.find("[name$=-municipality]").val($("#new_municipality").val());
+            newRow.find("[name$=-disembarkment_site]").val($("#new_disembsite").val());
+        });
+    });
     </script>
 {% endblock %}

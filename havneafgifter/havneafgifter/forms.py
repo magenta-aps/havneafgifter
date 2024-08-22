@@ -606,12 +606,20 @@ class PortTaxRateForm(ModelForm, BootstrapForm):
     class Meta:
         model = PortTaxRate
         exclude = ["tax_rates"]
+        widgets = {
+            "port": HiddenInput,
+            "vessel_type": HiddenInput,
+        }
 
 
 class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
     class Meta:
         model = DisembarkmentTaxRate
         exclude = ["tax_rates"]
+        widgets = {
+            "municipality": HiddenInput,
+            "disembarkment_site": HiddenInput,
+        }
 
 
 PortTaxRateFormSet = inlineformset_factory(
