@@ -25,3 +25,33 @@ def reject_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
         # required to render `{{ request.csp_nonce }}`
         "request": context.get("request"),
     }
+
+
+@register.inclusion_tag(
+    "havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html",
+    takes_context=True,
+)
+def inform_ship_user_on_save_shipping_agent_modal(
+    context, form: HarborDuesForm | CruiseTaxForm
+) -> dict:
+    return {"form": form}
+
+
+@register.inclusion_tag(
+    "havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html",
+    takes_context=True,
+)
+def inform_ship_user_on_save_no_shipping_agent_modal(
+    context, form: HarborDuesForm | CruiseTaxForm
+) -> dict:
+    return {"form": form}
+
+
+@register.inclusion_tag(
+    "havneafgifter/bootstrap/inform_ship_user_on_submit.html",
+    takes_context=True,
+)
+def inform_ship_user_on_submit_modal(
+    context, form: HarborDuesForm | CruiseTaxForm
+) -> dict:
+    return {"form": form}
