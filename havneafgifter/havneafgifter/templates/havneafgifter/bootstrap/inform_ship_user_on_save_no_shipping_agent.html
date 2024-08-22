@@ -1,0 +1,26 @@
+{% extends 'havneafgifter/bootstrap/modal.html' %}
+
+{% load i18n %}
+
+{% block modal_id %}#informShipUserOnSaveNoShippingAgentModal{% endblock %}
+{% block modal_title %}{% translate 'Attention' %}{% endblock %}
+
+{% block modal_body %}
+<p>
+    {% blocktrans trimmed %}
+    Please note: you are about to save this form as a draft without
+    sending it to a shipping agent or port authority.
+    {% endblocktrans %}
+</p>
+<p>
+    {% blocktrans trimmed %}
+    Please select an appropriate shipping agent if you would like to
+    send this form to a shipping agent.
+    {% endblocktrans %}
+</p>
+
+{% endblock %}
+
+{% block modal_ok_button %}
+<button type="submit" class="btn btn-primary" name="confirm" value="DRAFT" data-bs-dismiss="modal">{% translate 'Save as draft' %}</button>
+{% endblock %}
