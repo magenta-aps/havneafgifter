@@ -815,7 +815,10 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
                 "vessel_type_choices": ShipType.choices,
                 "port_choices": [ (port.pk, port.name) for port in Port.objects.order_by("name") ],
                 "municipality_choices": DisembarkmentSite.municipality.field.choices,
-                "disembarkmentsite_choices": [ (ds.pk, ds.name, ds.municipality, ds.is_outside_populated_areas) for ds in DisembarkmentSite.objects.order_by("municipality", "name") ],
+                "disembarkmentsite_map": {
+                    municipality.value: list(DisembarkmentSite.objects.filter(municipality=municipality).values_list("pk", "name"))
+                    for municipality in Municipality
+                },
             }
         )
 

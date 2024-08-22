@@ -139,7 +139,8 @@
                             <label for="new_vesseltype">{% translate "Skibstype" %}</label>
                         </div>
                         <div class="col-9">
-                            <select id="new_vesseltype">
+                            <select id="new_vesseltype" class="form-select">
+                                <option value="">{% translate "Enhver skibstype" %}</option>
                                 {% for type, label in vessel_type_choices %}
                                     <option value="{{ type }}">{{ label }}</option>
                                 {% endfor %}
@@ -153,7 +154,8 @@
                             <label for="new_port">{% translate "Havn" %}</label>
                         </div>
                         <div class="col-9">
-                            <select id="new_port">
+                            <select id="new_port" class="form-select">
+                                <option value="">{% translate "Enhver havn" %}</option>
                                 {% for pk, name in port_choices %}
                                     <option value="{{ pk }}">{{ name }}</option>
                                 {% endfor %}
@@ -166,7 +168,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="new_port_tax_rate_submit">{% translate "Tilføj" %}</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annulér" %}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annullér" %}</button>
                 </div>
 
 
@@ -186,7 +188,7 @@
                             <label for="new_municipality">{% translate "Kommune" %}</label>
                         </div>
                         <div class="col-8">
-                            <select id="new_municipality">
+                            <select id="new_municipality" class="form-select">
                                 {% for pk, name in municipality_choices %}
                                     <option value="{{ pk }}">{{ name }}</option>
                                 {% endfor %}
@@ -200,9 +202,9 @@
                             <label for="new_disembsite">{% translate "Ilandsætningssted" %}</label>
                         </div>
                         <div class="col-8">
-                            <select id="new_disembsite">
+                            <select id="new_disembsite" class="form-select">
                                 {% for pk, name, municipality, is_outside_populated_areas in disembarkmentsite_choices %}
-                                    <option value="{{ pk }}">{{ name }}</option>
+                                    <option value="">-</option>
                                     {#
                                     TODO: FILTER BY OPTIONS WHERE SELECTION IN municipality_choices MATCHES municipality HERE
                                     #}
@@ -210,25 +212,36 @@
                             </select>
                         </div>
                     </div>
-
-
-                    <div class="row py-1">
-                        <div class="col-4">
-                            <label for="new_disembrate">{% translate "Ilandsætningssted" %}</label>
-                        </div>
-                        <div class="col-8">
-                            <input type="number" min="0.00" step="0.01" placeholder="{% translate "Beløb" %}" id="new_disembrate">
-                        </div>
-                    </div>
-
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="new_port_tax_rate_submit">{% translate "Tilføj" %}</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annulér" %}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Annullér" %}</button>
                 </div>
 
             </div>
         </div>
     </div>
+    {{ disembarkmentsite_map|json_script:"disembarkmentsite_map" }}
+    <script nonce="{{ request.csp_nonce }}">
+    const any_label = "{% translate 'Enhver' %}";
+    {% verbatim %}
+    const disembarkmentsite_map = JSON.parse($("#disembarkmentsite_map").text());
+    const new_disembsite_field = $("#new_disembsite");
+    const on_municipality_update = function () {
+       const code = $(this).val();
+       new_disembsite_field.empty();
+       new_disembsite_field.append(
+           $(`<option value="">${any_label}</option>`)
+       );
+       for (let item of disembarkmentsite_map[code]) {
+           new_disembsite_field.append(
+               $(`<option value="${item[0]}">${item[1]}</option>`)
+           );
+       }
+    };
+    $("#new_municipality").on("change", on_municipality_update);
+    on_municipality_update.call($("#new_municipality"));
+    {% endverbatim %}
+    </script>
 {% endblock %}
