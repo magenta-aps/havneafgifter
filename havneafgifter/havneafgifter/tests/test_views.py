@@ -628,6 +628,32 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                 request,
             )
 
+    def test_form_valid_checks_cruise_tax_form_on_submit(self):
+        """If user clicks "Submit for review", the `CruiseTaxForm` created in "step 1"
+        must be validated before it can be submitted. Otherwise, the user must be
+        informed of the validation errors and sent back to "step 1."
+        """
+        # Arrange: set up view to process an invalid `CruiseTaxForm` instance.
+        self.instance._cruise_tax_form.gross_tonnage = None
+        # Arrange: user clicks "Submit" (rather than "Save as draft")
+        self._post_formset(status=Status.NEW.value)
+        # Act
+        with patch("havneafgifter.views.messages.error") as mock_messages_error:
+            response = self.instance.form_valid(self.instance.get_form())
+            # Assert: an error message is displayed
+            mock_messages_error.assert_called_once()
+            # Assert: we receive the expected redirect back to "step 1" as the cruise
+            # tax form is not valid.
+            self.assertIsInstance(response, HttpResponseRedirect)
+            self.assertEqual(
+                response.url,
+                "%s?status=NEW"
+                % reverse(
+                    "havneafgifter:draft_edit",
+                    kwargs={"pk": self.instance._cruise_tax_form.pk},
+                ),
+            )
+
 
 class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @classmethod
