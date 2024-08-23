@@ -5,7 +5,6 @@ from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
-    BaseInlineFormSet,
     BooleanField,
     CharField,
     ChoiceField,
@@ -27,6 +26,7 @@ from django.forms import (
     widgets,
     BaseForm,
     BaseFormSet,
+    BaseInlineFormSet,
 )
 from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
@@ -369,9 +369,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
         # If both dates are given, arrival must be before departure
         if (
-            (datetime_of_arrival is not None)
-            and (datetime_of_departure is not None)
-            and (datetime_of_arrival > datetime_of_departure)
+                (datetime_of_arrival is not None)
+                and (datetime_of_departure is not None)
+                and (datetime_of_arrival > datetime_of_departure)
         ):
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
@@ -414,7 +414,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         # If given a port of call, both arrival and departure dates must be given
         # as well.
         if (port_of_call is not None) and (
-            datetime_of_arrival is None or datetime_of_departure is None
+                datetime_of_arrival is None or datetime_of_departure is None
         ):
             raise ValidationError(
                 _(
