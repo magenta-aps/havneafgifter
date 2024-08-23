@@ -655,6 +655,21 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
             [reason],
             transform=lambda obj: obj.reason_text,
         )
+        # Assert that the model property `latest_rejection` returns the expected
+        # history entry.
+        self.assertIsNotNone(self.harbor_dues_form.latest_rejection)
+        self.assertEqual(self.harbor_dues_form.latest_rejection.reason_text, reason)
+
+    def test_latest_rejection_is_none_if_no_rejection_has_reason(self):
+        # Arrange
+        self.harbor_dues_form.reject(reason=None)
+        self.harbor_dues_form.save()
+        # Act and assert
+        self.assertIsNone(self.harbor_dues_form.latest_rejection)
+
+    def test_latest_rejection_is_none_if_not_rejected(self):
+        # A form whose status is not REJECTED returns None in `latest_rejection`
+        self.assertIsNone(self.harbor_dues_form.latest_rejection)
 
 
 class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
