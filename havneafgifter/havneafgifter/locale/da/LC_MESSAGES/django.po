@@ -60,10 +60,6 @@ msgstr "Kodeord"
 msgid "IMO-number"
 msgstr "IMO-nummer"
 
-#: havneafgifter/forms.py havneafgifter/models.py
-msgid "Vessel name"
-msgstr "Skibets navn"
-
 #: havneafgifter/forms.py
 msgid "First name"
 msgstr "Fornavn"
@@ -75,6 +71,26 @@ msgstr "Efternavn"
 #: havneafgifter/forms.py
 msgid "Email"
 msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel type"
+msgstr "Skibets type"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel name"
+msgstr "Skibets navn"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel owner"
+msgstr "Skibets ejer"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel captain"
+msgstr "Skibets kaptajn"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Gross tonnage"
+msgstr "Bruttotonnage"
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Nationality"
@@ -435,22 +451,6 @@ msgid "Vessel nationality"
 msgstr "Skibets nationalitet"
 
 #: havneafgifter/models.py
-msgid "Vessel owner"
-msgstr "Skibets ejer"
-
-#: havneafgifter/models.py
-msgid "Vessel captain"
-msgstr "Skibets kaptajn"
-
-#: havneafgifter/models.py
-msgid "Gross tonnage"
-msgstr "Bruttotonnage"
-
-#: havneafgifter/models.py
-msgid "Vessel type"
-msgstr "Skibets type"
-
-#: havneafgifter/models.py
 msgid "Calculated harbour tax"
 msgstr "Beregnet havneafgift"
 
@@ -793,6 +793,10 @@ msgstr "Vis PDF"
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Edit"
 msgstr "Rediger"
+
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Vessel details"
+msgstr "Skibs-detaljer"
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 msgid "Contact person details"
