@@ -39,6 +39,19 @@ class TestSignupVesselForm(HarborDuesFormMixin, TestCase):
 
 
 class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+    def test_clean_does_nothing_if_draft(self):
+        data = copy.copy(self.harbor_dues_form_data)
+        form = self._get_form_instance(data, status=Status.DRAFT)
+        self.assertTrue(form.is_valid())
+        self.assertDictEqual(
+            {k: v for k, v in form.cleaned_data.items() if k != "no_port_of_call"},
+            data,
+        )
+        self.assertEqual(
+            form.user_visible_non_field_errors(),
+            ErrorList(),  # empty error list
+        )
+
     @parametrize(
         "changes",
         [
@@ -123,7 +136,7 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         result = form.clean()
         self.assertEqual(data, result)
 
-    def test_user_visible_non_field_errors_is_empty(self):
+    def test_user_visible_non_field_errors(self):
         # Submit data that will lead to violating a database constraint
         data = copy.copy(self.harbor_dues_form_data)
         data["status"] = Status.NEW.value
@@ -133,17 +146,13 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         try:
             form.save(commit=False)
         except ValueError:
-            # Assert that the DB constraint violation produces the expected
-            # non-field error.
             self.assertEqual(
                 str(form.errors.get(NON_FIELD_ERRORS)[0]),
-                "Constraint “gross_tonnage_cannot_be_null_for_non_cruise_ships” "
-                "is violated.",
+                "Gross tonnage cannot be empty",
             )
-            # Assert that the same non-field error is not visible to the user
             self.assertEqual(
-                form.user_visible_non_field_errors(),
-                ErrorList(),  # empty error list
+                form.user_visible_non_field_errors()[0],
+                "Gross tonnage cannot be empty",
             )
 
     def test_get_vessel_info_for_ship_user(self):
@@ -182,10 +191,16 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         )
         self.assertTrue(form.fields["shipping_agent"].disabled)
 
-    def _get_form_instance(self, data):
+    def _get_form_instance(self, data, status=Status.NEW):
         # We use `self.shipping_agent_user` here to get a "normal" user
         # (i.e., not a "ship user".)
-        return HarborDuesFormForm(self.shipping_agent_user, data=data)
+        # We default to `status=Status.NEW` here to trigger most of the processing
+        # in the `clean` method.
+        return HarborDuesFormForm(
+            self.shipping_agent_user,
+            status=status,
+            data=data,
+        )
 
     def _assert_form_has_error(self, data, code):
         form = self._get_form_instance(data)
