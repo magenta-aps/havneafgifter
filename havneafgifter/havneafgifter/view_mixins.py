@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from django_fsm import has_transition_perm
@@ -25,8 +26,12 @@ class HavneafgiftView:
         self,
         viewname: str,
         form: HarborDuesForm | CruiseTaxForm,
+        **query,
     ):
-        return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
+        return HttpResponseRedirect(
+            reverse(viewname, kwargs={"pk": form.pk})
+            + (f"?{urlencode(query)}" if query else "")
+        )
 
 
 class _SendEmailMixin:

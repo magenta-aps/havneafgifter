@@ -26,7 +26,7 @@ from django.db.models import (
     When,
 )
 from django.db.models.functions import Coalesce
-from django.forms import formset_factory
+from django.forms import formset_factory, model_to_dict
 from django.http import (
     Http404,
     HttpResponse,
@@ -39,6 +39,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
+from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
 
 from havneafgifter.forms import (
@@ -354,6 +355,16 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
         return context_data
 
     def form_valid(self, form):
+        # If user is submitting this cruise tax form for review, make sure we
+        # validate it first, and send the user back to step 1 if the form is
+        # not valid.
+        try:
+            submitted_for_review: bool = (
+                self._validate_cruise_tax_form_submitted_for_review()
+            )
+        except ValidationError as error:
+            return self._return_to_step_1_with_errors(error.message)
+
         # Create or update `Disembarkment` objects based on formset data
         disembarkment_objects = self._get_disembarkment_objects()
         Disembarkment.objects.bulk_create(
@@ -372,7 +383,9 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
 
         # User is now all done filling out data for cruise ship.
         # Handle `status` (DRAFT or NEW) and send email if NEW.
-        self._handle_status()
+        if submitted_for_review:
+            self._cruise_tax_form.save(update_fields=("status",))
+            self._send_email(self._cruise_tax_form, self.request)
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
@@ -419,12 +432,46 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
             for disembarkment_site in DisembarkmentSite.objects.all()
         ]
 
-    def _handle_status(self):
+    def _validate_cruise_tax_form_submitted_for_review(self) -> bool:
+        submitted_for_review = False
+
+        # Determine if user selected "Submit" (status=NEW) or "Save as draft"
+        # (status=DRAFT).
         status = self.request.POST.get("status")
-        if status == Status.NEW.value:
+
+        # Update cruise tax form status, if submitting for review
+        if status == Status.NEW.value and can_proceed(
+            self._cruise_tax_form.submit_for_review
+        ):
             self._cruise_tax_form.submit_for_review()
-            self._cruise_tax_form.save()
-            self._send_email(self._cruise_tax_form, self.request)
+            submitted_for_review = True
+
+            # Validate the data on the cruise tax form, taking the new status into
+            # account.
+            form = HarborDuesFormForm(
+                self.request.user,
+                status=Status.NEW,
+                instance=self._cruise_tax_form,
+                data=model_to_dict(self._cruise_tax_form),
+            )
+
+            if not form.is_valid():
+                raise ValidationError(
+                    _(
+                        "Cruise tax form contains one or more errors. "
+                        "Please correct them."
+                    )
+                )
+
+        return submitted_for_review
+
+    def _return_to_step_1_with_errors(self, message: str) -> HttpResponse:
+        messages.error(self.request, message)
+        return self.get_redirect_for_form(
+            "havneafgifter:draft_edit",
+            self._cruise_tax_form,
+            status=Status.NEW.value,
+        )
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
