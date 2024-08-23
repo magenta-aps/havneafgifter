@@ -835,3 +835,29 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return DisembarkmentTaxRateFormSet(
             self.request.POST or None, instance=self.object
         )
+
+    def form_valid(self, form, formset1, formset2):
+        """If the form is valid, save the associated model."""
+        self.object = form.save()
+        formset1.save()
+        formset2.save()
+        return super().form_valid(form)
+
+    def form_invalid(self, form, formset1, formset2):
+        """If the form is invalid, render the invalid form."""
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        """
+        Handle POST requests: instantiate a form instance with the passed
+        POST variables and then check if it's valid.
+        """
+        form = self.get_form()
+        formset1 = self.get_port_formset()
+        formset2 = self.get_disembarkmentrate_formset()
+
+        if form.is_valid() and formset1.is_valid() and formset2.is_valid():
+            return self.form_valid(form, formset1, formset2)
+        else:
+            return self.form_invalid(form, formset1, formset2)

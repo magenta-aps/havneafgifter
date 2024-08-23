@@ -365,6 +365,7 @@ class TestHarborDuesFormCreateView(
                     mock_handle_notification_mail.assert_called_once_with(
                         OnSubmitForReviewMail,
                         HarborDuesForm.objects.latest("pk"),
+                        request,
                     )
             else:
                 # Assert that we receive a 403 error response
@@ -1357,7 +1358,7 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         super().setUp()
         self.client.force_login(self.ship_user)
 
-    def test_the_thing_with_parameter(self):
+    def test_rendering(self):
         response = self.client.get(
             reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk})
         )
@@ -1372,7 +1373,7 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.assertIn("25.00", soup.get_text())
         self.assertIn("2.00", soup.get_text())
         self.assertIn("None", soup.get_text())
-        self.assertIn("2023-10-05 18:30:00 (+0200)", soup.get_text())
+        self.assertIn("2023-10-05 14:30:00 (-0200)", soup.get_text())
 
 
 class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
