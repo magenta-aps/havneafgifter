@@ -1312,8 +1312,7 @@ class PortTaxRate(PermissionsMixin, models.Model):
         blank=False,
         verbose_name=_("Vessel gross tonnage (lower)"),
         validators=[
-            MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+            MaxValueValidator(2000000, message=_("Tallet er for højt"))
         ],
     )
 
@@ -1322,9 +1321,8 @@ class PortTaxRate(PermissionsMixin, models.Model):
         null=True,
         blank=True,
         validators=[
-            MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(2000000, message=_("Tallet er for højt"))
-        ]
+            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+        ],
     )
 
     port_tax_rate = models.DecimalField(
@@ -1336,8 +1334,8 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Tax per gross ton"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(999999999999, message=_("Tallet er for højt"))
-        ]
+            MaxValueValidator(999999999999, message=_("Tallet er for højt")),
+        ],
     )
 
     round_gross_ton_up_to = models.PositiveIntegerField(
@@ -1347,8 +1345,8 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Round GT up to"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(2000000, message=_("Tallet er for højt"))
-        ]
+            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+        ],
     )
 
     def __str__(self) -> str:

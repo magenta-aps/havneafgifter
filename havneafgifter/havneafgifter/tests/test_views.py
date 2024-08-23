@@ -271,35 +271,35 @@ class TestHarborDuesFormCreateView(
         [
             # Test 1: user creates harbor dues form and is sent directly to receipt
             (
-                ShipType.FREIGHTER,
-                False,
-                HarborDuesForm,
-                "havneafgifter:receipt_detail_html",
+                    ShipType.FREIGHTER,
+                    False,
+                    HarborDuesForm,
+                    "havneafgifter:receipt_detail_html",
             ),
             # Test 2: user creates cruise tax form with a port of call, and is sent to
             # the passenger tax form.
             (
-                ShipType.CRUISE,
-                False,
-                CruiseTaxForm,
-                "havneafgifter:passenger_tax_create",
+                    ShipType.CRUISE,
+                    False,
+                    CruiseTaxForm,
+                    "havneafgifter:passenger_tax_create",
             ),
             # Test 3: user creates cruise tax form without a port of call, and is sent
             # to the environmental tax form.
             (
-                ShipType.CRUISE,
-                True,
-                CruiseTaxForm,
-                "havneafgifter:environmental_tax_create",
+                    ShipType.CRUISE,
+                    True,
+                    CruiseTaxForm,
+                    "havneafgifter:environmental_tax_create",
             ),
         ],
     )
     def test_creates_model_instance_depending_on_vessel_type(
-        self,
-        vessel_type,
-        no_port_of_call,
-        model_class,
-        next_view_name,
+            self,
+            vessel_type,
+            no_port_of_call,
+            model_class,
+            next_view_name,
     ):
         self.client.force_login(self.shipping_agent_user)
         # Arrange: set up POST data
@@ -337,11 +337,11 @@ class TestHarborDuesFormCreateView(
         ],
     )
     def test_sends_email_and_displays_confirmation_message_on_submit(
-        self,
-        username,
-        status,
-        permitted,
-        email_expected,
+            self,
+            username,
+            status,
+            permitted,
+            email_expected,
     ):
         """When a form is completed (for other vessel types than cruise ships),
         the receipt must be emailed to the relevant recipients, and a confirmation
