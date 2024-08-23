@@ -23,7 +23,7 @@ from django.forms import (
     PasswordInput,
     Textarea,
     TextInput,
-    widgets,
+    widgets, BaseForm, BaseFormSet, BaseInlineFormSet,
 )
 from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
@@ -365,9 +365,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
         # If both dates are given, arrival must be before departure
         if (
-            (datetime_of_arrival is not None)
-            and (datetime_of_departure is not None)
-            and (datetime_of_arrival > datetime_of_departure)
+                (datetime_of_arrival is not None)
+                and (datetime_of_departure is not None)
+                and (datetime_of_arrival > datetime_of_departure)
         ):
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
@@ -410,7 +410,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         # If given a port of call, both arrival and departure dates must be given
         # as well.
         if (port_of_call is not None) and (
-            datetime_of_arrival is None or datetime_of_departure is None
+                datetime_of_arrival is None or datetime_of_departure is None
         ):
             raise ValidationError(
                 _(
@@ -622,13 +622,24 @@ class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
         }
 
 
+class TaxRateFormSet(BaseInlineFormSet):
+    deletion_widget = HiddenInput
+
+
 PortTaxRateFormSet = inlineformset_factory(
-    parent_model=TaxRates, model=PortTaxRate, form=PortTaxRateForm, extra=0
+    parent_model=TaxRates,
+    model=PortTaxRate,
+    form=PortTaxRateForm,
+    extra=0,
+    can_delete=True,
+    formset=TaxRateFormSet,
 )
 
 DisembarkmentTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,
     model=DisembarkmentTaxRate,
     form=DisembarkmentTaxRateForm,
+    formset=TaxRateFormSet,
     extra=0,
+    can_delete=True,
 )

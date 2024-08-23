@@ -7,14 +7,16 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
     EmailValidator,
     MaxLengthValidator,
     MaxValueValidator,
     MinLengthValidator,
-    RegexValidator, MinValueValidator,
+    RegexValidator,
+    MinValueValidator,
 )
 from django.db import models
 from django.db.models import F, Q, QuerySet
@@ -379,7 +381,6 @@ class PortAuthority(PermissionsMixin, models.Model):
         ordering = ["name"]
         verbose_name_plural = _("Port authorities")
 
-
     name = models.CharField(
         max_length=32,
         null=False,
@@ -394,7 +395,7 @@ class PortAuthority(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Port authority contact email"),
-        validators=[EmailValidator(message=_("Ugyldig email adresse"))]
+        validators=[EmailValidator(message=_("Ugyldig email adresse"))],
     )
 
     def __str__(self) -> str:
@@ -428,8 +429,8 @@ class Port(PermissionsMixin, models.Model):
         verbose_name=_("Port name"),
         validators=[
             MaxLengthValidator(100, message=_("Navnet er for langt")),
-            MinLengthValidator(4, message=_("Navnet er for kort"))
-        ]
+            MinLengthValidator(4, message=_("Navnet er for kort")),
+        ],
     )
     portauthority = models.ForeignKey(
         PortAuthority, null=True, blank=True, on_delete=models.SET_NULL
@@ -554,97 +555,97 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("Form submission date"),
     )
 
-	port_of_call = models.ForeignKey(
-		Port,
-		null=True,
-		blank=True,
-		verbose_name=_("Port of call"),
-		on_delete=models.PROTECT,
-	)
+    port_of_call = models.ForeignKey(
+        Port,
+        null=True,
+        blank=True,
+        verbose_name=_("Port of call"),
+        on_delete=models.PROTECT,
+    )
 
-	nationality = models.CharField(
-		max_length=2,
-		null=True,
-		blank=True,
-		choices=countries,
-		verbose_name=_("Vessel nationality"),
-	)
+    nationality = models.CharField(
+        max_length=2,
+        null=True,
+        blank=True,
+        choices=countries,
+        verbose_name=_("Vessel nationality"),
+    )
 
-	vessel_name = models.CharField(
-		max_length=255,
-		null=True,
-		blank=True,
-		verbose_name=_("Vessel name"),
-	)
+    vessel_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Vessel name"),
+    )
 
-	vessel_imo = models.CharField(
-		max_length=7,
-		null=True,
-		blank=True,
-		validators=[
-			MinLengthValidator(7),
-			MaxLengthValidator(7),
-			RegexValidator(r"\d{7}"),
-			imo_validator,
-		],
-		verbose_name=_("IMO-number"),
-	)
+    vessel_imo = models.CharField(
+        max_length=7,
+        null=True,
+        blank=True,
+        validators=[
+            MinLengthValidator(7),
+            MaxLengthValidator(7),
+            RegexValidator(r"\d{7}"),
+            imo_validator,
+        ],
+        verbose_name=_("IMO-number"),
+    )
 
-	vessel_owner = models.CharField(
-		max_length=255,
-		null=True,
-		blank=True,
-		verbose_name=_("Vessel owner"),
-	)
+    vessel_owner = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Vessel owner"),
+    )
 
-	vessel_master = models.CharField(
-		max_length=255,
-		null=True,
-		blank=True,
-		verbose_name=_("Vessel captain"),
-	)
+    vessel_master = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Vessel captain"),
+    )
 
-	shipping_agent = models.ForeignKey(
-		ShippingAgent,
-		null=True,
-		blank=True,
-		verbose_name=_("Shipping agent"),
-		on_delete=models.SET_NULL,
-	)
+    shipping_agent = models.ForeignKey(
+        ShippingAgent,
+        null=True,
+        blank=True,
+        verbose_name=_("Shipping agent"),
+        on_delete=models.SET_NULL,
+    )
 
-	datetime_of_arrival = models.DateTimeField(
-		null=True,
-		blank=True,
-		verbose_name=_("Arrival date/time"),
-	)
+    datetime_of_arrival = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Arrival date/time"),
+    )
 
-	datetime_of_departure = models.DateTimeField(
-		null=True,
-		blank=True,
-		verbose_name=_("Departure date/time"),
-	)
+    datetime_of_departure = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Departure date/time"),
+    )
 
-	gross_tonnage = models.PositiveIntegerField(
-		null=True,
-		blank=True,
-		verbose_name=_("Gross tonnage"),
-	)
+    gross_tonnage = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Gross tonnage"),
+    )
 
-	vessel_type = models.CharField(
-		null=True,
-		blank=True,
-		max_length=9,
-		choices=ShipType,
-		verbose_name=_("Vessel type"),
-	)
+    vessel_type = models.CharField(
+        null=True,
+        blank=True,
+        max_length=9,
+        choices=ShipType,
+        verbose_name=_("Vessel type"),
+    )
 
-	harbour_tax = models.DecimalField(
-		null=True,
-		blank=True,
-		decimal_places=2,
-		max_digits=12,
-		verbose_name=_("Calculated harbour tax"),
-	)
+    harbour_tax = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=12,
+        verbose_name=_("Calculated harbour tax"),
+    )
 
     pdf = models.FileField(
         null=True,
@@ -1141,7 +1142,7 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         default=False,
         null=True,
         blank=True,
-        verbose_name=_("Other disembarkation outside of populated areas"),
+        verbose_name=_("Other disembarkation outside of populated areas")
     )
 
     def __str__(self) -> str:
@@ -1206,8 +1207,8 @@ class TaxRates(PermissionsMixin, models.Model):
         verbose_name=_("Afgift pr. passager"),
         validators=[
             MinValueValidator(0, message=_("Beløbet er for lille")),
-            MaxValueValidator(999999, message=_("Beløbet er for stort"))
-        ]
+            MaxValueValidator(999999, message=_("Beløbet er for stort")),
+        ],
     )
 
     start_datetime = models.DateTimeField(null=True, blank=True)
@@ -1312,8 +1313,8 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Vessel gross tonnage (lower)"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(2000000, message=_("Tallet er for højt"))
-        ]
+            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+        ],
     )
 
     gt_end = models.PositiveIntegerField(

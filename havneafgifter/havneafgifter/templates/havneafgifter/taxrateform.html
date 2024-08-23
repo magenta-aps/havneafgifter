@@ -15,6 +15,7 @@
         {{ disembarkmentrate_formset.management_form }}
         {% csrf_token %}
 
+        {# Passenger tax rate value #}
         <div class="row">
             <div class="col-2">
                 <label for="{{ form.pax_tax_rate.id_for_label }}">{% translate "Afgift per passager" %}</label>
@@ -24,6 +25,7 @@
             </div>
         </div>
 
+        {# Tax rate start date #}
         <div class="row">
             <div class="col-2">
                 <label for="{{ form.start_datetime.id_for_label }}">{% translate "Begyndelsesdato" %}</label>
@@ -32,9 +34,10 @@
                 {{ form.start_datetime }}
             </div>
         </div>
+
         <hr>
 
-
+        {# Port tax rate table #}
         <table class="table table-borderless table-striped" id="port_tax_rate_table">
             <thead>
             <tr>
@@ -49,15 +52,16 @@
             <tbody id="port_formset_tbody">
             {% for form in port_formset %}
                 <tr class="align-middle">
+
                     <td>
                         {{ form.instance.name }}
                     </td>
-                    <td>
+                    <td class="{% if form.name.errors %}is-invalid{% endif %}">
                         {{ form.gt_start }}
-                        {%  if form.gt_start.errors %}
-                                  <div id="validationServerUsernameFeedback" class="invalid-feedback">
-                            {{ form.start.errors }}
-                                  </div>
+                        {% if form.gt_start.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.gt_start.errors }}
+                            </div>
                         {% endif %}
                     </td>
                     <td>{{ form.gt_end }}</td>
@@ -65,11 +69,13 @@
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
                         {% if form.instance.can_delete %}
-                            <button class="btn btn-danger" type="button">{% translate "Slet sats" %}
-                        </button>
+                            <button class="btn btn-danger" type="button" data-action="delete">{% translate "Slet sats" %}
+                            </button>
                         {% endif %}
                         {{ form.port }}
                         {{ form.vessel_type }}
+                        {{ form.id }}
+                        {{ form.DELETE }}
                     </td>
                 </tr>
             {% endfor %}
@@ -84,7 +90,7 @@
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
-                        <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        <button class="btn btn-danger" type="button" data-action="delete">{% translate "Slet sats" %}</button>
                         {{ form.port }}
                         {{ form.vessel_type }}
                     </td>
@@ -93,6 +99,7 @@
             {% endwith %}
         </table>
 
+        {# Button to show "add new port tax rate" modal #}
         <button class="btn btn-success my-2"
                 type="button"
                 data-bs-toggle="modal"
@@ -102,6 +109,7 @@
 
         <hr>
 
+        {# Disembarkment rate table #}
         <table class="table table-borderless table-striped" id="disembarkment_rate_table">
             <thead>
             <tr>
@@ -113,10 +121,11 @@
             <tbody id="disembarkment_formset_tbody">
             {% for form in disembarkmentrate_formset %}
                 <tr>
+                    {{ form.id }}
                     <td>{{ form.instance.name }}</td>
                     <td>{{ form.disembarkment_tax_rate }}</td>
                     <td class="text-end">
-                        <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        <button class="btn btn-danger" type="button" data-action="delete">{% translate "Slet sats" %}</button>
                         {{ form.municipality }}
                         {{ form.disembarkment_site }}
                     </td>
@@ -131,7 +140,7 @@
                     <td data-form-field="label">{{ site.instance.name }}</td>
                     <td>{{ form.disembarkment_tax_rate }}</td>
                     <td class="text-end">
-                        <button class="btn btn-danger" type="button">{% translate "Slet sats" %}</button>
+                        <button class="btn btn-danger" type="button" data-action="delete">{% translate "Slet sats" %}</button>
                         {{ form.municipality }}
                         {{ form.disembarkment_site }}
                     </td>
@@ -140,21 +149,32 @@
             {% endwith %}
 
         </table>
-
+        {# Button to show "add new disembarkemtn rate" modal #}
         <button class="btn btn-success my-2"
                 type="button"
                 data-bs-toggle="modal"
                 data-bs-target="#add_disembarkmentsite_rate_modal">
             {% translate "Tilføj Ilandsætningsafgiftssats" %}
         </button>
+
         <hr>
+        {# "Save changes" button #}
         <button class="btn btn-success my-2" type="submit">{% translate "Gem ændringer" %}</button>
 
     </form>
+
+    <script nonce="{{ request.csp_nonce }}">
+        $("form").on("click", "[data-action=delete]", function () {
+            const row = $(this).parents("tr");
+            row.find("[name$=DELETE]").val(1);
+            row.hide(400);
+        })
+    </script>
 {% endblock content %}
 
 
 {% block modals %}
+    {# Modal to add port tax rate row #}
     <div id="addporttaxrate_modal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -204,21 +224,25 @@
             </div>
         </div>
     </div>
+
+    {# JS that adds a line with values from the modal, to the port tax rate table #}
     <script nonce="{{ request.csp_nonce }}">
-    $(function() {
-        const formset = $("#port_formset_tbody").formset("port_tax_rates", $("#port_formset_prototype"));
-        $("#new_port_tax_rate_submit").on("click", function () {
-            const newRow = formset.addForm();
-            newRow.find("[data-form-field=label]").text(
-                $("#new_vesseltype").find("option:selected").text() + ", " + $("#new_port").find("option:selected").text()
-            );
-            newRow.find("[name$=-port]").val($("#new_port").val());
-            newRow.find("[name$=-vessel_type]").val($("#new_vesseltype").val());
+        $(function () {
+            const formset = $("#port_formset_tbody").formset("port_tax_rates", $("#port_formset_prototype"));
+            $("#new_port_tax_rate_submit").on("click", function () {
+                const newRow = formset.addForm();
+                newRow.hide();
+                newRow.show(400);
+                newRow.find("[data-form-field=label]").text(
+                    $("#new_vesseltype").find("option:selected").text() + ", " + $("#new_port").find("option:selected").text()
+                );
+                newRow.find("[name$=-port]").val($("#new_port").val());
+                newRow.find("[name$=-vessel_type]").val($("#new_vesseltype").val());
+            });
         });
-    });
     </script>
 
-
+    {# Modal to add a disembarkment rate row #}
     <div id="add_disembarkmentsite_rate_modal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -247,9 +271,6 @@
                             <select id="new_disembsite" class="form-select">
                                 {% for pk, name, municipality, is_outside_populated_areas in disembarkmentsite_choices %}
                                     <option value="">-</option>
-                                    {#
-                                    TODO: FILTER BY OPTIONS WHERE SELECTION IN municipality_choices MATCHES municipality HERE
-                                    #}
                                 {% endfor %}
                             </select>
                         </div>
@@ -264,40 +285,51 @@
             </div>
         </div>
     </div>
+
+    {# JS that only populates the embarkment site with sites that belong to the previously selected municipality #}
     {{ disembarkmentsite_map|json_script:"disembarkmentsite_map" }}
     <script nonce="{{ request.csp_nonce }}">
-    const any_label = "{% translate 'Enhver' %}";
-    {% verbatim %}
-    const disembarkmentsite_map = JSON.parse($("#disembarkmentsite_map").text());
-    const new_disembsite_field = $("#new_disembsite");
-    const on_municipality_update = function () {
-       const code = $(this).val();
-       new_disembsite_field.empty();
-       new_disembsite_field.append(
-           $(`<option value="">${any_label}</option>`)
-       );
-       for (let item of disembarkmentsite_map[code]) {
-           new_disembsite_field.append(
-               $(`<option value="${item[0]}">${item[1]}</option>`)
-           );
-       }
-    };
-    $("#new_municipality").on("change", on_municipality_update);
-    on_municipality_update.call($("#new_municipality"));
-    {% endverbatim %}
+        const any_label = "{% translate 'Ethvert ilandsætningssted' %}";
+        {% verbatim %}
+            const disembarkmentsite_map = JSON.parse($("#disembarkmentsite_map").text());
+            const new_disembsite_field = $("#new_disembsite");
+            const on_municipality_update = function () {
+                const code = $(this).val();
+                new_disembsite_field.empty();
+                new_disembsite_field.append(
+                    $(`<option value="">${any_label}</option>`)
+                );
+                for (let item of disembarkmentsite_map[code]) {
+                    new_disembsite_field.append(
+                        $(`<option value="${item[0]}">${item[1]}</option>`)
+                    );
+                }
+            };
+            $("#new_municipality").on("change", on_municipality_update);
+            on_municipality_update.call($("#new_municipality"));
+        {% endverbatim %}
     </script>
 
+    {# JS that adds a new row with values from the modal, to the disembarkment tax rate tabel #}
     <script nonce="{{ request.csp_nonce }}">
-    $(function() {
-        const formset = $("#disembarkment_formset_tbody").formset("disembarkment_tax_rates", $("#disembarkment_formset_prototype"));
-        $("#new_disembsite_submit").on("click", function () {
-            const newRow = formset.addForm();
-            newRow.find("[data-form-field=label]").text(
-                $("#new_municipality").find("option:selected").text() + ", " + $("#new_disembsite").find("option:selected").text()
-            );
-            newRow.find("[name$=-municipality]").val($("#new_municipality").val());
-            newRow.find("[name$=-disembarkment_site]").val($("#new_disembsite").val());
+        $(function () {
+            const formset = $("#disembarkment_formset_tbody").formset("disembarkment_tax_rates", $("#disembarkment_formset_prototype"));
+            $("#new_disembsite_submit").on("click", function () {
+                const newRow = formset.addForm();
+                newRow.hide();
+                newRow.show(400);
+                newRow.find("[data-form-field=label]").text(
+                    $("#new_municipality").find("option:selected").text() + ", " + $("#new_disembsite").find("option:selected").text()
+                );
+                newRow.find("[name$=-municipality]").val($("#new_municipality").val());
+                newRow.find("[name$=-disembarkment_site]").val($("#new_disembsite").val());
+            });
         });
-    });
     </script>
+
 {% endblock %}
+
+<script nonce="{{ request.csp_nonce }}">
+    $()
+
+</script>

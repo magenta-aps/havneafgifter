@@ -29,9 +29,9 @@ class BootstrapForm(CSPFormMixin, forms.Form):
         # if isinstance(field.widget, forms.Select):
         #     classes.append("form-select")
 
-        # if check_for_errors:
-        #     if self.has_error(name) is True:
-        #         classes.append("is-invalid")
+        if check_for_errors:
+            if self.has_error(name):
+                classes.append("is-invalid")
         field.widget.attrs["class"] = " ".join(set(classes))
 
     @staticmethod
