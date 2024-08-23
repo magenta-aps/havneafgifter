@@ -1127,8 +1127,8 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         verbose_name=_("Disembarkment site"),
         validators=[
             MaxLengthValidator(200, message=_("Navnet er for langt")),
-            MinLengthValidator(4, message=_("Navnet er for kort"))
-        ]
+            MinLengthValidator(4, message=_("Navnet er for kort")),
+        ],
     )
 
     municipality = models.PositiveSmallIntegerField(
@@ -1142,7 +1142,7 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         default=False,
         null=True,
         blank=True,
-        verbose_name=_("Other disembarkation outside of populated areas")
+        verbose_name=_("Other disembarkation outside of populated areas"),
     )
 
     def __str__(self) -> str:
@@ -1171,8 +1171,8 @@ class Disembarkment(PermissionsMixin, models.Model):
         verbose_name=_("Number of passengers disembarking"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lille")),
-            MaxValueValidator(20000, message=_("Tallet er for stort"))
-        ]
+            MaxValueValidator(20000, message=_("Tallet er for stort")),
+        ],
     )
 
     disembarkment_site = models.ForeignKey(
