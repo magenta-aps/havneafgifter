@@ -448,7 +448,7 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
             # Validate the data on the cruise tax form, taking the new status into
             # account.
             form = HarborDuesFormForm(
-                self.request.user,
+                self.request.user,  # type: ignore
                 status=Status.NEW,
                 instance=self._cruise_tax_form,
                 data=model_to_dict(self._cruise_tax_form),
