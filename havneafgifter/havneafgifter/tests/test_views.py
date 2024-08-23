@@ -46,6 +46,7 @@ from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
+    HarborDuesFormUpdateView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -1102,6 +1103,11 @@ class TestHarborDuesFormUpdateView(
             set(response.context["form"].errors.keys()),
             {"gross_tonnage"},
         )
+
+    def test_get_desired_status_handles_invalid_value(self):
+        instance = HarborDuesFormUpdateView()
+        instance.setup(self.request_factory.get("", {"status": "INVALID"}))
+        self.assertEqual(instance._get_desired_status(), Status.DRAFT)
 
     def _get_update_view_url(self, pk: int, **query) -> str:
         return reverse("havneafgifter:draft_edit", kwargs={"pk": pk}) + (
