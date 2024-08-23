@@ -52,7 +52,14 @@
                     <td>
                         {{ form.instance.name }}
                     </td>
-                    <td>{{ form.gt_start }}</td>
+                    <td>
+                        {{ form.gt_start }}
+                        {%  if form.gt_start.errors %}
+                                  <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                            {{ form.start.errors }}
+                                  </div>
+                        {% endif %}
+                    </td>
                     <td>{{ form.gt_end }}</td>
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
