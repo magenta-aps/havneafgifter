@@ -1087,8 +1087,26 @@ class TestHarborDuesFormUpdateView(
         self.assertEqual(cruise_tax_form.vessel_name, "Peder Dingo")
         self._assert_redirects_to_next_step(response, self.cruise_tax_draft_form.pk)
 
-    def _get_update_view_url(self, pk: int) -> str:
-        return reverse("havneafgifter:draft_edit", kwargs={"pk": pk})
+    def test_get_renders_form_errors(self):
+        # Arrange
+        self.client.force_login(self.shipping_agent_user)
+        # Arrange: introduce missing/invalid data
+        self.cruise_tax_form.gross_tonnage = None
+        self.cruise_tax_form.save(update_fields=("gross_tonnage",))
+        # Act: perform GET request
+        response = self.client.get(
+            self._get_update_view_url(self.cruise_tax_form.pk, status=Status.NEW.value)
+        )
+        # Assert: check that form error(s) are displayed (even before form is POSTed)
+        self.assertSetEqual(
+            set(response.context["form"].errors.keys()),
+            {"gross_tonnage"},
+        )
+
+    def _get_update_view_url(self, pk: int, **query) -> str:
+        return reverse("havneafgifter:draft_edit", kwargs={"pk": pk}) + (
+            f"?{urlencode(query)}" if query else ""
+        )
 
     def _assert_redirects_to_view(self, response, viewname: str, pk: int) -> None:
         self.assertIsInstance(response, HttpResponseRedirect)

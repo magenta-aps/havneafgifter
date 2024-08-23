@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from django_fsm import has_transition_perm
+from django_fsm import can_proceed, has_transition_perm
 
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
 
@@ -99,7 +99,7 @@ class HarborDuesFormMixin(
     def form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
 
-        if not has_transition_perm(
+        if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
             harbor_dues_form.submit_for_review,
             self.request.user,
         ):
