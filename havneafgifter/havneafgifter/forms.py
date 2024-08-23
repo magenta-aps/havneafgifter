@@ -2,7 +2,7 @@ from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
-from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.forms import (
     BooleanField,
     CharField,
@@ -42,6 +42,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     User,
+    Vessel,
     imo_validator,
 )
 
@@ -84,7 +85,6 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         model = User
         fields = [
             "username",  # used for saving IMO number
-            "organization",  # used for saving vessel name
             "first_name",
             "last_name",
             "email",
@@ -98,12 +98,6 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
             imo_validator,
         ],
         label=_("IMO-number"),
-    )
-
-    organization = CharField(
-        required=True,
-        max_length=100,
-        label=_("Vessel name"),
     )
 
     first_name = CharField(
@@ -123,6 +117,53 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         widget=EmailInput(attrs={"autocomplete": "email"}),
         label=_("Email"),
     )
+
+    # The following fields are present on the form, but are saved in the `Vessel` model
+    # rather than `User`.
+
+    type = ChoiceField(
+        required=False,
+        choices=ShipType.choices,
+        label=_("Vessel type"),
+    )
+
+    name = CharField(
+        required=False,
+        max_length=255,
+        label=_("Vessel name"),
+    )
+
+    owner = CharField(
+        max_length=255,
+        required=False,
+        label=_("Vessel owner"),
+    )
+
+    master = CharField(
+        max_length=255,
+        required=False,
+        label=_("Vessel captain"),
+    )
+
+    gross_tonnage = IntegerField(
+        required=False,
+        validators=[MinValueValidator(0)],
+        label=_("Gross tonnage"),
+    )
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        if commit:
+            Vessel.objects.update_or_create(
+                user=user,
+                imo=user.username,
+                name=self.cleaned_data["name"],
+                type=self.cleaned_data["type"],
+                owner=self.cleaned_data["owner"],
+                master=self.cleaned_data["master"],
+                gross_tonnage=self.cleaned_data["gross_tonnage"],
+            )
+        return user
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
@@ -160,8 +201,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=False,
         max_length=255,
         label=_("Vessel name"),
-        initial=lambda form: form._user.organization if form.user_is_ship else "",
-        disabled=lambda form: form.user_is_ship,
+        initial=lambda form: getattr(form._vessel, "name", None),
     )
 
     vessel_imo = DynamicField(
@@ -173,8 +213,24 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             imo_validator,
         ],
         label=_("IMO-number"),
-        initial=lambda form: form._user.username if form.user_is_ship else "",
+        initial=lambda form: getattr(form._vessel, "imo", None),
         disabled=lambda form: form.user_is_ship,
+        required=False,
+    )
+
+    vessel_owner = DynamicField(
+        CharField,
+        max_length=255,
+        label=_("Vessel owner"),
+        initial=lambda form: getattr(form._vessel, "owner", None),
+        required=False,
+    )
+
+    vessel_master = DynamicField(
+        CharField,
+        max_length=255,
+        label=_("Vessel captain"),
+        initial=lambda form: getattr(form._vessel, "master", None),
         required=False,
     )
 
@@ -211,6 +267,24 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("Departure date/time"),
     )
 
+    gross_tonnage = DynamicField(
+        IntegerField,
+        validators=[MinValueValidator(0)],
+        label=_("Gross tonnage"),
+        initial=lambda form: getattr(form._vessel, "gross_tonnage", None),
+        disabled=lambda form: form.user_is_ship,
+        required=False,
+    )
+
+    vessel_type = DynamicField(
+        ChoiceField,
+        choices=ShipType.choices,
+        label=_("Vessel type"),
+        initial=lambda form: getattr(form._vessel, "type", None),
+        disabled=lambda form: form.user_is_ship,
+        required=False,
+    )
+
     no_port_of_call = BooleanField(
         required=False,
         initial=False,
@@ -228,6 +302,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             user.shipping_agent
             if user.shipping_agent is not None and user.has_group_name("Shipping")
             else None
+        )
+        self._vessel = (
+            getattr(user, "vessel", None) if user.has_group_name("Ship") else None
         )
         super().__init__(*args, **kwargs)
 

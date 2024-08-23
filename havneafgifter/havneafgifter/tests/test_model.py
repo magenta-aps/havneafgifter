@@ -777,3 +777,8 @@ class TestMailRecipientList(HarborDuesFormMixin, TestCase):
             self.assertTrue(
                 any(record.message.endswith(message) for record in logged.records)
             )
+
+
+class TestVessel(HarborDuesFormMixin, TestCase):
+    def test_str(self):
+        self.assertEqual(str(self.ship_user_vessel), self.ship_user_vessel.imo)

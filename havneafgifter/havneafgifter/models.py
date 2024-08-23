@@ -1517,6 +1517,64 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
         return f"{municipality}, {disembarkment_site}"
 
 
+class Vessel(models.Model):
+    user = models.OneToOneField(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    type = models.CharField(
+        null=True,
+        blank=True,
+        max_length=9,
+        choices=ShipType,
+        verbose_name=_("Vessel type"),
+    )
+
+    name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Vessel name"),
+    )
+
+    imo = models.CharField(
+        unique=True,
+        max_length=7,
+        validators=[
+            MinLengthValidator(7),
+            MaxLengthValidator(7),
+            RegexValidator(r"\d{7}"),
+            imo_validator,
+        ],
+        verbose_name=_("IMO-number"),
+    )
+
+    owner = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Vessel owner"),
+    )
+
+    master = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Vessel captain"),
+    )
+
+    gross_tonnage = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Gross tonnage"),
+    )
+
+    def __str__(self) -> str:
+        return self.imo
+
+
 @receiver(pre_create_historical_record, sender=HarborDuesForm.history.model)
 def pre_create_historical_record_callback(
     sender, signal, instance, history_instance, **kwargs

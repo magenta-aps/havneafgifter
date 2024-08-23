@@ -58,10 +58,6 @@ msgstr ""
 msgid "IMO-number"
 msgstr ""
 
-#: havneafgifter/forms.py havneafgifter/models.py
-msgid "Vessel name"
-msgstr "Angallat"
-
 #: havneafgifter/forms.py
 msgid "First name"
 msgstr ""
@@ -74,6 +70,26 @@ msgstr "Angallat"
 
 #: havneafgifter/forms.py
 msgid "Email"
+msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel type"
+msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel name"
+msgstr "Angallat"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel owner"
+msgstr "Piginnittoq"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Vessel captain"
+msgstr "Umiarsuup naalagaa"
+
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Gross tonnage"
 msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
@@ -425,22 +441,6 @@ msgid "Vessel nationality"
 msgstr "Sumiuussuseq"
 
 #: havneafgifter/models.py
-msgid "Vessel owner"
-msgstr "Piginnittoq"
-
-#: havneafgifter/models.py
-msgid "Vessel captain"
-msgstr "Umiarsuup naalagaa"
-
-#: havneafgifter/models.py
-msgid "Gross tonnage"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Vessel type"
-msgstr ""
-
-#: havneafgifter/models.py
 msgid "Calculated harbour tax"
 msgstr "Umiarsualivimmiinnermut akitsuut"
 
@@ -764,6 +764,10 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Edit"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/signup_vessel.html
+msgid "Vessel details"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html

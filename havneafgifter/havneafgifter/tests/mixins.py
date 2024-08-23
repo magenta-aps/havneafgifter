@@ -14,6 +14,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     User,
+    Vessel,
 )
 
 
@@ -62,6 +63,16 @@ class HarborDuesFormMixin:
         cls.ship_user = User.objects.create(username="9074729", organization="Mary")
         cls.ship_user.groups.add(Group.objects.get(name="Ship"))
         cls.unprivileged_user = User.objects.create(username="unprivileged")
+
+        # Vessel belonging to `cls.ship_user`
+        cls.ship_user_vessel = Vessel.objects.create(
+            user=cls.ship_user,
+            imo=cls.ship_user.username,
+            type=ShipType.FREIGHTER,
+            owner="Owner",
+            master="Captain",
+            gross_tonnage=1234,
+        )
 
         # Valid data for creating a "ship user" `User` instance
         cls.ship_user_form_data = {
