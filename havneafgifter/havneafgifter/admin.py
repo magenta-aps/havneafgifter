@@ -37,6 +37,8 @@ class HarborDuesFormAdmin(SimpleHistoryAdmin):
         "vessel_master",
     ]
     list_display = [
+        "pk",
+        "status",
         "vessel_name",
         "vessel_imo",
         "vessel_type",
