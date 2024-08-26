@@ -39,6 +39,7 @@ class StatistikTable(tables.Table):
 
 
 class TaxRateTable(tables.Table):
+    id = tables.Column(linkify=("havneafgifter:tax_rate_details", [tables.A("pk")]))
 
     class Meta:
         model = TaxRates
