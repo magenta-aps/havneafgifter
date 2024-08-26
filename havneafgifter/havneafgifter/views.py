@@ -27,14 +27,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    HttpResponseRedirect,
-)
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
@@ -64,6 +57,11 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+)
+from havneafgifter.responses import (
+    HavneafgifterResponseBadRequest,
+    HavneafgifterResponseForbidden,
+    HavneafgifterResponseNotFound,
 )
 from havneafgifter.tables import HarborDuesFormTable, StatistikTable, TaxRateTable
 from havneafgifter.view_mixins import (
@@ -227,8 +225,9 @@ class _CruiseTaxFormSetView(
 
     def _check_permission(self):
         if self._cruise_tax_form is None:
-            return HttpResponseForbidden(
-                _("This form was already submitted and can no longer be edited")
+            return HavneafgifterResponseForbidden(
+                self.request,
+                _("This form was already submitted and can no longer be edited"),
             )
 
 
@@ -243,7 +242,7 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
                 for pbc in self._get_passengers_by_country_objects()
             )
         except ValidationError as e:
-            return HttpResponseBadRequest(e.message)
+            return HavneafgifterResponseBadRequest(request, e.message)
         passengers_total_form = PassengersTotalForm(data=request.POST)
         passengers_total_form.validate_total(sum_passengers_by_country)
         if not passengers_total_form.is_valid():
@@ -478,8 +477,8 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
-            return HttpResponseNotFound(
-                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            return HavneafgifterResponseNotFound(
+                request, f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
             )
 
         if not form.has_permission(request.user, "view"):
@@ -558,8 +557,8 @@ class PreviewPDFView(ReceiptDetailView):
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
-            return HttpResponseNotFound(
-                f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
+            return HavneafgifterResponseNotFound(
+                request, f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
             )
         else:
             receipt = form.get_receipt()
@@ -585,11 +584,12 @@ class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         try:
             harbor_dues_form = self.get_object()
         except Http404:
-            return HttpResponseForbidden(
+            return HavneafgifterResponseForbidden(
+                self.request,
                 _(
                     "You do not have the required permissions to approve "
                     "harbor dues forms"
-                )
+                ),
             )
         # There is no form to fill for "approve" actions, so it does not make sense to
         # implement `form_valid`. Instead, we just perform the object update here.
@@ -618,11 +618,12 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         try:
             self.object = self.get_object()
         except Http404:
-            return HttpResponseForbidden(
+            return HavneafgifterResponseForbidden(
+                self.request,
                 _(
                     "You do not have the required permissions to reject "
                     "harbor dues forms"
-                )
+                ),
             )
         # Call `form_valid` if `ReasonForm` is indeed valid
         return super().post(request, *args, **kwargs)
@@ -697,8 +698,9 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
             "havneafgifter.view_harborduesform"
             not in request.user.get_all_permissions()
         ):
-            return HttpResponseForbidden(
-                _("You do not have the required permissions to view statistics")
+            return HavneafgifterResponseForbidden(
+                self.request,
+                _("You do not have the required permissions to view statistics"),
             )
         return super().dispatch(request, *args, **kwargs)
 

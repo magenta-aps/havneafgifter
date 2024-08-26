@@ -1,0 +1,16 @@
+{% extends "havneafgifter/base.html" %}
+
+{% load i18n %}
+
+{% block title %}
+{% translate "Bad request (400)" %}
+{% endblock %}
+
+{% block content %}
+    <h1>{% translate "Bad request (400)" %}</h1>
+    {% if exception %}
+    <p>{{ exception }}</p>
+    {% else %}
+    <p>{% trans 'Your browser supplied an invalid HTTP request for this URL' %}</p>
+    {% endif %}
+{% endblock %}
