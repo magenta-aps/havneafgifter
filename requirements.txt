@@ -28,3 +28,4 @@ django-tempus-dominus==5.1.2.17
 django-sql-utils==0.7.0
 django-fsm==2.8.2
 django-simple-history==3.7.0
+lxml
