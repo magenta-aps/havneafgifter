@@ -1037,6 +1037,7 @@ class TestHarborDuesFormUpdateView(
         self._assert_redirects_to_receipt(response, nonexistent_id)
 
     def test_update_cruise_tax_form(self):
+        """It should be possible to edit an existing cruise tax form"""
         # Arrange
         self.client.force_login(self.shipping_agent_user)
         # Act
@@ -1046,12 +1047,6 @@ class TestHarborDuesFormUpdateView(
                 "status": Status.DRAFT.value,
                 "vessel_type": ShipType.CRUISE.value,
                 "no_port_of_call": True,
-                "datetime_of_arrival": self.cruise_tax_form_data[
-                    "datetime_of_arrival"
-                ].isoformat(),
-                "datetime_of_departure": self.cruise_tax_form_data[
-                    "datetime_of_departure"
-                ].isoformat(),
                 "vessel_name": "Peder Dingo",
             },
         )
@@ -1060,6 +1055,34 @@ class TestHarborDuesFormUpdateView(
         self.assertEqual(cruise_tax_form.status, Status.DRAFT)
         self.assertEqual(cruise_tax_form.vessel_name, "Peder Dingo")
         self._assert_redirects_to_next_step(response, self.cruise_tax_draft_form.pk)
+
+    def test_update_harbor_dues_form_to_cruise_tax_form(self):
+        """It should be possible to "upgrade" a harbor dues form to a cruise tax form
+        if the vessel type is changed to `CRUISE` and a cruise tax form does not yet
+        exist.
+        """
+        # Arrange
+        self.client.force_login(self.shipping_agent_user)
+        # Assert: before the edit, no `CruiseTaxForm` exists with the same PK
+        self.assertQuerySetEqual(
+            CruiseTaxForm.objects.filter(pk=self.harbor_dues_form.pk),
+            CruiseTaxForm.objects.none(),
+        )
+        # Act
+        response = self.client.post(
+            self._get_update_view_url(self.harbor_dues_form.pk),
+            {
+                "status": Status.DRAFT.value,
+                "vessel_type": ShipType.CRUISE.value,
+                "no_port_of_call": True,
+                "vessel_name": "Peder Dingo",
+            },
+        )
+        # Assert
+        new_cruise_tax_form = CruiseTaxForm.objects.get(pk=self.harbor_dues_form.pk)
+        self.assertEqual(new_cruise_tax_form.status, Status.DRAFT)
+        self.assertEqual(new_cruise_tax_form.vessel_name, "Peder Dingo")
+        self._assert_redirects_to_next_step(response, new_cruise_tax_form.pk)
 
     def _get_update_view_url(self, pk: int) -> str:
         return reverse("havneafgifter:draft_edit", kwargs={"pk": pk})
