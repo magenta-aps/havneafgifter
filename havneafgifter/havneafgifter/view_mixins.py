@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirec
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from django_fsm import has_transition_perm
+from django_fsm import can_proceed, has_transition_perm
 
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
 
@@ -94,7 +94,7 @@ class HarborDuesFormMixin(
     def form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
 
-        if not has_transition_perm(
+        if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
             harbor_dues_form.submit_for_review,
             self.request.user,
         ):
@@ -152,17 +152,34 @@ class HarborDuesFormMixin(
             # `HarborDuesForm` will be created automatically.
             return CruiseTaxForm.objects.create(**field_vals)
         else:
-            # A `CruiseTaxForm` object already exists for this PK.
-            # Update all its fields (except `status`.)
-            cruise_tax_form = CruiseTaxForm.objects.get(
-                harborduesform_ptr=harbor_dues_form.pk
-            )
-            for k, v in field_vals.items():
-                if k == "status":
-                    continue
-                setattr(cruise_tax_form, k, v)
-            cruise_tax_form.save()
-            return cruise_tax_form
+            # A `CruiseTaxForm` object may already exist for this PK.
+            try:
+                cruise_tax_form = CruiseTaxForm.objects.get(
+                    harborduesform_ptr=harbor_dues_form.pk
+                )
+            except CruiseTaxForm.DoesNotExist:
+                # A `CruiseTaxForm` does not exist, but the user is trying to save a
+                # cruise tax form, i.e. they are editing a harbor dues form and have
+                # changed the vessel type to `CRUISE`. Create the corresponding
+                # `CruiseTaxForm`.
+                return CruiseTaxForm.objects.create(
+                    harborduesform_ptr=harbor_dues_form,
+                    # Copy all fields from `HarborDuesForm` except `status`
+                    **{
+                        k: v
+                        for k, v in field_vals.items()
+                        if k not in ("harborduesform_ptr", "status")
+                    },
+                )
+            else:
+                # A `CruiseTaxForm` exists for this PK.
+                # Update all its fields, except `status`.
+                for k, v in field_vals.items():
+                    if k == "status":
+                        continue
+                    setattr(cruise_tax_form, k, v)
+                cruise_tax_form.save()
+                return cruise_tax_form
 
 
 class CacheControlMixin:
