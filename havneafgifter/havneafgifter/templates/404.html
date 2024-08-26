@@ -1,0 +1,16 @@
+{% extends "havneafgifter/base.html" %}
+
+{% load i18n %}
+
+{% block title %}
+{% translate "Not Found (404)" %}
+{% endblock %}
+
+{% block content %}
+    <h1>{% translate "Not Found (404)" %}</h1>
+    {% if exception %}
+    <p>{{ exception }}</p>
+    {% else %}
+    <p>{% trans 'The page you requested could not be found' %}</p>
+    {% endif %}
+{% endblock %}

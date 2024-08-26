@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-20 11:51-0100\n"
+"POT-Creation-Date: 2024-08-26 12:52-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -562,6 +562,30 @@ msgstr ""
 
 #: havneafgifter/tables.py
 msgid "Antal skibe"
+msgstr ""
+
+#: havneafgifter/templates/400.html
+msgid "Bad request (400)"
+msgstr ""
+
+#: havneafgifter/templates/400.html
+msgid "Your browser supplied an invalid HTTP request for this URL"
+msgstr ""
+
+#: havneafgifter/templates/403.html
+msgid "Forbidden (403)"
+msgstr ""
+
+#: havneafgifter/templates/403.html
+msgid "You do not have permission to view this page"
+msgstr ""
+
+#: havneafgifter/templates/404.html
+msgid "Not Found (404)"
+msgstr ""
+
+#: havneafgifter/templates/404.html
+msgid "The page you requested could not be found"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
