@@ -806,7 +806,7 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
     model = TaxRates
     form_class = TaxRateForm
     template_name = "havneafgifter/taxrateform.html"
-    success_url = reverse_lazy("havneafgifter:edit_taxrate", kwargs={"pk": 1})
+    success_url = reverse_lazy("havneafgifter:tax_rate_list")
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
