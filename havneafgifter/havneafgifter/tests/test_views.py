@@ -46,6 +46,7 @@ from havneafgifter.views import (
     EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
+    HarborDuesFormUpdateView,
     PassengerTaxCreateView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -628,6 +629,32 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                 request,
             )
 
+    def test_form_valid_checks_cruise_tax_form_on_submit(self):
+        """If user clicks "Submit for review", the `CruiseTaxForm` created in "step 1"
+        must be validated before it can be submitted. Otherwise, the user must be
+        informed of the validation errors and sent back to "step 1."
+        """
+        # Arrange: set up view to process an invalid `CruiseTaxForm` instance.
+        self.instance._cruise_tax_form.gross_tonnage = None
+        # Arrange: user clicks "Submit" (rather than "Save as draft")
+        self._post_formset(status=Status.NEW.value)
+        # Act
+        with patch("havneafgifter.views.messages.error") as mock_messages_error:
+            response = self.instance.form_valid(self.instance.get_form())
+            # Assert: an error message is displayed
+            mock_messages_error.assert_called_once()
+            # Assert: we receive the expected redirect back to "step 1" as the cruise
+            # tax form is not valid.
+            self.assertIsInstance(response, HttpResponseRedirect)
+            self.assertEqual(
+                response.url,
+                "%s?status=NEW"
+                % reverse(
+                    "havneafgifter:draft_edit",
+                    kwargs={"pk": self.instance._cruise_tax_form.pk},
+                ),
+            )
+
 
 class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
     @classmethod
@@ -1084,8 +1111,31 @@ class TestHarborDuesFormUpdateView(
         self.assertEqual(new_cruise_tax_form.vessel_name, "Peder Dingo")
         self._assert_redirects_to_next_step(response, new_cruise_tax_form.pk)
 
-    def _get_update_view_url(self, pk: int) -> str:
-        return reverse("havneafgifter:draft_edit", kwargs={"pk": pk})
+    def test_get_renders_form_errors(self):
+        # Arrange
+        self.client.force_login(self.shipping_agent_user)
+        # Arrange: introduce missing/invalid data
+        self.cruise_tax_form.gross_tonnage = None
+        self.cruise_tax_form.save(update_fields=("gross_tonnage",))
+        # Act: perform GET request
+        response = self.client.get(
+            self._get_update_view_url(self.cruise_tax_form.pk, status=Status.NEW.value)
+        )
+        # Assert: check that form error(s) are displayed (even before form is POSTed)
+        self.assertSetEqual(
+            set(response.context["form"].errors.keys()),
+            {"gross_tonnage"},
+        )
+
+    def test_get_desired_status_handles_invalid_value(self):
+        instance = HarborDuesFormUpdateView()
+        instance.setup(self.request_factory.get("", {"status": "INVALID"}))
+        self.assertEqual(instance._get_desired_status(), Status.DRAFT)
+
+    def _get_update_view_url(self, pk: int, **query) -> str:
+        return reverse("havneafgifter:draft_edit", kwargs={"pk": pk}) + (
+            f"?{urlencode(query)}" if query else ""
+        )
 
     def _assert_redirects_to_view(self, response, viewname: str, pk: int) -> None:
         self.assertIsInstance(response, HttpResponseRedirect)

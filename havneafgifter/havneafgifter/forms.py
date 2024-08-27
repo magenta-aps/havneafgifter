@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm as DjangoAuthentication
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
+from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BooleanField,
     CharField,
@@ -33,6 +34,7 @@ from dynamic_forms import DynamicField, DynamicFormMixin
 
 from havneafgifter.form_mixins import BootstrapForm
 from havneafgifter.models import (
+    CruiseTaxForm,
     DisembarkmentSite,
     HarborDuesForm,
     Municipality,
@@ -187,10 +189,24 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_departure",
         ]
 
-    _vessel_nationality_choices = [("", "---")] + list(countries)
+    _vessel_nationality_choices = BLANK_CHOICE_DASH + list(countries)
 
-    nationality = ChoiceField(
-        required=False,
+    _required_if_status_is_new = lambda form: form._status == Status.NEW  # noqa: E731
+
+    _required_if_status_is_new_and_has_port_of_call = lambda form: (  # noqa: E731
+        False if form.has_no_port_of_call else (form._status == Status.NEW)
+    )
+
+    port_of_call = DynamicField(
+        ModelChoiceField,
+        required=_required_if_status_is_new_and_has_port_of_call,
+        queryset=Port.objects.all(),
+        label=_("Port of call"),
+    )
+
+    nationality = DynamicField(
+        ChoiceField,
+        required=_required_if_status_is_new,
         choices=_vessel_nationality_choices,
         widget=Select2Widget(choices=_vessel_nationality_choices),
         label=_("Nationality"),
@@ -198,45 +214,46 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     vessel_name = DynamicField(
         CharField,
-        required=False,
+        required=_required_if_status_is_new,
         max_length=255,
-        label=_("Vessel name"),
         initial=lambda form: getattr(form._vessel, "name", None),
+        disabled=lambda form: form.user_is_ship,
+        label=_("Vessel name"),
     )
 
     vessel_imo = DynamicField(
         CharField,
+        required=_required_if_status_is_new,
         min_length=0,
         max_length=7,
         validators=[
             RegexValidator(r"\d{7}"),
             imo_validator,
         ],
-        label=_("IMO-number"),
         initial=lambda form: getattr(form._vessel, "imo", None),
         disabled=lambda form: form.user_is_ship,
-        required=False,
+        label=_("IMO-number"),
     )
 
     vessel_owner = DynamicField(
         CharField,
+        required=_required_if_status_is_new,
         max_length=255,
-        label=_("Vessel owner"),
         initial=lambda form: getattr(form._vessel, "owner", None),
-        required=False,
+        label=_("Vessel owner"),
     )
 
     vessel_master = DynamicField(
         CharField,
+        required=_required_if_status_is_new,
         max_length=255,
-        label=_("Vessel captain"),
         initial=lambda form: getattr(form._vessel, "master", None),
-        required=False,
+        label=_("Vessel captain"),
     )
 
     shipping_agent = DynamicField(
         ModelChoiceField,
-        required=False,
+        required=_required_if_status_is_new,
         queryset=ShippingAgent.objects.all(),
         initial=lambda form: (form._shipping_agent if form._shipping_agent else None),
         disabled=lambda form: form._shipping_agent is not None,
@@ -245,49 +262,50 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     datetime_of_arrival = DynamicField(
         DateTimeField,
-        required=False,
-        widget=HTML5DateWidget(),
+        required=_required_if_status_is_new_and_has_port_of_call,
         initial=lambda form: (
             form.instance.datetime_of_arrival.isoformat()
             if form.instance.datetime_of_arrival
             else None
         ),
+        widget=HTML5DateWidget(),
         label=_("Arrival date/time"),
     )
 
     datetime_of_departure = DynamicField(
         DateTimeField,
-        widget=HTML5DateWidget(),
-        required=False,
+        required=_required_if_status_is_new_and_has_port_of_call,
         initial=lambda form: (
             form.instance.datetime_of_departure.isoformat()
             if form.instance.datetime_of_departure
             else None
         ),
+        widget=HTML5DateWidget(),
         label=_("Departure date/time"),
     )
 
     gross_tonnage = DynamicField(
         IntegerField,
+        required=_required_if_status_is_new_and_has_port_of_call,
         validators=[MinValueValidator(0)],
-        label=_("Gross tonnage"),
         initial=lambda form: getattr(form._vessel, "gross_tonnage", None),
         disabled=lambda form: form.user_is_ship,
-        required=False,
+        label=_("Gross tonnage"),
     )
 
     vessel_type = DynamicField(
         ChoiceField,
-        choices=ShipType.choices,
-        label=_("Vessel type"),
+        required=_required_if_status_is_new,
+        choices=BLANK_CHOICE_DASH + ShipType.choices,
         initial=lambda form: getattr(form._vessel, "type", None),
         disabled=lambda form: form.user_is_ship,
-        required=False,
+        label=_("Vessel type"),
     )
 
-    no_port_of_call = BooleanField(
+    no_port_of_call = DynamicField(
+        BooleanField,
         required=False,
-        initial=False,
+        initial=lambda form: form.has_no_port_of_call,
         label=_("No port of call"),
     )
 
@@ -296,8 +314,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         choices=Status.choices,
     )
 
-    def __init__(self, user: User, *args, **kwargs):
+    def __init__(self, user: User, status: Status | None = None, *args, **kwargs):
         self._user = user
+        self._status = status or Status.DRAFT
         self._shipping_agent = (
             user.shipping_agent
             if user.shipping_agent is not None and user.has_group_name("Shipping")
@@ -307,15 +326,33 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             getattr(user, "vessel", None) if user.has_group_name("Ship") else None
         )
         super().__init__(*args, **kwargs)
+        self.fields["no_port_of_call"].widget.attrs[
+            "checked"
+        ] = self.has_no_port_of_call
 
     @property
     def user_is_ship(self) -> bool:
         return "Ship" in self._user.group_names
 
+    @property
+    def has_no_port_of_call(self) -> bool:
+        # 1. Check whether (unvalidated) form data sets `no_port_of_call`:
+        form_has_no_port_of_call = self.data.get("no_port_of_call")
+        if form_has_no_port_of_call == "on":
+            return True
+        # 2. Check whether model instance appears to have no port of call:
+        self.instance: HarborDuesForm | CruiseTaxForm
+        instance_has_no_port_of_call: bool = (
+            (self.instance.pk is not None)
+            and (self.instance.port_of_call is None)
+            and (self.instance.vessel_type == ShipType.CRUISE)
+        )
+        return instance_has_no_port_of_call
+
     def clean(self):
         cleaned_data = super().clean()
 
-        status = cleaned_data.get("status")
+        status = self._status or cleaned_data.get("status")
         if status == Status.DRAFT:
             return cleaned_data
 
@@ -336,6 +373,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
         no_port_of_call = cleaned_data.get("no_port_of_call")
+        vessel_type = cleaned_data.get("vessel_type")
         # "Port of call" cannot be set if "no port of call" is also set
         if (port_of_call is not None) and (no_port_of_call is True):
             raise ValidationError(
@@ -343,14 +381,17 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 code="port_of_call_chosen_but_no_port_of_call_is_true",
             )
         # And the opposite: "port of call" must be set if "no port of call" is not set
-        if (port_of_call is None) and (no_port_of_call is False):
+        if (
+            (port_of_call is None)
+            and (no_port_of_call is False)
+            and (vessel_type != ShipType.CRUISE)
+        ):
             raise ValidationError(
                 _("Port of call must be filled if 'no port of call' is not selected"),
                 code="port_of_call_is_empty_and_no_port_of_call_is_false",
             )
 
         # Handle "no port of call" vs. "vessel type"
-        vessel_type = cleaned_data.get("vessel_type")
         # Only cruise ships can select "no port of call"
         if (vessel_type != ShipType.CRUISE) and (no_port_of_call is True):
             raise ValidationError(
@@ -375,9 +416,28 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 code="port_of_call_requires_arrival_and_departure_dates",
             )
 
+        # A number of fields are only allowed to be empty if:
+        # - status is DRAFT
+        # - or vessel type is CRUISE and "no port of call" is selected
+        if self._status == Status.NEW and vessel_type != ShipType.CRUISE:
+            fields = {
+                "port_of_call",
+                "datetime_of_arrival",
+                "datetime_of_departure",
+                "gross_tonnage",
+            }
+            for field in fields:
+                if self.cleaned_data.get(field) is None:
+                    label = self.fields[field].label
+                    raise ValidationError(
+                        _("%(field)s cannot be empty"),
+                        params={"field": label},
+                        code=f"{field}_cannot_be_empty",
+                    )
+
         return cleaned_data
 
-    def user_visible_non_field_errors(self) -> ErrorList | None:
+    def user_visible_non_field_errors(self) -> ErrorList:
         non_field_errors = self.errors.get(NON_FIELD_ERRORS)
         if non_field_errors:
             return ErrorList(
@@ -387,7 +447,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                     if error.code != "constraint_violated"
                 ]
             )
-        return None
+        return ErrorList()  # empty error list
 
 
 class PassengersTotalForm(CSPFormMixin, Form):
