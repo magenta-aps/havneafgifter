@@ -1,4 +1,4 @@
-/* eslint-disable-next-line no-unused-vars */
+/* eslint-disable no-unused-vars */
 (function () {
     $(document).ready(function () {
         const onSaveShippingAgentModal = new bootstrap.Modal(
