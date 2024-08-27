@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm as DjangoAuthentication
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
-from django.db.models import BLANK_CHOICE_DASH
+from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BooleanField,
     CharField,
