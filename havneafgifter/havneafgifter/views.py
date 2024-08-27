@@ -516,9 +516,8 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, CacheControlMixin, UpdateVie
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Pass `status` and `data` to form to ensure that validation errors are
+        # Pass `data` to form to ensure that validation errors are
         # re-evaluated and displayed.
-        kwargs["status"] = self._get_desired_status()
         if self.request.method == "GET":
             kwargs["data"] = model_to_dict(self.object)
         return kwargs
@@ -542,15 +541,6 @@ class HarborDuesFormUpdateView(HarborDuesFormMixin, CacheControlMixin, UpdateVie
 
     def get_template_names(self):
         return ["havneafgifter/harborduesform_form.html"]
-
-    def _get_desired_status(self) -> Status:
-        status = self.request.POST.get("status") or self.request.GET.get("status")
-        if status is not None:
-            try:
-                return Status[status]
-            except KeyError:
-                pass
-        return Status.DRAFT
 
 
 class PreviewPDFView(ReceiptDetailView):

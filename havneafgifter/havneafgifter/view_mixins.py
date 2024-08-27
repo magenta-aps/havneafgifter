@@ -95,6 +95,7 @@ class HarborDuesFormMixin(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
+        kwargs["status"] = self._get_desired_status()
         return kwargs
 
     def form_valid(self, form):
@@ -187,6 +188,15 @@ class HarborDuesFormMixin(
                     setattr(cruise_tax_form, k, v)
                 cruise_tax_form.save()
                 return cruise_tax_form
+
+    def _get_desired_status(self) -> Status:
+        status = self.request.POST.get("status") or self.request.GET.get("status")
+        if status is not None:
+            try:
+                return Status[status]
+            except KeyError:
+                pass
+        return Status.DRAFT
 
 
 class CacheControlMixin:
