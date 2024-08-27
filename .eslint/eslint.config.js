@@ -14,12 +14,14 @@ export default [
                 jquery: true,
                 $: 'readonly',
                 bootstrap: 'readonly',
+                tempusDominus: 'readonly',
             },
             ecmaVersion: 6,
             sourceType: "script",
         },
         rules: {
             "no-case-declarations": "off",
+            "no-global-assign": "off",
         }
     }
 ];
