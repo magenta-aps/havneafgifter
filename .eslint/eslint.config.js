@@ -8,16 +8,13 @@ export default [
     {
         languageOptions: {
             globals: {
-                ...globals.browser
+                ...globals.browser,
+                commonjs: true,
+                es6: true,
+                jquery: true,
             },
             ecmaVersion: 6,
             sourceType: "script",
-        },
-        env: {
-            browser: true,
-            commonjs: true,
-            es6: true,
-            jquery: true
         },
         rules: {
             "no-case-declarations": "off",
