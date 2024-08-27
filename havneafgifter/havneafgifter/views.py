@@ -816,7 +816,7 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
         return []
 
 
-class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
+class TaxRateFormView(LoginRequiredMixin, UpdateView):
     model = TaxRates
     form_class = TaxRateForm
     template_name = "havneafgifter/taxrateform.html"
