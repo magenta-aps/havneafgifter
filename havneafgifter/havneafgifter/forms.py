@@ -304,9 +304,10 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("Vessel type"),
     )
 
-    no_port_of_call = BooleanField(
+    no_port_of_call = DynamicField(
+        BooleanField,
         required=False,
-        initial=False,
+        initial=lambda form: form.has_no_port_of_call,
         label=_("No port of call"),
     )
 
@@ -327,6 +328,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             getattr(user, "vessel", None) if user.has_group_name("Ship") else None
         )
         super().__init__(*args, **kwargs)
+        self.fields["no_port_of_call"].widget.attrs[
+            "checked"
+        ] = self.has_no_port_of_call
 
     @property
     def user_is_ship(self) -> bool:
@@ -340,8 +344,10 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             return True
         # 2. Check whether model instance appears to have no port of call:
         self.instance: HarborDuesForm | CruiseTaxForm
-        instance_has_no_port_of_call: bool = (self.instance.port_of_call is None) and (
-            self.instance.vessel_type == ShipType.CRUISE
+        instance_has_no_port_of_call: bool = (
+            (self.instance.pk is not None)
+            and (self.instance.port_of_call is None)
+            and (self.instance.vessel_type == ShipType.CRUISE)
         )
         return instance_has_no_port_of_call
 
@@ -369,6 +375,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
         no_port_of_call = cleaned_data.get("no_port_of_call")
+        vessel_type = cleaned_data.get("vessel_type")
         # "Port of call" cannot be set if "no port of call" is also set
         if (port_of_call is not None) and (no_port_of_call is True):
             raise ValidationError(
@@ -376,14 +383,17 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 code="port_of_call_chosen_but_no_port_of_call_is_true",
             )
         # And the opposite: "port of call" must be set if "no port of call" is not set
-        if (port_of_call is None) and (no_port_of_call is False):
+        if (
+            (port_of_call is None)
+            and (no_port_of_call is False)
+            and (vessel_type != ShipType.CRUISE)
+        ):
             raise ValidationError(
                 _("Port of call must be filled if 'no port of call' is not selected"),
                 code="port_of_call_is_empty_and_no_port_of_call_is_false",
             )
 
         # Handle "no port of call" vs. "vessel type"
-        vessel_type = cleaned_data.get("vessel_type")
         # Only cruise ships can select "no port of call"
         if (vessel_type != ShipType.CRUISE) and (no_port_of_call is True):
             raise ValidationError(

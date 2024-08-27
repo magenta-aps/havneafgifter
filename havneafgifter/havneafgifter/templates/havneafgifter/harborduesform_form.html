@@ -36,19 +36,7 @@
             }
         }
 
-        // Update text on submit buttons, depending on the selected vessel type.
-        vesselTypeSelect.on("change", function () {
-            const vesselType = $(this).val();
-            const state = vesselType === "CRUISE";
-            toggleSubmitButton(state);
-        });
-
-        // Disable "port of call", etc. inputs, if "no port of call" is selected.
-        // Enforce vessel type CRUISE if "no port of call" is selected.
-        // Update text on submit button depending on the selected vessel type,
-        noPortOfCallCheckbox.on("change", function () {
-            const disabled = $(this).is(":checked") ? "disabled" : null;
-
+        const toggleNoPortOfCallState = function (disabled) {
             portOfCallSelect.attr("disabled", disabled);
             datetimeInputs.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
@@ -63,6 +51,21 @@
             }
 
             toggleSubmitButton(disabled === "disabled" || vesselType.val() === "CRUISE");
+        }
+
+        // Update text on submit buttons, depending on the selected vessel type.
+        vesselTypeSelect.on("change", function () {
+            const vesselType = $(this).val();
+            const state = vesselType === "CRUISE";
+            toggleSubmitButton(state);
+        });
+
+        // Disable "port of call", etc. inputs, if "no port of call" is selected.
+        // Enforce vessel type CRUISE if "no port of call" is selected.
+        // Update text on submit button depending on the selected vessel type,
+        noPortOfCallCheckbox.on("change", function () {
+            const disabled = $(this).is(":checked") ? "disabled" : null;
+            toggleNoPortOfCallState(disabled);
         });
 
         // Hook form submit
@@ -78,6 +81,9 @@
 
         const vesselType = vesselTypeSelect.val();
         toggleSubmitButton(vesselType === "CRUISE");
+
+        const noPortOfCall = noPortOfCallCheckbox.is(":checked") ? "disabled" : null;
+        toggleNoPortOfCallState(noPortOfCall);
     });
 })();
 </script>
