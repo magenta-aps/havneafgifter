@@ -91,7 +91,7 @@
 
 {% block content %}
 <h1>{% translate "Harbour Dues/Port Tax" %}</h1>
-<form action="." method="post" class="form" id="main" data-user-type="{{ user.user_type }}">
+<form action="." method="post" class="form" id="main" novalidate data-user-type="{{ user.user_type }}">
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
