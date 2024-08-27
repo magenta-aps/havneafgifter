@@ -142,7 +142,7 @@ Lint Javascript:
 
 Build image:
   stage: build
-  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance", "Lint Javascript"]
   dependencies: []
   image:
     name: gcr.io/kaniko-project/executor:debug-v0.16.0
