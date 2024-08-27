@@ -4,7 +4,6 @@ import js from "@eslint/js";
 import globals from "globals";
 
 export default [
-    js.configs.recommended,
     {
         languageOptions: {
             globals: {
@@ -16,12 +15,12 @@ export default [
                 bootstrap: 'readonly',
                 tempusDominus: 'readonly',
             },
-            ecmaVersion: 6,
-            sourceType: "script",
+            ecmaVersion: "latest",
+            sourceType: "module",
         },
         rules: {
             "no-case-declarations": "off",
             "no-global-assign": "off",
         }
-    }
+    },
 ];
