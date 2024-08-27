@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm as DjangoAuthentication
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
+from django.db.models import BLANK_CHOICE_DASH
 from django.forms import (
     BooleanField,
     CharField,
@@ -188,7 +189,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "datetime_of_departure",
         ]
 
-    _vessel_nationality_choices = [("", "---")] + list(countries)
+    _vessel_nationality_choices = BLANK_CHOICE_DASH + list(countries)
 
     port_of_call = DynamicField(
         ModelChoiceField,
@@ -297,7 +298,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     vessel_type = DynamicField(
         ChoiceField,
         required=lambda form: form._status == Status.NEW,
-        choices=ShipType.choices,
+        choices=BLANK_CHOICE_DASH + ShipType.choices,
         initial=lambda form: getattr(form._vessel, "type", None),
         disabled=lambda form: form.user_is_ship,
         label=_("Vessel type"),
