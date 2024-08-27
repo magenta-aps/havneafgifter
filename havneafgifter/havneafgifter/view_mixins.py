@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from django_fsm import can_proceed, has_transition_perm
@@ -26,8 +27,12 @@ class HavneafgiftView:
         self,
         viewname: str,
         form: HarborDuesForm | CruiseTaxForm,
+        **query,
     ):
-        return HttpResponseRedirect(reverse(viewname, kwargs={"pk": form.pk}))
+        return HttpResponseRedirect(
+            reverse(viewname, kwargs={"pk": form.pk})
+            + (f"?{urlencode(query)}" if query else "")
+        )
 
 
 class _SendEmailMixin:
@@ -90,6 +95,7 @@ class HarborDuesFormMixin(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
+        kwargs["status"] = self._get_desired_status()
         return kwargs
 
     def form_valid(self, form):
@@ -182,6 +188,15 @@ class HarborDuesFormMixin(
                     setattr(cruise_tax_form, k, v)
                 cruise_tax_form.save()
                 return cruise_tax_form
+
+    def _get_desired_status(self) -> Status:
+        status = self.request.POST.get("status") or self.request.GET.get("status")
+        if status is not None:
+            try:
+                return Status[status]
+            except KeyError:
+                pass
+        return Status.DRAFT
 
 
 class CacheControlMixin:

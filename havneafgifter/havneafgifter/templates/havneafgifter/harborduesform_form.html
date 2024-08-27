@@ -36,19 +36,7 @@
             }
         }
 
-        // Update text on submit buttons, depending on the selected vessel type.
-        vesselTypeSelect.on("change", function () {
-            const vesselType = $(this).val();
-            const state = vesselType === "CRUISE";
-            toggleSubmitButton(state);
-        });
-
-        // Disable "port of call", etc. inputs, if "no port of call" is selected.
-        // Enforce vessel type CRUISE if "no port of call" is selected.
-        // Update text on submit button depending on the selected vessel type,
-        noPortOfCallCheckbox.on("change", function () {
-            const disabled = $(this).is(":checked") ? "disabled" : null;
-
+        const toggleNoPortOfCallState = function (disabled) {
             portOfCallSelect.attr("disabled", disabled);
             datetimeInputs.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
@@ -63,6 +51,21 @@
             }
 
             toggleSubmitButton(disabled === "disabled" || vesselType.val() === "CRUISE");
+        }
+
+        // Update text on submit buttons, depending on the selected vessel type.
+        vesselTypeSelect.on("change", function () {
+            const vesselType = $(this).val();
+            const state = vesselType === "CRUISE";
+            toggleSubmitButton(state);
+        });
+
+        // Disable "port of call", etc. inputs, if "no port of call" is selected.
+        // Enforce vessel type CRUISE if "no port of call" is selected.
+        // Update text on submit button depending on the selected vessel type,
+        noPortOfCallCheckbox.on("change", function () {
+            const disabled = $(this).is(":checked") ? "disabled" : null;
+            toggleNoPortOfCallState(disabled);
         });
 
         // Hook form submit
@@ -78,6 +81,9 @@
 
         const vesselType = vesselTypeSelect.val();
         toggleSubmitButton(vesselType === "CRUISE");
+
+        const noPortOfCall = noPortOfCallCheckbox.is(":checked") ? "disabled" : null;
+        toggleNoPortOfCallState(noPortOfCall);
     });
 })();
 </script>
@@ -85,10 +91,18 @@
 
 {% block content %}
 <h1>{% translate "Harbour Dues/Port Tax" %}</h1>
-<form action="." method="post" class="form" id="main" data-user-type="{{ user.user_type }}">
+<form action="." method="post" class="form" id="main" novalidate data-user-type="{{ user.user_type }}">
     {% csrf_token %}
     {{ form.media.css }}
     {{ form.media.js }}
+
+    {% if form.user_visible_non_field_errors %}
+    <ul class="list-unstyled text-danger">
+        {% for error in form.user_visible_non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
     <div class="row">
         <div class="col-9">
@@ -98,14 +112,6 @@
             {% bootstrap_field form.no_port_of_call wrapper_class="pt-3 mt-3 mb-3" %}
         </div>
     </div>
-
-    {% if form.user_visible_non_field_errors %}
-    <ul class="list-unstyled text-danger">
-        {% for error in form.user_visible_non_field_errors %}
-        <li>{{ error }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
 
     {% bootstrap_form form exclude="port_of_call,no_port_of_call,status" alert_error_type="none" %}
 
