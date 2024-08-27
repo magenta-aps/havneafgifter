@@ -191,18 +191,22 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     _vessel_nationality_choices = BLANK_CHOICE_DASH + list(countries)
 
+    _required_if_status_is_new = lambda form: form._status == Status.NEW  # noqa: E731
+
+    _required_if_status_is_new_and_has_port_of_call = lambda form: (  # noqa: E731
+        False if form.has_no_port_of_call else (form._status == Status.NEW)
+    )
+
     port_of_call = DynamicField(
         ModelChoiceField,
-        required=lambda form: (
-            False if form.has_no_port_of_call else (form._status == Status.NEW)
-        ),
+        required=_required_if_status_is_new_and_has_port_of_call,
         queryset=Port.objects.all(),
         label=_("Port of call"),
     )
 
     nationality = DynamicField(
         ChoiceField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         choices=_vessel_nationality_choices,
         widget=Select2Widget(choices=_vessel_nationality_choices),
         label=_("Nationality"),
@@ -210,7 +214,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     vessel_name = DynamicField(
         CharField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         max_length=255,
         initial=lambda form: getattr(form._vessel, "name", None),
         disabled=lambda form: form.user_is_ship,
@@ -219,7 +223,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     vessel_imo = DynamicField(
         CharField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         min_length=0,
         max_length=7,
         validators=[
@@ -233,7 +237,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     vessel_owner = DynamicField(
         CharField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         max_length=255,
         initial=lambda form: getattr(form._vessel, "owner", None),
         label=_("Vessel owner"),
@@ -241,7 +245,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     vessel_master = DynamicField(
         CharField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         max_length=255,
         initial=lambda form: getattr(form._vessel, "master", None),
         label=_("Vessel captain"),
@@ -249,7 +253,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     shipping_agent = DynamicField(
         ModelChoiceField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         queryset=ShippingAgent.objects.all(),
         initial=lambda form: (form._shipping_agent if form._shipping_agent else None),
         disabled=lambda form: form._shipping_agent is not None,
@@ -258,9 +262,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     datetime_of_arrival = DynamicField(
         DateTimeField,
-        required=lambda form: (
-            False if form.has_no_port_of_call else (form._status == Status.NEW)
-        ),
+        required=_required_if_status_is_new_and_has_port_of_call,
         initial=lambda form: (
             form.instance.datetime_of_arrival.isoformat()
             if form.instance.datetime_of_arrival
@@ -272,9 +274,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     datetime_of_departure = DynamicField(
         DateTimeField,
-        required=lambda form: (
-            False if form.has_no_port_of_call else (form._status == Status.NEW)
-        ),
+        required=_required_if_status_is_new_and_has_port_of_call,
         initial=lambda form: (
             form.instance.datetime_of_departure.isoformat()
             if form.instance.datetime_of_departure
@@ -286,9 +286,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     gross_tonnage = DynamicField(
         IntegerField,
-        required=lambda form: (
-            False if form.has_no_port_of_call else (form._status == Status.NEW)
-        ),
+        required=_required_if_status_is_new_and_has_port_of_call,
         validators=[MinValueValidator(0)],
         initial=lambda form: getattr(form._vessel, "gross_tonnage", None),
         disabled=lambda form: form.user_is_ship,
@@ -297,7 +295,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     vessel_type = DynamicField(
         ChoiceField,
-        required=lambda form: form._status == Status.NEW,
+        required=_required_if_status_is_new,
         choices=BLANK_CHOICE_DASH + ShipType.choices,
         initial=lambda form: getattr(form._vessel, "type", None),
         disabled=lambda form: form.user_is_ship,
