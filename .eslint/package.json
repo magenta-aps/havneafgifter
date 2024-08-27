@@ -1,5 +1,5 @@
 {
-  "name": "godsregistrering",
+  "name": "havneafgifter",
   "version": "1.0.0",
   "type": "module",
   "description": "",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.magenta.dk:gronlandsprojekter/toldbehandling.git"
+    "url": "git@git.magenta.dk:gronlandsprojekter/havneafgifter.git"
   },
   "author": "Lars Peter Thomsen",
   "license": "MPL 2.0",
