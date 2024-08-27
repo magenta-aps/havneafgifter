@@ -15,3 +15,6 @@ data/er/*
 **/.DS_Store
 **/__pycache__
 **/.coverage*
+node_modules/
+package-lock.json
+/package.json
