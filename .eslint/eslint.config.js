@@ -12,6 +12,8 @@ export default [
                 commonjs: true,
                 es6: true,
                 jquery: true,
+                $: 'readonly',
+                bootstrap: 'readonly',
             },
             ecmaVersion: 6,
             sourceType: "script",
