@@ -15,6 +15,7 @@ repos:
     hooks:
       - id: black
         exclude: migrations
+        args: ["--exclude='env|venv|migrations'"]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
@@ -22,7 +23,7 @@ repos:
       - id: isort
         name: isort (python)
         exclude: migrations
-        args: ["--profile", "black"]
+        args: ["--profile", "black", "--skip", "env", "--skip", "venv"]
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.24.0
@@ -30,10 +31,3 @@ repos:
       - id: commitizen
       - id: commitizen-branch
         stages: [ push ]
-
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.9.1
-    hooks:
-      - id: eslint
-        additional_dependencies: ['eslint', '@eslint/js']
-        args: ['--config', '.eslint/eslint.config.js']
