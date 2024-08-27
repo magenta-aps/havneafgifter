@@ -24,6 +24,21 @@ git push -uf origin master
 
 - [ ] [Set up project integrations](https://git.magenta.dk/gronlandsprojekter/krydstogtafgift/-/settings/integrations)
 
+### When using `pre-commit`
+If you're using `pre-commit` you'll need to make sure to have `node` and `eslint` installed.
+Note that `node` should be newer than version 16.
+
+It's recommended to refer to the nodejs website for instructions on how to install the current version of node and npm.
+On a debian based OS this can typically be done with `sudo apt install npm`.
+On MacOS with Homebrew this can be down with `brew install node`.
+
+Afterwards `eslint` can be installed with `npm install eslint @eslint/js --save-dev`.
+Alternatively your preferred package manager might have an eslint package as well.
+
+If `pre-commit` is installed (`pip install pre-commit`) it can be readied using `pre-commit install --install-hooks`.
+Afterwards `pre-commit` can be invoked manually with `pre-commit run -a`.
+Usually it'd also be invoked by git when commiting.
+
 ## Collaborate with your team
 
 - [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
