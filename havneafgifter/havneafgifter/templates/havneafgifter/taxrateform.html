@@ -69,7 +69,12 @@
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
                         {% if form.instance.can_delete %}
-                            <button class="btn btn-danger" type="button" data-action="delete">{% translate "Slet sats" %}
+                            <button
+                                    class="btn btn-danger"
+                                    type="button"
+                                    data-action="delete"
+                                    id="port_tax_rate_delete-button-{{ forloop.counter0 }}"
+                            >{% translate "Slet sats" %}
                             </button>
                         {% endif %}
                         {{ form.port }}
