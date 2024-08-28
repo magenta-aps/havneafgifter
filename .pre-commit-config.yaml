@@ -14,15 +14,14 @@ repos:
     rev: 24.4.1
     hooks:
       - id: black
-        args: [ "--exclude='env|venv|migrations'" ]
+        exclude: '(^env/|^venv/|migrations/)'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
         name: isort (python)
-        exclude: migrations
-        args: [ "--profile", "black", "--skip", "env", "--skip", "venv" ]
+        args: ["--profile", "black", "--skip", "migrations", "env", "venv"]
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.24.0
