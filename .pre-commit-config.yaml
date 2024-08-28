@@ -21,7 +21,8 @@ repos:
     hooks:
       - id: isort
         name: isort (python)
-        args: ["--profile", "black", "--skip", "migrations", "env", "venv"]
+        exclude: '(^env/|^venv/|migrations/)'
+        args: ["--profile", "black"]
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.24.0
