@@ -14,7 +14,6 @@ repos:
     rev: 24.4.1
     hooks:
       - id: black
-        exclude: migrations
         args: [ "--exclude='env|venv|migrations'" ]
 
   - repo: https://github.com/pycqa/isort
