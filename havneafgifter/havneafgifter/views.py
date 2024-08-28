@@ -27,13 +27,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    HttpResponseRedirect,
-)
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
