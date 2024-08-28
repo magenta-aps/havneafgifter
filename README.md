@@ -35,6 +35,7 @@ On MacOS with Homebrew this can be down with `brew install node`.
 
 Afterwards `eslint` and `globals` can be installed with `npm install --save-dev eslint @eslint/js globals`.
 Alternatively your preferred package manager might have an eslint package as well.
+**It is vital to install the mentioned npm packages while in the root directory of this repo.**
 
 If `pre-commit` is installed (`pip install pre-commit`) it can be readied using `pre-commit install --install-hooks`.
 Afterwards `pre-commit` can be invoked manually with `pre-commit run -a`.
