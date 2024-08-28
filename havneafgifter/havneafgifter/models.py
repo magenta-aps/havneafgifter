@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
@@ -1311,9 +1311,7 @@ class PortTaxRate(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Vessel gross tonnage (lower)"),
-        validators=[
-            MaxValueValidator(2000000, message=_("Tallet er for højt"))
-        ],
+        validators=[MaxValueValidator(2000000, message=_("Tallet er for højt"))],
     )
 
     gt_end = models.PositiveIntegerField(
