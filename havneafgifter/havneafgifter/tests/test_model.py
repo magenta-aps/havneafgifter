@@ -13,6 +13,7 @@ from django.utils import translation
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
+    CruiseTaxForm,
     DisembarkmentSite,
     EmailMessage,
     HarborDuesForm,
@@ -700,6 +701,31 @@ class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
 
     def test_get_receipt(self):
         self.assertIsInstance(self.cruise_tax_form.get_receipt(), CruiseTaxFormReceipt)
+
+    def test_reject_transition(self):
+        # Arrange
+        reason = "Afvist fordi der mangler noget"
+        # Retrieve the cruise tax form "as" a harbor dues form, as the `reject` logic
+        # only updates the history in `HarborDuesForm.history`.
+        harbor_dues_form = HarborDuesForm.objects.get(pk=self.cruise_tax_form.pk)
+        # Act
+        harbor_dues_form.reject(reason=reason)
+        harbor_dues_form.save()
+        # Refresh DB object
+        self.cruise_tax_form = CruiseTaxForm.objects.get(pk=self.cruise_tax_form.pk)
+        # Assert state changes on the modified `HarborDuesForm` object
+        self.assertEqual(harbor_dues_form._change_reason, Status.REJECTED.label)
+        # Assert that the rejection reason is saved as part of the `HarborDuesForm`
+        # history.
+        self.assertQuerySetEqual(
+            harbor_dues_form.history.filter(status=Status.REJECTED),
+            [reason],
+            transform=lambda obj: obj.reason_text,
+        )
+        # Assert that `CruiseTaxForm.latest_rejection` returns the expected history
+        # entry.
+        self.assertIsNotNone(self.cruise_tax_form.latest_rejection)
+        self.assertEqual(self.cruise_tax_form.latest_rejection.reason_text, reason)
 
 
 class TestDisembarkmentSite(TestCase):
