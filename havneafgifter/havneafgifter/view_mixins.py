@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from django_fsm import can_proceed, has_transition_perm
 
+from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
 from havneafgifter.responses import HavneafgifterResponseForbidden
 
@@ -35,28 +36,22 @@ class HavneafgiftView:
         )
 
 
-class _SendEmailMixin:
-    def _send_email(
+class HandleNotificationMailMixin:
+    def handle_notification_mail(
         self,
+        mail_class: type[NotificationMail],
         form: HarborDuesForm | CruiseTaxForm,
-        request,
-    ) -> None:
-        email_message, status = form.send_email()
+    ):
+        mail = mail_class(form)
+        result = mail.send_email()
         messages.add_message(
-            request,
-            messages.SUCCESS if status == 1 else messages.ERROR,
+            self.request,  # type: ignore
+            messages.SUCCESS if result.succeeded else messages.ERROR,
             (
-                self._get_success_message(form)
-                if status == 1
-                else _("Error when sending email")
+                result.mail.success_message
+                if result.succeeded
+                else result.mail.error_message
             ),
-        )
-
-    def _get_success_message(self, form: HarborDuesForm | CruiseTaxForm):
-        return _(
-            "Thank you for submitting this form. "
-            "Your harbour dues form has now been received by the port authority "
-            "and the Greenlandic Tax Authority."
         )
 
 
@@ -89,7 +84,7 @@ class GetFormView(FormView):
 class HarborDuesFormMixin(
     LoginRequiredMixin,
     CSPViewMixin,
-    _SendEmailMixin,
+    HandleNotificationMailMixin,
     HavneafgiftView,
 ):
     def get_form_kwargs(self):
@@ -135,7 +130,7 @@ class HarborDuesFormMixin(
             if status == Status.NEW:
                 harbor_dues_form.submit_for_review()
                 harbor_dues_form.save()
-                self._send_email(harbor_dues_form, self.request)
+                self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
             else:
                 harbor_dues_form.save()
 

@@ -1,5 +1,5 @@
 from datetime import date
-from unittest.mock import ANY, patch
+from unittest.mock import patch
 
 from django.conf import settings
 from django.core.files import File
@@ -72,27 +72,27 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
         mail = OnSubmitForReviewMail(harbor_dues_form)
         with patch.object(EmailMessage, "send") as mock_send:
             # Act
-            msg, status = mail.send_email()
+            result = mail.send_email()
             # Assert the basic email fields are populated
-            self.assertEqual(msg.subject, mail.mail_subject)
-            self.assertEqual(msg.body, mail.mail_body)
-            self.assertEqual(msg.bcc, mail.mail_recipients)
-            self.assertEqual(msg.from_email, settings.EMAIL_SENDER)
+            self.assertEqual(result.msg.subject, mail.mail_subject)
+            self.assertEqual(result.msg.body, mail.mail_body)
+            self.assertEqual(result.msg.bcc, mail.mail_recipients)
+            self.assertEqual(result.msg.from_email, settings.EMAIL_SENDER)
             # Assert that the receipt is attached as PDF, using the correct filename
-            self.assertListEqual(
-                msg.attachments,
-                [(harbor_dues_form.get_pdf_filename(), ANY, "application/pdf")],
-            )
-            pdf_content: bytes = msg.attachments[0][1]
+            self.assertEqual(len(result.msg.attachments), 1)
+            filename, pdf_content, filetype = result.msg.attachments[0]
+            self.assertTrue(filename.startswith(harbor_dues_form.form_id))
+            self.assertTrue(filename.endswith(".pdf"))
             self.assertIsInstance(pdf_content, bytes)
             self.assertGreater(len(pdf_content), 0)
+            self.assertEqual(filetype, "application/pdf")
             # Assert that `OnSubmitForReviewMail.send_mail` calls `EmailMessage.send` as
             # expected.
             mock_send.assert_called_once_with(fail_silently=False)
-            # Assert that the generated PDF is also saved locally
-            harbor_dues_form = HarborDuesForm.objects.get(
-                pk=harbor_dues_form.pk
-            )  # refresh from DB
+            # Assert that the generated PDF is also saved locally.
+            # Refresh from DB.
+            harbor_dues_form = HarborDuesForm.objects.get(pk=harbor_dues_form.pk)
+            # Assert PDF file is saved on `HarborDuesForm` instance
             self.assertIsInstance(harbor_dues_form.pdf, File)
             self.assertEqual(
                 harbor_dues_form.pdf.name, harbor_dues_form.get_pdf_filename()

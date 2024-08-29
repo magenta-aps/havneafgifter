@@ -45,6 +45,7 @@ from havneafgifter.forms import (
     SignupVesselForm,
     StatisticsForm,
 )
+from havneafgifter.mails import OnSubmitForReviewMail
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -72,9 +73,9 @@ from havneafgifter.tables import (
 from havneafgifter.view_mixins import (
     CacheControlMixin,
     GetFormView,
+    HandleNotificationMailMixin,
     HarborDuesFormMixin,
     HavneafgiftView,
-    _SendEmailMixin,
 )
 
 
@@ -346,7 +347,7 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         ]
 
 
-class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
+class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetView):
     template_name = "havneafgifter/environmental_tax_create.html"
     form_class = DisembarkmentForm
 
@@ -392,7 +393,7 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
         # Handle `status` (DRAFT or NEW) and send email if NEW.
         if submitted_for_review:
             self._cruise_tax_form.save(update_fields=("status",))
-            self._send_email(self._cruise_tax_form, self.request)
+            self.handle_notification_mail(OnSubmitForReviewMail, self._cruise_tax_form)
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(

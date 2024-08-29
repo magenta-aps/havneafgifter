@@ -9,7 +9,6 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.storage import FileSystemStorage
-from django.core.mail import EmailMessage
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -936,12 +935,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 )
             )
         )
-
-    def send_email(self) -> tuple[EmailMessage, int]:
-        from havneafgifter.mails import OnSubmitForReviewMail
-
-        mail = OnSubmitForReviewMail(self)
-        return mail.send_email()
 
 
 class CruiseTaxForm(HarborDuesForm):

@@ -9,7 +9,6 @@ from django.db.models import Model
 from django.templatetags.l10n import localize
 from django.utils import translation
 from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType
 
@@ -21,6 +20,13 @@ class MailRecipient:
     name: str
     email: str
     object: Model | None
+
+
+@dataclass
+class SendResult:
+    mail: "NotificationMail"
+    succeeded: bool
+    msg: EmailMessage
 
 
 class NotificationMail:
@@ -89,7 +95,7 @@ class NotificationMail:
             )
             return None
 
-    def send_email(self) -> tuple[EmailMessage, int]:
+    def send_email(self) -> SendResult:
         logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
         msg = EmailMessage(
             self.mail_subject,
@@ -109,7 +115,7 @@ class NotificationMail:
                 BytesIO(receipt.pdf), name=self.form.get_pdf_filename()
             )
             self.form.save(update_fields=["pdf"])
-        return msg, result
+        return SendResult(mail=self, succeeded=result == 1, msg=msg)
 
     @property
     def mail_recipients(self) -> list[str]:
@@ -122,6 +128,14 @@ class NotificationMail:
     @property
     def mail_body(self):
         raise NotImplementedError("must be implemented by subclass")  # pragma: no cover
+
+    @property
+    def success_message(self) -> str:
+        return gettext("An email was sent successfully")
+
+    @property
+    def error_message(self) -> str:
+        return gettext("Error when sending email")
 
 
 class OnSubmitForReviewMail(NotificationMail):
@@ -150,7 +164,7 @@ class OnSubmitForReviewMail(NotificationMail):
                 }
                 if self.form.vessel_type == ShipType.CRUISE:
                     text = (
-                        _(
+                        gettext(
                             "%(agent)s has %(date)s reported port taxes, cruise "
                             "passenger taxes, as well as environmental and "
                             "maintenance fees in relation to a ship's call "
@@ -161,7 +175,7 @@ class OnSubmitForReviewMail(NotificationMail):
                     )
                 else:
                     text = (
-                        _(
+                        gettext(
                             "%(agent)s has %(date)s reported port taxes due to a "
                             "ship's call at a Greenlandic port. See further details "
                             "in the attached overview."
@@ -170,3 +184,11 @@ class OnSubmitForReviewMail(NotificationMail):
                     )
                 result.append(text)
         return "\n\n".join(result)
+
+    @property
+    def success_message(self) -> str:
+        return gettext(
+            "Thank you for submitting this form. "
+            "Your harbour dues form has now been received by the port authority "
+            "and the Greenlandic Tax Authority."
+        )
