@@ -112,12 +112,8 @@ class NotificationMail:
         return msg, result
 
     @property
-    def recipient_emails(self) -> list[str]:
-        return [recipient.email for recipient in self.recipients]
-
-    @property
     def mail_recipients(self) -> list[str]:
-        return self.recipient_emails
+        return [recipient.email for recipient in self.recipients]
 
     @property
     def mail_subject(self):

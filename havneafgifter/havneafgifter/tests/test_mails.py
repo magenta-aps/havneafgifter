@@ -17,7 +17,7 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
     def test_mail_recipients(self):
         instance = self._get_instance()
         self.assertListEqual(
-            instance.recipient_emails,
+            instance.mail_recipients,
             [
                 instance.form.port_of_call.portauthority.email,
                 instance.form.shipping_agent.email,
@@ -32,7 +32,7 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
     def test_mail_recipients_falls_back_if_no_port_of_call(self):
         instance = OnSubmitForReviewMail(self.cruise_tax_form_without_port_of_call)
         self.assertListEqual(
-            instance.recipient_emails,
+            instance.mail_recipients,
             [
                 settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
                 instance.form.shipping_agent.email,
