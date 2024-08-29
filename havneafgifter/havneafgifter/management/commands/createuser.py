@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
-from havneafgifter.models import PortAuthority, ShippingAgent, User
+from havneafgifter.models import PortAuthority, ShippingAgent, ShipType, User, Vessel
 
 
 class Command(BaseCommand):
@@ -70,3 +70,15 @@ class Command(BaseCommand):
                 self.stdout.write(
                     f"Updated '{user}' shipping agent to {shipping_agent_object}"
                 )
+
+        # Add `Vessel` to ship users
+        if (groups is not None) and ("Ship" in groups):
+            Vessel.objects.create(
+                user=user,
+                imo=user.username,
+                name="Mary",
+                type=ShipType.FREIGHTER,
+                owner="Owner",
+                master="Captain",
+                gross_tonnage=1234,
+            )
