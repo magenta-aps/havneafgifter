@@ -25,12 +25,13 @@ class MailRecipient:
 
 class NotificationMail:
     def __init__(self, form: HarborDuesForm | CruiseTaxForm):
-        self.form = form
-        self.recipients = []
+        self.form: HarborDuesForm | CruiseTaxForm = form
+        self.recipients: list[MailRecipient] = []
 
-    def add_recipient(self, recipient: MailRecipient | None):
+    def add_recipient(self, recipient: MailRecipient | None) -> None:
         if recipient is not None:
             self.recipients.append(recipient)
+        return None
 
     def get_port_authority_recipient(self) -> MailRecipient | None:
         if (
@@ -59,6 +60,7 @@ class NotificationMail:
                 "mail recipients",
                 self,
             )
+            return None
 
     def get_shipping_agent_recipient(self) -> MailRecipient | None:
         if self.form.shipping_agent and self.form.shipping_agent.email:
@@ -72,6 +74,7 @@ class NotificationMail:
                 "%r is not linked to a shipping agent, excluding from mail recipients",
                 self,
             )
+            return None
 
     def get_tax_authority_recipient(self) -> MailRecipient | None:
         if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
@@ -84,6 +87,7 @@ class NotificationMail:
             logger.info(
                 "Skattestyrelsen email not configured, excluding from mail recipients",
             )
+            return None
 
     def send_email(self) -> tuple[EmailMessage, int]:
         logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
