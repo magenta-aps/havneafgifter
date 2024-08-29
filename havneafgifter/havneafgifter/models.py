@@ -2,15 +2,12 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from io import BytesIO
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.mail import EmailMessage
 from django.core.validators import (
@@ -23,10 +20,8 @@ from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.defaultfilters import date
-from django.templatetags.l10n import localize
 from django.utils import translation
 from django.utils.functional import cached_property
-from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_fsm import FSMField, transition
@@ -39,82 +34,6 @@ from havneafgifter.data import DateTimeRange
 logger = logging.getLogger(__name__)
 
 pdf_storage = FileSystemStorage(location=settings.STORAGE_PDF)
-
-
-@dataclass
-class MailRecipient:
-    name: str
-    email: str
-    object: models.Model | None
-
-
-class MailRecipientList:
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
-        self.form = form
-        self.recipients = []
-
-        if (
-            form.port_of_call
-            and form.port_of_call.portauthority
-            and form.port_of_call.portauthority.email
-        ):
-            self.recipients.append(
-                MailRecipient(
-                    name=form.port_of_call.portauthority.name,
-                    email=form.port_of_call.portauthority.email,
-                    object=form.port_of_call.portauthority,
-                )
-            )
-        else:
-            if (
-                isinstance(form, CruiseTaxForm)
-                and not form.has_port_of_call
-                and settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL
-            ):
-                self.recipients.append(
-                    MailRecipient(
-                        name=gettext("Authority for vessels without port of call"),
-                        email=settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
-                        object=None,
-                    )
-                )
-            else:
-                logger.info(
-                    "%r is not linked to a port authority, excluding from "
-                    "mail recipients",
-                    self,
-                )
-
-        if form.shipping_agent and form.shipping_agent.email:
-            self.recipients.append(
-                MailRecipient(
-                    name=form.shipping_agent.name,
-                    email=form.shipping_agent.email,
-                    object=form.shipping_agent,
-                )
-            )
-        else:
-            logger.info(
-                "%r is not linked to a shipping agent, excluding from mail recipients",
-                self,
-            )
-
-        if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
-            self.recipients.append(
-                MailRecipient(
-                    name=gettext("Tax Authority"),
-                    email=settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
-                    object=None,
-                )
-            )
-        else:
-            logger.info(
-                "Skattestyrelsen email not configured, excluding from mail recipients",
-            )
-
-    @property
-    def recipient_emails(self) -> list[str]:
-        return [recipient.email for recipient in self.recipients]
 
 
 class User(AbstractUser):
@@ -890,71 +809,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
         return HarborDuesFormReceipt(self, **kwargs)
 
-    def send_email(self) -> tuple[EmailMessage, int]:
-        logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
-        msg = EmailMessage(
-            self.mail_subject,
-            self.mail_body,
-            from_email=settings.EMAIL_SENDER,
-            bcc=self.mail_recipients,
-        )
-        receipt = self.get_receipt()
-        msg.attach(
-            filename=self.get_pdf_filename(),
-            content=receipt.pdf,
-            mimetype="application/pdf",
-        )
-        result = msg.send(fail_silently=False)
-        if result:
-            self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
-            self.save(update_fields=["pdf"])
-        return msg, result
-
-    @property
-    def mail_subject(self):
-        return f"Talippoq: {self.pk:05} ({self.date})"
-
-    @property
-    def mail_body(self):
-        # The mail body consists of the same text repeated in English, Greenlandic, and
-        # Danish.
-        # The text varies depending on whether the form concerns a cruise ship, or any
-        # other type of vessel.
-        result = []
-        for lang_code, lang_name in settings.LANGUAGES:
-            with translation.override(lang_code):
-                context = {
-                    "date": localize(self.date),
-                    "agent": self.shipping_agent.name if self.shipping_agent else "",
-                }
-                if self.vessel_type == ShipType.CRUISE:
-                    text = (
-                        _(
-                            "%(agent)s has %(date)s reported port taxes, cruise "
-                            "passenger taxes, as well as environmental and "
-                            "maintenance fees in relation to a ship's call "
-                            "at a Greenlandic port. See further details in the "
-                            "attached overview."
-                        )
-                        % context
-                    )
-                else:
-                    text = (
-                        _(
-                            "%(agent)s has %(date)s reported port taxes due to a "
-                            "ship's call at a Greenlandic port. See further details "
-                            "in the attached overview."
-                        )
-                        % context
-                    )
-                result.append(text)
-        return "\n\n".join(result)
-
-    @property
-    def mail_recipients(self) -> list[str]:
-        recipient_list: MailRecipientList = MailRecipientList(self)
-        return recipient_list.recipient_emails
-
     @cached_property
     def latest_rejection(self):
         if self.status == Status.REJECTED:
@@ -1082,6 +936,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 )
             )
         )
+
+    def send_email(self) -> tuple[EmailMessage, int]:
+        from havneafgifter.mails import OnSubmitForReviewMail
+
+        mail = OnSubmitForReviewMail(self)
+        return mail.send_email()
 
 
 class CruiseTaxForm(HarborDuesForm):
