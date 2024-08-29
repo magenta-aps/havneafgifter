@@ -366,16 +366,18 @@ class TestCruiseTaxFormSetView(
         cls.instance._cruise_tax_form = cls.cruise_tax_draft_form
 
     @parametrize(
-        "username,is_draft,can_access",
+        "username,status,can_access",
         [
-            ("shipping_agent", True, True),
-            ("shipping_agent", False, False),
-            ("port_auth", True, False),
-            ("port_auth", False, False),
+            ("shipping_agent", Status.DRAFT, True),
+            ("shipping_agent", Status.NEW, False),
+            ("shipping_agent", Status.REJECTED, True),
+            ("port_auth", Status.DRAFT, False),
+            ("port_auth", Status.NEW, False),
+            ("port_auth", Status.REJECTED, True),
         ],
     )
-    def test_setup(self, username: str, is_draft: bool, can_access: bool):
-        user, obj = self._call_setup(username, is_draft)
+    def test_setup(self, username: str, status: Status, can_access: bool):
+        user, obj = self._call_setup(username, status)
         if can_access:
             self.assertEqual(self.instance._cruise_tax_form, obj)
         else:
@@ -401,16 +403,25 @@ class TestCruiseTaxFormSetView(
         expected_response_class: type[HttpResponse],
         **extra,
     ):
-        user, obj = self._call_setup(username, True)
+        user, obj = self._call_setup(username, Status.DRAFT)
         get_response = self.instance.get(self._get(user))
         post_response = self.instance.post(self._post_formset(user=user, **extra))
         self.assertIsInstance(get_response, expected_response_class)
         self.assertIsInstance(post_response, expected_response_class)
         self._assert_response_prevents_caching(get_response)
 
-    def _call_setup(self, username: str, is_draft: bool) -> tuple[User, CruiseTaxForm]:
+    def _call_setup(self, username: str, status: Status) -> tuple[User, CruiseTaxForm]:
         user = User.objects.get(username=username)
-        obj = self.cruise_tax_draft_form if is_draft else self.cruise_tax_form
+        if status == Status.DRAFT:
+            obj = self.cruise_tax_draft_form
+        elif status == Status.NEW:
+            obj = self.cruise_tax_form
+        elif status == Status.REJECTED:
+            self.cruise_tax_form.reject(reason="Rejected")
+            self.cruise_tax_form.save(update_fields=("status",))
+            obj = self.cruise_tax_form
+        else:
+            self.skipTest(f"Unknown status: {status}")
         self.instance.setup(self._get(user), pk=obj.pk)
         return user, obj
 

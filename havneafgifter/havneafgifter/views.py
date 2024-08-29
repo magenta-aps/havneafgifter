@@ -198,7 +198,10 @@ class _CruiseTaxFormSetView(
         super().setup(request, *args, **kwargs)
         pk = kwargs["pk"]
         qs = CruiseTaxForm.filter_user_permissions(
-            CruiseTaxForm.objects.filter(pk=pk, status=Status.DRAFT),
+            CruiseTaxForm.objects.filter(
+                pk=pk,
+                status__in=[Status.DRAFT, Status.REJECTED],
+            ),
             request.user,
             "view",
         )
