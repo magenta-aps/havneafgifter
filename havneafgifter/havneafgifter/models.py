@@ -958,8 +958,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     @cached_property
     def latest_rejection(self):
         if self.status == Status.REJECTED:
+            if isinstance(self, CruiseTaxForm):
+                history = self.harborduesform_ptr.history
+            else:
+                history = self.history
             try:
-                return self.history.filter(
+                return history.filter(
                     status=Status.REJECTED,
                     reason_text__isnull=False,
                 ).latest("history_date")
