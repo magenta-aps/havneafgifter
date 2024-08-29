@@ -192,3 +192,33 @@ class OnSubmitForReviewMail(NotificationMail):
             "Your harbour dues form has now been received by the port authority "
             "and the Greenlandic Tax Authority."
         )
+
+
+class OnApproveMail(NotificationMail):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
+        super().__init__(form)
+        self.add_recipient(self.get_shipping_agent_recipient())
+        # self.add_recipient(self.get_ship_user_recipient())
+
+    @property
+    def mail_body(self):
+        return gettext("Your harbor dues form has been approved")
+
+    @property
+    def success_message(self) -> str:
+        return gettext("An approval notification has been sent to the form submitter")
+
+
+class OnRejectMail(NotificationMail):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
+        super().__init__(form)
+        self.add_recipient(self.get_shipping_agent_recipient())
+        # self.add_recipient(self.get_ship_user_recipient())
+
+    @property
+    def mail_body(self):
+        return gettext("Your harbor dues form has been rejected")
+
+    @property
+    def success_message(self) -> str:
+        return gettext("A rejection notification has been sent to the form submitter")

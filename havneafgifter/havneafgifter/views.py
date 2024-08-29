@@ -45,7 +45,7 @@ from havneafgifter.forms import (
     SignupVesselForm,
     StatisticsForm,
 )
-from havneafgifter.mails import OnSubmitForReviewMail
+from havneafgifter.mails import OnApproveMail, OnRejectMail, OnSubmitForReviewMail
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -567,7 +567,9 @@ class PreviewPDFView(ReceiptDetailView):
         )
 
 
-class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+class ApproveView(
+    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
+):
     http_method_names = ["post"]
 
     def get_queryset(self):
@@ -594,13 +596,16 @@ class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         # implement `form_valid`. Instead, we just perform the object update here.
         harbor_dues_form.approve()
         harbor_dues_form.save()
+        self.handle_notification_mail(OnApproveMail, harbor_dues_form)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_list")
 
 
-class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+class RejectView(
+    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
+):
     form_class = ReasonForm
     http_method_names = ["post"]
 
@@ -632,6 +637,7 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         harbor_dues_form = self.object
         harbor_dues_form.reject(reason=form.cleaned_data["reason"])
         harbor_dues_form.save()
+        self.handle_notification_mail(OnRejectMail, harbor_dues_form)
         return response
 
     def get_success_url(self):

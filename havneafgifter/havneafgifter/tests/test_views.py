@@ -1220,10 +1220,14 @@ class TestApproveView(TestActionViewMixin, TestCase):
         # Arrange
         request = self._setup({}, self.port_authority_user)
         # Act
-        response = self.instance.post(request)
+        with patch(
+            "havneafgifter.view_mixins.messages.add_message"
+        ) as mock_add_message:
+            response = self.instance.post(request)
         # Assert
         harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
         self.assertEqual(harbor_dues_form.status, Status.APPROVED.value)
+        mock_add_message.assert_called_once()
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):
@@ -1244,10 +1248,14 @@ class TestRejectView(TestActionViewMixin, TestCase):
             {"reason": "There is no reason"}, self.port_authority_user
         )
         # Act
-        response = self.instance.post(request)
+        with patch(
+            "havneafgifter.view_mixins.messages.add_message"
+        ) as mock_add_message:
+            response = self.instance.post(request)
         # Assert
         harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
         self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
+        mock_add_message.assert_called_once()
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):
