@@ -35,6 +35,7 @@ from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
 from icecream import ic
+from project.util import omit
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -838,21 +839,49 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
         return kwargs
 
     def get_port_formset(self):
-
         if self.clone:
-            return PortTaxRateFormSet(
-                data=self.request.POST or None, instance=self.object, save_as_new=False
+            if self.object and self.object.pk:
+                initial = [
+                    {
+                        **omit(model_to_dict(item), "id", "tax_rates"),
+                        "name": item.name,
+                        "can_delete": item.can_delete,
+                    }
+                    for item in self.object.port_tax_rates.all()
+                ]
+            else:
+                initial = []
+            formset = PortTaxRateFormSet(
+                data=self.request.POST or None, initial=initial
             )
+            formset.extra = len(initial)
+            return formset
         else:
             return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
 
     def get_disembarkmentrate_formset(self):
-        return DisembarkmentTaxRateFormSet(
-            self.request.POST or None, instance=self.object
-        )
+        if self.clone:
+            if self.object and self.object.pk:
+                initial = [
+                    {
+                        **omit(model_to_dict(item), "id", "tax_rates"),
+                        "name": item.name,
+                    }
+                    for item in self.object.disembarkment_tax_rates.all()
+                ]
+            else:
+                initial = []
+            formset = DisembarkmentTaxRateFormSet(
+                data=self.request.POST or None, initial=initial
+            )
+            formset.extra = len(initial)
+            return formset
+        else:
+            return DisembarkmentTaxRateFormSet(
+                self.request.POST or None, instance=self.object
+            )
 
     def form_valid(self, form, formset1, formset2):
-        ic()
         self.object = form.save()
 
         if self.clone:

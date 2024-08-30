@@ -54,7 +54,7 @@
                 <tr class="align-middle">
 
                     <td>
-                        {{ form.instance.name }}
+                        {{ form.initial.name|default:form.instance.name }}
                     </td>
                     <td class="{% if form.name.errors %}is-invalid{% endif %}">
                         {{ form.gt_start }}
@@ -68,7 +68,7 @@
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
-                        {% if form.instance.can_delete %}
+                        {% if form.initial.can_delete or form.instance.can_delete %}
                             <button
                                     class="btn btn-danger"
                                     type="button"
@@ -130,7 +130,9 @@
             {% for form in disembarkmentrate_formset %}
                 <tr>
                     {{ form.id }}
-                    <td>{{ form.instance.name }}</td>
+                    <td>
+                        {{ form.initial.name|default:form.instance.name }}
+                    </td>
                     <td>{{ form.disembarkment_tax_rate }}</td>
                     <td class="text-end">
                         <button class="btn btn-danger" type="button" data-action="delete">{% translate "Slet sats" %}</button>
