@@ -53,9 +53,7 @@
             {% for form in port_formset %}
                 <tr class="align-middle">
 
-                    <td>
-                        {{ form.initial.name|default:form.instance.name }}
-                    </td>
+                    <td data-form-field="label">{{ form.extradata.name|default:form.instance.name }}</td>
                     <td class="{% if form.name.errors %}is-invalid{% endif %}">
                         {{ form.gt_start }}
                         {% if form.gt_start.errors %}
@@ -68,7 +66,7 @@
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
                     <td class="text-end">
-                        {% if form.initial.can_delete or form.instance.can_delete %}
+                        {% if form.extradata.can_delete or form.instance.can_delete %}
                             <button
                                     class="btn btn-danger"
                                     type="button"
@@ -130,8 +128,8 @@
             {% for form in disembarkmentrate_formset %}
                 <tr>
                     {{ form.id }}
-                    <td>
-                        {{ form.initial.name|default:form.instance.name }}
+                    <td data-form-field="label">
+                        {{ form.extradata.name|default:form.instance.name }}
                     </td>
                     <td>{{ form.disembarkment_tax_rate }}</td>
                     <td class="text-end">
