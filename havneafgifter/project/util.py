@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 # Copied from core python because its containing module `distutils` is deprecated.
 
 
@@ -24,4 +26,10 @@ def lenient_get(item, *keys: str | int):
                 item = item[key]
             else:
                 return None
+    return item
+
+
+def omit(item: Dict[str, Any], *keys: str) -> Dict[str, Any]:
+    for key in keys:
+        del item[key]
     return item
