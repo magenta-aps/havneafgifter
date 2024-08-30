@@ -132,4 +132,9 @@ urlpatterns: List[URLResolver | URLPattern] = [
     path("sats", TaxRateListView.as_view(), name="tax_rate_list"),
     path("sats/<int:pk>", TaxRateDetailView.as_view(), name="tax_rate_details"),
     path("sats/<int:pk>/edit", TaxRateFormView.as_view(), name="edit_taxrate"),
+    path(
+        "sats/<int:pk>/clone",
+        TaxRateFormView.as_view(clone=True),
+        name="tax_rate_clone",
+    ),
 ]

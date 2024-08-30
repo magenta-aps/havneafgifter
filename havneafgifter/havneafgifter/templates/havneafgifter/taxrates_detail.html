@@ -68,7 +68,6 @@
 <hr/>
 
 <a href="#" class="btn btn-primary">{% translate 'Edit' %}</a>
-<a href="#" class="btn btn-primary">{% translate 'Clone' %}</a>
+<a href="{% url 'havneafgifter:tax_rate_clone' pk=object.pk %}" class="btn btn-primary">{% translate 'Clone' %}</a>
 <a href="#" class="btn btn-danger">{% translate 'Delete' %}</a>
-
 {% endblock content %}
