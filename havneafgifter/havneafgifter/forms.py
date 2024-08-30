@@ -641,6 +641,16 @@ class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
 class TaxRateFormSet(BaseInlineFormSet):
     deletion_widget = HiddenInput
 
+    def __init__(self, extradata=None, **kwargs):
+        self.extradata = extradata
+        super().__init__(**kwargs)
+
+    def _construct_form(self, i, **kwargs):
+        form = super()._construct_form(i, **kwargs)
+        if self.extradata:
+            form.extradata = self.extradata[i]
+        return form
+
 
 PortTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,

@@ -55,11 +55,13 @@ from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
+    DisembarkmentTaxRate,
     HarborDuesForm,
     Municipality,
     Nationality,
     PassengersByCountry,
     Port,
+    PortTaxRate,
     ShipType,
     Status,
     TaxRates,
@@ -840,19 +842,23 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
 
     def get_port_formset(self):
         if self.clone:
-            if self.object and self.object.pk:
-                initial = [
-                    {
-                        **omit(model_to_dict(item), "id", "tax_rates"),
-                        "name": item.name,
-                        "can_delete": item.can_delete,
-                    }
+            initial = (
+                [
+                    omit(model_to_dict(item), "id", "tax_rates")
                     for item in self.object.port_tax_rates.all()
                 ]
-            else:
-                initial = []
+                if self.object and self.object.pk
+                else []
+            )
+            extradata = [
+                {
+                    "name": item.name,
+                    "can_delete": item.can_delete,
+                }
+                for item in PortTaxRate.objects.filter(tax_rates_id=self.kwargs["pk"])
+            ]
             formset = PortTaxRateFormSet(
-                data=self.request.POST or None, initial=initial
+                data=self.request.POST or None, initial=initial, extradata=extradata
             )
             formset.extra = len(initial)
             return formset
@@ -861,18 +867,22 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
 
     def get_disembarkmentrate_formset(self):
         if self.clone:
-            if self.object and self.object.pk:
-                initial = [
-                    {
-                        **omit(model_to_dict(item), "id", "tax_rates"),
-                        "name": item.name,
-                    }
+            initial = (
+                [
+                    omit(model_to_dict(item), "id", "tax_rates")
                     for item in self.object.disembarkment_tax_rates.all()
                 ]
-            else:
-                initial = []
+                if self.object and self.object.pk
+                else []
+            )
+            extradata = [
+                {"name": item.name}
+                for item in DisembarkmentTaxRate.objects.filter(
+                    tax_rates_id=self.kwargs["pk"]
+                )
+            ]
             formset = DisembarkmentTaxRateFormSet(
-                data=self.request.POST or None, initial=initial
+                data=self.request.POST or None, initial=initial, extradata=extradata
             )
             formset.extra = len(initial)
             return formset
