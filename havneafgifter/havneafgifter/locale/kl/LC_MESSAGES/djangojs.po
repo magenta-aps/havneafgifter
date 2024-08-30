@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-20 11:26-0100\n"
+"POT-Creation-Date: 2024-08-30 08:20-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,30 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+#: havneafgifter/static/havneafgifter/form_step_1.js
 msgid "Continue"
 msgstr ""
 
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+#: havneafgifter/static/havneafgifter/form_step_1.js
 msgid "Save as draft"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid ""
-"You have added a shipping agent without saving as a draft. \n"
-"\n"
-"Do you want to continue?"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Ankomst"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Afrejse"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Søg"
 msgstr ""
