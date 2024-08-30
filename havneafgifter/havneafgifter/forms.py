@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
@@ -601,6 +603,19 @@ class TaxRateForm(ModelForm, BootstrapForm):
     class Meta:
         model = TaxRates
         exclude = ["end_datetime"]
+        widgets = {
+            "start_datetime": DateTimeInput(
+                attrs={"type": "datetime-local", "class": "datetimepicker"}
+            ),
+        }
+
+        start_datetime = DateTimeField(widget=DateTimeInput)
+
+    # Give default value for the "add" view, that's one week in the future
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["start_datetime"].initial = datetime.now() + timedelta(weeks=1)
+        self.fields["pax_tax_rate"].initial = 0.00
 
 
 class PortTaxRateForm(ModelForm, BootstrapForm):

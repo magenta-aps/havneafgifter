@@ -34,6 +34,7 @@ from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
+from icecream import ic
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -800,16 +801,18 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
         return []
 
 
-class TaxRateFormView(LoginRequiredMixin, UpdateView):
+class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
     model = TaxRates
     form_class = TaxRateForm
     template_name = "havneafgifter/taxrateform.html"
     success_url = reverse_lazy("havneafgifter:tax_rate_list")
+    clone = False
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
+        context = super().get_context_data(
             **{
                 **kwargs,
+                "clone": self.clone,
                 "port_formset": self.get_port_formset(),
                 "disembarkmentrate_formset": self.get_disembarkmentrate_formset(),
                 "vessel_type_choices": ShipType.choices,
@@ -828,8 +831,20 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             }
         )
 
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        return kwargs
+
     def get_port_formset(self):
-        return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
+
+        if self.clone:
+            return PortTaxRateFormSet(
+                data=self.request.POST or None, instance=self.object, save_as_new=False
+            )
+        else:
+            return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
 
     def get_disembarkmentrate_formset(self):
         return DisembarkmentTaxRateFormSet(
@@ -837,22 +852,31 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         )
 
     def form_valid(self, form, formset1, formset2):
-        """If the form is valid, save the associated model."""
+        ic()
         self.object = form.save()
+
+        if self.clone:
+            formset1.instance = self.object
+            formset2.instance = self.object
+
         formset1.save()
         formset2.save()
-        return super().form_valid(form)
+        return super().form_valid(form)  # Tages der højde for invalid formset1 og 2 ?
 
     def form_invalid(self, form, formset1, formset2):
-        """If the form is invalid, render the invalid form."""
+        ic()
+        ic(formset1.errors)
+        ic(formset2.errors)
+        ic(form.errors)
+
         return self.render_to_response(self.get_context_data(form=form))
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        """
-        Handle POST requests: instantiate a form instance with the passed
-        POST variables and then check if it's valid.
-        """
+
+        if self.clone:
+            self.object.pk = None
+
         form = self.get_form()
         formset1 = self.get_port_formset()
         formset2 = self.get_disembarkmentrate_formset()
