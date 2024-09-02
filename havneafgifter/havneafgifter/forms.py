@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
@@ -30,6 +28,7 @@ from django.forms import (
 )
 from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
@@ -603,19 +602,26 @@ class TaxRateForm(ModelForm, BootstrapForm):
     class Meta:
         model = TaxRates
         exclude = ["end_datetime"]
-        widgets = {
-            "start_datetime": DateTimeInput(
-                attrs={"type": "datetime-local", "class": "datetimepicker"}
-            ),
-        }
 
-        start_datetime = DateTimeField(widget=DateTimeInput)
+    start_datetime = DateTimeField(
+        label=_("Gyldighed fra"),
+        required=True,
+        widget=DateTimeInput(
+            attrs={"class": "datetimepicker", "placeholder": _("Gyldighed fra")}
+        ),
+    )
 
-    # Give default value for the "add" view, that's one week in the future
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["start_datetime"].initial = datetime.now() + timedelta(weeks=1)
-        self.fields["pax_tax_rate"].initial = 0.00
+    def clean_start_datetime(self):
+        start_datetime = self.cleaned_data.get("start_datetime")
+        if start_datetime:
+            now = timezone.now()
+            one_week_from_now = now + timezone.timedelta(weeks=1)
+            if start_datetime < one_week_from_now:
+                raise ValidationError(
+                    _("Start dato skal være mindst en uge i fremtiden"),
+                    code="start_datetime_at_least_one_week_from_today",
+                )
+        return start_datetime
 
 
 class PortTaxRateForm(ModelForm, BootstrapForm):
@@ -652,13 +658,76 @@ class TaxRateFormSet(BaseInlineFormSet):
         return form
 
 
+class BasePortTaxRateFormSet(TaxRateFormSet):
+    def clean(self):
+        super().clean()
+
+        combinations = {}
+
+        for form in self.forms:
+
+            if form.cleaned_data:
+                delete = form.cleaned_data.get("DELETE")
+                if delete:
+                    continue
+
+                port = form.cleaned_data.get("port")
+                vessel_type = form.cleaned_data.get("vessel_type")
+                gt_start = form.cleaned_data.get("gt_start")
+                gt_end = form.cleaned_data.get("gt_end")
+
+                key = (port, vessel_type)
+
+                if key not in combinations:
+                    combinations[key] = {
+                        "count": 0,
+                        "count_gt_start_zero": 0,
+                        "count_gt_end_none": 0,
+                    }
+
+                combinations[key]["count"] += 1
+
+                if gt_start == 0:
+                    combinations[key]["count_gt_start_zero"] += 1
+
+                if gt_end is None:
+                    combinations[key]["count_gt_end_none"] += 1
+
+        # validate occurrence combinations
+        for key, value in combinations.items():
+            port, vessel_type = key
+            if value["count"] == 1:
+                # only one occurrence of type/port comb
+                # it must have both gt_star==0 and gt_end==None
+                if value["count_gt_start_zero"] != 1 or value["count_gt_end_none"] != 1:
+                    raise ValidationError(
+                        _(
+                            f"For the combination of port '{port}' and vessel type "
+                            f"'{vessel_type}', the single entry must have both "
+                            f"gt_start=0 and gt_end=None."
+                        )
+                    )
+            else:
+                # multiple type/port occurrences
+                # it must have both gt_star==0 and gt_end==None
+                errmsg = _(
+                    f"There should be exactly one entry with gt_start=0 for port "
+                    f"'{port}' and vessel type '{vessel_type}'."
+                )
+                if value["count_gt_start_zero"] != 1:
+                    raise ValidationError(errmsg)
+                if value["count_gt_end_none"] != 1:
+                    raise ValidationError(errmsg)
+
+
 PortTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,
     model=PortTaxRate,
     form=PortTaxRateForm,
     extra=0,
     can_delete=True,
-    formset=TaxRateFormSet,
+    # formset=TaxRateFormSet,
+    formset=BasePortTaxRateFormSet,
 )
 
 DisembarkmentTaxRateFormSet = inlineformset_factory(

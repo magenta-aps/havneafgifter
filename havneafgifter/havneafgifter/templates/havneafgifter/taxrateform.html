@@ -6,10 +6,26 @@
 
 {% block extra_headers %}
     <script src="{% static 'havneafgifter/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'tempusdominus/popper.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'tempusdominus/tempus-dominus.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+    <link rel="stylesheet" href="{% static 'tempusdominus/tempus-dominus.min.css' %}" nonce="{{ request.csp_nonce }}">
 {% endblock %}
 
 {% block content %}
-    <h1>Redigér afgift, sats eller periode</h1>
+
+    {# HEADING AND UNSAVED WARNING #}
+    {% if clone %}
+        <h1>{% translate "Oprettelse af ny afgiftssats fra kopi" %}</h1>
+        <div class="col-12 pt-3">
+            <div class="alert alert-danger">
+                {% translate "BEMÆRK: Denne afgiftssats kopi er endnu ikke gemt.<br>Husk at trykke 'Gem Ændringer' for neden." %}
+            </div>
+        </div>
+    {% else %}
+        <h1>{% translate "Redigér afgift, sats eller periode" %}</h1>
+    {% endif %}
+
+
     <form method="post">
         {{ port_formset.management_form }}
         {{ disembarkmentrate_formset.management_form }}
@@ -32,6 +48,11 @@
             </div>
             <div class="col-4">
                 {{ form.start_datetime }}
+                {% if form.start_datetime.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.start_datetime.errors }}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -50,7 +71,30 @@
             </tr>
             </thead>
             <tbody id="port_formset_tbody">
+            {% if port_formset.non_form_errors %}
+                {% for errorlist in port_formset.non_form_errors.as_data %}
+                    {% for error in errorlist %}
+                        <tr class="align-middle">
+                            <td colspan="6" class=" is-invalid">
+                                <div class="alert alert-danger">
+                                    {{ error }}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
             {% for form in port_formset %}
+                {{ form.errors }}
+                {% if form.non_field_errors %}
+                    <tr class="align-middle errorlist">
+                        <td colspan="5">
+                            {{ form.non_field_errors }}
+                        </td>
+
+                    </tr>
+                {% endif %}
+
                 <tr class="align-middle">
 
                     <td data-form-field="label">{{ form.extradata.name|default:form.instance.name }}</td>
@@ -172,6 +216,9 @@
         <hr>
         {# "Save changes" button #}
         <button class="btn btn-success my-2" type="submit">{% translate "Gem ændringer" %}</button>
+
+        {# "Cancel" button #}
+        <a href="{% url 'havneafgifter:tax_rate_list' %}" class="btn btn-danger">{% translate 'Cancel' %}</a>
 
     </form>
 

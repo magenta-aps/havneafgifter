@@ -28,7 +28,9 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
@@ -692,6 +694,14 @@ class TaxRateListView(LoginRequiredMixin, SingleTableView):
 class TaxRateDetailView(LoginRequiredMixin, DetailView):
     model = TaxRates
 
+    def post(self, request, *args, **kwargs):
+        if "delete" in request.POST:
+            ic("ASKED TO DELETE")
+            self.object = self.get_object()
+            self.object.delete()
+            return redirect("havneafgifter:tax_rate_list")
+        return super().post(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             **{
@@ -811,12 +821,21 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
     success_url = reverse_lazy("havneafgifter:tax_rate_list")
     clone = False
 
+    # Tvinger provisorisk en "mindst en uge i fremtiden" start_datetime.
+    # Men fordi tiden stadig går, så skal man alligevel tilpasse datoen.
+    # Det er mest for convenience.
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.clone:
+            initial["start_datetime"] = timezone.now() + timezone.timedelta(weeks=1)
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             **{
                 **kwargs,
                 "clone": self.clone,
-                "port_formset": self.get_port_formset(),
+                # "port_formset": self.get_port_formset(),
                 "disembarkmentrate_formset": self.get_disembarkmentrate_formset(),
                 "vessel_type_choices": ShipType.choices,
                 "port_choices": [
@@ -833,6 +852,8 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
                 },
             }
         )
+        if "port_formset" not in context:
+            context["port_formset"] = self.get_port_formset()
 
         return context
 
@@ -892,6 +913,7 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
             )
 
     def form_valid(self, form, formset1, formset2):
+        ic()
         self.object = form.save()
 
         if self.clone:
@@ -904,11 +926,12 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView, CacheControlMixin):
 
     def form_invalid(self, form, formset1, formset2):
         ic()
-        ic(formset1.errors)
-        ic(formset2.errors)
-        ic(form.errors)
-
-        return self.render_to_response(self.get_context_data(form=form))
+        ic(form.non_field_errors())
+        ic(formset1.non_form_errors())
+        ic(formset2.non_form_errors())
+        return self.render_to_response(
+            self.get_context_data(form=form, port_formset=formset1)
+        )
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
