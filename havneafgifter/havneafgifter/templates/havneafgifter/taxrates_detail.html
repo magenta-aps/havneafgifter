@@ -4,70 +4,75 @@
 {% load django_bootstrap5 %}
 
 {% block content %}
-<h1>{% translate "Tax Rate Details" %}</h1>
+    <h1>{% translate "Tax Rate Details" %}</h1>
 
-<table class="table table-bordered">
+    <table class="table table-bordered">
 
-    <tbody>
+        <tbody>
 
-    <tr>
-        <th>{% translate "Start date" %}</th>
-        <td>{{object.start_datetime|date:"Y-m-d H:i:s (O)"}}</td>
-    </tr>
+        <tr>
+            <th>{% translate "Start date" %}</th>
+            <td>{{ object.start_datetime|date:"Y-m-d H:i:s (O)"}}</td>
+        </tr>
 
-    <tr>
-        <th>{% translate "End date" %}</th>
-        <td>{{object.end_datetime|default_if_none:"-"}}</td>
-    </tr>
+        <tr>
+            <th>{% translate "End date" %}</th>
+            <td>{{ object.end_datetime|default_if_none:"-"}}</td>
+        </tr>
 
-    <tr>
-        <th>{% translate "Passenger tax rate" %}</th>
-        <td>{{object.pax_tax_rate}}</td>
-    </tr>
+        <tr>
+            <th>{% translate "Passenger tax rate" %}</th>
+            <td>{{ object.pax_tax_rate }}</td>
+        </tr>
 
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-<table class="table table-bordered">
-    <tbody>
-    <tr>
-        <th>Afgifter pr. bruttoton:</th>
-        <th>Fra (ton)</th>
-        <th>Til (ton)</th>
-        <th>Rund op til (ton)</th>
-        <th>Sats (DKK)</th>
-    </tr>
-    {% for port_tax_rate in port_tax_rates %}
-    <tr>
-        <td>{{port_tax_rate.name}}</td>
-        <td>{{port_tax_rate.gt_start}}</td>
-        <td>{{port_tax_rate.gt_end|default_if_none:"∞"}}</td>
-        <td>{{port_tax_rate.round_gross_ton_up_to|default:""}}</td>
-        <td>{{port_tax_rate.port_tax_rate}}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <th>Afgifter pr. bruttoton:</th>
+            <th>Fra (ton)</th>
+            <th>Til (ton)</th>
+            <th>Rund op til (ton)</th>
+            <th>Sats (DKK)</th>
+        </tr>
+        {% for port_tax_rate in port_tax_rates %}
+            <tr>
+                <td>{{ port_tax_rate.name }}</td>
+                <td>{{ port_tax_rate.gt_start }}</td>
+                <td>{{ port_tax_rate.gt_end|default_if_none:"∞"}}</td>
+                <td>{{ port_tax_rate.round_gross_ton_up_to|default:""}}</td>
+                <td>{{ port_tax_rate.port_tax_rate }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
-<table class="table table-bordered">
-    <tbody>
-    <tr>
-        <th>Afgifter pr. ilandsætningssted:</th>
-        <th>Sats (DKK)</th>
-    </tr>
-    {% for disembarkment_tax_rate in disembarkment_tax_rates %}
-    <tr>
-        <td>{{disembarkment_tax_rate.name}}</td>
-        <td>{{disembarkment_tax_rate.disembarkment_tax_rate}}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <th>Afgifter pr. ilandsætningssted:</th>
+            <th>Sats (DKK)</th>
+        </tr>
+        {% for disembarkment_tax_rate in disembarkment_tax_rates %}
+            <tr>
+                <td>{{ disembarkment_tax_rate.name }}</td>
+                <td>{{ disembarkment_tax_rate.disembarkment_tax_rate }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
 
-<hr/>
+    <hr/>
 
-<a href="#" class="btn btn-primary">{% translate 'Edit' %}</a>
-<a href="{% url 'havneafgifter:tax_rate_clone' pk=object.pk %}" class="btn btn-primary">{% translate 'Clone' %}</a>
-<a href="#" class="btn btn-danger">{% translate 'Delete' %}</a>
+
+    <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'havneafgifter:edit_taxrate' pk=object.pk %}" class="btn btn-primary">{% translate 'Edit' %}</a>
+        <a href="{% url 'havneafgifter:tax_rate_clone' pk=object.pk %}" class="btn btn-primary">{% translate 'Clone' %}</a>
+        <button type="submit" name="delete" class="btn btn-danger">{% translate 'Delete' %}</button>
+        <a href="{% url 'havneafgifter:tax_rate_list' %}" class="btn btn-primary">{% translate 'Cancel' %}</a>
+    </form>
 {% endblock content %}
