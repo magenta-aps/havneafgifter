@@ -941,10 +941,12 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)  # Tages der højde for invalid formset1 og 2 ?
 
     def form_invalid(self, form, formset1, formset2):
+        print("................ FORM INVALID START....................")
         ic()
-        # ic(form.non_field_errors())
-        # ic(formset1.non_form_errors())
-        # ic(formset2.non_form_errors())
+        ic(form.non_field_errors())
+        ic(formset1.non_form_errors())
+        ic(formset2.non_form_errors())
+        print("................ FORM INVALID END....................")
         return self.render_to_response(
             self.get_context_data(form=form, port_formset=formset1)
         )
