@@ -27,13 +27,8 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    HttpResponseRedirect,
-)
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -697,6 +692,7 @@ class TaxRateListView(LoginRequiredMixin, SingleTableView):
 
 
 class TaxRateDetailView(LoginRequiredMixin, DetailView):
+    # TODO: Prevent deletion of current and old TaxRate objects
     model = TaxRates
 
     def post(self, request, *args, **kwargs):
@@ -718,6 +714,16 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
                 "disembarkment_tax_rates": self.object.disembarkment_tax_rates.order_by(
                     F("municipality").asc(nulls_first=True),
                     F("disembarkment_site").asc(nulls_first=True),
+                ),
+                "can_edit": self.object.has_permission(
+                    self.request.user, "change", False
+                )
+                and self.object.can_edit,
+                "can_clone": self.object.has_permission(
+                    self.request.user, "add", False
+                ),
+                "can_delete": self.object.has_permission(
+                    self.request.user, "delete", False
                 ),
             }
         )
@@ -820,6 +826,8 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
 
 
 class TaxRateFormView(LoginRequiredMixin, UpdateView):
+    # TODO: In add_porttaxrate modal: Add option for "outside_populated_areas"
+
     model = TaxRates
     form_class = TaxRateForm
     template_name = "havneafgifter/taxrateform.html"
@@ -867,6 +875,8 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def get_port_formset(self):
+        ic()
+        ic(self.clone)
         if self.clone:
             initial = (
                 [
@@ -889,6 +899,7 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             formset.extra = len(initial)
             return formset
         else:
+            ic()
             return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
 
     def get_disembarkmentrate_formset(self):
@@ -931,9 +942,9 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
 
     def form_invalid(self, form, formset1, formset2):
         ic()
-        ic(form.non_field_errors())
-        ic(formset1.non_form_errors())
-        ic(formset2.non_form_errors())
+        # ic(form.non_field_errors())
+        # ic(formset1.non_form_errors())
+        # ic(formset2.non_form_errors())
         return self.render_to_response(
             self.get_context_data(form=form, port_formset=formset1)
         )

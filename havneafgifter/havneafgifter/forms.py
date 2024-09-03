@@ -5,6 +5,7 @@ from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
+    BaseInlineFormSet,
     BooleanField,
     CharField,
     ChoiceField,
@@ -24,9 +25,6 @@ from django.forms import (
     Textarea,
     TextInput,
     widgets,
-    BaseForm,
-    BaseFormSet,
-    BaseInlineFormSet,
 )
 from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
@@ -369,9 +367,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         datetime_of_departure = cleaned_data.get("datetime_of_departure")
         # If both dates are given, arrival must be before departure
         if (
-                (datetime_of_arrival is not None)
-                and (datetime_of_departure is not None)
-                and (datetime_of_arrival > datetime_of_departure)
+            (datetime_of_arrival is not None)
+            and (datetime_of_departure is not None)
+            and (datetime_of_arrival > datetime_of_departure)
         ):
             raise ValidationError(
                 _("Date of departure cannot be before date of arrival"),
@@ -414,7 +412,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         # If given a port of call, both arrival and departure dates must be given
         # as well.
         if (port_of_call is not None) and (
-                datetime_of_arrival is None or datetime_of_departure is None
+            datetime_of_arrival is None or datetime_of_departure is None
         ):
             raise ValidationError(
                 _(
@@ -609,7 +607,11 @@ class TaxRateForm(ModelForm, BootstrapForm):
         label=_("Gyldighed fra"),
         required=True,
         widget=DateTimeInput(
-            attrs={"class": "datetimepicker", "placeholder": _("Gyldighed fra")}
+            attrs={
+                # "id": "datetimepicker",
+                "class": "form-control datetimepicker",
+                "placeholder": _("Gyldighed fra"),
+            }
         ),
     )
 
@@ -649,9 +651,12 @@ class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
 class TaxRateFormSet(BaseInlineFormSet):
     deletion_widget = HiddenInput
 
-    def __init__(self, extradata=None, **kwargs):
+    # TODO: Prevent deletion of "old" or current TaxRate objects
+    # TODO: start_datetime/pax_tax_rate combos need to be unique
+
+    def __init__(self, *args, extradata=None, **kwargs):
         self.extradata = extradata
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def _construct_form(self, i, **kwargs):
         form = super()._construct_form(i, **kwargs)
@@ -662,6 +667,18 @@ class TaxRateFormSet(BaseInlineFormSet):
 
 class BasePortTaxRateFormSet(TaxRateFormSet):
     def clean(self):
+        # TODO: round_gross_ton_up_to must be between gt_start and gt_end of gt_start==0
+        # TODO: There may be no gap between gt_end of one type/port
+        #  occurrence and gt_start of the next
+        # TODO: gt_start should be less than gt_end
+        # TODO: Every type/port combo needs at least one gt_start==0
+        # TODO: Every type/port combo needs at least one gt_end==None
+        # TODO: type/port, gt_start, gt_end, round_gross_tonne_up_to combos need
+        #  to be unique
+        #
+
+        # TODO: Every type/port combo needs one! gt_start==0 and one! gt_end==None.
+        #  No duplicates if more than one combo occurrence.
         super().clean()
 
         combinations = {}
@@ -722,6 +739,11 @@ class BasePortTaxRateFormSet(TaxRateFormSet):
                     raise ValidationError(errmsg)
 
 
+class BaseDisembarkmentTaxRateFormSet(TaxRateFormSet):
+    # TODO: There may be no duplicates of municipality/site combos
+    pass
+
+
 PortTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,
     model=PortTaxRate,
@@ -735,7 +757,8 @@ DisembarkmentTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,
     model=DisembarkmentTaxRate,
     form=DisembarkmentTaxRateForm,
-    formset=TaxRateFormSet,
+    # formset=TaxRateFormSet,
     extra=0,
     can_delete=True,
+    formset=BaseDisembarkmentTaxRateFormSet,
 )

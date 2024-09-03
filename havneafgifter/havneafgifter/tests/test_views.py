@@ -1881,6 +1881,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
 
         # TODO: SOMEHOW post_request_response.status_code is 302 when only
         #  running TestTaxRateFormView, but 200 when running all tests. Halp?
+        #  - 200 might means validation errors
         post_request_response = self.client.post(
             self.edit_url,
             data=value_dict_to_post,
