@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_tables2",
     "havneafgifter",
     "django_select2",
+    "django_filters",
     "django_mitid_auth",
     "mitid_test",
     "csp_helpers",

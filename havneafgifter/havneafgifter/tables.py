@@ -1,11 +1,20 @@
+import django_filters
 import django_tables2 as tables
 from django.utils.translation import gettext_lazy as _
 
 from havneafgifter.models import HarborDuesForm, TaxRates
 
 
+class HarborDuesFormFilter(django_filters.FilterSet):
+    class Meta:
+        model = HarborDuesForm
+        fields = {"status": ["exact"]}
+
+
 class HarborDuesFormTable(tables.Table):
-    id = tables.Column(linkify=("havneafgifter:receipt_detail_html", [tables.A("pk")]))
+    view = tables.TemplateColumn(
+        template_name="havneafgifter/bootstrap/open_details.html"
+    )
 
     class Meta:
         model = HarborDuesForm

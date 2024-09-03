@@ -63,7 +63,12 @@ from havneafgifter.responses import (
     HavneafgifterResponseForbidden,
     HavneafgifterResponseNotFound,
 )
-from havneafgifter.tables import HarborDuesFormTable, StatistikTable, TaxRateTable
+from havneafgifter.tables import (
+    HarborDuesFormFilter,
+    HarborDuesFormTable,
+    StatistikTable,
+    TaxRateTable,
+)
 from havneafgifter.view_mixins import (
     CacheControlMixin,
     GetFormView,
@@ -634,6 +639,7 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
 
 class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableView):
     table_class = HarborDuesFormTable
+    context_object_name = "harbordues"
 
     custom_order = [Status.DRAFT, Status.NEW, Status.APPROVED, Status.REJECTED]
     ordering_criteria = Case(
@@ -648,9 +654,16 @@ class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableVie
     )
 
     def get_queryset(self):
-        return HarborDuesForm.filter_user_permissions(
+        queryset = HarborDuesForm.filter_user_permissions(
             HarborDuesForm.objects.all(), self.request.user, "view"
         ).order_by(self.ordering_criteria, "-date")
+        self.filterset = HarborDuesFormFilter(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **context):
+        context = super().get_context_data(**context)
+        context["form"] = self.filterset.form
+        return context
 
 
 class TaxRateListView(LoginRequiredMixin, SingleTableView):
