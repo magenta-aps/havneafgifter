@@ -9,6 +9,7 @@
     <script src="{% static 'tempusdominus/popper.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'tempusdominus/tempus-dominus.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <link rel="stylesheet" href="{% static 'tempusdominus/tempus-dominus.min.css' %}" nonce="{{ request.csp_nonce }}">
+    <script src="{% static 'havneafgifter/form.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -384,5 +385,39 @@
             });
         });
     </script>
+
+    {# JS for TempusDominus datetimepicker implementation #}
+    <script type="text/javascript" nonce="{{ request.csp_nonce }}">
+        $(function () {
+            $("input.datetimepicker").each(function () {
+        new tempusDominus.TempusDominus(
+            this,
+            {
+                display: {
+                    sideBySide: true,
+                    calendarWeeks: false,
+                    buttons: {
+                        clear: true,
+                    },
+                    components: {
+                        seconds: true,
+
+                    },
+                },
+                localization: {
+                    hourCycle: "h23",
+                    startOfTheWeek: 1,
+                    format: "yyyy-MM-dd HH:mm:ss"
+                }
+
+            }
+        )
+    });
+        });
+    </script>
+
+{% endblock %}
+
+{% block extra_js %}
 
 {% endblock %}

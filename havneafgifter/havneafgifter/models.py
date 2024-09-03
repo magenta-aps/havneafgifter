@@ -1278,7 +1278,6 @@ class TaxRates(PermissionsMixin, models.Model):
         end = self.end_datetime.date() if self.end_datetime else "∞"
         return f"{start} - {end}"
 
-
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
 
 
@@ -1332,8 +1331,8 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Tax per gross ton"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(999999999999, message=_("Tallet er for højt")),
-        ],
+            MaxValueValidator(999999999999, message=_("Tallet er for højt"))
+        ]
     )
 
     round_gross_ton_up_to = models.PositiveIntegerField(
@@ -1343,8 +1342,8 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Round GT up to"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(2000000, message=_("Tallet er for højt")),
-        ],
+            MaxValueValidator(2000000, message=_("Tallet er for højt"))
+        ]
     )
 
     def __str__(self) -> str:
