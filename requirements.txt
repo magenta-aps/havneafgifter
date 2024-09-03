@@ -23,6 +23,7 @@ django-countries==7.6.1
 django-select2==8.1.2
 xmltodict>=0.12.0
 django-tables2==2.7.0
+django-filter==24.3
 django-tempus-dominus==5.1.2.17
 django-sql-utils==0.7.0
 django-fsm==2.8.2
