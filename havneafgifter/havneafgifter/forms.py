@@ -637,6 +637,8 @@ class PortTaxRateForm(ModelForm, BootstrapForm):
             "vessel_type": HiddenInput,
         }
 
+    show_errors_as_tooltip = True
+
 
 class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
     class Meta:
@@ -661,7 +663,7 @@ class TaxRateFormSet(BaseInlineFormSet):
     def _construct_form(self, i, **kwargs):
         form = super()._construct_form(i, **kwargs)
         if self.extradata:
-            form.extradata = self.extradata[i]
+            form.extradata = self.extradata[i] if i < len(self.extradata) else None
         return form
 
 

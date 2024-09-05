@@ -3,6 +3,8 @@ from django import forms
 
 
 class BootstrapForm(CSPFormMixin, forms.Form):
+    show_errors_as_tooltip = False
+
     def __init__(self, *args, **kwargs):
         super(BootstrapForm, self).__init__(*args, **kwargs)
         self.kwargs = kwargs
@@ -32,6 +34,12 @@ class BootstrapForm(CSPFormMixin, forms.Form):
         if check_for_errors:
             if self.has_error(name):
                 classes.append("is-invalid")
+                if self.show_errors_as_tooltip:
+                    error = self.errors.get(name)
+                    field.widget.attrs["data-bs-toggle"] = "tooltip"
+                    field.widget.attrs["data-bs-title"] = error[0]
+                    field.widget.attrs["data-bs-custom-class"] = "error-tooltip"
+                    field.widget.attrs["data-bs-trigger"] = "manual"
         field.widget.attrs["class"] = " ".join(set(classes))
 
     @staticmethod
