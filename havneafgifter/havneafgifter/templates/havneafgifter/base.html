@@ -14,8 +14,8 @@ SPDX-License-Identifier: MPL-2.0
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" />
     <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" >
+    <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" />
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{request.csp_nonce}}"></script>
     <script src="{% static 'jquery/jquery-3.7.1.min.js' %}" nonce="{{request.csp_nonce}}"></script>
     <title>{% block title %}{% translate "Havneafgifter" %}{% endblock %}</title>

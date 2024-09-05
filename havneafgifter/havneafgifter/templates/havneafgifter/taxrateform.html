@@ -99,14 +99,7 @@
                 <tr class="align-middle">
 
                     <td data-form-field="label">{{ form.extradata.name|default:form.instance.name }}</td>
-                    <td class="{% if form.name.errors %}is-invalid{% endif %}">
-                        {{ form.gt_start }}
-                        {% if form.gt_start.errors %}
-                            <div class="invalid-feedback">
-                                {{ form.gt_start.errors }}
-                            </div>
-                        {% endif %}
-                    </td>
+                    <td>{{ form.gt_start }}</td>
                     <td>{{ form.gt_end }}</td>
                     <td>{{ form.round_gross_ton_up_to }}</td>
                     <td>{{ form.port_tax_rate }}</td>
@@ -228,6 +221,16 @@
             row.find("[name$=DELETE]").val(1);
             row.hide(400);
         })
+    </script>
+        <script nonce="{{ request.csp_nonce }}">
+    console.log("Hephey");
+    $("[data-bs-toggle=tooltip][data-bs-trigger=manual]").each(function(){
+        const tooltip = bootstrap.Tooltip.getOrCreateInstance(this);
+        tooltip.show();
+        $(this).on("keyup", function() {
+            tooltip.hide();
+        });
+    });
     </script>
 {% endblock content %}
 
@@ -415,6 +418,8 @@
     });
         });
     </script>
+
+
 
 {% endblock %}
 
