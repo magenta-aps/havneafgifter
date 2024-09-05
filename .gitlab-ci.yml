@@ -44,6 +44,8 @@ include:
       - "/gitlab-ci-templates/common/conventional-commits-changelog-meta.v1.yml"
 
 .releaserc:
+  variables:
+    GITLAB_TOKEN: ${CONVENTIONAL_COMMITS_GITLAB_TOKEN}
   before_script:
     - |
       cat <<EOF > .releaserc.yaml
@@ -73,6 +75,7 @@ include:
               - path: CHANGELOG.md
                 label: Changelog
       EOF
+
 
 
 variables:
