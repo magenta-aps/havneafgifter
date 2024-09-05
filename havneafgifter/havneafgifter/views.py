@@ -45,6 +45,7 @@ from havneafgifter.forms import (
     SignupVesselForm,
     StatisticsForm,
 )
+from havneafgifter.mails import OnApproveMail, OnRejectMail, OnSubmitForReviewMail
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -72,9 +73,9 @@ from havneafgifter.tables import (
 from havneafgifter.view_mixins import (
     CacheControlMixin,
     GetFormView,
+    HandleNotificationMailMixin,
     HarborDuesFormMixin,
     HavneafgiftView,
-    _SendEmailMixin,
 )
 
 
@@ -346,7 +347,7 @@ class PassengerTaxCreateView(_CruiseTaxFormSetView):
         ]
 
 
-class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
+class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetView):
     template_name = "havneafgifter/environmental_tax_create.html"
     form_class = DisembarkmentForm
 
@@ -392,7 +393,7 @@ class EnvironmentalTaxCreateView(_SendEmailMixin, _CruiseTaxFormSetView):
         # Handle `status` (DRAFT or NEW) and send email if NEW.
         if submitted_for_review:
             self._cruise_tax_form.save(update_fields=("status",))
-            self._send_email(self._cruise_tax_form, self.request)
+            self.handle_notification_mail(OnSubmitForReviewMail, self._cruise_tax_form)
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
@@ -566,7 +567,9 @@ class PreviewPDFView(ReceiptDetailView):
         )
 
 
-class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+class ApproveView(
+    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
+):
     http_method_names = ["post"]
 
     def get_queryset(self):
@@ -593,13 +596,16 @@ class ApproveView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         # implement `form_valid`. Instead, we just perform the object update here.
         harbor_dues_form.approve()
         harbor_dues_form.save()
+        self.handle_notification_mail(OnApproveMail, harbor_dues_form)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_list")
 
 
-class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
+class RejectView(
+    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
+):
     form_class = ReasonForm
     http_method_names = ["post"]
 
@@ -631,6 +637,7 @@ class RejectView(LoginRequiredMixin, HavneafgiftView, UpdateView):
         harbor_dues_form = self.object
         harbor_dues_form.reject(reason=form.cleaned_data["reason"])
         harbor_dues_form.save()
+        self.handle_notification_mail(OnRejectMail, harbor_dues_form)
         return response
 
     def get_success_url(self):

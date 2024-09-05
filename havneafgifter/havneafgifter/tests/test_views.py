@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMessage
 from django.core.management import call_command
 from django.forms import BaseFormSet
 from django.http import (
@@ -23,6 +24,7 @@ from django.urls import reverse
 from django_tables2.rows import BoundRows
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
+from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail, SendResult
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -44,6 +46,7 @@ from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
     ApproveView,
     EnvironmentalTaxCreateView,
+    HandleNotificationMailMixin,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
     HarborDuesFormUpdateView,
@@ -55,7 +58,6 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateListView,
     _CruiseTaxFormSetView,
-    _SendEmailMixin,
 )
 
 
@@ -179,36 +181,48 @@ class TestPostLoginView(TestCase):
         )
 
 
-class TestSendEmailMixin(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.request_factory = RequestFactory()
+class TestHandleNotificationMailMixin(ParametrizedTestCase, TestCase):
+    class MockSuccessMail(NotificationMail):
+        def send_email(self) -> SendResult:
+            return SendResult(mail=self, succeeded=True, msg=EmailMessage())
+
+    class MockErrorMail(NotificationMail):
+        def send_email(self) -> SendResult:
+            return SendResult(mail=self, succeeded=False, msg=EmailMessage())
 
     @parametrize(
-        "status,expected_message_class",
+        "mail_class,expected_level,expected_message_content",
         [
-            (0, messages.ERROR),
-            (1, messages.SUCCESS),
+            (
+                MockSuccessMail,
+                messages.SUCCESS,
+                MockSuccessMail(Mock()).success_message,
+            ),
+            (
+                MockErrorMail,
+                messages.ERROR,
+                MockErrorMail(Mock()).error_message,
+            ),
         ],
     )
-    def test_send_email_produces_message(self, status, expected_message_class):
-        instance = _SendEmailMixin()
+    def test_handle_notification_mail(
+        self,
+        mail_class: type[NotificationMail],
+        expected_level: int,
+        expected_message_content: str,
+    ):
+        # Arrange
+        instance = HandleNotificationMailMixin()
+        instance.request = RequestFactory().get("")
         with patch(
             "havneafgifter.view_mixins.messages.add_message"
         ) as mock_add_message:
-            with patch(
-                "havneafgifter.models.HarborDuesForm.send_email",
-                return_value=(Mock(), status),
-            ) as mock_send_email:
-                instance._send_email(
-                    self.harbor_dues_form,
-                    self.request_factory.post("/"),
-                )
-                mock_send_email.assert_called_once_with()
-                mock_add_message.assert_called_once_with(
-                    ANY, expected_message_class, ANY
-                )
+            # Act
+            instance.handle_notification_mail(mail_class, Mock())
+            # Assert
+            mock_add_message.assert_called_once_with(
+                ANY, expected_level, expected_message_content
+            )
 
 
 class RequestMixin:
@@ -335,7 +349,9 @@ class TestHarborDuesFormCreateView(
         data = copy.copy(self.harbor_dues_form_data_pk)
         data["status"] = status
         user = User.objects.get(username=username)
-        with patch.object(self.instance, "_send_email") as mock_send_email:
+        with patch.object(
+            self.instance, "handle_notification_mail"
+        ) as mock_handle_notification_mail:
             # Act
             request = self._post_form(data, user)
             response = self.instance.post(request)
@@ -344,9 +360,9 @@ class TestHarborDuesFormCreateView(
                 self.assertIsInstance(response, HttpResponseRedirect)
                 if email_expected:
                     # Assert that we call the `_send_email` method as expected
-                    mock_send_email.assert_called_once_with(
+                    mock_handle_notification_mail.assert_called_once_with(
+                        OnSubmitForReviewMail,
                         HarborDuesForm.objects.latest("pk"),
-                        request,
                     )
             else:
                 # Assert that we receive a 403 error response
@@ -603,7 +619,7 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
 
     def test_form_valid_creates_objects(self):
         # Arrange
-        request = self._post_formset(
+        self._post_formset(
             # Update existing entry for first disembarkment site (index 0)
             {"number_of_passengers": 42},
             # Add new entry for next disembarkment site (index 1)
@@ -611,7 +627,9 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             # Submit cruise tax form for review
             status=Status.NEW.value,
         )
-        with patch.object(self.instance, "_send_email") as mock_send_email:
+        with patch.object(
+            self.instance, "handle_notification_mail"
+        ) as mock_handle_notification_mail:
             # Act: trigger DB insert logic
             self.instance.form_valid(self.instance.get_form())
             # Assert: verify that the specified `Disembarkment` objects are
@@ -635,9 +653,9 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                 ],
             )
             # Assert: verify that we call the `_send_email` method as expected
-            mock_send_email.assert_called_once_with(
+            mock_handle_notification_mail.assert_called_once_with(
+                OnSubmitForReviewMail,
                 self.instance._cruise_tax_form,
-                request,
             )
 
     def test_form_valid_checks_cruise_tax_form_on_submit(self):
@@ -1202,10 +1220,14 @@ class TestApproveView(TestActionViewMixin, TestCase):
         # Arrange
         request = self._setup({}, self.port_authority_user)
         # Act
-        response = self.instance.post(request)
+        with patch(
+            "havneafgifter.view_mixins.messages.add_message"
+        ) as mock_add_message:
+            response = self.instance.post(request)
         # Assert
         harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
         self.assertEqual(harbor_dues_form.status, Status.APPROVED.value)
+        mock_add_message.assert_called_once()
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):
@@ -1226,10 +1248,14 @@ class TestRejectView(TestActionViewMixin, TestCase):
             {"reason": "There is no reason"}, self.port_authority_user
         )
         # Act
-        response = self.instance.post(request)
+        with patch(
+            "havneafgifter.view_mixins.messages.add_message"
+        ) as mock_add_message:
+            response = self.instance.post(request)
         # Assert
         harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
         self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
+        mock_add_message.assert_called_once()
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):
