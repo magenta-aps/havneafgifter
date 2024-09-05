@@ -227,9 +227,10 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "email",
-        "first_name",
-        "last_name",
         "group_list",
+        "port_authority",
+        "port",
+        "shipping_agent",
         "is_staff",
     )
 
