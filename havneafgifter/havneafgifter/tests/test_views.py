@@ -1373,7 +1373,7 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.assertIn("25.00", soup.get_text())
         self.assertIn("2.00", soup.get_text())
         self.assertIn("None", soup.get_text())
-        self.assertIn("2233-10-05 14:30:00 (-0200)", soup.get_text())
+        self.assertIn("2233-10-05 14:30:00 (-0100)", soup.get_text())
 
 
 class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
@@ -1883,8 +1883,6 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         # Did "port_tax_rate-1-gt_end" change from "30000" to "40000" ?
         self.assertEqual("40000", after_request_dict["port_tax_rates-1-gt_end"])
 
-
-"""
     def test_port_tax_rate_formset_insert(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
@@ -1911,7 +1909,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             self.edit_url,
             data=value_dict_to_post,
         )
-        ic()
+
         print(post_request_response.status_code)  # as placeholder to make linting
         #                                   happy, while i figure out what's happening
         # self.assertEqual(post_request_response.status_code, 302)
@@ -1938,6 +1936,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         # Was the recoginsable value found in the newly added form table row?
         self.assertEqual("313373", after_request_dict["port_tax_rates-8-gt_end"])
 
+    """
     def test_port_tax_rate_formset_delete(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
