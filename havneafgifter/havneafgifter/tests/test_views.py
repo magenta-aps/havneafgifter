@@ -23,6 +23,7 @@ from django.http import (
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django_tables2.rows import BoundRows
+from icecream import ic
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail, SendResult
@@ -1422,7 +1423,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             vessel_type=None,
             gt_start=0,
             gt_end=30000,
-            port_tax_rate=25.0,
+            port_tax_rate=11.0,
             round_gross_ton_up_to=70,
         )
 
@@ -1432,7 +1433,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             vessel_type=None,
             gt_start=30000,
             gt_end=None,
-            port_tax_rate=25.0,
+            port_tax_rate=12.0,
             round_gross_ton_up_to=70,
         )
 
@@ -1933,35 +1934,50 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         # And the db?
         self.assertEqual(313373.00, PortTaxRate.objects.last().port_tax_rate)
 
-    """
     def test_port_tax_rate_formset_delete(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
         )
+        Path("/temp/out.html").write_bytes(self.client.get(self.edit_url).content)
+        ic(original_response_dict["port_tax_rates-1-port_tax_rate"])
+        ic(original_response_dict["port_tax_rates-2-port_tax_rate"])
+        self.assertEqual(PortTaxRate.objects.count(), 10)
 
-        self.assertEqual(PortTaxRate.objects.count(), 8)
-
-        value_dict_to_post = {**original_response_dict, "port_tax_rates-7-DELETE": "1"}
+        value_dict_to_post = {
+            **original_response_dict,
+            "port_tax_rates-1-DELETE": "1",
+            "port_tax_rates-2-DELETE": "1",
+        }
         post_request_response = self.client.post(
             self.edit_url,
             data=value_dict_to_post,
         )
 
-        self.assertEqual(post_request_response.status_code, 302)  # Did we POST ok?
+        ic(value_dict_to_post)
 
+        self.assertEqual(post_request_response.status_code, 302)  # Did we POST ok?
         # Was the row removed from the db table?
-        self.assertEqual(PortTaxRate.objects.count(), 7)
+        self.assertEqual(PortTaxRate.objects.count(), 8)
 
         after_request_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
         )
 
+        # TODO: form ender ved port_tax_rates-7,
+        #  db har kun 7 port_tax_rates objekter,
+        #  'port_tax_rates-TOTAL_FORMS': '8',
+        #  men der vises stadig 11 i html -
+        #  det virker fint i brug, men ikke i test
+
+        Path("/temp/out.html").write_bytes(self.client.get(self.edit_url).content)
+
         # Was the row removed from the form table?
-        self.assertNotIn("port_tax_rates-7-DELETE", after_request_dict)
+        self.assertNotIn("port_tax_rates-1-DELETE", after_request_dict)
 
         # Did we avoid deleting the "above" row in the form table?
-        self.assertIn("port_tax_rates-6-DELETE", after_request_dict)
+        self.assertIn("port_tax_rates-9-DELETE", after_request_dict)
 
+    """
     def test_bisembarkment_tax_rate_formset_change(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
