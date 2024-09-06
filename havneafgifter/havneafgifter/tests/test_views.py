@@ -1,6 +1,7 @@
 import copy
 from datetime import datetime, timedelta
 from decimal import Decimal
+from pathlib import Path
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
@@ -1497,7 +1498,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             vessel_type="CRUISE",
             gt_start=0,
             gt_end=30000,
-            port_tax_rate=25.0,
+            port_tax_rate=26.0,
             round_gross_ton_up_to=70,
         )
 
@@ -1507,7 +1508,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             vessel_type="CRUISE",
             gt_start=40000,
             gt_end=None,
-            port_tax_rate=25.0,
+            port_tax_rate=27.0,
             round_gross_ton_up_to=70,
         )
 
@@ -1890,38 +1891,29 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
 
         value_dict_to_post = {
             **original_response_dict,
-            "port_tax_rates-TOTAL_FORMS": "9",
-            "port_tax_rates-8-gt_start": "0",
-            "port_tax_rates-8-gt_end": "313373",
-            "port_tax_rates-8-round_gross_ton_up_to": "70",
-            "port_tax_rates-8-port_tax_rate": "15.00",
-            "port_tax_rates-8-port": "3",
-            "port_tax_rates-8-vessel_type": "FISHER",
-            "port_tax_rates-8-DELETE": "",
+            "port_tax_rates-TOTAL_FORMS": "11",
+            "port_tax_rates-10-gt_start": "0",
+            "port_tax_rates-10-gt_end": "",
+            "port_tax_rates-10-round_gross_ton_up_to": "80",
+            "port_tax_rates-10-port_tax_rate": "313373.00",
+            "port_tax_rates-10-port": "3",
+            "port_tax_rates-10-vessel_type": "FISHER",
+            "port_tax_rates-10-DELETE": "",
         }
 
-        self.assertEqual(PortTaxRate.objects.count(), 8)
+        self.assertEqual(PortTaxRate.objects.count(), 10)
 
-        # TODO: SOMEHOW post_request_response.status_code is 302 when only
-        #  running TestTaxRateFormView, but 200 when running all tests. Halp?
-        #  - 200 might means validation errors
         post_request_response = self.client.post(
             self.edit_url,
             data=value_dict_to_post,
         )
+        Path("/temp/out.html").write_bytes(self.client.get(self.edit_url).content)
 
-        print(post_request_response.status_code)  # as placeholder to make linting
-        #                                   happy, while i figure out what's happening
-        # self.assertEqual(post_request_response.status_code, 302)
-        # self.assertEqual(post_request_response.status_code, 200)
-        print("----------------------------------------------------------")
-
-        print(post_request_response.content.decode("utf-8"))
-
-        print("----------------------------------------------------------")
+        # Check for redirect
+        self.assertEqual(post_request_response.status_code, 302)
 
         # Was a row added to the db table?
-        self.assertEqual(PortTaxRate.objects.count(), 9)
+        self.assertEqual(PortTaxRate.objects.count(), 11)
 
         after_request_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
@@ -1934,7 +1926,12 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         )
 
         # Was the recoginsable value found in the newly added form table row?
-        self.assertEqual("313373", after_request_dict["port_tax_rates-8-gt_end"])
+        self.assertEqual(
+            "313373.00", after_request_dict["port_tax_rates-10-port_tax_rate"]
+        )
+
+        # And the db?
+        self.assertEqual(313373.00, PortTaxRate.objects.last().port_tax_rate)
 
     """
     def test_port_tax_rate_formset_delete(self):

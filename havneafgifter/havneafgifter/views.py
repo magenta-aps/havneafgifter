@@ -875,8 +875,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def get_port_formset(self):
-        ic()
-        ic(self.clone)
         if self.clone:
             initial = (
                 [
@@ -899,7 +897,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             formset.extra = len(initial)
             return formset
         else:
-            ic()
             return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
 
     def get_disembarkmentrate_formset(self):
