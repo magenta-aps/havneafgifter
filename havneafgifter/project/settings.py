@@ -133,6 +133,7 @@ DATABASES = {
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
         "HOST": os.environ["POSTGRES_HOST"],
+        "TIME_ZONE": os.environ.get("DJANGO_TIMEZONE", "America/Godthab"),
     },
 }
 
@@ -198,7 +199,7 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(django.conf.locale.LANG_INFO, **EXTRA_LANG_INFO)
 django.conf.locale.LANG_INFO = LANG_INFO
 
-TIME_ZONE = "America/Godthab"
+TIME_ZONE = os.environ.get("DJANGO_TIMEZONE", "America/Godthab")
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
