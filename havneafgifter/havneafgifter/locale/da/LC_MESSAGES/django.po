@@ -19,10 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: havneafgifter/admin.py
-#, fuzzy
-#| msgid "Port authority company name"
 msgid "Port authority"
-msgstr "Havnemyndighedens navn"
+msgstr "Havnemyndighed"
 
 #: havneafgifter/admin.py
 msgid "Calculate tax"
@@ -444,22 +442,16 @@ msgid "superuser"
 msgstr ""
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Tax Authority"
 msgid "tax authority"
-msgstr "Skattestyrelsen"
+msgstr "skattestyrelse"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Port authority company name"
 msgid "port authority"
-msgstr "Havnemyndighedens navn"
+msgstr "havnemyndighed"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Shipping agent"
 msgid "shipping agent"
-msgstr "Shippingagent"
+msgstr "shippingagent"
 
 #: havneafgifter/models.py
 msgid "ship"
@@ -498,8 +490,6 @@ msgid "Status"
 msgstr "Status"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Form submission date"
 msgid "Submission date"
 msgstr "Indberetningsdato"
 
@@ -596,10 +586,8 @@ msgid "Landgangsafgift"
 msgstr ""
 
 #: havneafgifter/tables.py
-#, fuzzy
-#| msgid "Havneafgifter"
 msgid "Havneafgift"
-msgstr "Havneafgifter"
+msgstr ""
 
 #: havneafgifter/tables.py
 msgid "Antal skibe"
@@ -668,8 +656,6 @@ msgstr "Kontakt"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
-#, fuzzy
-#| msgid "Approved"
 msgid "Approve"
 msgstr "Godkend"
 
@@ -724,8 +710,6 @@ msgstr ""
 "havnemyndighed."
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
-#, fuzzy
-#| msgid "This form was already submitted and can no longer be edited"
 msgid "Please note: when a form is submitted, it can no longer be edited."
 msgstr ""
 "Bemærk venligst: når en formular er indsendt kan den ikke længere redigeres."
@@ -760,8 +744,6 @@ msgstr "Åben"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
-#, fuzzy
-#| msgid "Rejected"
 msgid "Reject"
 msgstr "Afvis"
 
@@ -783,11 +765,6 @@ msgid "Cruise Ships: Environmental and Maintenance Fee"
 msgstr "Krydstogtskibe: miljø- og vedligeholdelsesafgift"
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#, fuzzy
-#| msgid ""
-#| "Please notice that environmental and maintenance fees apply to <b>all</b> "
-#| "passengers on board at the time of disembarkment, regardless of how many "
-#| "passengers disembark."
 msgid ""
 "Please notice that environmental and maintenance fees apply to <b>all</b> "
 "passengers on board at the time of disembarkment, regardless of how many "
@@ -799,16 +776,12 @@ msgstr ""
 "passagerer, der ilandsættes."
 
 #: havneafgifter/templates/havneafgifter/error/error.html
-#, fuzzy
-#| msgid "Log out"
 msgid "Log ud"
-msgstr "Log ud"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/error.html
-#, fuzzy
-#| msgid "Log in"
 msgid "Log ind"
-msgstr "Log ind"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/login_assurance.html
 #: havneafgifter/templates/havneafgifter/error/login_failed.html
@@ -968,20 +941,16 @@ msgid "Tax Rate Details"
 msgstr "Afgifts-detaljer"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
-#, fuzzy
-#| msgid "Important dates"
 msgid "Start date"
-msgstr "Vigtige datoer"
+msgstr "Startdato"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "End date"
 msgstr "Slutdato"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
-#, fuzzy
-#| msgid "Passenger ship"
 msgid "Passenger tax rate"
-msgstr "Passagerskib"
+msgstr "Passagerafgift"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Clone"
@@ -1008,8 +977,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_done.html
-#, fuzzy
-#| msgid "Password"
 msgid "Password reset"
 msgstr "Nulstil kodeord"
 
@@ -1022,10 +989,8 @@ msgstr ""
 "instrukser til hvordan man sætter et nyt."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
-#, fuzzy
-#| msgid "Email address"
 msgid "Email address:"
-msgstr "Email-adresse"
+msgstr "Email-adresse:"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 msgid "Reset my password"
@@ -1048,8 +1013,6 @@ msgstr ""
 "indtastet det korrekt."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
-#, fuzzy
-#| msgid "Password"
 msgid "New password:"
 msgstr "Nyt kodeord:"
 
