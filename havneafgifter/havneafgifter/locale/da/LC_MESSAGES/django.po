@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-26 12:52-0100\n"
+"POT-Creation-Date: 2024-09-09 07:10-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,7 +46,7 @@ msgstr "Vigtige datoer"
 
 #: havneafgifter/admin.py
 msgid "This user belongs to"
-msgstr ""
+msgstr "Denne bruger tilhører"
 
 #: havneafgifter/forms.py
 msgid "Username or IMO number"
@@ -93,6 +93,10 @@ msgid "Gross tonnage"
 msgstr "Bruttotonnage"
 
 #: havneafgifter/forms.py havneafgifter/models.py
+msgid "Port of call"
+msgstr "Ankomsthavn"
+
+#: havneafgifter/forms.py havneafgifter/models.py
 msgid "Nationality"
 msgstr "Nationalitet"
 
@@ -133,6 +137,11 @@ msgid "If reporting port tax, please specify both arrival and departure date"
 msgstr ""
 "Angiv venligst både ankomst- og afgangsdato, når du indrapporterer "
 "havneafgifter"
+
+#: havneafgifter/forms.py
+#, python-format
+msgid "%(field)s cannot be empty"
+msgstr "%(field)s må ikke være tom"
 
 #: havneafgifter/forms.py
 msgid "Total number of passengers"
@@ -182,13 +191,65 @@ msgstr ""
 msgid "Havn"
 msgstr ""
 
-#: havneafgifter/models.py
+#: havneafgifter/mails.py
 msgid "Authority for vessels without port of call"
 msgstr "Havnemyndighed for skibe uden ankomsthavn"
 
-#: havneafgifter/models.py
+#: havneafgifter/mails.py
 msgid "Tax Authority"
 msgstr "Skattestyrelsen"
+
+#: havneafgifter/mails.py
+msgid "An email was sent successfully"
+msgstr "En email er blevet sendt"
+
+#: havneafgifter/mails.py
+msgid "Error when sending email"
+msgstr "Fejl under afsendelse af email"
+
+#: havneafgifter/mails.py
+#, python-format
+msgid ""
+"%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
+"as environmental and maintenance fees in relation to a ship's call at a "
+"Greenlandic port. See further details in the attached overview."
+msgstr ""
+"%(agent)s har %(date)s indberettet havneafgift, krydstogtpassagerafgift samt "
+"miljø- og vedligeholdelsesgebyr i forbindelse med et skibs anløb i en "
+"grønlandsk havn. Se yderligere detaljer i vedhæftede oversigt."
+
+#: havneafgifter/mails.py
+#, python-format
+msgid ""
+"%(agent)s has %(date)s reported port taxes due to a ship's call at a "
+"Greenlandic port. See further details in the attached overview."
+msgstr ""
+"%(agent)s har %(date)s indberettet havneafgift i forbindelse med et skibs "
+"anløb i en grønlandsk havn. Se yderligere detaljer i vedhæftede oversigt."
+
+#: havneafgifter/mails.py
+msgid ""
+"Thank you for submitting this form. Your harbour dues form has now been "
+"received by the port authority and the Greenlandic Tax Authority."
+msgstr ""
+"Tak fordi du indsendte denne blanket. Din blanket er nu modtaget af "
+"havnemyndigheden og den grønlandske skattestyrelse."
+
+#: havneafgifter/mails.py
+msgid "Your harbor dues form has been approved"
+msgstr "Din havneafgifts-formular er blevet godkendt"
+
+#: havneafgifter/mails.py
+msgid "An approval notification has been sent to the form submitter"
+msgstr "En godkendelses-notifikation er blevet sendt til formularens afsender"
+
+#: havneafgifter/mails.py
+msgid "Your harbor dues form has been rejected"
+msgstr "Din havneafgifts-formular er blevet afvist"
+
+#: havneafgifter/mails.py
+msgid "A rejection notification has been sent to the form submitter"
+msgstr "En afvisningsmeddelelse er blevet sendt til formularens afsender"
 
 #: havneafgifter/models.py
 msgid "You must specify a port authority if a port is specified"
@@ -402,7 +463,7 @@ msgstr "Shippingagent"
 
 #: havneafgifter/models.py
 msgid "ship"
-msgstr ""
+msgstr "skib"
 
 #: havneafgifter/models.py
 msgid "Name"
@@ -443,10 +504,6 @@ msgid "Submission date"
 msgstr "Indberetningsdato"
 
 #: havneafgifter/models.py
-msgid "Port of call"
-msgstr "Ankomsthavn"
-
-#: havneafgifter/models.py
 msgid "Vessel nationality"
 msgstr "Skibets nationalitet"
 
@@ -456,31 +513,11 @@ msgstr "Beregnet havneafgift"
 
 #: havneafgifter/models.py
 msgid "PDF file"
-msgstr ""
+msgstr "PDF-fil"
 
 #: havneafgifter/models.py
 msgid "no port of call"
 msgstr "Ingen ankomsthavn"
-
-#: havneafgifter/models.py
-#, python-format
-msgid ""
-"%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
-"as environmental and maintenance fees in relation to a ship's call at a "
-"Greenlandic port. See further details in the attached overview."
-msgstr ""
-"%(agent)s har %(date)s indberettet havneafgift, krydstogtpassagerafgift samt "
-"miljø- og vedligeholdelsesgebyr i forbindelse med et skibs anløb i en "
-"grønlandsk havn. Se yderligere detaljer i vedhæftede oversigt."
-
-#: havneafgifter/models.py
-#, python-format
-msgid ""
-"%(agent)s has %(date)s reported port taxes due to a ship's call at a "
-"Greenlandic port. See further details in the attached overview."
-msgstr ""
-"%(agent)s har %(date)s indberettet havneafgift i forbindelse med et skibs "
-"anløb i en grønlandsk havn. Se yderligere detaljer i vedhæftede oversigt."
 
 #: havneafgifter/models.py
 msgid "Number of passengers"
@@ -508,7 +545,7 @@ msgstr "Kommune"
 
 #: havneafgifter/models.py
 msgid "Other disembarkation outside of populated areas"
-msgstr ""
+msgstr "Anden landsætning uden for befolkede områder"
 
 #: havneafgifter/models.py
 msgid "Number of passengers disembarking"
@@ -536,7 +573,7 @@ msgstr "Afgift pr. bruttonton"
 
 #: havneafgifter/models.py
 msgid "Round GT up to"
-msgstr ""
+msgstr "Afrund GT op til"
 
 #: havneafgifter/models.py
 msgid "Enhver skibstype"
@@ -607,7 +644,7 @@ msgstr "Mine blanketter"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Statistics"
-msgstr ""
+msgstr "Statistikker"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Log out"
@@ -647,6 +684,68 @@ msgstr ""
 "Dette vil informere indsenderen af blanketten om at blanketten er blevet "
 "accepteret."
 
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
+msgid "Attention"
+msgstr "Vær opmærksom"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
+msgid ""
+"Please note: you are about to save this form as a draft without sending it "
+"to a shipping agent or port authority."
+msgstr ""
+"Bemærk venligst: du er ved at gemme denne formular som en kladde uden at "
+"sende den til en shippingagent eller havnemyndighed."
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
+msgid ""
+"Please select an appropriate shipping agent if you would like to send this "
+"form to a shipping agent."
+msgstr ""
+"Vælgt venligst en passende shippingagent hvis du gerne vil sende denne "
+"formular til en shippingagent"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Save as draft"
+msgstr "Gem som kladde"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
+msgid ""
+"Please note: you are about to send this form to your shipping agent, who "
+"will be notified that they must complete and submit the form to the relevant "
+"port authority."
+msgstr ""
+"Bemærk venligst: du er ved at sende denne formular til din shippingagent som "
+"vil få besked om at de skal færdiggøre og indsende formularen til relevante "
+"havnemyndighed."
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
+#, fuzzy
+#| msgid "This form was already submitted and can no longer be edited"
+msgid "Please note: when a form is submitted, it can no longer be edited."
+msgstr ""
+"Bemærk venligst: når en formular er indsendt kan den ikke længere redigeres."
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
+msgid ""
+"When submitted, the form will be sent directly to the relevant port "
+"authority. If you prefer sending the form to your shipping agent, use \"Save "
+"as draft\" instead."
+msgstr ""
+"Når formularen bliver indsendt, bliver den sendt direkte til den relevante "
+"havnemyndighed. Hvis du foretrækker at sende formularen til din "
+"shippingagent, skal du bruge \"Gem som kladde\" i stedet."
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
+msgstr "Indsend"
+
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
 msgid "Close"
 msgstr "Luk"
@@ -654,6 +753,10 @@ msgstr "Luk"
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
 msgid "Save"
 msgstr "Gem"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
+msgid "Open"
+msgstr "Åben"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
@@ -694,16 +797,6 @@ msgstr ""
 "Vær opmærksom på at miljø- og vedligeholdelsesafgifter vedrører <b>alle</b> "
 "passagerer ombord på tidspunktet for ilandsætningen, uanset hvor mange "
 "passagerer, der ilandsættes."
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Submit"
-msgstr "Indsend"
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Save as draft"
-msgstr "Gem som kladde"
 
 #: havneafgifter/templates/havneafgifter/error/error.html
 #, fuzzy
@@ -756,7 +849,11 @@ msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "Harbor dues list"
-msgstr ""
+msgstr "Havneafgiftsliste"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
+msgid "Filter"
+msgstr "Filtrer"
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid "Logged out"
@@ -818,6 +915,15 @@ msgstr "Vis PDF"
 msgid "Edit"
 msgstr "Rediger"
 
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#, python-format
+msgid "Rejected by \"%(user)s\" on %(date)s"
+msgstr "Afvist af \"%(user)s\" den %(date)s"
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Message"
+msgstr "Besked"
+
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 msgid "Vessel details"
 msgstr "Skibs-detaljer"
@@ -859,7 +965,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Tax Rate Details"
-msgstr ""
+msgstr "Afgifts-detaljer"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 #, fuzzy
@@ -869,7 +975,7 @@ msgstr "Vigtige datoer"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "End date"
-msgstr ""
+msgstr "Slutdato"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 #, fuzzy
@@ -879,15 +985,15 @@ msgstr "Passagerskib"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Clone"
-msgstr ""
+msgstr "Kopiér"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Delete"
-msgstr ""
+msgstr "Slet"
 
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Harbor tax rate list"
-msgstr ""
+msgstr "Havneafgifts-liste"
 
 #: havneafgifter/templates/havneafgifter/user/password/password_requirements.html
 msgid ""
@@ -895,6 +1001,9 @@ msgid ""
 "Passwords cannot be too similar to your name, username or email address. "
 "Avoid using very common passwords."
 msgstr ""
+"Kodeord skal være mindst 8 tegn lange, og må ikke kun bestå af tal. Kodeord "
+"må ikke minde om dit navn, brugernavn eller email-adresse. Undgå at bruge "
+"meget almindelige kodeord."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
@@ -909,6 +1018,8 @@ msgid ""
 "Forgotten your password? Enter your email address below, and we’ll email "
 "instructions for setting a new one."
 msgstr ""
+"Glemt dit kodeord? Indsæt din email-adresse under og vi vil sende dig "
+"instrukser til hvordan man sætter et nyt."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 #, fuzzy
@@ -918,21 +1029,23 @@ msgstr "Email-adresse"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 msgid "Reset my password"
-msgstr ""
+msgstr "Nulstil mit kodeord"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 msgid "Your password has been set.  You may go ahead and log in now."
-msgstr ""
+msgstr "Dit kodeord er blevet sat.  Du kan nu logge ind."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 msgid "Password reset confirmation"
-msgstr ""
+msgstr "Bekræft nulstilning af kodeord"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 msgid ""
 "Please enter your new password twice so we can verify you typed it in "
 "correctly."
 msgstr ""
+"Indtast venligst dit nye kodeord to gange så vi kan bekræfte at du har "
+"indtastet det korrekt."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 #, fuzzy
@@ -942,45 +1055,39 @@ msgstr "Nyt kodeord:"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 msgid "Confirm password:"
-msgstr ""
+msgstr "Bekræft kodeord:"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 msgid "Change my password"
-msgstr ""
+msgstr "Skift dit kodeord"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used.  Please request a new password reset."
 msgstr ""
+"Linket til nulstilning af kodeord er ugyldigt, muligvis fordi det allerede "
+"har været brugt.  Anmod venligst om en ny nulstilning"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_done.html
 msgid ""
 "We’ve emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
 msgstr ""
+"Vi har sendt dig en email med instruktioner til skifte dit password hvis en "
+"konto eksisterer med den email du har indtastet. Du bør modtage dem snart."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_done.html
 msgid ""
 "If you don’t receive an email, please make sure you’ve entered the address "
 "you registered with, and check your spam folder."
 msgstr ""
+"Hvis du ikke modtager en email skal du sørge for at du har indtastet samme "
+"adresse som du registrerede dig med, og har checket din spam-mappe."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_done.html
 msgid "Return to login"
 msgstr "Tilbage til login"
-
-#: havneafgifter/view_mixins.py
-msgid "Error when sending email"
-msgstr "Fejl under afsendelse af email"
-
-#: havneafgifter/view_mixins.py
-msgid ""
-"Thank you for submitting this form. Your harbour dues form has now been "
-"received by the port authority and the Greenlandic Tax Authority."
-msgstr ""
-"Tak fordi du indsendte denne blanket. Din blanket er nu modtaget af "
-"havnemyndigheden og den grønlandske skattestyrelse."
 
 #: havneafgifter/view_mixins.py
 msgid ""
@@ -999,7 +1106,12 @@ msgstr ""
 
 #: havneafgifter/views.py
 msgid "Invalid data in passenger count list"
+msgstr "Ugyldig data i passengertællerliste"
+
+#: havneafgifter/views.py
+msgid "Cruise tax form contains one or more errors. Please correct them."
 msgstr ""
+"Krydstogtskibs-formularen indeholder en eller flere fejl. Ret dem venligt."
 
 #: havneafgifter/views.py
 msgid "You do not have the required permissions to approve harbor dues forms"
