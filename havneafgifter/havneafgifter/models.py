@@ -190,6 +190,11 @@ class User(AbstractUser):
         else:
             return user_type in (UserType.TAX_AUTHORITY, UserType.ADMIN)
 
+    @property
+    def can_view_taxratelist(self) -> bool:
+        # For now every user is allowed to use the TaxRateListView
+        return True
+
 
 class PermissionsMixin(models.Model):
     class Meta:
@@ -387,7 +392,7 @@ class PortAuthority(PermissionsMixin, models.Model):
         blank=False,
         verbose_name=_("Port authority company name"),
         validators=[
-            MaxLengthValidator(100, message=_("Navnet er for langt")),
+            MaxLengthValidator(32, message=_("Navnet er for langt")),
             MinLengthValidator(4, message=_("Navnet er for kort")),
         ],
     )
@@ -1278,6 +1283,15 @@ class TaxRates(PermissionsMixin, models.Model):
         end = self.end_datetime.date() if self.end_datetime else "∞"
         return f"{start} - {end}"
 
+    def can_delete(self):
+        return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
+
+    def can_edit(self):
+        return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
+
+
+# TODO: Get both computed properties abive verified
+
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
 
 
@@ -1331,19 +1345,19 @@ class PortTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Tax per gross ton"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(999999999999, message=_("Tallet er for højt"))
-        ]
+            MaxValueValidator(999999999999, message=_("Tallet er for højt")),
+        ],
     )
 
     round_gross_ton_up_to = models.PositiveIntegerField(
         null=False,
         blank=False,
         default=0,
-        verbose_name=_("Round GT up to"),
+        verbose_name=_("Rund op til (ton)"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lavt")),
-            MaxValueValidator(2000000, message=_("Tallet er for højt"))
-        ]
+            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+        ],
     )
 
     def __str__(self) -> str:

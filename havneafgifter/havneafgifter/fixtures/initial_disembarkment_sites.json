@@ -1,604 +1,604 @@
 [
-{
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 100,
     "fields": {
-        "name": "Siorapaluk",
-        "municipality": 960
+      "name": "Siorapaluk",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 101,
     "fields": {
-        "name": "Qaanaq",
-        "municipality": 960
+      "name": "Qaanaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 102,
     "fields": {
-        "name": "Qeqertat",
-        "municipality": 960
+      "name": "Qeqertat",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 103,
     "fields": {
-        "name": "Savissivik",
-        "municipality": 960
+      "name": "Savissivik",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 104,
     "fields": {
-        "name": "Kullorsuaq",
-        "municipality": 960
+      "name": "Kullorsuaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 105,
     "fields": {
-        "name": "Nuussuaq",
-        "municipality": 960
+      "name": "Nuussuaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 106,
     "fields": {
-        "name": "Nutaarmiut",
-        "municipality": 960
+      "name": "Nutaarmiut",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 107,
     "fields": {
-        "name": "Tasiusaq",
-        "municipality": 960
+      "name": "Tasiusaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 108,
     "fields": {
-        "name": "Innaarsuit",
-        "municipality": 960
+      "name": "Innaarsuit",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 109,
     "fields": {
-        "name": "Naajaat",
-        "municipality": 960
+      "name": "Naajaat",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 110,
     "fields": {
-        "name": "Aappilattoq",
-        "municipality": 960
+      "name": "Aappilattoq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 111,
     "fields": {
-        "name": "Upernavik",
-        "municipality": 960
+      "name": "Upernavik",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 112,
     "fields": {
-        "name": "Kangersuatsiaq",
-        "municipality": 960
+      "name": "Kangersuatsiaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 113,
     "fields": {
-        "name": "Upernavik Kujalleq",
-        "municipality": 960
+      "name": "Upernavik Kujalleq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 114,
     "fields": {
-        "name": "Ukkusissat",
-        "municipality": 960
+      "name": "Ukkusissat",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 115,
     "fields": {
-        "name": "Niaqornat",
-        "municipality": 960
+      "name": "Niaqornat",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 116,
     "fields": {
-        "name": "Saattut",
-        "municipality": 960
+      "name": "Saattut",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 117,
     "fields": {
-        "name": "Qaarsut",
-        "municipality": 960
+      "name": "Qaarsut",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 118,
     "fields": {
-        "name": "Uummannaq",
-        "municipality": 960
+      "name": "Uummannaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 119,
     "fields": {
-        "name": "Oqaatsut",
-        "municipality": 960
+      "name": "Oqaatsut",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 120,
     "fields": {
-        "name": "Ilulissat",
-        "municipality": 960
+      "name": "Ilulissat",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 121,
     "fields": {
-        "name": "Ilimanaq",
-        "municipality": 960
+      "name": "Ilimanaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 122,
     "fields": {
-        "name": "Saqqaq",
-        "municipality": 960
+      "name": "Saqqaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 123,
     "fields": {
-        "name": "Qeqertaq",
-        "municipality": 960
+      "name": "Qeqertaq",
+      "municipality": 960
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 124,
     "fields": {
-        "name": "-",
-        "municipality": 960,
-        "is_outside_populated_areas": true
+      "name": "-",
+      "municipality": 960,
+      "is_outside_populated_areas": true
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 125,
     "fields": {
-        "name": "Aasiaat",
-        "municipality": 959
+      "name": "Aasiaat",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 126,
     "fields": {
-        "name": "Qasigiannguit",
-        "municipality": 959
+      "name": "Qasigiannguit",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 127,
     "fields": {
-        "name": "Qeqertarsuaq",
-        "municipality": 959
+      "name": "Qeqertarsuaq",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 128,
     "fields": {
-        "name": "Kangaatsiaq",
-        "municipality": 959
+      "name": "Kangaatsiaq",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 129,
     "fields": {
-        "name": "Attu",
-        "municipality": 959
+      "name": "Attu",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 130,
     "fields": {
-        "name": "Ikerasaarsuk",
-        "municipality": 959
+      "name": "Ikerasaarsuk",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 131,
     "fields": {
-        "name": "Akunnaaq",
-        "municipality": 959
+      "name": "Akunnaaq",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 132,
     "fields": {
-        "name": "Iginniarfik",
-        "municipality": 959
+      "name": "Iginniarfik",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 133,
     "fields": {
-        "name": "Ikamiut",
-        "municipality": 959
+      "name": "Ikamiut",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 134,
     "fields": {
-        "name": "Kitsissuarsuit",
-        "municipality": 959
+      "name": "Kitsissuarsuit",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 135,
     "fields": {
-        "name": "Kangerluk",
-        "municipality": 959
+      "name": "Kangerluk",
+      "municipality": 959
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 136,
     "fields": {
-        "name": "-",
-        "municipality": 959,
-        "is_outside_populated_areas": true
+      "name": "-",
+      "municipality": 959,
+      "is_outside_populated_areas": true
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 137,
     "fields": {
-        "name": "Sisimiut",
-        "municipality": 957
+      "name": "Sisimiut",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 138,
     "fields": {
-        "name": "Kangerlussuaq",
-        "municipality": 957
+      "name": "Kangerlussuaq",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 139,
     "fields": {
-        "name": "Maniitsoq",
-        "municipality": 957
+      "name": "Maniitsoq",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 140,
     "fields": {
-        "name": "Sarfannguit",
-        "municipality": 957
+      "name": "Sarfannguit",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 141,
     "fields": {
-        "name": "Itilleq",
-        "municipality": 957
+      "name": "Itilleq",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 142,
     "fields": {
-        "name": "Kangaamiut",
-        "municipality": 957
+      "name": "Kangaamiut",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 143,
     "fields": {
-        "name": "Napasoq",
-        "municipality": 957
+      "name": "Napasoq",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 144,
     "fields": {
-        "name": "Attamik",
-        "municipality": 957
+      "name": "Attamik",
+      "municipality": 957
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 145,
     "fields": {
-        "name": "Igaliku",
-        "municipality": 955
+      "name": "Igaliku",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 146,
     "fields": {
-        "name": "Aappilattoq",
-        "municipality": 955
+      "name": "Aappilattoq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 147,
     "fields": {
-        "name": "Eqalugaarsuit",
-        "municipality": 955
+      "name": "Eqalugaarsuit",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 148,
     "fields": {
-        "name": "Narsarmijit",
-        "municipality": 955
+      "name": "Narsarmijit",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 149,
     "fields": {
-        "name": "Narsarsuaq",
-        "municipality": 955
+      "name": "Narsarsuaq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 150,
     "fields": {
-        "name": "Qassiarsuk",
-        "municipality": 955
+      "name": "Qassiarsuk",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 151,
     "fields": {
-        "name": "Qassimiut",
-        "municipality": 955
+      "name": "Qassimiut",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 152,
     "fields": {
-        "name": "Saarloq",
-        "municipality": 955
+      "name": "Saarloq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 153,
     "fields": {
-        "name": "Tasiusaq",
-        "municipality": 955
+      "name": "Tasiusaq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 154,
     "fields": {
-        "name": "Itilleq",
-        "municipality": 955
+      "name": "Itilleq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 155,
     "fields": {
-        "name": "Qanisartuut",
-        "municipality": 955
+      "name": "Qanisartuut",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 156,
     "fields": {
-        "name": "Qaqortukuluq",
-        "municipality": 955
+      "name": "Qaqortukuluq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 157,
     "fields": {
-        "name": "Sissarluttoq",
-        "municipality": 955
+      "name": "Sissarluttoq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 158,
     "fields": {
-        "name": "Tasermiut Fjord",
-        "municipality": 955
+      "name": "Tasermiut Fjord",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 159,
     "fields": {
-        "name": "Upernaviarsuk",
-        "municipality": 955
+      "name": "Upernaviarsuk",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 160,
     "fields": {
-        "name": "Unnartoq",
-        "municipality": 955
+      "name": "Unnartoq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 161,
     "fields": {
-        "name": "Akullit (Akilliit)",
-        "municipality": 955
+      "name": "Akullit (Akilliit)",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 162,
     "fields": {
-        "name": "Ikerasssuaq (Prins Christians Sund)",
-        "municipality": 955
+      "name": "Ikerasssuaq (Prins Christians Sund)",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 163,
     "fields": {
-        "name": "Kangikitsoq",
-        "municipality": 955
+      "name": "Kangikitsoq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 164,
     "fields": {
-        "name": "Qajuuttat (Qajiittat)",
-        "municipality": 955
+      "name": "Qajuuttat (Qajiittat)",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 165,
     "fields": {
-        "name": "Qlerallit Imaat",
-        "municipality": 955
+      "name": "Qlerallit Imaat",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 166,
     "fields": {
-        "name": "Qaqortoq",
-        "municipality": 955
+      "name": "Qaqortoq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 167,
     "fields": {
-        "name": "Nanortalik",
-        "municipality": 955
+      "name": "Nanortalik",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 168,
     "fields": {
-        "name": "Narsaq",
-        "municipality": 955
+      "name": "Narsaq",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 169,
     "fields": {
-        "name": "Nuuk",
-        "municipality": 956
+      "name": "Nuuk",
+      "municipality": 956
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 170,
     "fields": {
-        "name": "Paamiut",
-        "municipality": 956
+      "name": "Paamiut",
+      "municipality": 956
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 171,
     "fields": {
-        "name": "Ittoqqortoormiit",
-        "municipality": 956
+      "name": "Ittoqqortoormiit",
+      "municipality": 956
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 172,
     "fields": {
-        "name": "Tasiilaq",
-        "municipality": 956
+      "name": "Tasiilaq",
+      "municipality": 956
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 173,
     "fields": {
-        "name": "Ammassivik",
-        "municipality": 955
+      "name": "Ammassivik",
+      "municipality": 955
     }
-},
-{
+  },
+  {
     "model": "havneafgifter.disembarkmentsite",
     "pk": 174,
     "fields": {
-        "name": "Alluitsup Paa",
-        "municipality": 955
+      "name": "Alluitsup Paa",
+      "municipality": 955
     }
-}
+  }
 ]

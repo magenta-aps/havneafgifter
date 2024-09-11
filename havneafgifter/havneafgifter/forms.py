@@ -34,8 +34,9 @@ from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_select2.forms import Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
+from icecream import ic
 
-from havneafgifter.form_mixins import BootstrapForm
+from havneafgifter.form_mixins import BootstrapForm, BootstrapFormSet
 from havneafgifter.models import (
     CruiseTaxForm,
     DisembarkmentSite,
@@ -608,14 +609,37 @@ class TaxRateForm(ModelForm, BootstrapForm):
         required=True,
         widget=DateTimeInput(
             attrs={
-                # "id": "datetimepicker",
                 "class": "form-control datetimepicker",
                 "placeholder": _("Gyldighed fra"),
             }
         ),
     )
 
-    def clean_start_datetime(self):
+    def clean(self):
+        self.check_valid_start_datetime()
+        self.check_duplicate_start_datetime()
+
+    def check_duplicate_start_datetime(self):
+        start_datetime = self.cleaned_data.get("start_datetime")
+        if TaxRates.objects.filter(start_datetime=start_datetime).exists():
+            raise ValidationError(
+                "En sats med dette start tidspunkt eksisterer allerede."
+            )
+
+    def check_valid_start_datetime(self):
+        cleaned_data = self.cleaned_data
+        start_datetime = cleaned_data.get("start_datetime")
+
+        if start_datetime:
+            edit_limit_datetime = timezone.now() + timezone.timedelta(weeks=1)
+
+            if start_datetime < edit_limit_datetime:
+                raise ValidationError(
+                    _(
+                        "Der må ikke redigeres i afgifter, der bliver gyldige"
+                        " om mindre end 1 uge fra nu."
+                    )
+                )
         start_datetime = self.cleaned_data.get("start_datetime")
         if start_datetime:
             now = timezone.now()
@@ -637,7 +661,7 @@ class PortTaxRateForm(ModelForm, BootstrapForm):
             "vessel_type": HiddenInput,
         }
 
-    show_errors_as_tooltip = True
+    show_errors_as_tooltip = False
 
 
 class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
@@ -653,7 +677,6 @@ class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
 class TaxRateFormSet(BaseInlineFormSet):
     deletion_widget = HiddenInput
 
-    # TODO: Prevent deletion of "old" or current TaxRate objects
     # TODO: start_datetime/pax_tax_rate combos need to be unique
 
     def __init__(self, *args, extradata=None, **kwargs):
@@ -667,37 +690,50 @@ class TaxRateFormSet(BaseInlineFormSet):
         return form
 
 
-class BasePortTaxRateFormSet(TaxRateFormSet):
-    def clean(self):
-        # TODO: round_gross_ton_up_to must be between gt_start and gt_end of gt_start==0
-        # TODO: There may be no gap between gt_end of one type/port
-        #  occurrence and gt_start of the next
-        # TODO: gt_start should be less than gt_end
-        # TODO: Every type/port combo needs at least one gt_start==0
-        # TODO: Every type/port combo needs at least one gt_end==None
-        # TODO: type/port, gt_start, gt_end, round_gross_tonne_up_to combos need
-        #  to be unique
-        #
-
-        # TODO: Every type/port combo needs one! gt_start==0 and one! gt_end==None.
-        #  No duplicates if more than one combo occurrence.
-        super().clean()
-
-        combinations = {}
-
+class BasePortTaxRateFormSet(BootstrapFormSet, TaxRateFormSet):
+    def clean_round_gross_ton_up_to(self):
         for form in self.forms:
+            gt_start = form.cleaned_data.get("gt_start")
+            gt_end = form.cleaned_data.get("gt_end")
+            vessel_type = form.cleaned_data.get("vessel_type")
+            port = form.cleaned_data.get("port")
+            gt_round = form.cleaned_data.get("round_gross_ton_up_to")
+            ic(vessel_type)
+            errmsg = (
+                f"{ShipType(vessel_type).label
+                    if vessel_type is not None else 'Enhver skibstype'} , "
+                f"{port.name if port is not None else 'enhver havn'}: "
+                f'"Rund op til (ton)" '
+                f"({gt_round if gt_round is not None else 'tom'})"
+                f' skal være mellem "Fra (ton)" '
+                f'{gt_start if gt_start is not None else 'tom'} og "Til (ton)" '
+                f"({gt_end if gt_end is not None else 'intet tal indtastet'})"
+            )
 
+            if (
+                gt_start == 0
+                and gt_end is not None
+                and not (gt_start <= gt_round <= gt_end)
+            ):
+                form.add_error("", errmsg)
+
+    def check_tonnage_gap_and_presence(self):
+        combinations = {}
+        # Check that there's no gap between a "lower gt" rates gt_end
+        # and the next rates gt_start
+        for form in self.forms:
             if form.cleaned_data:
+                # Ignore those to be deleted
                 delete = form.cleaned_data.get("DELETE")
                 if delete:
                     continue
 
                 port = form.cleaned_data.get("port")
-                vessel_type = form.cleaned_data.get("vessel_type")
+                vtype = form.cleaned_data.get("vessel_type")
                 gt_start = form.cleaned_data.get("gt_start")
                 gt_end = form.cleaned_data.get("gt_end")
 
-                key = (port, vessel_type)
+                key = (port, vtype)
 
                 if key not in combinations:
                     combinations[key] = {
@@ -705,45 +741,129 @@ class BasePortTaxRateFormSet(TaxRateFormSet):
                         "count_gt_start_zero": 0,
                         "count_gt_end_none": 0,
                     }
-
                 combinations[key]["count"] += 1
-
                 if gt_start == 0:
                     combinations[key]["count_gt_start_zero"] += 1
-
                 if gt_end is None:
                     combinations[key]["count_gt_end_none"] += 1
 
         # validate occurrence combinations
         for key, value in combinations.items():
-            port, vessel_type = key
+            port, vtype = key
             if value["count"] == 1:
                 # only one occurrence of type/port comb
                 # it must have both gt_star==0 and gt_end==None
-                if value["count_gt_start_zero"] != 1 or value["count_gt_end_none"] != 1:
-                    raise ValidationError(
-                        _(
-                            f"For the combination of port '{port}' and vessel type "
-                            f"'{vessel_type}', the single entry must have both "
-                            f"gt_start=0 and gt_end=None."
-                        )
-                    )
+                errmsg = (
+                    f'{ShipType(vtype).label if vtype else "Enhver skibstype"}, '
+                    f'{port.name if port else "enhver havn"}: '
+                    f'"Fra (ton)" skal være 0 ({gt_start if gt_start else "tomt"}), '
+                    f'og "Til (ton)" skal være tomt ({gt_end if gt_end else "tomt"}), '
+                    f"hvis der kun er én sats til denne kombination "
+                    f"af skibstype og havn."
+                )
+
+            if value["count_gt_start_zero"] != 1 or value["count_gt_end_none"] != 1:
+                form.add_error("gt_start", errmsg)
+                form.add_error("gt_end", "")
             else:
                 # multiple type/port occurrences
                 # it must have both gt_star==0 and gt_end==None
-                errmsg = _(
-                    f"There should be exactly one entry with gt_start=0 for port "
-                    f"'{port}' and vessel type '{vessel_type}'."
+                errmsg = (
+                    f"{ShipType(vtype).label if vtype is not None else 'Enhver '
+                                                                       'skibstype'}, "
+                    f"{port.name if port is not None else 'enhver havn'}: "
                 )
-                if value["count_gt_start_zero"] != 1:
-                    raise ValidationError(errmsg)
-                if value["count_gt_end_none"] != 1:
-                    raise ValidationError(errmsg)
+                (
+                    f'Der skal være én sats hvor "Fra (ton)" er 0 '
+                    f"({gt_start if gt_start is not None else 'tomt'}) "
+                )
+                (
+                    f'og én hvor "Til (ton)" er tomt. '
+                    f"({gt_end if gt_end is not None else 'tomt'})"
+                )
+            if value["count_gt_start_zero"] != 1 and value["count_gt_end_none"] != 1:
+                form.add_error("gt_start", errmsg)
+                form.add_error("gt_end", errmsg)
+
+    def gt_start_less_than_gt_end(self):
+        for form in self.forms:
+            gt_start = form.cleaned_data.get("gt_start")
+            gt_end = form.cleaned_data.get("gt_end")
+            vessel_type = form.cleaned_data.get("vessel_type")
+            port = form.cleaned_data.get("port")
+            if gt_start is None or (
+                gt_end is not None and gt_end < gt_start
+            ):  # TODO: Get readability check
+                errmsg = (
+                    f"{ShipType(vessel_type).label}, "
+                    f"{port.name if port is not None else 'enhver havn'}: "
+                    f'"Fra (ton)" ({gt_start if gt_start is not None else 'tomt'})'
+                    f' skal være mindre end "Til (ton)" '
+                    f"({gt_end if gt_end is not None else 'tomt'})"
+                )
+                form.add_error("gt_end", errmsg)
+                form.add_error("gt_start", "")
+
+    def check_for_duplicates(self):
+        combinations = set()
+
+        for form in self.forms:
+            if form.cleaned_data:
+                gt_start = form.cleaned_data.get("gt_start")
+                gt_end = form.cleaned_data.get("gt_end")
+                vtype = form.cleaned_data.get("vessel_type")
+                port = form.cleaned_data.get("port")
+                gt_round = form.cleaned_data.get("round_gross_tonne_up_to")
+                errmsg = (
+                    f'En sats med denne kombination af "Fra (ton)" [{gt_start}], '
+                    f'"Til (ton)" [{gt_end}] og "Rund op til (ton)" [{gt_round}] for '
+                    f"{ShipType(vtype).label if vtype is not None else 'Enhver '
+                                                                       'skibstype'}, "
+                    f"{port.name if port is not None else 'enhver havn'}:"
+                )
+
+                combination = (vtype, port, gt_start, gt_end, gt_round)
+
+                if combinations in combinations:
+                    form.add_error("gt_start", errmsg)
+                    form.add_error("gt_end", "")
+                    form.add_error("round_gross_tonne_up_to", "")
+                else:
+                    combinations.add(combination)
+
+    def clean(self):
+        super().clean()
+        self.clean_round_gross_ton_up_to()
+        self.check_tonnage_gap_and_presence()
+        self.gt_start_less_than_gt_end()
+        self.check_for_duplicates()
 
 
-class BaseDisembarkmentTaxRateFormSet(TaxRateFormSet):
-    # TODO: There may be no duplicates of municipality/site combos
-    pass
+class BaseDisembarkmentTaxRateFormSet(BootstrapFormSet, TaxRateFormSet):
+    """
+    Checks for "duplicate" combinations for disembarkment_site and municipality.
+    Adds an error to the form, if a given combination is already in the list.
+    Else it simply finishes, after checking all forms in the formset.
+    """
+
+    def clean(self):
+        super().clean()
+        pairs = set()
+
+        for form in self.forms:
+            if form.cleaned_data:
+                disemb_site = form.cleaned_data.get("disembarkment_site")
+                municipality = form.cleaned_data.get("municipality")
+                pair = (disemb_site, municipality)
+                errmsg = (
+                    f'"{municipality}, '
+                    f'{disemb_site if disemb_site else "ethvert ilandsætningssted"}"'
+                    f" er allerede i listen."
+                )
+                if pair in pairs:
+                    form.add_error(None, errmsg)
+                else:
+                    pairs.add(pair)
 
 
 PortTaxRateFormSet = inlineformset_factory(
@@ -759,7 +879,6 @@ DisembarkmentTaxRateFormSet = inlineformset_factory(
     parent_model=TaxRates,
     model=DisembarkmentTaxRate,
     form=DisembarkmentTaxRateForm,
-    # formset=TaxRateFormSet,
     extra=0,
     can_delete=True,
     formset=BaseDisembarkmentTaxRateFormSet,
