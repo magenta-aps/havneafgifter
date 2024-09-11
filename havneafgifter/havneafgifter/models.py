@@ -2,21 +2,20 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
     EmailValidator,
     MaxLengthValidator,
     MaxValueValidator,
     MinLengthValidator,
-    RegexValidator,
     MinValueValidator,
+    RegexValidator,
 )
 from django.db import models
 from django.db.models import F, Q, QuerySet
@@ -1211,8 +1210,8 @@ class TaxRates(PermissionsMixin, models.Model):
         max_digits=6,
         verbose_name=_("Afgift pr. passager"),
         validators=[
-            MinValueValidator(0, message=_("Beløbet er for lille")),
-            MaxValueValidator(999999, message=_("Beløbet er for stort")),
+            MinValueValidator(0, message=_("Beløbet er for lavt")),
+            MaxValueValidator(999999, message=_("Beløbet er for højt")),
         ],
     )
 
@@ -1289,8 +1288,6 @@ class TaxRates(PermissionsMixin, models.Model):
     def can_edit(self):
         return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
 
-
-# TODO: Get both computed properties abive verified
 
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
 
@@ -1419,8 +1416,8 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
         verbose_name=_("Disembarkment tax rate"),
         validators=[
             MinValueValidator(0, message=_("Beløbet er for lavt")),
-            MaxValueValidator(50, message=_("Beløbet er for højt"))
-        ]
+            MaxValueValidator(50, message=_("Beløbet er for højt")),
+        ],
     )
 
     def __str__(self) -> str:

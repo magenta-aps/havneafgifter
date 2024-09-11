@@ -25,8 +25,6 @@
         <h1>{% translate "Redigér afgift, sats eller periode" %}</h1>
     {% endif %}
 
-    {# TODO: DISPLAY NON-FORM ERRORS UP HERE #}
-
     <form method="post">
         {{ port_formset.management_form }}
         {{ disembarkmentrate_formset.management_form }}
@@ -116,7 +114,6 @@
                     </td>
                 </tr>
 
-                {# TODO: KEEP THIS ONE AND IMPLEMENT ERRYWHERE #}
                 {% if form.errors %}
                     <tr class="align-middle errorlist">
                         <td colspan="6">
