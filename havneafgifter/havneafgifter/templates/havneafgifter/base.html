@@ -1,7 +1,8 @@
 {% comment %}
-SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+    SPDX-FileCopyrightText: 2024 MagentaApS
+    <info@magenta.dk>
 
-SPDX-License-Identifier: MPL-2.0
+    SPDX-License-Identifier: MPL-2.0
 {% endcomment %}
 
 {% load static %}
@@ -14,42 +15,47 @@ SPDX-License-Identifier: MPL-2.0
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" >
-    <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{request.csp_nonce}}" />
-    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{request.csp_nonce}}"></script>
-    <script src="{% static 'jquery/jquery-3.7.1.min.js' %}" nonce="{{request.csp_nonce}}"></script>
+    <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}">
+    <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}"/>
+    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'jquery/jquery-3.7.1.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <title>{% block title %}{% translate "Havneafgifter" %}{% endblock %}</title>
     {% block extra_headers %}
     {% endblock %}
 </head>
 <body>
-    {% block header %}
+{% block header %}
     <header>
         <nav class="nav navbar flex-column flex-sm-row p-1 bg-dark" data-bs-theme="dark">
             {% if user.is_authenticated %}
                 {% if user.can_create %}
-                <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="nav-link">
-                    {% translate 'Create new' %}
-                </a>
+                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="nav-link">
+                        {% translate 'Create new' %}
+                    </a>
                 {% endif %}
                 {% if user.can_view_list %}
-                <a href="{% url 'havneafgifter:harbor_dues_form_list' %}" class="nav-link">
-                    {% translate 'My forms' %}
-                </a>
+                    <a href="{% url 'havneafgifter:harbor_dues_form_list' %}" class="nav-link">
+                        {% translate 'My forms' %}
+                    </a>
                 {% endif %}
                 {% if user.can_view_statistics %}
-                <a href="{% url 'havneafgifter:statistik' %}" class="nav-link">
-                    {% translate 'Statistics' %}
-                </a>
+                    <a href="{% url 'havneafgifter:statistik' %}" class="nav-link">
+                        {% translate 'Statistics' %}
+                    </a>
+                {% endif %}
+                {% if user.can_view_taxratelist %}
+                    <a href="{% url 'havneafgifter:tax_rate_list' %}" class="nav-link">
+                    {% translate 'Rates' %}
+                    </a>
                 {% endif %}
             {% endif %}
             <span class="navbar-text m-2 pt-2 ms-auto">
                 {{ user.display_name }}
             </span>
             {% if user.is_authenticated %}
-            <a href="{% url 'havneafgifter:logout' %}" class="btn btn-primary mx-1 my-2" id="logout-link">
-                {% translate "Log out" %}
-            </a>
+                <a href="{% url 'havneafgifter:logout' %}" class="btn btn-primary mx-1 my-2" id="logout-link">
+                    {% translate "Log out" %}
+                </a>
             {% endif %}
             <button type="button" class="btn btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
                 {% translate "About" %}
@@ -61,35 +67,37 @@ SPDX-License-Identifier: MPL-2.0
                 {% csrf_token %}
                 <div class="form-group">
                     <select name="language" class="form-control">
-                    {% for language in languages %}
-                    <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected="selected"{% endif %}>
-                        {{ language.name_local|capfirst }}
-                    </option>
-                    {% endfor %}
+                        {% for language in languages %}
+                            <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected="selected"{% endif %}>
+                                {{ language.name_local|capfirst }}
+                            </option>
+                        {% endfor %}
                     </select>
-                    <script nonce="{{request.csp_nonce}}">$("[name=language]").on("change", function (){this.form.submit()})</script>
+                    <script nonce="{{ request.csp_nonce }}">$("[name=language]").on("change", function () {
+                        this.form.submit()
+                    })</script>
                 </div>
             </form>
             {# endif #}
 
         </nav>
     </header>
+{% endblock %}
+
+<div class="container">
+    {% block object_actions %}
     {% endblock %}
 
-    <div class="container">
-        {% block object_actions %}
-        {% endblock %}
-
-        <div class="row mt-3">
-            {# Displays messages from the Django 'messages' framework #}
-            {% bootstrap_messages %}
-        </div>
-
-        {% block content %}
-        {% endblock %}
+    <div class="row mt-3">
+        {# Displays messages from the Django 'messages' framework #}
+        {% bootstrap_messages %}
     </div>
 
-    {% block modals %}
+    {% block content %}
+    {% endblock %}
+</div>
+
+{% block modals %}
     <div id="about_modal" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -100,7 +108,7 @@ SPDX-License-Identifier: MPL-2.0
                     <table class="table table-borderless">
                         <tr>
                             <th>{% translate 'Version' %}:</th>
-                            <td>{{version}}</td>
+                            <td>{{ version }}</td>
                         </tr>
                         <tr>
                             <th>{% translate 'Source code' %}:</th>
@@ -112,13 +120,13 @@ SPDX-License-Identifier: MPL-2.0
                         </tr>
                         <tr>
                             <th>{% translate 'Contact' %}:</th>
-                            <td>{{contact_email}}</td>
+                            <td>{{ contact_email }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    {% endblock %}
+{% endblock %}
 </body>
 </html>

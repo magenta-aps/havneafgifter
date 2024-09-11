@@ -13,19 +13,19 @@
 {% endblock %}
 
 {% block content %}
-
     {# HEADING AND UNSAVED WARNING #}
     {% if clone %}
         <h1>{% translate "Oprettelse af ny afgiftssats fra kopi" %}</h1>
         <div class="col-12 pt-3">
             <div class="alert alert-danger">
-                {% translate "BEMÆRK: Denne afgiftssats kopi er endnu ikke gemt.<br>Husk at trykke 'Gem Ændringer' for neden." %}
+                {% translate "<strong>BEMÆRK:</strong> Denne afgiftssats kopi er endnu ikke gemt.<br>Husk at trykke 'Gem Ændringer' for neden." %}
             </div>
         </div>
     {% else %}
         <h1>{% translate "Redigér afgift, sats eller periode" %}</h1>
     {% endif %}
 
+    {# TODO: DISPLAY NON-FORM ERRORS UP HERE #}
 
     <form method="post">
         {{ port_formset.management_form }}
@@ -49,15 +49,19 @@
             </div>
             <div class="col-4">
                 {{ form.start_datetime }}
-                {% if form.start_datetime.errors %}
-                    <div class="invalid-feedback">
-                        {{ form.start_datetime.errors }}
+                {% if form.non_field_errors %}
+                    <div class="pt-1 py-1">
+                        <div class="alert alert-danger errorlist py-1">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
                     </div>
                 {% endif %}
             </div>
         </div>
 
-        <hr>
+        <hr/>
 
         {# Port tax rate table #}
         <table class="table table-borderless table-striped" id="port_tax_rate_table">
@@ -73,31 +77,23 @@
             </thead>
             <tbody id="port_formset_tbody">
             {% if port_formset.non_form_errors %}
-                {% for errorlist in port_formset.non_form_errors.as_data %}
-                    {% for error in errorlist %}
-                        <tr class="align-middle">
-                            <td colspan="6" class=" is-invalid">
-                                <div class="alert alert-danger">
-                                    {{ error }}
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% endfor %}
+                <tr class="align-middle">   {# EXTRA TABLE ROW ON TOP #}
+                    <td colspan="6" class="is-invalid">
+                        <div class="alert alert-danger">
+                            {% for errorlist in port_formset.non_form_errors.as_data %}
+                                {% for error in errorlist %}
+                                    {{ error.values }}
+                                    <br>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
             {% endif %}
-            {% for form in port_formset %}
-                {{ form.errors }}
-                {% if form.non_field_errors %}
-                    <tr class="align-middle errorlist">
-                        <td colspan="5">
-                            {{ form.non_field_errors }}
-                        </td>
 
-                    </tr>
-                {% endif %}
+            {% for form in port_formset %}
 
                 <tr class="align-middle">
-
                     <td data-form-field="label">{{ form.extradata.name|default:form.instance.name }}</td>
                     <td>{{ form.gt_start }}</td>
                     <td>{{ form.gt_end }}</td>
@@ -119,6 +115,25 @@
                         {{ form.DELETE }}
                     </td>
                 </tr>
+
+                {# TODO: KEEP THIS ONE AND IMPLEMENT ERRYWHERE #}
+                {% if form.errors %}
+                    <tr class="align-middle errorlist">
+                        <td colspan="6">
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for errorlist in form.errors.values %}
+                                        {% for error in errorlist %}
+                                            {% if error %}
+                                                {{ error }}<br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
 
@@ -142,7 +157,7 @@
             {% endwith %}
         </table>
 
-        {# Button to show "add new port tax rate" modal #}
+        {# "add new port tax rate" modal button #}
         <button class="btn btn-success my-2"
                 type="button"
                 data-bs-toggle="modal"
@@ -163,8 +178,10 @@
             </thead>
             <tbody id="disembarkment_formset_tbody">
             {% for form in disembarkmentrate_formset %}
+
                 <tr>
-                    {{ form.id }}
+
+
                     <td data-form-field="label">
                         {{ form.extradata.name|default:form.instance.name }}
                     </td>
@@ -177,6 +194,23 @@
                         {{ form.DELETE }}
                     </td>
                 </tr>
+                {% if form.errors %}
+                    <tr class="align-middle errorlist">
+                        <td colspan="3">
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for errorlist in form.errors.values %}
+                                        {% for error in errorlist %}
+                                            {% if error %}
+                                                {{ error }}<br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
 
@@ -215,6 +249,7 @@
 
     </form>
 
+    {# JS to mark row for deletion - and hide it #}
     <script nonce="{{ request.csp_nonce }}">
         $("form").on("click", "[data-action=delete]", function () {
             const row = $(this).parents("tr");
@@ -222,15 +257,16 @@
             row.hide(400);
         })
     </script>
-        <script nonce="{{ request.csp_nonce }}">
-    console.log("Hephey");
-    $("[data-bs-toggle=tooltip][data-bs-trigger=manual]").each(function(){
-        const tooltip = bootstrap.Tooltip.getOrCreateInstance(this);
-        tooltip.show();
-        $(this).on("keyup", function() {
-            tooltip.hide();
+
+    {# JS to show tooltip where a validation error has occurred #}
+    <script nonce="{{ request.csp_nonce }}">
+        $("[data-bs-toggle=tooltip][data-bs-trigger=manual]").each(function () {
+            const tooltip = bootstrap.Tooltip.getOrCreateInstance(this);
+            tooltip.show();
+            $(this).on("keyup", function () {
+                tooltip.hide();
+            });
         });
-    });
     </script>
 {% endblock content %}
 
@@ -348,7 +384,7 @@
         </div>
     </div>
 
-    {# JS that only populates the embarkment site with sites that belong to the previously selected municipality #}
+    {# JS that only populates the disembarkment site with sites that belong to the previously selected municipality (in the modal) #}
     {{ disembarkmentsite_map|json_script:"disembarkmentsite_map" }}
     <script nonce="{{ request.csp_nonce }}">
         const any_label = "{% translate 'Ethvert ilandsætningssted' %}";
@@ -393,33 +429,31 @@
     <script type="text/javascript" nonce="{{ request.csp_nonce }}">
         $(function () {
             $("input.datetimepicker").each(function () {
-        new tempusDominus.TempusDominus(
-            this,
-            {
-                display: {
-                    sideBySide: true,
-                    calendarWeeks: false,
-                    buttons: {
-                        clear: true,
-                    },
-                    components: {
-                        seconds: true,
+                new tempusDominus.TempusDominus(
+                    this,
+                    {
+                        display: {
+                            sideBySide: true,
+                            calendarWeeks: false,
+                            buttons: {
+                                clear: true,
+                            },
+                            components: {
+                                seconds: true,
 
-                    },
-                },
-                localization: {
-                    hourCycle: "h23",
-                    startOfTheWeek: 1,
-                    format: "yyyy-MM-dd HH:mm:ss"
-                }
+                            },
+                        },
+                        localization: {
+                            hourCycle: "h23",
+                            startOfTheWeek: 1,
+                            format: "yyyy-MM-dd HH:mm:ss"
+                        }
 
-            }
-        )
-    });
+                    }
+                )
+            });
         });
     </script>
-
-
 
 {% endblock %}
 

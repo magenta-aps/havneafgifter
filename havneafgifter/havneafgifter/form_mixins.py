@@ -2,6 +2,14 @@ from csp_helpers.mixins import CSPFormMixin
 from django import forms
 
 
+class BootstrapFormSet:
+    def full_clean(self):
+        super().full_clean()
+        for form in self.forms:
+            if isinstance(form, BootstrapForm):
+                form.set_all_field_classes()
+
+
 class BootstrapForm(CSPFormMixin, forms.Form):
     show_errors_as_tooltip = False
 
@@ -40,6 +48,7 @@ class BootstrapForm(CSPFormMixin, forms.Form):
                     field.widget.attrs["data-bs-title"] = error[0]
                     field.widget.attrs["data-bs-custom-class"] = "error-tooltip"
                     field.widget.attrs["data-bs-trigger"] = "manual"
+
         field.widget.attrs["class"] = " ".join(set(classes))
 
     @staticmethod

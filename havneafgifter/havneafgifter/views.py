@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from csp_helpers.mixins import CSPViewMixin
@@ -724,7 +725,12 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
                 ),
                 "can_delete": self.object.has_permission(
                     self.request.user, "delete", False
-                ),
+                )
+                and self.object.can_delete,
+                "show_changing_buttons": self.request.user.groups.filter(
+                    name="TaxAuthority"
+                ).exists()
+                or self.request.user.is_superuser,
             }
         )
 
@@ -826,21 +832,31 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
 
 
 class TaxRateFormView(LoginRequiredMixin, UpdateView):
-    # TODO: In add_porttaxrate modal: Add option for "outside_populated_areas"
-
     model = TaxRates
     form_class = TaxRateForm
     template_name = "havneafgifter/taxrateform.html"
     success_url = reverse_lazy("havneafgifter:tax_rate_list")
     clone = False
 
-    # Tvinger provisorisk en "mindst en uge i fremtiden" start_datetime.
-    # Men fordi tiden stadig går, så skal man alligevel tilpasse datoen.
-    # Det er mest for convenience.
+    def get_object(self, queryset=None):
+        object = super().get_object(queryset)
+        if object.has_permission(self.request.user, "add" if self.clone else "change"):
+            return object
+        else:
+            raise PermissionDenied
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except PermissionDenied:
+            return HavneafgifterResponseForbidden(
+                request, _("Du har ikke rettighed til at se denne side.")
+            )
+
     def get_initial(self):
         initial = super().get_initial()
         if self.clone:
-            initial["start_datetime"] = timezone.now() + timezone.timedelta(weeks=1)
+            initial["start_datetime"] = datetime.now() + timezone.timedelta(weeks=1)
         return initial
 
     def get_context_data(self, **kwargs):
@@ -848,8 +864,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             **{
                 **kwargs,
                 "clone": self.clone,
-                # "port_formset": self.get_port_formset(),
-                "disembarkmentrate_formset": self.get_disembarkmentrate_formset(),
                 "vessel_type_choices": ShipType.choices,
                 "port_choices": [
                     (port.pk, port.name) for port in Port.objects.order_by("name")
@@ -867,6 +881,8 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         )
         if "port_formset" not in context:
             context["port_formset"] = self.get_port_formset()
+        if "disembarkmentrate_formset" not in context:
+            context["disembarkmentrate_formset"] = self.get_disembarkmentrate_formset()
 
         return context
 
@@ -927,6 +943,9 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form, formset1, formset2):
         ic()
+        ic(form)
+        ic(formset1)
+        ic(formset2)
         self.object = form.save()
 
         if self.clone:
@@ -935,17 +954,20 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
 
         formset1.save()
         formset2.save()
-        return super().form_valid(form)  # Tages der højde for invalid formset1 og 2 ?
+        return super().form_valid(form)
 
     def form_invalid(self, form, formset1, formset2):
         print("................ FORM INVALID START....................")
         ic()
         ic(form.non_field_errors())
         ic(formset1.non_form_errors())
+
         ic(formset2.non_form_errors())
         print("................ FORM INVALID END....................")
         return self.render_to_response(
-            self.get_context_data(form=form, port_formset=formset1)
+            self.get_context_data(
+                form=form, port_formset=formset1, disembarkmentrate_formset=formset2
+            )
         )
 
     def post(self, request, *args, **kwargs):

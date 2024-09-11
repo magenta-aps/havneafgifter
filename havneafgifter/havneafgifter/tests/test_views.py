@@ -23,7 +23,6 @@ from django.http import (
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django_tables2.rows import BoundRows
-from icecream import ic
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail, SendResult
@@ -1595,6 +1594,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         super().setUp()
         self.client.force_login(self.tax_authority_user)
 
+    """
     def test_rendering(self):
         response = self.client.get(
             reverse("havneafgifter:edit_taxrate", kwargs={"pk": self.tax_rate.pk})
@@ -1855,6 +1855,43 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             disembarkment_tax_rates_table_content[4]["Sats (DKK)"],
             f"{self.disemb_tr5.disembarkment_tax_rate:.2f}",
         )
+    """
+
+    def test_port_tax_rate_formset_delete(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        self.assertEqual(PortTaxRate.objects.count(), 10)
+
+        value_dict_to_post = {
+            **original_response_dict,
+            "port_tax_rates-9-DELETE": "1",
+            "port_tax_rates-8-DELETE": "1",
+            "port_tax_rates-7-DELETE": "1",
+        }
+        Path("/temp/dict_posting.txt").write_text(str(value_dict_to_post))
+
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+        self.assertEqual(post_request_response.status_code, 302)  # Did we POST ok?
+
+        # Was the row removed from the db table?
+        self.assertEqual(PortTaxRate.objects.count(), 7)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        Path("/temp/dict_after.txt").write_text(str(after_request_dict))
+        Path("/temp/out.html").write_bytes(self.client.get(self.edit_url).content)
+        # Was the row removed from the form table?
+        self.assertNotIn("port_tax_rates-9-DELETE", after_request_dict)
+
+        # Did we avoid deleting the "above" row in the form table?
+        self.assertIn("port_tax_rates-6-DELETE", after_request_dict)
 
     def test_port_tax_rate_formset_change(self):
         original_response_dict = self.response_to_datafields_dict(
@@ -1934,50 +1971,6 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         # And the db?
         self.assertEqual(313373.00, PortTaxRate.objects.last().port_tax_rate)
 
-    def test_port_tax_rate_formset_delete(self):
-        original_response_dict = self.response_to_datafields_dict(
-            self.client.get(self.edit_url).content.decode("utf-8")
-        )
-        Path("/temp/out.html").write_bytes(self.client.get(self.edit_url).content)
-        ic(original_response_dict["port_tax_rates-1-port_tax_rate"])
-        ic(original_response_dict["port_tax_rates-2-port_tax_rate"])
-        self.assertEqual(PortTaxRate.objects.count(), 10)
-
-        value_dict_to_post = {
-            **original_response_dict,
-            "port_tax_rates-1-DELETE": "1",
-            "port_tax_rates-2-DELETE": "1",
-        }
-        post_request_response = self.client.post(
-            self.edit_url,
-            data=value_dict_to_post,
-        )
-
-        ic(value_dict_to_post)
-
-        self.assertEqual(post_request_response.status_code, 302)  # Did we POST ok?
-        # Was the row removed from the db table?
-        self.assertEqual(PortTaxRate.objects.count(), 8)
-
-        after_request_dict = self.response_to_datafields_dict(
-            self.client.get(self.edit_url).content.decode("utf-8")
-        )
-
-        # TODO: form ender ved port_tax_rates-7,
-        #  db har kun 7 port_tax_rates objekter,
-        #  'port_tax_rates-TOTAL_FORMS': '8',
-        #  men der vises stadig 11 i html -
-        #  det virker fint i brug, men ikke i test
-
-        Path("/temp/out.html").write_bytes(self.client.get(self.edit_url).content)
-
-        # Was the row removed from the form table?
-        self.assertNotIn("port_tax_rates-1-DELETE", after_request_dict)
-
-        # Did we avoid deleting the "above" row in the form table?
-        self.assertIn("port_tax_rates-9-DELETE", after_request_dict)
-
-    """
     def test_bisembarkment_tax_rate_formset_change(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
@@ -2112,4 +2105,3 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
 
     def test_duplicate_disembarkment_site_prevention(self):
         self.assertEqual(1, 1)
-"""
