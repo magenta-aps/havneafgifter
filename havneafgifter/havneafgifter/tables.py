@@ -45,8 +45,6 @@ class ButtonColumn(tables.Column):
         url = reverse_lazy("havneafgifter:tax_rate_details", args=[record.pk])
         return format_html('<a href="{}" class="btn btn-primary">Show</a>', url)
 
-    # TODO: Make button text translateable
-
 
 class TaxRateTable(tables.Table):
     # id = tables.Column(linkify=("havneafgifter:tax_rate_details", [tables.A("pk")]))

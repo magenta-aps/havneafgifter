@@ -37,7 +37,6 @@ from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
-from icecream import ic
 from project.util import omit
 
 from havneafgifter.forms import (
@@ -693,12 +692,10 @@ class TaxRateListView(LoginRequiredMixin, SingleTableView):
 
 
 class TaxRateDetailView(LoginRequiredMixin, DetailView):
-    # TODO: Prevent deletion of current and old TaxRate objects
     model = TaxRates
 
     def post(self, request, *args, **kwargs):
         if "delete" in request.POST:
-            ic("ASKED TO DELETE")
             self.object = self.get_object()
             self.object.delete()
             return redirect("havneafgifter:tax_rate_list")
@@ -942,10 +939,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             )
 
     def form_valid(self, form, formset1, formset2):
-        ic()
-        ic(form)
-        ic(formset1)
-        ic(formset2)
         self.object = form.save()
 
         if self.clone:
@@ -957,13 +950,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def form_invalid(self, form, formset1, formset2):
-        print("................ FORM INVALID START....................")
-        ic()
-        ic(form.non_field_errors())
-        ic(formset1.non_form_errors())
-
-        ic(formset2.non_form_errors())
-        print("................ FORM INVALID END....................")
         return self.render_to_response(
             self.get_context_data(
                 form=form, port_formset=formset1, disembarkmentrate_formset=formset2

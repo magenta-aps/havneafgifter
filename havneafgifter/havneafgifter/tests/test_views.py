@@ -60,7 +60,6 @@ from havneafgifter.views import (
     TaxRateFormView,
     TaxRateListView,
     _CruiseTaxFormSetView,
-    _SendEmailMixin,
 )
 
 
@@ -272,35 +271,35 @@ class TestHarborDuesFormCreateView(
         [
             # Test 1: user creates harbor dues form and is sent directly to receipt
             (
-                    ShipType.FREIGHTER,
-                    False,
-                    HarborDuesForm,
-                    "havneafgifter:receipt_detail_html",
+                ShipType.FREIGHTER,
+                False,
+                HarborDuesForm,
+                "havneafgifter:receipt_detail_html",
             ),
             # Test 2: user creates cruise tax form with a port of call, and is sent to
             # the passenger tax form.
             (
-                    ShipType.CRUISE,
-                    False,
-                    CruiseTaxForm,
-                    "havneafgifter:passenger_tax_create",
+                ShipType.CRUISE,
+                False,
+                CruiseTaxForm,
+                "havneafgifter:passenger_tax_create",
             ),
             # Test 3: user creates cruise tax form without a port of call, and is sent
             # to the environmental tax form.
             (
-                    ShipType.CRUISE,
-                    True,
-                    CruiseTaxForm,
-                    "havneafgifter:environmental_tax_create",
+                ShipType.CRUISE,
+                True,
+                CruiseTaxForm,
+                "havneafgifter:environmental_tax_create",
             ),
         ],
     )
     def test_creates_model_instance_depending_on_vessel_type(
-            self,
-            vessel_type,
-            no_port_of_call,
-            model_class,
-            next_view_name,
+        self,
+        vessel_type,
+        no_port_of_call,
+        model_class,
+        next_view_name,
     ):
         self.client.force_login(self.shipping_agent_user)
         # Arrange: set up POST data
@@ -338,11 +337,11 @@ class TestHarborDuesFormCreateView(
         ],
     )
     def test_sends_email_and_displays_confirmation_message_on_submit(
-            self,
-            username,
-            status,
-            permitted,
-            email_expected,
+        self,
+        username,
+        status,
+        permitted,
+        email_expected,
     ):
         """When a form is completed (for other vessel types than cruise ships),
         the receipt must be emailed to the relevant recipients, and a confirmation
@@ -1566,9 +1565,31 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             disembarkment_tax_rate=2.0,
         )
 
-    def setUp(self):
-        super().setUp()
-        self.client.force_login(self.tax_authority_user)
+    @classmethod
+    def response_to_datafields_dict(cls, content):
+        soup = BeautifulSoup(content, "lxml")
+
+        form_data_dict = {}
+
+        forms = soup.find_all("form")
+
+        for form in forms:
+            inputs = form.find_all(
+                [
+                    "input",
+                    "select",
+                ]
+            )
+            for input_field in inputs:
+                field_name = input_field.get("name")
+                field_value = input_field.get(
+                    "value", ""
+                )  # Default to empty string if no value
+
+                if field_name:
+                    form_data_dict[field_name] = field_value
+
+        return form_data_dict
 
     @classmethod
     def html_table_to_dict(cls, table):
@@ -2104,4 +2125,4 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         )
 
     def test_duplicate_disembarkment_site_prevention(self):
-        self.assertEqual(1, 1)
+        self.assertEqual(1, 1)  # TODO:

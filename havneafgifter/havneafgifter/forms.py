@@ -34,7 +34,6 @@ from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_select2.forms import Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
-from icecream import ic
 
 from havneafgifter.form_mixins import BootstrapForm, BootstrapFormSet
 from havneafgifter.models import (
@@ -616,17 +615,6 @@ class TaxRateForm(ModelForm, BootstrapForm):
     )
 
     def clean(self):
-        self.check_valid_start_datetime()
-        self.check_duplicate_start_datetime()
-
-    def check_duplicate_start_datetime(self):
-        start_datetime = self.cleaned_data.get("start_datetime")
-        if TaxRates.objects.filter(start_datetime=start_datetime).exists():
-            raise ValidationError(
-                "En sats med dette start tidspunkt eksisterer allerede."
-            )
-
-    def check_valid_start_datetime(self):
         cleaned_data = self.cleaned_data
         start_datetime = cleaned_data.get("start_datetime")
 
@@ -636,8 +624,8 @@ class TaxRateForm(ModelForm, BootstrapForm):
             if start_datetime < edit_limit_datetime:
                 raise ValidationError(
                     _(
-                        "Der må ikke redigeres i afgifter, der bliver gyldige"
-                        " om mindre end 1 uge fra nu."
+                        "Der må ikke oprettes eller redigeres i afgifter, "
+                        "der bliver gyldige om mindre end 1 uge fra nu."
                     )
                 )
         start_datetime = self.cleaned_data.get("start_datetime")
@@ -677,8 +665,6 @@ class DisembarkmentTaxRateForm(ModelForm, BootstrapForm):
 class TaxRateFormSet(BaseInlineFormSet):
     deletion_widget = HiddenInput
 
-    # TODO: start_datetime/pax_tax_rate combos need to be unique
-
     def __init__(self, *args, extradata=None, **kwargs):
         self.extradata = extradata
         super().__init__(*args, **kwargs)
@@ -698,7 +684,6 @@ class BasePortTaxRateFormSet(BootstrapFormSet, TaxRateFormSet):
             vessel_type = form.cleaned_data.get("vessel_type")
             port = form.cleaned_data.get("port")
             gt_round = form.cleaned_data.get("round_gross_ton_up_to")
-            ic(vessel_type)
             errmsg = (
                 f"{ShipType(vessel_type).label
                     if vessel_type is not None else 'Enhver skibstype'} , "
@@ -791,9 +776,7 @@ class BasePortTaxRateFormSet(BootstrapFormSet, TaxRateFormSet):
             gt_end = form.cleaned_data.get("gt_end")
             vessel_type = form.cleaned_data.get("vessel_type")
             port = form.cleaned_data.get("port")
-            if gt_start is None or (
-                gt_end is not None and gt_end < gt_start
-            ):  # TODO: Get readability check
+            if gt_start is None or (gt_end is not None and gt_end < gt_start):
                 errmsg = (
                     f"{ShipType(vessel_type).label}, "
                     f"{port.name if port is not None else 'enhver havn'}: "
