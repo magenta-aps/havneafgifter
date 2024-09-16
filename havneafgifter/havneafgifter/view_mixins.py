@@ -10,7 +10,13 @@ from django.views.generic import FormView
 from django_fsm import can_proceed, has_transition_perm
 
 from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status
+from havneafgifter.models import (
+    CruiseTaxForm,
+    HarborDuesForm,
+    ShipType,
+    Status,
+    UserType,
+)
 from havneafgifter.responses import HavneafgifterResponseForbidden
 
 
@@ -87,6 +93,11 @@ class HarborDuesFormMixin(
     HandleNotificationMailMixin,
     HavneafgiftView,
 ):
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data["user_is_ship"] = self.request.user.user_type == UserType.SHIP
+        return context_data
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user

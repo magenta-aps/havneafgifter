@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-26 12:52-0100\n"
+"POT-Creation-Date: 2024-09-16 14:01-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -639,6 +639,21 @@ msgid ""
 "This will notify the submitter of the form that the form has been accepted."
 msgstr ""
 
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Save as draft"
+msgstr ""
+
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
+#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Submit"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
 msgid "Close"
 msgstr ""
@@ -677,12 +692,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Submit"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
-msgid "Save as draft"
+msgid "Send to agent"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/error.html
