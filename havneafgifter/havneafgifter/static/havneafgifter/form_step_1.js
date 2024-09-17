@@ -1,3 +1,4 @@
+"use strict";
 /* eslint-disable no-unused-vars */
 (function () {
     $(document).ready(function () {
@@ -11,18 +12,52 @@
         const shippingAgent = $("#id_shipping_agent");
         const submitButton = $("button[type=submit][value=NEW]");
         const submitDraftButton = $("button[type=submit][value=DRAFT]");
+        const userTypeData = form.data("user-type");
 
-        const toggleSubmitButton = function (state) {
-            if (state) {
-                submitButton.addClass("d-none");
-                submitDraftButton.text(gettext("Continue"));
+        const isShipUserSelectingShippingAgent = function () {
+            const isAgentSelected = (shippingAgent.val() !== "") && (shippingAgent.val() !== null);
+            return (userTypeData === "ship") && isAgentSelected;
+        }
+
+        const isNoPortOfCall = function () {
+            return noPortOfCallCheckbox.is(":checked");
+        }
+
+        const isCruise = function () {
+            const isCruiseShip = vesselTypeSelect.val() === "CRUISE";
+            return isNoPortOfCall() || isCruiseShip;
+        }
+
+        const getDraftButtonText = function () {
+            if (isCruise()) {
+                return gettext("Continue");
             } else {
-                submitButton.removeClass("d-none");
-                submitDraftButton.text(gettext("Save as draft"));
+                if (isShipUserSelectingShippingAgent()) {
+                    return gettext("Send to agent");
+                } else {
+                    return gettext("Save as draft");
+                }
             }
         }
 
-        const toggleNoPortOfCallState = function (disabled) {
+        const updateButtonState = function () {
+            if (isCruise() || isShipUserSelectingShippingAgent()) {
+                // Show only the DRAFT button (hide the NEW button)
+                submitButton.addClass("d-none");
+                submitDraftButton.removeClass("d-none");
+            } else {
+                // Show both DRAFT and NEW buttons
+                submitButton.removeClass("d-none");
+                submitDraftButton.removeClass("d-none");
+            }
+
+            // Update text on DRAFT button
+            submitDraftButton.text(getDraftButtonText());
+        }
+
+        const updateNoPortOfCallState = function () {
+            const disabled = isNoPortOfCall() ? "disabled" : null;
+
             portOfCallSelect.attr("disabled", disabled);
             datetimeInputs.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
@@ -36,22 +71,24 @@
                 vesselTypeSelect.val("CRUISE");
             }
 
-            toggleSubmitButton(disabled === "disabled" || vesselTypeSelect.val() === "CRUISE");
+            updateButtonState();
         }
 
         // Update text on submit buttons, depending on the selected vessel type.
         vesselTypeSelect.on("change", function () {
-            const vesselType = $(this).val();
-            const state = vesselType === "CRUISE";
-            toggleSubmitButton(state);
+            updateButtonState();
+        });
+
+        // Update text on submit buttons, depending on the selected shipping agent.
+        shippingAgent.on("change", function () {
+            updateButtonState();
         });
 
         // Disable "port of call", etc. inputs, if "no port of call" is selected.
         // Enforce vessel type CRUISE if "no port of call" is selected.
         // Update text on submit button depending on the selected vessel type,
         noPortOfCallCheckbox.on("change", function () {
-            const disabled = $(this).is(":checked") ? "disabled" : null;
-            toggleNoPortOfCallState(disabled);
+            updateNoPortOfCallState();
         });
 
         // Hook form submit
@@ -65,10 +102,7 @@
             shippingAgent.attr("disabled", null);
         });
 
-        const vesselType = vesselTypeSelect.val();
-        toggleSubmitButton(vesselType === "CRUISE");
-
-        const noPortOfCall = noPortOfCallCheckbox.is(":checked") ? "disabled" : null;
-        toggleNoPortOfCallState(noPortOfCall);
+        updateButtonState();
+        updateNoPortOfCallState();
     });
 })();

@@ -58,6 +58,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+    UserType,
 )
 from havneafgifter.responses import (
     HavneafgifterResponseBadRequest,
@@ -360,6 +361,7 @@ class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetV
         context_data = super().get_context_data(**kwargs)
         context_data["object"] = self._cruise_tax_form
         context_data["disembarkment_formset"] = self.get_form()
+        context_data["user_is_ship"] = self.request.user.user_type == UserType.SHIP
         return context_data
 
     def form_valid(self, form):
