@@ -40,7 +40,7 @@ class StatistikTable(tables.Table):
     count = tables.Column(verbose_name=_("Antal skibe"))
 
 
-class ButtonColumn(tables.Column):
+class TaxRateTableButtonColumn(tables.Column):
     def render(self, value, record, bound_column, **kwargs):
         url = reverse_lazy("havneafgifter:tax_rate_details", args=[record.pk])
         return format_html('<a href="{}" class="btn btn-primary">Show</a>', url)
@@ -48,7 +48,7 @@ class ButtonColumn(tables.Column):
 
 class TaxRateTable(tables.Table):
     # id = tables.Column(linkify=("havneafgifter:tax_rate_details", [tables.A("pk")]))
-    id = ButtonColumn()
+    id = TaxRateTableButtonColumn()
 
     class Meta:
         model = TaxRates

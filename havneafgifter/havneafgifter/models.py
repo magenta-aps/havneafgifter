@@ -432,7 +432,7 @@ class Port(PermissionsMixin, models.Model):
         blank=False,
         verbose_name=_("Port name"),
         validators=[
-            MaxLengthValidator(100, message=_("Navnet er for langt")),
+            MaxLengthValidator(16, message=_("Navnet er for langt")),
             MinLengthValidator(4, message=_("Navnet er for kort")),
         ],
     )
@@ -850,7 +850,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def _get_port_authority_filter(cls, user: User) -> Q:
         base_filter: Q = Q(
             # 1. Port authority users cannot see DRAFT forms
-            status__in=[Status.NEW, Status.APPROVED, Status.REJECTED, Status.DONE],
+            status__in=[Status.NEW, Status.APPROVED, Status.REJECTED],
             # 2. Port authority users can only see forms whose port of call is a port
             # managed by the port authority in question.
             port_of_call__portauthority__isnull=False,

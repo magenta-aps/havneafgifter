@@ -699,9 +699,17 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
     def post(self, request, *args, **kwargs):
         if "delete" in request.POST:
             self.object = self.get_object()
-            self.object.delete()
-            return redirect("havneafgifter:tax_rate_list")
-        return super().post(request, *args, **kwargs)
+            if self.object.has_permission(self.request.user, "delete", False):
+                self.object.delete()
+                return redirect("havneafgifter:tax_rate_list")
+            else:
+                return HavneafgifterResponseForbidden(
+                    self.request,
+                    _("You do not have the required permissions to delete a tax rate"),
+                )
+        # return HavneafgifterResponseBadRequest(
+        #    self.request, _("There is nothing to delete")
+        # )
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -882,7 +890,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             context["port_formset"] = self.get_port_formset()
         if "disembarkmentrate_formset" not in context:
             context["disembarkmentrate_formset"] = self.get_disembarkmentrate_formset()
-
         return context
 
     def get_form_kwargs(self):

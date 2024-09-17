@@ -1,10 +1,13 @@
 import copy
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
+from bs4 import BeautifulSoup
 from django.contrib.auth.hashers import is_password_usable
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.utils import ErrorList
 from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.forms import (
@@ -14,7 +17,17 @@ from havneafgifter.forms import (
     PassengersTotalForm,
     SignupVesselForm,
 )
-from havneafgifter.models import DisembarkmentSite, Nationality, Port, Status, Vessel
+from havneafgifter.models import (
+    DisembarkmentSite,
+    DisembarkmentTaxRate,
+    Nationality,
+    Port,
+    PortAuthority,
+    PortTaxRate,
+    Status,
+    TaxRates,
+    Vessel,
+)
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
@@ -279,3 +292,1068 @@ class TestPassengersTotalForm(SimpleTestCase):
         instance.validate_total(101)
         self.assertEqual(len(instance.errors), 1)
         self.assertIn("total_number_of_passengers", instance.errors)
+
+
+class TestBasePortTaxRateFormSet(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tax_rate = TaxRates.objects.create(
+            start_datetime=datetime(
+                year=2233,  # Needs to be >=1 week from datetime.now()
+                month=10,
+                day=5,
+                hour=14,
+                minute=30,
+                second=0,
+                tzinfo=ZoneInfo("America/Nuuk"),
+            ),
+            pax_tax_rate=42,
+        )
+
+        cls.edit_url = reverse(
+            "havneafgifter:edit_taxrate", kwargs={"pk": cls.tax_rate.pk}
+        )
+
+        cls.ptr0 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa1 = PortAuthority.objects.create(
+            name="TestPortauthority1", email="testportauthority@legitemail.com"
+        )
+
+        cls.port1 = Port.objects.create(name="TestPort", portauthority=cls.pa1)
+
+        cls.ptr1_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=11.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr1_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=12.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa2 = PortAuthority.objects.create(
+            name="TestPortauthority2", email="testportauthority@legitemail.com"
+        )
+
+        cls.port2 = Port.objects.create(name="OtherTestPort", portauthority=cls.pa2)
+
+        cls.ptr4 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=30000,
+            gt_end=40000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr5 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=26.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr6 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=40000,
+            gt_end=None,
+            port_tax_rate=27.0,
+            round_gross_ton_up_to=70,
+        )
+
+        # ------ ILANDSÆTNINGSSTEDER -------------
+        cls.disemb_tr1 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s1 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=955,  # Kujalleq
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s1,  # udenfor befolkede områder
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_tr3 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,  # Alle?
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s2 = DisembarkmentSite.objects.create(
+            name="",
+            municipality=959,
+            is_outside_populated_areas=True,
+        )
+
+        cls.disemb_tr4 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s2,  # udenfor befolkede områder
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s3 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=959,
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr5 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s3,  # Attu
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+    @classmethod
+    def response_to_datafields_dict(cls, content):
+        soup = BeautifulSoup(content, "lxml")
+
+        form_data_dict = {}
+
+        forms = soup.find_all("form")
+
+        for form in forms:
+            inputs = form.find_all(
+                [
+                    "input",
+                    "select",
+                ]
+            )
+            for input_field in inputs:
+                field_name = input_field.get("name")
+                field_value = input_field.get(
+                    "value", ""
+                )  # Default to empty string if no value
+
+                if field_name:
+                    form_data_dict[field_name] = field_value
+
+        return form_data_dict
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.tax_authority_user)
+
+    def test_clean(self):
+        initial_object_count = DisembarkmentTaxRate.objects.count()
+
+        # attempt to add an already existing disembarkment site rate
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+        value_dict_to_post = {
+            **original_response_dict,
+            "disembarkment_tax_rates-TOTAL_FORMS": "6",
+            "disembarkment_tax_rates-5-disembarkment_tax_rate": "2.00",
+            "disembarkment_tax_rates-5-municipality": "955",
+            "disembarkment_tax_rates-5-disembarkment_site": "175",
+            "disembarkment_tax_rates-5-DELETE": "",
+        }
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+
+        # ensure we're not getting a redirect
+        self.assertEqual(post_request_response.status_code, 200)
+
+        # ensure the expected error message is in the generated HTML
+        soup = BeautifulSoup(post_request_response.content, "html.parser")
+        self.assertIn('"955, Attu (Kujalleq)" er allerede i listen.', soup.get_text())
+
+        # ensure nothing has been added to db
+        self.assertEqual(initial_object_count, DisembarkmentTaxRate.objects.count())
+
+
+class TestBaseDisembarkmentTaxRateFormSet(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tax_rate = TaxRates.objects.create(
+            start_datetime=datetime(
+                year=2233,  # Needs to be >=1 week from datetime.now()
+                month=10,
+                day=5,
+                hour=14,
+                minute=30,
+                second=0,
+                tzinfo=ZoneInfo("America/Nuuk"),
+            ),
+            pax_tax_rate=42,
+        )
+
+        cls.edit_url = reverse(
+            "havneafgifter:edit_taxrate", kwargs={"pk": cls.tax_rate.pk}
+        )
+
+        cls.ptr0 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa1 = PortAuthority.objects.create(
+            name="TestPortauthority1", email="testportauthority@legitemail.com"
+        )
+
+        cls.port1 = Port.objects.create(name="TestPort", portauthority=cls.pa1)
+
+        cls.ptr1_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=11.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr1_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=12.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa2 = PortAuthority.objects.create(
+            name="TestPortauthority2", email="testportauthority@legitemail.com"
+        )
+
+        cls.port2 = Port.objects.create(name="OtherTestPort", portauthority=cls.pa2)
+
+        cls.ptr4 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=30000,
+            gt_end=40000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr5 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=26.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr6 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=40000,
+            gt_end=None,
+            port_tax_rate=27.0,
+            round_gross_ton_up_to=70,
+        )
+
+        # ------ ILANDSÆTNINGSSTEDER -------------
+        cls.disemb_tr1 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s1 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=955,  # Kujalleq
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s1,  # udenfor befolkede områder
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_tr3 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,  # Alle?
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s2 = DisembarkmentSite.objects.create(
+            name="",
+            municipality=959,
+            is_outside_populated_areas=True,
+        )
+
+        cls.disemb_tr4 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s2,  # udenfor befolkede områder
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s3 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=959,
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr5 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s3,  # Attu
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+    @classmethod
+    def response_to_datafields_dict(cls, content):
+        soup = BeautifulSoup(content, "lxml")
+
+        form_data_dict = {}
+
+        forms = soup.find_all("form")
+
+        for form in forms:
+            inputs = form.find_all(
+                [
+                    "input",
+                    "select",
+                ]
+            )
+            for input_field in inputs:
+                field_name = input_field.get("name")
+                field_value = input_field.get(
+                    "value", ""
+                )  # Default to empty string if no value
+
+                if field_name:
+                    form_data_dict[field_name] = field_value
+
+        return form_data_dict
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.tax_authority_user)
+
+    def test_port_tax_rate_form_clean_round_gross_ton_up_to(self):
+        # these are nested functions, so they can collapsed, for easier
+        # navigation and reading them
+
+        def attempt_single():
+            orgiginal_object_count = PortTaxRate.objects.count()
+
+            # attempt to create a port tax rate with a rounding value that's
+            # not between gt_start and gt_end
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "11",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "100",
+                "port_tax_rates-10-round_gross_ton_up_to": "200",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": "3",
+                "port_tax_rates-10-vessel_type": "FISHER",
+                "port_tax_rates-10-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 200)
+
+            # ensure nothing was added to db
+            self.assertEqual(PortTaxRate.objects.count(), orgiginal_object_count)
+
+            # ensure the expected error message is in the generated HTML
+            soup = BeautifulSoup(post_request_response.content, "html.parser")
+            self.assertIn("skal være mellem", soup.get_text())
+
+        def attempt_multiple():
+            orgiginal_object_count = PortTaxRate.objects.count()
+
+            # attempt to create a port tax rate with a rounding value that's
+            # not between gt_start and gt_end
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "12",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "100",
+                "port_tax_rates-10-round_gross_ton_up_to": "200",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": "3",
+                "port_tax_rates-10-vessel_type": "FISHER",
+                "port_tax_rates-10-DELETE": "",
+                "port_tax_rates-11-gt_start": "100",
+                "port_tax_rates-11-gt_end": "",
+                "port_tax_rates-11-round_gross_ton_up_to": "80",
+                "port_tax_rates-11-port_tax_rate": "42.00",
+                "port_tax_rates-11-port": "3",
+                "port_tax_rates-11-vessel_type": "FISHER",
+                "port_tax_rates-11-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 200)
+
+            # ensure nothing was added to db
+            self.assertEqual(PortTaxRate.objects.count(), orgiginal_object_count)
+
+            # ensure the expected error message is in the generated HTML
+            soup = BeautifulSoup(post_request_response.content, "html.parser")
+            self.assertIn("skal være mellem", soup.get_text())
+
+        attempt_single()
+        attempt_multiple()
+
+    def test_port_tax_rate_form_check_for_tonnage_presences(self):
+        # these are nested functions, so they can collapsed, for easier
+        # navigation and reading them
+        def attempt_single():
+            orgiginal_object_count = PortTaxRate.objects.count()
+
+            # attempt to create a singke "non-open ended" port tax rate
+            # with gt_end of 10 not being None
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "11",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "100",
+                "port_tax_rates-10-round_gross_ton_up_to": "80",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": self.port1.pk,
+                "port_tax_rates-10-vessel_type": "FREIGHTER",
+                "port_tax_rates-10-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 200)
+
+            # ensure the expected error message is in the generated HTML
+            soup = BeautifulSoup(post_request_response.content, "html.parser")
+            self.assertIn("For denne kombination", soup.get_text())
+
+            # ensure nothing was added to db
+            self.assertEqual(PortTaxRate.objects.count(), orgiginal_object_count)
+
+        def attempt_multiple():
+            orgiginal_object_count = PortTaxRate.objects.count()
+
+            # attempt to create a "non-open ended" port tax rate over two objects
+            # with gt_end of 11 not being None
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "12",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "100",
+                "port_tax_rates-10-round_gross_ton_up_to": "80",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": self.port1.pk,
+                "port_tax_rates-10-vessel_type": "FISHER",
+                "port_tax_rates-10-DELETE": "",
+                "port_tax_rates-11-gt_start": "100",
+                "port_tax_rates-11-gt_end": "200",
+                "port_tax_rates-11-round_gross_ton_up_to": "80",
+                "port_tax_rates-11-port_tax_rate": "42.00",
+                "port_tax_rates-11-port": "3",
+                "port_tax_rates-11-vessel_type": "FISHER",
+                "port_tax_rates-11-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 200)
+
+            # ensure the expected error message is in the generated HTML
+            soup = BeautifulSoup(post_request_response.content, "html.parser")
+            self.assertIn("For denne kombination", soup.get_text())
+
+            # ensure nothing was added to db
+            self.assertEqual(PortTaxRate.objects.count(), orgiginal_object_count)
+
+        attempt_single()
+        attempt_multiple()
+
+    def test_port_tax_rate_form_chek_for_tonnage_gap_or_overlap(self):
+        # these are nested functions, so they can collapsed, for easier
+        # navigation and reading them
+        def attempt_acceptable():
+            original_object_count = PortTaxRate.objects.count()
+
+            # attempt to add two port tax rates with no overlapping or gapped tonnages
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "12",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "30000",
+                "port_tax_rates-10-round_gross_ton_up_to": "80",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": "3",
+                "port_tax_rates-10-vessel_type": "FISHER",
+                "port_tax_rates-10-DELETE": "",
+                "port_tax_rates-11-gt_start": "30000",
+                "port_tax_rates-11-gt_end": "",
+                "port_tax_rates-11-round_gross_ton_up_to": "80",
+                "port_tax_rates-11-port_tax_rate": "44.00",
+                "port_tax_rates-11-port": "3",
+                "port_tax_rates-11-vessel_type": "FISHER",
+                "port_tax_rates-11-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 302)
+
+            # ensure that two were added to db
+            self.assertEqual(PortTaxRate.objects.count(), original_object_count + 2)
+
+        def attempt_overlap():
+            original_object_count = PortTaxRate.objects.count()
+
+            # attempt to add two port tax rates with overlapping tonnages
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "12",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "40000",
+                "port_tax_rates-10-round_gross_ton_up_to": "80",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": "3",
+                "port_tax_rates-10-vessel_type": "FISHER",
+                "port_tax_rates-10-DELETE": "",
+                "port_tax_rates-11-gt_start": "30000",
+                "port_tax_rates-11-gt_end": "",
+                "port_tax_rates-11-round_gross_ton_up_to": "80",
+                "port_tax_rates-11-port_tax_rate": "44.00",
+                "port_tax_rates-11-port": "3",
+                "port_tax_rates-11-vessel_type": "FISHER",
+                "port_tax_rates-11-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 200)
+
+            # ensure the expected error message is in the generated HTML
+            soup = BeautifulSoup(post_request_response.content, "html.parser")
+            self.assertIn("Der er overlap i brutto ton værdierne for", soup.get_text())
+
+            # ensure that nothing was added to db
+            self.assertEqual(PortTaxRate.objects.count(), original_object_count)
+
+        def attempt_gapped():
+            original_object_count = PortTaxRate.objects.count()
+
+            # attempt to add two port tax rates with gapped tonnages
+            original_response_dict = self.response_to_datafields_dict(
+                self.client.get(self.edit_url).content.decode("utf-8")
+            )
+            value_dict_to_post = {
+                **original_response_dict,
+                "port_tax_rates-TOTAL_FORMS": "12",
+                "port_tax_rates-10-gt_start": "0",
+                "port_tax_rates-10-gt_end": "30000",
+                "port_tax_rates-10-round_gross_ton_up_to": "80",
+                "port_tax_rates-10-port_tax_rate": "42.00",
+                "port_tax_rates-10-port": "3",
+                "port_tax_rates-10-vessel_type": "FISHER",
+                "port_tax_rates-10-DELETE": "",
+                "port_tax_rates-11-gt_start": "40000",
+                "port_tax_rates-11-gt_end": "",
+                "port_tax_rates-11-round_gross_ton_up_to": "80",
+                "port_tax_rates-11-port_tax_rate": "44.00",
+                "port_tax_rates-11-port": "3",
+                "port_tax_rates-11-vessel_type": "FISHER",
+                "port_tax_rates-11-DELETE": "",
+            }
+            post_request_response = self.client.post(
+                self.edit_url,
+                data=value_dict_to_post,
+            )
+
+            # Check for redirect
+            self.assertEqual(post_request_response.status_code, 200)
+
+            # ensure the expected error message is in the generated HTML
+            soup = BeautifulSoup(post_request_response.content, "html.parser")
+            self.assertIn('Der er "hul" i brutto ton værdierne for', soup.get_text())
+
+            # ensure that nothing was added to db
+            self.assertEqual(PortTaxRate.objects.count(), original_object_count)
+
+        attempt_acceptable()
+        attempt_overlap()
+        attempt_gapped()
+
+    def test_port_tax_rate_form_check_for_duplicates(self):
+        initial_object_count = PortTaxRate.objects.count()
+
+        # attempt to add two port tax rates with the exact same values
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+        value_dict_to_post = {
+            **original_response_dict,
+            "port_tax_rates-TOTAL_FORMS": "12",
+            "port_tax_rates-10-gt_start": "0",
+            "port_tax_rates-10-gt_end": "",
+            "port_tax_rates-10-round_gross_ton_up_to": "80",
+            "port_tax_rates-10-port_tax_rate": "313373.00",
+            "port_tax_rates-10-port": "3",
+            "port_tax_rates-10-vessel_type": "FISHER",
+            "port_tax_rates-10-DELETE": "",
+            "port_tax_rates-11-gt_start": "0",
+            "port_tax_rates-11-gt_end": "",
+            "port_tax_rates-11-round_gross_ton_up_to": "80",
+            "port_tax_rates-11-port_tax_rate": "313373.00",
+            "port_tax_rates-11-port": "3",
+            "port_tax_rates-11-vessel_type": "FISHER",
+            "port_tax_rates-11-DELETE": "",
+        }
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+
+        # Check for redirect
+        self.assertEqual(post_request_response.status_code, 200)
+
+        # ensure the expected error message is in the generated HTML
+        soup = BeautifulSoup(post_request_response.content, "html.parser")
+        self.assertIn("eksisterer allerede.", soup.get_text())
+
+        # ensure nothing was added to db
+        self.assertEqual(PortTaxRate.objects.count(), initial_object_count)
+
+
+class TestTaxRateForm(HarborDuesFormMixin, TestCase):
+    """
+    Ensure that TaxRates with start_date less than 1 week in advance
+    can't be made or edited
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tax_rate = TaxRates.objects.create(
+            start_datetime=datetime(
+                year=2233,  # Needs to be >=1 week from datetime.now()
+                month=10,
+                day=5,
+                hour=14,
+                minute=30,
+                second=0,
+                tzinfo=ZoneInfo("America/Nuuk"),
+            ),
+            pax_tax_rate=42,
+        )
+
+        cls.edit_url = reverse(
+            "havneafgifter:edit_taxrate", kwargs={"pk": cls.tax_rate.pk}
+        )
+
+        cls.ptr0 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa1 = PortAuthority.objects.create(
+            name="TestPortauthority1", email="testportauthority@legitemail.com"
+        )
+
+        cls.port1 = Port.objects.create(name="TestPort", portauthority=cls.pa1)
+
+        cls.ptr1_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=11.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr1_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=12.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa2 = PortAuthority.objects.create(
+            name="TestPortauthority2", email="testportauthority@legitemail.com"
+        )
+
+        cls.port2 = Port.objects.create(name="OtherTestPort", portauthority=cls.pa2)
+
+        cls.ptr4 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=30000,
+            gt_end=40000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr5 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=26.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr6 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=40000,
+            gt_end=None,
+            port_tax_rate=27.0,
+            round_gross_ton_up_to=70,
+        )
+
+        # ------ ILANDSÆTNINGSSTEDER -------------
+        cls.disemb_tr1 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s1 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=955,  # Kujalleq
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s1,  # udenfor befolkede områder
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_tr3 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,  # Alle?
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s2 = DisembarkmentSite.objects.create(
+            name="",
+            municipality=959,
+            is_outside_populated_areas=True,
+        )
+
+        cls.disemb_tr4 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s2,  # udenfor befolkede områder
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s3 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=959,
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr5 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s3,  # Attu
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.tax_authority_user)
+
+    @classmethod
+    def response_to_datafields_dict(cls, content):
+        soup = BeautifulSoup(content, "lxml")
+
+        form_data_dict = {}
+
+        forms = soup.find_all("form")
+
+        for form in forms:
+            inputs = form.find_all(
+                [
+                    "input",
+                    "select",
+                ]
+            )
+            for input_field in inputs:
+                field_name = input_field.get("name")
+                field_value = input_field.get(
+                    "value", ""
+                )  # Default to empty string if no value
+
+                if field_name:
+                    form_data_dict[field_name] = field_value
+
+        return form_data_dict
+
+    def test_write_tax_rate_deadline(self):
+        original_object_count = TaxRates.objects.count()
+
+        response = self.client.get(
+            reverse("havneafgifter:tax_rate_clone", kwargs={"pk": self.tax_rate.pk})
+        )
+
+        original_response_dict = self.response_to_datafields_dict(
+            response.content.decode("utf-8")
+        )
+
+        # regex to strip out id keys
+        import re
+
+        number_pattern = re.compile(
+            r"^(disembarkment_tax_rates|port_tax_rates)-\d+-id$"
+        )
+        prefix_pattern = re.compile(
+            r"^(disembarkment_tax_rates|port_tax_rates)-__prefix__-id$"
+        )
+
+        # assemble new dict and POST
+        datetetime_string_two_days_in_the_future = (
+            datetime.now(timezone.utc) + timedelta(days=2)
+        ).strftime("%Y-%m-%d %H:%M:%S")
+        data_dict_to_post = {
+            key: value
+            for key, value in original_response_dict.items()
+            if not (number_pattern.match(key) or prefix_pattern.match(key))
+        }
+        data_dict_to_post["start_datetime"] = datetetime_string_two_days_in_the_future
+        response = self.client.post(
+            reverse("havneafgifter:tax_rate_clone", kwargs={"pk": self.tax_rate.pk}),
+            data=data_dict_to_post,
+        )
+
+        # that should result in no redirect
+        self.assertEqual(response.status_code, 200)
+
+        # check that nothing was added to db
+        self.assertEqual(original_object_count, TaxRates.objects.count())
+
+        # ensure the expected error message is in the generated HTML
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertIn(
+            "Der må ikke oprettes eller redigeres i afgifter, "
+            "der bliver gyldige om mindre end 1 uge fra nu.",
+            soup.get_text(),
+        )

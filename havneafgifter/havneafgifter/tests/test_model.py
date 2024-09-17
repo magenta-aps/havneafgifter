@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.contrib.auth.models import Group
@@ -643,3 +643,16 @@ class TestDisembarkmentSite(TestCase):
 class TestVessel(HarborDuesFormMixin, TestCase):
     def test_str(self):
         self.assertEqual(str(self.ship_user_vessel), self.ship_user_vessel.imo)
+
+
+class TestTaxRates(TestCase):
+    def test_can_delete(self):
+        new_bad_tax_rate = TaxRates(
+            start_datetime=datetime.now(timezone.utc) + timedelta(days=1)
+        )
+        new_good_tax_rate = TaxRates(
+            start_datetime=datetime.now(timezone.utc) + timedelta(days=8)
+        )
+
+        self.assertTrue(new_good_tax_rate.can_delete())
+        self.assertFalse(new_bad_tax_rate.can_delete())

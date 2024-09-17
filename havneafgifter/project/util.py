@@ -30,6 +30,4 @@ def lenient_get(item, *keys: str | int):
 
 
 def omit(item: Dict[str, Any], *keys: str) -> Dict[str, Any]:
-    for key in keys:
-        del item[key]
-    return item
+    return {key: value for key, value in item.items() if key not in keys}
