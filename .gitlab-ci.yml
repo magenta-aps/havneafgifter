@@ -37,7 +37,7 @@ include:
     file:
       - '/gitlab-ci-templates/common/rules.v1.yml'
       - '/gitlab-ci-templates/common/saltbert.v1.yml'
-      - '/gitlab-ci-templates/common/docker-build.v1.yml'
+      - '/gitlab-ci-templates/common/docker-build-meta.v2.yml'
       - '/gitlab-ci-templates/common/docker-release-meta.v1.yml'
       - '/gitlab-ci-templates/common/config-updater-meta.v1.yml'
       - "/gitlab-ci-templates/common/conventional-commits-meta.v1.yml"
@@ -140,6 +140,13 @@ Lint Javascript:
   image: registry.gitlab.com/pipeline-components/eslint:latest
   script:
     - sh -c "cp .eslint/package.json package.json && npm install @eslint/js && eslint --config .eslint/eslint.config.js --color --stats havneafgifter/havneafgifter/static/havneafgifter/*.js || rm package.json"
+
+# Build stage
+#############
+Build:
+  extends: .build-docker
+  variables:
+    BUILD_DOCKER_EXTRA_FLAGS: --build-arg=COMMIT_TAG=${CI_COMMIT_TAG}
 
 # Test stage
 ############
