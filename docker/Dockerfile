@@ -40,6 +40,9 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" && \
     mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
     ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
+ARG COMMIT_TAG
+ENV COMMIT_TAG=${COMMIT_TAG:-HEAD}
+
 COPY requirements.txt /app/requirements.txt
 COPY mypy.ini /app/mypy.ini
 
