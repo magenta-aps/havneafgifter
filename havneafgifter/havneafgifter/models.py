@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.conf import settings
@@ -10,8 +10,11 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
+    EmailValidator,
     MaxLengthValidator,
+    MaxValueValidator,
     MinLengthValidator,
+    MinValueValidator,
     RegexValidator,
 )
 from django.db import models
@@ -185,6 +188,11 @@ class User(AbstractUser):
             return False
         else:
             return user_type in (UserType.TAX_AUTHORITY, UserType.ADMIN)
+
+    @property
+    def can_view_taxratelist(self) -> bool:
+        # For now every user is allowed to use the TaxRateListView
+        return True
 
 
 class PermissionsMixin(models.Model):
@@ -382,9 +390,16 @@ class PortAuthority(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Port authority company name"),
+        validators=[
+            MaxLengthValidator(32, message=_("Navnet er for langt")),
+            MinLengthValidator(4, message=_("Navnet er for kort")),
+        ],
     )
     email = models.EmailField(
-        null=False, blank=False, verbose_name=_("Port authority contact email")
+        null=False,
+        blank=False,
+        verbose_name=_("Port authority contact email"),
+        validators=[EmailValidator(message=_("Ugyldig email adresse"))],
     )
 
     def __str__(self) -> str:
@@ -412,7 +427,14 @@ class Port(PermissionsMixin, models.Model):
         ordering = ["portauthority__name", "name"]
 
     name = models.CharField(
-        max_length=16, null=False, blank=False, verbose_name=_("Port name")
+        max_length=16,
+        null=False,
+        blank=False,
+        verbose_name=_("Port name"),
+        validators=[
+            MaxLengthValidator(16, message=_("Navnet er for langt")),
+            MinLengthValidator(4, message=_("Navnet er for kort")),
+        ],
     )
     portauthority = models.ForeignKey(
         PortAuthority, null=True, blank=True, on_delete=models.SET_NULL
@@ -534,7 +556,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         auto_now_add=True,
-        verbose_name=_("Submission date"),
+        verbose_name=_("Form submission date"),
     )
 
     port_of_call = models.ForeignKey(
@@ -1107,6 +1129,10 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Disembarkment site"),
+        validators=[
+            MaxLengthValidator(200, message=_("Navnet er for langt")),
+            MinLengthValidator(4, message=_("Navnet er for kort")),
+        ],
     )
 
     municipality = models.PositiveSmallIntegerField(
@@ -1147,6 +1173,10 @@ class Disembarkment(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Number of passengers disembarking"),
+        validators=[
+            MinValueValidator(0, message=_("Tallet er for lille")),
+            MaxValueValidator(20000, message=_("Tallet er for stort")),
+        ],
     )
 
     disembarkment_site = models.ForeignKey(
@@ -1178,7 +1208,11 @@ class TaxRates(PermissionsMixin, models.Model):
         blank=True,
         decimal_places=2,
         max_digits=6,
-        verbose_name=_("Tax per passenger"),
+        verbose_name=_("Afgift pr. passager"),
+        validators=[
+            MinValueValidator(0, message=_("Beløbet er for lavt")),
+            MaxValueValidator(999999, message=_("Beløbet er for højt")),
+        ],
     )
 
     start_datetime = models.DateTimeField(null=True, blank=True)
@@ -1248,6 +1282,12 @@ class TaxRates(PermissionsMixin, models.Model):
         end = self.end_datetime.date() if self.end_datetime else "∞"
         return f"{start} - {end}"
 
+    def can_delete(self):
+        return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
+
+    def can_edit(self):
+        return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
+
 
 post_save.connect(TaxRates.on_update, sender=TaxRates, dispatch_uid="TaxRates_update")
 
@@ -1281,12 +1321,16 @@ class PortTaxRate(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         verbose_name=_("Vessel gross tonnage (lower)"),
+        validators=[MaxValueValidator(2000000, message=_("Tallet er for højt"))],
     )
 
     gt_end = models.PositiveIntegerField(
         verbose_name=_("Vessel gross tonnage (upper)"),
         null=True,
         blank=True,
+        validators=[
+            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+        ],
     )
 
     port_tax_rate = models.DecimalField(
@@ -1296,10 +1340,21 @@ class PortTaxRate(PermissionsMixin, models.Model):
         max_digits=12,
         default=Decimal(0),
         verbose_name=_("Tax per gross ton"),
+        validators=[
+            MinValueValidator(0, message=_("Tallet er for lavt")),
+            MaxValueValidator(999999999999, message=_("Tallet er for højt")),
+        ],
     )
 
     round_gross_ton_up_to = models.PositiveIntegerField(
-        null=False, blank=False, default=0, verbose_name=_("Round GT up to")
+        null=False,
+        blank=False,
+        default=0,
+        verbose_name=_("Rund op til (ton)"),
+        validators=[
+            MinValueValidator(0, message=_("Tallet er for lavt")),
+            MaxValueValidator(2000000, message=_("Tallet er for højt")),
+        ],
     )
 
     def __str__(self) -> str:
@@ -1309,6 +1364,10 @@ class PortTaxRate(PermissionsMixin, models.Model):
         gt_start = self.gt_start
         gt_end = self.gt_end
         return f"{tax_rates}, {port}, {vessel_type}, {gt_start} t - {gt_end} t"
+
+    @property
+    def can_delete(self):
+        return self.port is not None or self.vessel_type is not None
 
     @property
     def name(self):
@@ -1353,8 +1412,12 @@ class DisembarkmentTaxRate(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         decimal_places=2,
-        max_digits=12,
+        max_digits=4,
         verbose_name=_("Disembarkment tax rate"),
+        validators=[
+            MinValueValidator(0, message=_("Beløbet er for lavt")),
+            MaxValueValidator(50, message=_("Beløbet er for højt")),
+        ],
     )
 
     def __str__(self) -> str:

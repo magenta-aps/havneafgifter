@@ -21,6 +21,7 @@ from havneafgifter.views import (
     SignupVesselView,
     StatisticsView,
     TaxRateDetailView,
+    TaxRateFormView,
     TaxRateListView,
 )
 
@@ -128,6 +129,12 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="receipt_detail_pdf",
     ),
     path("blanket/statistik/", StatisticsView.as_view(), name="statistik"),
-    path("sats", TaxRateListView.as_view(), name="tax_rate_list"),
-    path("sats/<int:pk>", TaxRateDetailView.as_view(), name="tax_rate_details"),
+    path("sats/", TaxRateListView.as_view(), name="tax_rate_list"),
+    path("sats/<int:pk>/", TaxRateDetailView.as_view(), name="tax_rate_details"),
+    path("sats/<int:pk>/edit/", TaxRateFormView.as_view(), name="edit_taxrate"),
+    path(
+        "sats/<int:pk>/clone/",
+        TaxRateFormView.as_view(clone=True),
+        name="tax_rate_clone",
+    ),
 ]

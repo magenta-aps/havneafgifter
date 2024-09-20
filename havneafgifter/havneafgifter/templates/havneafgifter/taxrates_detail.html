@@ -3,72 +3,128 @@
 {% load i18n %}
 {% load django_bootstrap5 %}
 
+
+
 {% block content %}
-<h1>{% translate "Tax Rate Details" %}</h1>
-
-<table class="table table-bordered">
-
-    <tbody>
-
-    <tr>
-        <th>{% translate "Start date" %}</th>
-        <td>{{object.start_datetime|date:"Y-m-d H:i:s (O)"}}</td>
-    </tr>
-
-    <tr>
-        <th>{% translate "End date" %}</th>
-        <td>{{object.end_datetime|default_if_none:"-"}}</td>
-    </tr>
-
-    <tr>
-        <th>{% translate "Passenger tax rate" %}</th>
-        <td>{{object.pax_tax_rate}}</td>
-    </tr>
-
-    </tbody>
-</table>
-
-<table class="table table-bordered">
-    <tbody>
-    <tr>
-        <th>Afgifter pr. bruttoton:</th>
-        <th>Fra (ton)</th>
-        <th>Til (ton)</th>
-        <th>Rund op til (ton)</th>
-        <th>Sats (DKK)</th>
-    </tr>
-    {% for port_tax_rate in port_tax_rates %}
-    <tr>
-        <td>{{port_tax_rate.name}}</td>
-        <td>{{port_tax_rate.gt_start}}</td>
-        <td>{{port_tax_rate.gt_end|default_if_none:"∞"}}</td>
-        <td>{{port_tax_rate.round_gross_ton_up_to|default:""}}</td>
-        <td>{{port_tax_rate.port_tax_rate}}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<table class="table table-bordered">
-    <tbody>
-    <tr>
-        <th>Afgifter pr. ilandsætningssted:</th>
-        <th>Sats (DKK)</th>
-    </tr>
-    {% for disembarkment_tax_rate in disembarkment_tax_rates %}
-    <tr>
-        <td>{{disembarkment_tax_rate.name}}</td>
-        <td>{{disembarkment_tax_rate.disembarkment_tax_rate}}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <h1>{% translate "Tax Rate Details" %}</h1>
 
 
-<hr/>
+    {# Warning banner #}
+    {% if not object.can_edit or not object.can_delete %}
+        <div class="col-12 pt-3">
+            <div class="alert alert-info align-items-center d-flex alert-dismissible fade show" role="alert">
+                <div>
+                    {% translate "<strong>BEMÆRK:</strong> Denne afgiftssats er historisk, aktiv eller træder snart i kraft. Den må derfor ikke ændres eller slettes." %}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endif %}
 
-<a href="#" class="btn btn-primary">{% translate 'Edit' %}</a>
-<a href="#" class="btn btn-primary">{% translate 'Clone' %}</a>
-<a href="#" class="btn btn-danger">{% translate 'Delete' %}</a>
+    <table class="table table-bordered">
 
+        <tbody>
+
+        <tr>
+            <th>{% translate "Start date" %}</th>
+            <td>{{ object.start_datetime|date:"Y-m-d H:i:s (O)"}}</td>
+        </tr>
+
+        <tr>
+            <th>{% translate "End date" %}</th>
+            <td>{{ object.end_datetime|default_if_none:"-"}}</td>
+        </tr>
+
+        <tr>
+            <th>{% translate "Passenger tax rate" %}</th>
+            <td>{{ object.pax_tax_rate }}</td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <th>Afgifter pr. bruttoton:</th>
+            <th>Fra (ton)</th>
+            <th>Til (ton)</th>
+            <th>Rund op til (ton)</th>
+            <th>Sats (DKK)</th>
+        </tr>
+        {% for port_tax_rate in port_tax_rates %}
+            <tr>
+                <td>{{ port_tax_rate.name }}</td>
+                <td>{{ port_tax_rate.gt_start }}</td>
+                <td>{{ port_tax_rate.gt_end|default_if_none:"∞"}}</td>
+                <td>{{ port_tax_rate.round_gross_ton_up_to|default:""}}</td>
+                <td>{{ port_tax_rate.port_tax_rate }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <th>Afgifter pr. ilandsætningssted:</th>
+            <th>Sats (DKK)</th>
+        </tr>
+        {% for disembarkment_tax_rate in disembarkment_tax_rates %}
+            <tr>
+                <td>{{ disembarkment_tax_rate.name }}</td>
+                <td>{{ disembarkment_tax_rate.disembarkment_tax_rate }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+    <hr/>
+
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if show_changing_buttons %}
+            {# EDIT button #}
+            {% if can_edit %}
+                <a href="{% url 'havneafgifter:edit_taxrate' pk=object.pk %}"
+                   class="btn btn-primary">
+                    {% translate 'Edit' %}
+                </a>
+            {% else %}
+                <button type="button" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                        data-bs-title=""
+                        class="btn btn-outline-primary">
+                    {% translate 'Edit' %}
+                </button>
+            {% endif %}
+
+            {# CLONE button #}
+            {% if can_clone %}
+                <a href="{% url 'havneafgifter:tax_rate_clone' pk=object.pk %}"
+                   class="btn btn-primary" disabled>{% translate 'Clone' %}</a>
+            {% else %}
+                <button type="button" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                        data-bs-title=""
+                        class="btn btn-outline-primary">
+                    {% translate 'Clone' %}
+                </button>
+            {% endif %}
+            {# DELETE button #}
+            {% if can_delete %}
+                <button type="submit" name="delete" class="btn btn-danger">
+                    {% translate 'Delete' %}
+                </button>
+            {% else %}
+                <button type="submit" name="delete" class="btn btn-outline-danger" disabled>
+                    {% translate 'Delete' %}
+                </button>
+            {% endif %}
+        {% endif %}
+
+        {# CANCEL/BACK button #}
+        <a href="{% url 'havneafgifter:tax_rate_list' %}" class="btn btn-primary">{% translate 'Back' %}</a>
+    </form>
 {% endblock content %}
