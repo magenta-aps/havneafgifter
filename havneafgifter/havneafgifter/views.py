@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from csp_helpers.mixins import CSPViewMixin
@@ -28,33 +29,41 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
+from project.util import omit
 
 from havneafgifter.forms import (
     AuthenticationForm,
     DisembarkmentForm,
+    DisembarkmentTaxRateFormSet,
     HarborDuesFormForm,
     PassengersByCountryForm,
     PassengersTotalForm,
+    PortTaxRateFormSet,
     ReasonForm,
     SignupVesselForm,
     StatisticsForm,
+    TaxRateForm,
 )
 from havneafgifter.mails import OnApproveMail, OnRejectMail, OnSubmitForReviewMail
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
     DisembarkmentSite,
+    DisembarkmentTaxRate,
     HarborDuesForm,
     Municipality,
     Nationality,
     PassengersByCountry,
     Port,
+    PortTaxRate,
     ShipType,
     Status,
     TaxRates,
@@ -687,6 +696,21 @@ class TaxRateListView(LoginRequiredMixin, SingleTableView):
 class TaxRateDetailView(LoginRequiredMixin, DetailView):
     model = TaxRates
 
+    def post(self, request, *args, **kwargs):
+        if "delete" in request.POST:
+            self.object = self.get_object()
+            if self.object.has_permission(self.request.user, "delete", False):
+                self.object.delete()
+                return redirect("havneafgifter:tax_rate_list")
+            else:
+                return HavneafgifterResponseForbidden(
+                    self.request,
+                    _("You do not have the required permissions to delete a tax rate"),
+                )
+        # return HavneafgifterResponseBadRequest(
+        #    self.request, _("There is nothing to delete")
+        # )
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             **{
@@ -699,6 +723,21 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
                     F("municipality").asc(nulls_first=True),
                     F("disembarkment_site").asc(nulls_first=True),
                 ),
+                "can_edit": self.object.has_permission(
+                    self.request.user, "change", False
+                )
+                and self.object.can_edit,
+                "can_clone": self.object.has_permission(
+                    self.request.user, "add", False
+                ),
+                "can_delete": self.object.has_permission(
+                    self.request.user, "delete", False
+                )
+                and self.object.can_delete,
+                "show_changing_buttons": self.request.user.groups.filter(
+                    name="TaxAuthority"
+                ).exists()
+                or self.request.user.is_superuser,
             }
         )
 
@@ -797,3 +836,146 @@ class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetForm
                     item["vessel_type"] = ShipType(vessel_type).label
             return items
         return []
+
+
+class TaxRateFormView(LoginRequiredMixin, UpdateView):
+    model = TaxRates
+    form_class = TaxRateForm
+    template_name = "havneafgifter/taxrateform.html"
+    success_url = reverse_lazy("havneafgifter:tax_rate_list")
+    clone = False
+
+    def get_object(self, queryset=None):
+        object = super().get_object(queryset)
+        if object.has_permission(self.request.user, "add" if self.clone else "change"):
+            return object
+        else:
+            raise PermissionDenied
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except PermissionDenied:
+            return HavneafgifterResponseForbidden(
+                request, _("Du har ikke rettighed til at se denne side.")
+            )
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.clone:
+            initial["start_datetime"] = datetime.now() + timezone.timedelta(weeks=1)
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(
+            **{
+                **kwargs,
+                "clone": self.clone,
+                "vessel_type_choices": ShipType.choices,
+                "port_choices": [
+                    (port.pk, port.name) for port in Port.objects.order_by("name")
+                ],
+                "municipality_choices": DisembarkmentSite.municipality.field.choices,
+                "disembarkmentsite_map": {
+                    municipality.value: list(
+                        DisembarkmentSite.objects.filter(
+                            municipality=municipality
+                        ).values_list("pk", "name")
+                    )
+                    for municipality in Municipality
+                },
+            }
+        )
+        if "port_formset" not in context:
+            context["port_formset"] = self.get_port_formset()
+        if "disembarkmentrate_formset" not in context:
+            context["disembarkmentrate_formset"] = self.get_disembarkmentrate_formset()
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        return kwargs
+
+    def get_port_formset(self):
+        if self.clone:
+            initial = (
+                [
+                    omit(model_to_dict(item), "id", "tax_rates")
+                    for item in self.object.port_tax_rates.all()
+                ]
+                if self.object and self.object.pk
+                else []
+            )
+            extradata = [
+                {
+                    "name": item.name,
+                    "can_delete": item.can_delete,
+                }
+                for item in PortTaxRate.objects.filter(tax_rates_id=self.kwargs["pk"])
+            ]
+            formset = PortTaxRateFormSet(
+                data=self.request.POST or None, initial=initial, extradata=extradata
+            )
+            formset.extra = len(initial)
+            return formset
+        else:
+            return PortTaxRateFormSet(self.request.POST or None, instance=self.object)
+
+    def get_disembarkmentrate_formset(self):
+        if self.clone:
+            initial = (
+                [
+                    omit(model_to_dict(item), "id", "tax_rates")
+                    for item in self.object.disembarkment_tax_rates.all()
+                ]
+                if self.object and self.object.pk
+                else []
+            )
+            extradata = [
+                {"name": item.name}
+                for item in DisembarkmentTaxRate.objects.filter(
+                    tax_rates_id=self.kwargs["pk"]
+                )
+            ]
+            formset = DisembarkmentTaxRateFormSet(
+                data=self.request.POST or None, initial=initial, extradata=extradata
+            )
+            formset.extra = len(initial)
+            return formset
+        else:
+            return DisembarkmentTaxRateFormSet(
+                self.request.POST or None, instance=self.object
+            )
+
+    def form_valid(self, form, formset1, formset2):
+        self.object = form.save()
+
+        if self.clone:
+            formset1.instance = self.object
+            formset2.instance = self.object
+
+        formset1.save()
+        formset2.save()
+        return super().form_valid(form)
+
+    def form_invalid(self, form, formset1, formset2):
+        return self.render_to_response(
+            self.get_context_data(
+                form=form, port_formset=formset1, disembarkmentrate_formset=formset2
+            )
+        )
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if self.clone:
+            self.object.pk = None
+
+        form = self.get_form()
+        formset1 = self.get_port_formset()
+        formset2 = self.get_disembarkmentrate_formset()
+
+        if form.is_valid() and formset1.is_valid() and formset2.is_valid():
+            return self.form_valid(form, formset1, formset2)
+        else:
+            return self.form_invalid(form, formset1, formset2)

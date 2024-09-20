@@ -2,6 +2,14 @@ from csp_helpers.mixins import CSPFormMixin
 from django import forms
 
 
+class BootstrapFormSet:
+    def full_clean(self):
+        super().full_clean()
+        for form in self.forms:
+            if isinstance(form, BootstrapForm):
+                form.set_all_field_classes()
+
+
 class BootstrapForm(CSPFormMixin, forms.Form):
     def __init__(self, *args, **kwargs):
         super(BootstrapForm, self).__init__(*args, **kwargs)
@@ -29,9 +37,10 @@ class BootstrapForm(CSPFormMixin, forms.Form):
         # if isinstance(field.widget, forms.Select):
         #     classes.append("form-select")
 
-        # if check_for_errors:
-        #     if self.has_error(name) is True:
-        #         classes.append("is-invalid")
+        if check_for_errors:
+            if self.has_error(name):
+                classes.append("is-invalid")
+
         field.widget.attrs["class"] = " ".join(set(classes))
 
     @staticmethod

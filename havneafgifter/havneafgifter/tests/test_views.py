@@ -56,6 +56,7 @@ from havneafgifter.views import (
     RejectView,
     SignupVesselView,
     TaxRateDetailView,
+    TaxRateFormView,
     TaxRateListView,
     _CruiseTaxFormSetView,
 )
@@ -1267,7 +1268,7 @@ class TestRejectView(TestActionViewMixin, TestCase):
         self.assertIsInstance(response, HttpResponseForbidden)
 
 
-class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
+class TestTaxRateListView(HarborDuesFormMixin, TestCase):
     view_class = TaxRateListView
 
     @classmethod
@@ -1300,6 +1301,13 @@ class TestHarborTaxRateListView(HarborDuesFormMixin, TestCase):
         self.assertLess(rows[0].record.start_datetime, rows[1].record.start_datetime)
         # check that the previous end_datetime is inferred as expected
         self.assertEqual(rows[0].record.end_datetime, rows[1].record.start_datetime)
+
+    def test_buttons(self):
+        request = self._setup(self.ship_user)
+        response = self.instance.get(request)
+        response.render()
+
+        self.assertIn('class="btn btn-primary"', response.content.decode("utf-8"))
 
 
 class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
@@ -1355,7 +1363,7 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         super().setUp()
         self.client.force_login(self.ship_user)
 
-    def test_the_thing_with_parameter(self):
+    def test_rendering(self):
         response = self.client.get(
             reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk})
         )
@@ -1370,5 +1378,832 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.assertIn("25.00", soup.get_text())
         self.assertIn("2.00", soup.get_text())
         self.assertIn("None", soup.get_text())
-        # FIXME: Reintroduce this when TZ issue is solved
-        # self.assertIn("2023-10-05 18:30:00 (+0200)", soup.get_text())
+
+    def test_forbidden_delete(self):
+        self.client.force_login(self.ship_user)
+        response = self.client.post(
+            reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk}),
+            {"delete": "Delete"},
+        )
+
+        # make sure we get an error message
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertIn(
+            "You do not have the required permissions to delete a tax rate",
+            soup.get_text(),
+        )
+
+    def test_allowed_delete(self):
+        self.client.force_login(self.admin_user)
+        response = self.client.post(
+            reverse("havneafgifter:tax_rate_details", kwargs={"pk": self.tax_rate.pk}),
+            {"delete": "Delete"},
+        )
+
+        # make sure we get a redirect, indicating we had permission
+        self.assertEqual(response.status_code, 302)
+
+
+class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
+    view_class = TaxRateFormView
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tax_rate = TaxRates.objects.create(
+            start_datetime=datetime(
+                year=2233,  # Needs to be >=1 week from datetime.now()
+                month=10,
+                day=5,
+                hour=14,
+                minute=30,
+                second=0,
+                tzinfo=ZoneInfo("America/Nuuk"),
+            ),
+            pax_tax_rate=42,
+        )
+
+        cls.edit_url = reverse(
+            "havneafgifter:edit_taxrate", kwargs={"pk": cls.tax_rate.pk}
+        )
+
+        cls.ptr0 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa1 = PortAuthority.objects.create(
+            name="TestPortauthority1", email="testportauthority@legitemail.com"
+        )
+
+        cls.port1 = Port.objects.create(name="TestPort", portauthority=cls.pa1)
+
+        cls.ptr1_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=11.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr1_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type=None,
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=12.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr2_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=None,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_small = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr3_big = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port1,
+            vessel_type="FREIGHTER",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.pa2 = PortAuthority.objects.create(
+            name="TestPortauthority2", email="testportauthority@legitemail.com"
+        )
+
+        cls.port2 = Port.objects.create(name="OtherTestPort", portauthority=cls.pa2)
+
+        cls.ptr4 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=30000,
+            gt_end=40000,
+            port_tax_rate=25.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr5 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=0,
+            gt_end=30000,
+            port_tax_rate=26.0,
+            round_gross_ton_up_to=70,
+        )
+
+        cls.ptr6 = PortTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            port=cls.port2,
+            vessel_type="CRUISE",
+            gt_start=40000,
+            gt_end=None,
+            port_tax_rate=27.0,
+            round_gross_ton_up_to=70,
+        )
+
+        # ------ ILANDSÆTNINGSSTEDER -------------
+        cls.disemb_tr1 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s1 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=955,  # Kujalleq
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s1,  # udenfor befolkede områder
+            municipality=955,  # Kujalleq
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_tr3 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=None,  # Alle?
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s2 = DisembarkmentSite.objects.create(
+            name="",
+            municipality=959,
+            is_outside_populated_areas=True,
+        )
+
+        cls.disemb_tr4 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s2,  # udenfor befolkede områder
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+        cls.disemb_s3 = DisembarkmentSite.objects.create(
+            name="Attu",
+            municipality=959,
+            is_outside_populated_areas=False,
+        )
+
+        cls.disemb_tr5 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rate,
+            disembarkment_site=cls.disemb_s3,  # Attu
+            municipality=959,  # Qeqertalik
+            disembarkment_tax_rate=2.0,
+        )
+
+    @classmethod
+    def response_to_datafields_dict(cls, content):
+        soup = BeautifulSoup(content, "lxml")
+
+        form_data_dict = {}
+
+        forms = soup.find_all("form")
+
+        for form in forms:
+            inputs = form.find_all(
+                [
+                    "input",
+                    "select",
+                ]
+            )
+            for input_field in inputs:
+                field_name = input_field.get("name")
+                field_value = input_field.get(
+                    "value", ""
+                )  # Default to empty string if no value
+
+                if field_name:
+                    form_data_dict[field_name] = field_value
+
+        return form_data_dict
+
+    @classmethod
+    def html_table_to_dict(cls, table):
+        headers = [element.text for element in table.css.select("thead tr th")]
+        return [
+            dict(
+                zip(
+                    headers,
+                    [
+                        (
+                            td.select_one("input").get("value")
+                            if td.select_one("input")
+                            else td.text.strip()
+                        )
+                        for td in row.select("td")
+                    ],
+                )
+            )
+            for row in table.css.select("table tbody tr")
+        ]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.tax_authority_user)
+
+    def test_rendering(self):
+        response = self.client.get(
+            reverse("havneafgifter:edit_taxrate", kwargs={"pk": self.tax_rate.pk})
+        )
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        port_tax_rates_table = soup.find("table", id="port_tax_rate_table")
+        port_tax_rates_table_content = self.html_table_to_dict(port_tax_rates_table)
+        disembarkment_tax_rates_table = soup.find(
+            "table", id="disembarkment_rate_table"
+        )
+        disembarkment_tax_rates_table_content = self.html_table_to_dict(
+            disembarkment_tax_rates_table
+        )
+
+        # Tax rate section
+        self.assertIn(
+            datetime(2233, 10, 5, 14, 30, 0, tzinfo=ZoneInfo("America/Nuuk")).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+            soup.find("input", {"name": "start_datetime"}).get("value"),
+        )
+        self.assertIn(
+            f"{self.tax_rate.pax_tax_rate}",
+            soup.find("input", {"name": "pax_tax_rate"}).get("value"),
+        )
+
+        # Port tax rate row 1
+        self.assertEqual(
+            port_tax_rates_table_content[0]["Afgifter pr. brutto ton"],
+            "Enhver skibstype, enhver havn",
+        )
+
+        self.assertEqual(
+            port_tax_rates_table_content[0]["Fra (ton)"],
+            str(self.ptr0.gt_start) if self.ptr0.gt_start is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[0]["Til (ton)"],
+            str(self.ptr0.gt_end) if self.ptr0.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[0]["Rund op til (ton)"],
+            str(self.ptr0.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[0]["Sats"], f"{self.ptr0.port_tax_rate:.2f}"
+        )
+
+        # Port tax rate row 2
+        self.assertEqual(
+            port_tax_rates_table_content[1]["Afgifter pr. brutto ton"],
+            "Enhver skibstype, TestPort",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[1]["Fra (ton)"],
+            (
+                str(self.ptr1_small.gt_start)
+                if self.ptr1_small.gt_start is not None
+                else None
+            ),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[1]["Til (ton)"],
+            str(self.ptr1_small.gt_end) if self.ptr1_small.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[1]["Rund op til (ton)"],
+            str(self.ptr1_small.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[1]["Sats"],
+            f"{self.ptr1_small.port_tax_rate:.2f}",
+        )
+
+        # Port tax rate row 3
+        self.assertEqual(
+            port_tax_rates_table_content[2]["Afgifter pr. brutto ton"],
+            "Enhver skibstype, TestPort",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[2]["Fra (ton)"],
+            str(self.ptr1_big.gt_start) if self.ptr1_big.gt_start is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[2]["Til (ton)"],
+            str(self.ptr1_big.gt_end) if self.ptr1_big.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[2]["Rund op til (ton)"],
+            str(self.ptr1_big.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[2]["Sats"],
+            f"{self.ptr1_big.port_tax_rate:.2f}",
+        )
+
+        # Port tax rate row 4
+        self.assertEqual(
+            port_tax_rates_table_content[3]["Afgifter pr. brutto ton"],
+            "Freighter, enhver havn",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[3]["Fra (ton)"],
+            (
+                str(self.ptr2_small.gt_start)
+                if self.ptr2_small.gt_start is not None
+                else None
+            ),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[3]["Til (ton)"],
+            str(self.ptr2_small.gt_end) if self.ptr2_small.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[3]["Rund op til (ton)"],
+            str(self.ptr2_small.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[3]["Sats"],
+            f"{self.ptr2_small.port_tax_rate:.2f}",
+        )
+
+        # Port tax rate row 5
+        self.assertEqual(
+            port_tax_rates_table_content[4]["Afgifter pr. brutto ton"],
+            "Freighter, enhver havn",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[4]["Fra (ton)"],
+            str(self.ptr2_big.gt_start) if self.ptr2_big.gt_start is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[4]["Til (ton)"],
+            str(self.ptr2_big.gt_end) if self.ptr2_big.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[4]["Rund op til (ton)"],
+            str(self.ptr2_big.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[4]["Sats"],
+            f"{self.ptr2_big.port_tax_rate:.2f}",
+        )
+
+        # Port tax rate row 6
+        self.assertEqual(
+            port_tax_rates_table_content[5]["Afgifter pr. brutto ton"],
+            "Freighter, TestPort",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[5]["Fra (ton)"],
+            (
+                str(self.ptr3_small.gt_start)
+                if self.ptr3_small.gt_start is not None
+                else None
+            ),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[5]["Til (ton)"],
+            str(self.ptr3_small.gt_end) if self.ptr3_small.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[5]["Rund op til (ton)"],
+            str(self.ptr3_small.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[5]["Sats"],
+            f"{self.ptr3_small.port_tax_rate:.2f}",
+        )
+
+        # Port tax rate row 7
+        self.assertEqual(
+            port_tax_rates_table_content[6]["Afgifter pr. brutto ton"],
+            "Freighter, TestPort",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[6]["Fra (ton)"],
+            str(self.ptr3_big.gt_start) if self.ptr3_big.gt_start is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[6]["Til (ton)"],
+            str(self.ptr3_big.gt_end) if self.ptr3_big.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[6]["Rund op til (ton)"],
+            str(self.ptr3_big.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[6]["Sats"],
+            f"{self.ptr3_big.port_tax_rate:.2f}",
+        )
+
+        # Port tax rate row 8
+        self.assertEqual(
+            port_tax_rates_table_content[7]["Afgifter pr. brutto ton"],
+            "Cruise ship, OtherTestPort",
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[7]["Fra (ton)"],
+            str(self.ptr4.gt_start) if self.ptr4.gt_start is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[7]["Til (ton)"],
+            str(self.ptr4.gt_end) if self.ptr4.gt_end is not None else None,
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[7]["Rund op til (ton)"],
+            str(self.ptr4.round_gross_ton_up_to),
+        )
+        self.assertEqual(
+            port_tax_rates_table_content[7]["Sats"], f"{self.ptr4.port_tax_rate:.2f}"
+        )
+
+        # Disembarkment tax rate row 1
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[0]["Afgifter pr. ilandsætningssted"],
+            "Kujalleq, ethvert ilandsætningssted",
+        )
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[0]["Sats (DKK)"],
+            f"{self.disemb_tr1.disembarkment_tax_rate:.2f}",
+        )
+
+        # Disembarkment tax rate row 2
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[1]["Afgifter pr. ilandsætningssted"],
+            "Kujalleq, Attu",
+        )
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[1]["Sats (DKK)"],
+            f"{self.disemb_tr2.disembarkment_tax_rate:.2f}",
+        )
+
+        # Disembarkment tax rate row 3
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[2]["Afgifter pr. ilandsætningssted"],
+            "Qeqertalik, ethvert ilandsætningssted",
+        )
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[2]["Sats (DKK)"],
+            f"{self.disemb_tr3.disembarkment_tax_rate:.2f}",
+        )
+
+        # Disembarkment tax rate row 4
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[3]["Afgifter pr. ilandsætningssted"],
+            "Qeqertalik,",
+        )  # TODO: This output is still a bug!
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[3]["Sats (DKK)"],
+            f"{self.disemb_tr4.disembarkment_tax_rate:.2f}",
+        )
+
+        # Disembarkment tax rate row 5
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[4]["Afgifter pr. ilandsætningssted"],
+            "Qeqertalik, Attu",
+        )
+        self.assertEqual(
+            disembarkment_tax_rates_table_content[4]["Sats (DKK)"],
+            f"{self.disemb_tr5.disembarkment_tax_rate:.2f}",
+        )
+
+    def test_port_tax_rate_formset_delete(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        self.assertEqual(PortTaxRate.objects.count(), 10)
+
+        value_dict_to_post = {
+            **original_response_dict,
+            "port_tax_rates-9-DELETE": "1",
+            "port_tax_rates-8-DELETE": "1",
+            "port_tax_rates-7-DELETE": "1",
+        }
+
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+        self.assertEqual(post_request_response.status_code, 302)  # Did we POST ok?
+
+        # Was the row removed from the db table?
+        self.assertEqual(PortTaxRate.objects.count(), 7)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Was the row removed from the form table?
+        self.assertNotIn("port_tax_rates-9-DELETE", after_request_dict)
+
+        # Did we avoid deleting the "above" row in the form table?
+        self.assertIn("port_tax_rates-6-DELETE", after_request_dict)
+
+    def test_port_tax_rate_formset_change(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Is "port_tax_rates-1-gt_end" "30000" as created in the setup?
+        self.assertEqual(
+            "70", original_response_dict["port_tax_rates-1-round_gross_ton_up_to"]
+        )
+
+        data_dict_to_post = {
+            **original_response_dict,
+            "port_tax_rates-1-round_gross_ton_up_to": "80",
+            "start_datetime": "2033-10-05 17:30:00",  # To satisfy validation
+            # (new rates must be >=1 week in the future)
+        }
+
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=data_dict_to_post,
+        )
+
+        self.assertEqual(post_request_response.status_code, 302)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        self.assertEqual(
+            "80", after_request_dict["port_tax_rates-1-round_gross_ton_up_to"]
+        )
+
+    def test_port_tax_rate_formset_insert(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        value_dict_to_post = {
+            **original_response_dict,
+            "port_tax_rates-TOTAL_FORMS": "11",
+            "port_tax_rates-10-gt_start": "0",
+            "port_tax_rates-10-gt_end": "",
+            "port_tax_rates-10-round_gross_ton_up_to": "80",
+            "port_tax_rates-10-port_tax_rate": "313373.00",
+            "port_tax_rates-10-port": self.port1.pk,
+            "port_tax_rates-10-vessel_type": "FISHER",
+            "port_tax_rates-10-DELETE": "",
+        }
+
+        self.assertEqual(PortTaxRate.objects.count(), 10)
+
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+
+        # Check for redirect
+        self.assertEqual(post_request_response.status_code, 302)
+
+        # Was a row added to the db table?
+        self.assertEqual(PortTaxRate.objects.count(), 11)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Was the form table length incremented?
+        self.assertEqual(
+            int(after_request_dict["port_tax_rates-TOTAL_FORMS"]),
+            int(original_response_dict["port_tax_rates-TOTAL_FORMS"]) + 1,
+        )
+
+        # Was the recoginsable value found in the newly added form table row?
+        self.assertEqual(
+            "313373.00", after_request_dict["port_tax_rates-10-port_tax_rate"]
+        )
+
+        # And the db?
+        self.assertEqual(313373.00, PortTaxRate.objects.last().port_tax_rate)
+
+    def test_bisembarkment_tax_rate_formset_change(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Is "disembarkment_tax_rates-4-disembarkment_tax_rate"
+        #   "2.00" as created in the setup?
+        self.assertEqual(
+            "2.00",
+            original_response_dict["disembarkment_tax_rates-4-disembarkment_tax_rate"],
+        )
+
+        data_dict_to_post = {
+            **original_response_dict,
+            "disembarkment_tax_rates-4-disembarkment_tax_rate": "25.00",
+        }
+
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=data_dict_to_post,
+        )
+        self.assertEqual(post_request_response.status_code, 302)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Did "disembarkment_tax_rates-4-disembarkment_tax_rate" change from
+        #   "2.00" to "25.00" ?
+        self.assertEqual(
+            "25.00",
+            after_request_dict["disembarkment_tax_rates-4-disembarkment_tax_rate"],
+        )
+
+    def test_bisembarkment_tax_rate_formset_insert(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        value_dict_to_post = {
+            **original_response_dict,
+            "disembarkment_tax_rates-TOTAL_FORMS": "6",
+            "disembarkment_tax_rates-5-disembarkment_tax_rate": "42.00",
+            "disembarkment_tax_rates-5-municipality": "960",
+            "disembarkment_tax_rates-5-disembarkment_site": "103",
+            "disembarkment_tax_rates-5-DELETE": "",
+        }
+
+        self.assertEqual(DisembarkmentTaxRate.objects.count(), 5)
+
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+
+        self.assertEqual(post_request_response.status_code, 302)
+
+        # Was a row added to the db table?
+        self.assertEqual(DisembarkmentTaxRate.objects.count(), 6)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Was the form table length incremented?
+        self.assertEqual(
+            int(after_request_dict["disembarkment_tax_rates-TOTAL_FORMS"]),
+            int(original_response_dict["disembarkment_tax_rates-TOTAL_FORMS"]) + 1,
+        )
+
+        # Was the recoginsable value found in the newly added form table row?
+        self.assertEqual(
+            "42.00",
+            after_request_dict["disembarkment_tax_rates-5-disembarkment_tax_rate"],
+        )
+
+    def test_bisembarkment_tax_rate_formset_delete(self):
+        original_response_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        self.assertEqual(DisembarkmentTaxRate.objects.count(), 5)
+
+        value_dict_to_post = {
+            **original_response_dict,
+            "disembarkment_tax_rates-4-DELETE": "1",
+        }
+        post_request_response = self.client.post(
+            self.edit_url,
+            data=value_dict_to_post,
+        )
+
+        self.assertEqual(post_request_response.status_code, 302)  # Did we POST ok?
+
+        # Was the row removed from the db table?
+        self.assertEqual(DisembarkmentTaxRate.objects.count(), 4)
+
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(self.edit_url).content.decode("utf-8")
+        )
+
+        # Was the row removed from the form table?
+        self.assertNotIn("disembarkment_tax_rates-4-DELETE", after_request_dict)
+
+        # Did we avoid deleting the "above" row in the form table?
+        self.assertIn("disembarkment_tax_rates-3-DELETE", after_request_dict)
+
+    def test_delete_button_presence(self):
+        response = self.client.get(
+            reverse("havneafgifter:edit_taxrate", kwargs={"pk": self.tax_rate.pk})
+        )
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        rows = soup.find("tbody", id="port_formset_tbody").find_all("tr")
+
+        first_row = rows[0]
+        delete_button_first_row = first_row.find("button", class_="btn btn-danger")
+        self.assertIsNone(delete_button_first_row)
+
+        for index, row in enumerate(rows[1:], start=1):
+            delete_button = row.find("button", class_="btn btn-danger")
+            self.assertIsNotNone(
+                delete_button, f"NO DELETE BUTTON IN {index + 1}: {row}"
+            )
+
+        # The first row should not have a delete button
+        self.assertIsNone(soup.find("button", {"id": "port_tax_rate_delete-button-0"}))
+
+        # Delete button should be in the next row, however
+        self.assertIsNotNone(
+            soup.find("button", {"id": "port_tax_rate_delete-button-1"})
+        )
+
+    def test_clone_functionality(self):
+        response = self.client.get(
+            reverse("havneafgifter:tax_rate_clone", kwargs={"pk": self.tax_rate.pk})
+        )
+
+        original_response_dict = self.response_to_datafields_dict(
+            response.content.decode("utf-8")
+        )
+
+        # regex to strip out id keys
+        import re
+
+        number_pattern = re.compile(
+            r"^(disembarkment_tax_rates|port_tax_rates)-\d+-id$"
+        )
+        prefix_pattern = re.compile(
+            r"^(disembarkment_tax_rates|port_tax_rates)-__prefix__-id$"
+        )
+
+        # assemble new dict and POST
+        data_dict_to_post = {
+            key: value
+            for key, value in original_response_dict.items()
+            if not (number_pattern.match(key) or prefix_pattern.match(key))
+        }
+        data_dict_to_post["start_datetime"] = "3033-10-05 17:33:00"
+        self.client.post(
+            reverse("havneafgifter:tax_rate_clone", kwargs={"pk": self.tax_rate.pk}),
+            data=data_dict_to_post,
+        )
+
+        # was the expected start_datetime saved int he new taxrate ?
+        new_rate_url = reverse(
+            "havneafgifter:edit_taxrate", kwargs={"pk": self.tax_rate.pk + 1}
+        )
+        after_request_dict = self.response_to_datafields_dict(
+            self.client.get(new_rate_url).content.decode("utf-8")
+        )
+        self.assertEqual(after_request_dict["start_datetime"], "3033-10-05 17:33:00")
+
+    def test_get_object_permission(self):
+        self.client.force_login(self.ship_user)
+        response = self.client.get(
+            reverse("havneafgifter:edit_taxrate", kwargs={"pk": self.tax_rate.pk})
+        )
+
+        # make sure we didn't have permission to show the edit view, as ship user
+        self.assertEqual(response.status_code, 403)
+
+        print(response.status_code)
+
+        # make sure we get an error message
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertIn("Du har ikke rettighed til at se denne side.", soup.get_text())

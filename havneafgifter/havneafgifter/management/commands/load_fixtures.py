@@ -58,7 +58,6 @@ class Command(BaseCommand):
             port, _ = Port.objects.get_or_create(
                 name=port_name, defaults={"portauthority": authority}
             )
-            # TODO: kobl på bruger eller gruppe
 
     def load_disembarkment_sites(self):
         # Load 73 disembarkment sites
@@ -84,6 +83,15 @@ class Command(BaseCommand):
             port_tax_rate="0.70",
             round_gross_ton_up_to=70,
         )
+
+        PortTaxRate.objects.get_or_create(
+            tax_rates=taxrates,
+            port=None,
+            vessel_type="CRUISE",
+            gt_start=30000,
+            gt_end=None,
+            port_tax_rate="2.20",
+        )
         PortTaxRate.objects.get_or_create(
             tax_rates=taxrates,
             port=None,
@@ -92,14 +100,6 @@ class Command(BaseCommand):
             gt_end=30000,
             port_tax_rate="1.10",
             round_gross_ton_up_to=70,
-        )
-        PortTaxRate.objects.get_or_create(
-            tax_rates=taxrates,
-            port=None,
-            vessel_type="CRUISE",
-            gt_start=30000,
-            gt_end=None,
-            port_tax_rate="2.20",
         )
         PortTaxRate.objects.get_or_create(
             tax_rates=taxrates,
