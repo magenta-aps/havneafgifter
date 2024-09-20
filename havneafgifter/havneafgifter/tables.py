@@ -41,14 +41,18 @@ class StatistikTable(tables.Table):
 
 
 class TaxRateTableButtonColumn(tables.Column):
+    """
+    Allows TaxRateTable to show a clickable button, instead of just a clickable ID
+    """
+
     def render(self, value, record, bound_column, **kwargs):
         url = reverse_lazy("havneafgifter:tax_rate_details", args=[record.pk])
         return format_html('<a href="{}" class="btn btn-primary">Show</a>', url)
 
 
 class TaxRateTable(tables.Table):
-    # id = tables.Column(linkify=("havneafgifter:tax_rate_details", [tables.A("pk")]))
     id = TaxRateTableButtonColumn()
+    end_datetime = tables.Column(default="∞")
 
     class Meta:
         model = TaxRates
