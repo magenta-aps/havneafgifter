@@ -32,7 +32,7 @@
 
         <tr>
             <th>{% translate "End date" %}</th>
-            <td>{{ object.end_datetime|default_if_none:"-"}}</td>
+            <td>{{ object.end_datetime|default_if_none:"∞"}}</td>
         </tr>
 
         <tr>
@@ -94,9 +94,7 @@
                     {% translate 'Edit' %}
                 </a>
             {% else %}
-                <button type="button" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                        data-bs-title=""
-                        class="btn btn-outline-primary">
+                <button type="button" class="btn btn-outline-primary" disabled>
                     {% translate 'Edit' %}
                 </button>
             {% endif %}
@@ -106,9 +104,7 @@
                 <a href="{% url 'havneafgifter:tax_rate_clone' pk=object.pk %}"
                    class="btn btn-primary" disabled>{% translate 'Clone' %}</a>
             {% else %}
-                <button type="button" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                        data-bs-title=""
-                        class="btn btn-outline-primary">
+                <button type="button" class="btn btn-outline-primary" disabled>
                     {% translate 'Clone' %}
                 </button>
             {% endif %}
