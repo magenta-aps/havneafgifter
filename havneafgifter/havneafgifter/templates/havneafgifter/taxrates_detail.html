@@ -8,17 +8,18 @@
 {% block content %}
     <h1>{% translate "Tax Rate Details" %}</h1>
 
-
     {# Warning banner #}
-    {% if not object.can_edit or not object.can_delete %}
-        <div class="col-12 pt-3">
-            <div class="alert alert-info align-items-center d-flex alert-dismissible fade show" role="alert">
-                <div>
-                    {% translate "<strong>BEMÆRK:</strong> Denne afgiftssats er historisk, aktiv eller træder snart i kraft. Den må derfor ikke ændres eller slettes." %}
+    {% if show_changing_buttons %}
+        {% if not object.can_edit or not object.can_delete %}
+            <div class="col-12 pt-3">
+                <div class="alert alert-info align-items-center d-flex alert-dismissible fade show" role="alert">
+                    <div>
+                        {% translate "<strong>BEMÆRK:</strong> Denne afgiftssats er historisk, aktiv eller træder snart i kraft. Den må derfor ikke ændres eller slettes." %}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
+        {% endif %}
     {% endif %}
 
     <table class="table table-bordered">
