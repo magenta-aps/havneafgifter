@@ -1282,10 +1282,7 @@ class TaxRates(PermissionsMixin, models.Model):
         end = self.end_datetime.date() if self.end_datetime else "∞"
         return f"{start} - {end}"
 
-    def can_delete(self):
-        return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
-
-    def can_edit(self):
+    def is_within_editing_deadline(self):
         return self.start_datetime >= datetime.now(timezone.utc) + timedelta(weeks=1)
 
 
