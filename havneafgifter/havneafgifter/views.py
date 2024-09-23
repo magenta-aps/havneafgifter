@@ -31,13 +31,12 @@ from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
-from project.util import omit
+from project.util import new_taxrate_start_datetime, omit
 
 from havneafgifter.forms import (
     AuthenticationForm,
@@ -863,7 +862,7 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
     def get_initial(self):
         initial = super().get_initial()
         if self.clone:
-            initial["start_datetime"] = datetime.now() + timezone.timedelta(weeks=1)
+            initial["start_datetime"] = new_taxrate_start_datetime(datetime.now())
         return initial
 
     def get_context_data(self, **kwargs):
