@@ -654,5 +654,5 @@ class TestTaxRates(TestCase):
             start_datetime=datetime.now(timezone.utc) + timedelta(days=8)
         )
 
-        self.assertTrue(new_good_tax_rate.can_delete())
-        self.assertFalse(new_bad_tax_rate.can_delete())
+        self.assertTrue(new_good_tax_rate.is_within_editing_deadline())
+        self.assertFalse(new_bad_tax_rate.is_within_editing_deadline())

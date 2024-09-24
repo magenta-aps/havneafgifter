@@ -711,6 +711,7 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
         # )
 
     def get_context_data(self, **kwargs):
+
         return super().get_context_data(
             **{
                 **kwargs,
@@ -722,21 +723,15 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
                     F("municipality").asc(nulls_first=True),
                     F("disembarkment_site").asc(nulls_first=True),
                 ),
-                "can_edit": self.object.has_permission(
+                "user_can_edit": self.object.has_permission(
                     self.request.user, "change", False
-                )
-                and self.object.can_edit,
-                "can_clone": self.object.has_permission(
+                ),
+                "user_can_clone": self.object.has_permission(
                     self.request.user, "add", False
                 ),
-                "can_delete": self.object.has_permission(
+                "user_can_delete": self.object.has_permission(
                     self.request.user, "delete", False
-                )
-                and self.object.can_delete,
-                "show_changing_buttons": self.request.user.groups.filter(
-                    name="TaxAuthority"
-                ).exists()
-                or self.request.user.is_superuser,
+                ),
             }
         )
 
@@ -908,7 +903,6 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             extradata = [
                 {
                     "name": item.name,
-                    "can_delete": item.can_delete,
                 }
                 for item in PortTaxRate.objects.filter(tax_rates_id=self.kwargs["pk"])
             ]

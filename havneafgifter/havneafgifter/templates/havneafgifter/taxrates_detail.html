@@ -8,9 +8,8 @@
 {% block content %}
     <h1>{% translate "Tax Rate Details" %}</h1>
 
-
     {# Warning banner #}
-    {% if not object.can_edit or not object.can_delete %}
+    {% if user_can_edit and not object.is_within_editing_deadline %}
         <div class="col-12 pt-3">
             <div class="alert alert-info align-items-center d-flex alert-dismissible fade show" role="alert">
                 <div>
@@ -88,7 +87,7 @@
 
         {% if show_changing_buttons %}
             {# EDIT button #}
-            {% if can_edit %}
+            {% if user_can_edit and object.is_within_editing_deadline %}
                 <a href="{% url 'havneafgifter:edit_taxrate' pk=object.pk %}"
                    class="btn btn-primary">
                     {% translate 'Edit' %}
@@ -100,7 +99,7 @@
             {% endif %}
 
             {# CLONE button #}
-            {% if can_clone %}
+            {% if user_can_clone %}
                 <a href="{% url 'havneafgifter:tax_rate_clone' pk=object.pk %}"
                    class="btn btn-primary" disabled>{% translate 'Clone' %}</a>
             {% else %}
@@ -109,7 +108,7 @@
                 </button>
             {% endif %}
             {# DELETE button #}
-            {% if can_delete %}
+            {% if user_can_delete and object.is_within_editing_deadline %}
                 <button type="submit" name="delete" class="btn btn-danger">
                     {% translate 'Delete' %}
                 </button>
