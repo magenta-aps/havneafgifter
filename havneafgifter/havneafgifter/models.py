@@ -858,6 +858,19 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 return None
 
     @classmethod
+    def _get_ship_user_filter(cls, user: User) -> Q:
+        if imo_validator_bool(user.username):
+            return Q(vessel_imo=user.username)
+        else:
+            return Q()
+
+    @classmethod
+    def _get_shipping_agent_user_filter(cls, user: User) -> Q:
+        return Q(shipping_agent__isnull=False) & Q(
+            shipping_agent_id=user.shipping_agent_id
+        )
+
+    @classmethod
     def _get_port_authority_filter(cls, user: User) -> Q:
         base_filter: Q = Q(
             # 1. Port authority users cannot see DRAFT forms
@@ -905,31 +918,32 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def _filter_user_permissions(
         cls, qs: QuerySet, user: User, action: str
     ) -> QuerySet | None:
+        filter: Q = Q()
+
         # Filter the qs based on what the user is allowed to do
-        if action in (
-            "view",
-            "change",
-        ):
-            filter: Q = Q()
+        if action in ("view", "change"):
+            if user.has_group_name("Ship"):
+                filter |= cls._get_ship_user_filter(user)
             if user.has_group_name("Shipping"):
-                filter |= Q(shipping_agent__isnull=False) & Q(
-                    shipping_agent_id=user.shipping_agent_id
-                )
+                filter |= cls._get_shipping_agent_user_filter(user)
             if user.has_group_name("PortAuthority"):
                 filter |= cls._get_port_authority_filter(user)
-            if user.has_group_name("Ship") and imo_validator_bool(user.username):
-                filter |= Q(vessel_imo=user.username)
 
-            if filter.children:
-                return qs.filter(filter)
+        if action == "withdraw_from_review":
+            if user.has_group_name("Ship"):
+                filter |= cls._get_ship_user_filter(user)
+            if user.has_group_name("Shipping"):
+                filter |= cls._get_shipping_agent_user_filter(user)
+            if user.has_group_name("TaxAuthority"):
+                return qs.all()
 
-        if action in (
-            "approve",
-            "reject",
-            "invoice",
-        ):
+        if filter.children:
+            return qs.filter(filter)
+
+        if action in ("approve", "reject", "invoice"):
             if user.has_group_name("PortAuthority"):
                 return qs.filter(cls._get_port_authority_filter(user))
+
         return qs.none()
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
@@ -956,6 +970,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             or (
                 action == "submit_for_review"
                 and (user.has_group_name("Ship") or user.has_group_name("Shipping"))
+            )
+            or (
+                action == "withdraw_from_review"
+                and (
+                    user.has_group_name("Ship")
+                    or user.has_group_name("Shipping")
+                    or user.has_group_name("TaxAuthority")
+                )
             )
             or (
                 action in ("approve", "reject", "invoice")
