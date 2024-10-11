@@ -934,8 +934,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 filter |= cls._get_ship_user_filter(user)
             if user.has_group_name("Shipping"):
                 filter |= cls._get_shipping_agent_user_filter(user)
-            if user.has_group_name("TaxAuthority"):
-                return qs.all()
 
         if filter.children:
             return qs.filter(filter)
