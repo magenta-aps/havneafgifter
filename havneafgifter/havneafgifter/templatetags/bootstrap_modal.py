@@ -7,6 +7,14 @@ register = template.Library()
 
 
 @register.inclusion_tag(
+    "havneafgifter/bootstrap/withdraw_form.html",
+    takes_context=True,
+)
+def withdraw_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
+    return {"form": form}
+
+
+@register.inclusion_tag(
     "havneafgifter/bootstrap/approve_form.html",
     takes_context=True,
 )

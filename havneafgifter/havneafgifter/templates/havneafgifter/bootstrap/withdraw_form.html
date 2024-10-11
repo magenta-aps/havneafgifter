@@ -1,0 +1,20 @@
+{% extends 'havneafgifter/bootstrap/modal.html' %}
+
+{% load i18n %}
+
+{% block modal_id %}withdrawModal{% endblock %}
+{% block modal_title %}{% translate 'Withdraw forwarded form' %}{% endblock %}
+
+{% block modal_body %}
+<p>
+    {% blocktrans trimmed %}
+    Do you want to withdraw this form?
+    {% endblocktrans %}
+</p>
+{% endblock %}
+
+{% block modal_submit_url %}{% url 'havneafgifter:withdraw' pk=form.pk %}{% endblock %}
+
+{% block modal_ok_button %}
+<button type="submit" class="btn btn-primary" data-bs-dismiss="modal">{% translate 'Withdraw' %}</button>
+{% endblock %}

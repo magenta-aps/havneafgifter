@@ -23,6 +23,7 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateFormView,
     TaxRateListView,
+    WithdrawView,
 )
 
 app_name = "havneafgifter"
@@ -112,6 +113,11 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/<int:pk>/rediger/",
         HarborDuesFormUpdateView.as_view(),
         name="draft_edit",
+    ),
+    path(
+        "blanket/<int:pk>/tilbagetraek/",
+        WithdrawView.as_view(),
+        name="withdraw",
     ),
     path(
         "blanket/<int:pk>/godkend/",
