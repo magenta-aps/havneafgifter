@@ -914,6 +914,17 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 user.port == self.port_of_call
             )
 
+    def _has_withdraw_from_review_permission(self, user: User) -> bool:
+        if user.has_group_name("Ship"):
+            return (
+                imo_validator_bool(user.username) and user.username == self.vessel_imo
+            )
+        if user.has_group_name("Shipping"):
+            return (
+                self.shipping_agent is not None
+                and self.shipping_agent == user.shipping_agent
+            )
+
     @classmethod
     def _filter_user_permissions(
         cls, qs: QuerySet, user: User, action: str
@@ -971,11 +982,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
             or (
                 action == "withdraw_from_review"
-                and (
-                    user.has_group_name("Ship")
-                    or user.has_group_name("Shipping")
-                    or user.has_group_name("TaxAuthority")
-                )
+                and self._has_withdraw_from_review_permission(user)
             )
             or (
                 action in ("approve", "reject", "invoice")
