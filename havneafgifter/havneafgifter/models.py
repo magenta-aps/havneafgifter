@@ -924,6 +924,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 self.shipping_agent is not None
                 and self.shipping_agent == user.shipping_agent
             )
+        return False
 
     @classmethod
     def _filter_user_permissions(
