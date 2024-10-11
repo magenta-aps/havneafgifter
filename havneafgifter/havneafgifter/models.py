@@ -671,6 +671,17 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @transition(
         field=status,
+        source=[Status.NEW],
+        target=Status.DRAFT,
+        permission=lambda instance, user: instance.has_permission(
+            user, "withdraw_from_review", False
+        ),
+    )
+    def withdraw_from_review(self):
+        self._change_reason = _("Withdrawn from review")
+
+    @transition(
+        field=status,
         source=Status.NEW,
         target=Status.APPROVED,
         permission=lambda instance, user: instance.has_permission(
