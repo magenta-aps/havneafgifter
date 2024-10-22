@@ -89,6 +89,11 @@ table.table-striped td:first-child {
                 {% translate 'Edit' %}
             </a>
             {% endif %}
+            {% if can_withdraw %}
+            <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                {% translate 'Withdraw forwarded form' %}
+            </button>
+            {% endif %}
             {% if can_approve %}
             <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#approveModal">
                 {% translate 'Approve' %}
@@ -135,6 +140,7 @@ table.table-striped td:first-child {
 
 {% block modals %}
 {{ block.super }}
+{% withdraw_form_modal form %}
 {% approve_form_modal form %}
 {% reject_form_modal form %}
 {% endblock %}
