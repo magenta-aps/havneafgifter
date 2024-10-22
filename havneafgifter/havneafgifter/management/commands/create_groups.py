@@ -57,6 +57,13 @@ class Command(BaseCommand):
         )
         Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
+            codename="withdraw_from_review_harborduesform",
+            defaults={
+                "name": "Can withdraw harbor dues forms from review",
+            },
+        )
+        Permission.objects.update_or_create(
+            content_type=harborduesform_contenttype,
             codename="approve_harborduesform",
             defaults={
                 "name": "Can approve harborduesforms",
@@ -74,6 +81,13 @@ class Command(BaseCommand):
             codename="invoice_harborduesform",
             defaults={
                 "name": "Can invoice harborduesforms",
+            },
+        )
+        Permission.objects.update_or_create(
+            content_type=cruisetaxform_contenttype,
+            codename="withdraw_from_review_cruisetaxform",
+            defaults={
+                "name": "Can withdraw cruise tax forms from review",
             },
         )
         Permission.objects.update_or_create(
@@ -181,11 +195,11 @@ class Command(BaseCommand):
             *self.get_permissions(
                 # Tax officers have access to the following actions
                 # on all model instances of these classes
-                (CruiseTaxForm, ("view",)),
+                (CruiseTaxForm, ("view", "withdraw_from_review")),
                 (Disembarkment, ("view",)),
                 (DisembarkmentSite, ("view", "add", "change")),
                 (DisembarkmentTaxRate, ("add", "view", "change")),
-                (HarborDuesForm, ("view",)),
+                (HarborDuesForm, ("view", "withdraw_from_review")),
                 (PassengersByCountry, ("view",)),
                 (Port, ("view",)),
                 (PortAuthority, ("view",)),

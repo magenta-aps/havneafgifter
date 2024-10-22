@@ -60,6 +60,7 @@ class Receipt:
         return {
             "can_create": self._get_can_create(),
             "can_edit": self._get_can_edit(),
+            "can_withdraw": self._get_can_withdraw(),
             "can_approve": self._get_can_approve(),
             "can_reject": self._get_can_reject(),
         }
@@ -81,6 +82,9 @@ class Receipt:
 
     def _get_can_edit(self) -> bool:
         return self._is_permitted_for_user(self.form.submit_for_review)
+
+    def _get_can_withdraw(self) -> bool:
+        return self._is_permitted_for_user(self.form.withdraw_from_review)
 
     def _get_can_approve(self) -> bool:
         return self._is_permitted_for_user(self.form.approve)

@@ -11,6 +11,7 @@ from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMessage
 from django.core.management import call_command
+from django.db.models import Q
 from django.forms import BaseFormSet
 from django.http import (
     HttpResponse,
@@ -58,6 +59,7 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateFormView,
     TaxRateListView,
+    WithdrawView,
     _CruiseTaxFormSetView,
 )
 
@@ -1202,20 +1204,58 @@ class TestActionViewMixin(HarborDuesFormMixin, RequestMixin):
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(response.url, reverse("havneafgifter:harbor_dues_form_list"))
 
-    def test_get_queryset(self):
-        self._setup({}, self.port_authority_user)
+    def _assert_get_queryset_result(
+        self,
+        user: User,
+        status: Status,
+        filter: Q,
+    ):
+        self._setup({}, user)
         self.assertQuerySetEqual(
             self.instance.get_queryset(),
-            HarborDuesForm.objects.filter(
-                port_of_call__portauthority=self.port_authority_user.port_authority,
-                status=Status.NEW,
-            ),
+            HarborDuesForm.objects.filter(filter, status=status),
             ordered=False,
         )
 
 
+class TestWithdrawView(TestActionViewMixin, TestCase):
+    view_class = WithdrawView
+
+    def test_get_queryset(self):
+        self._assert_get_queryset_result(
+            self.shipping_agent_user,
+            Status.NEW,
+            Q(shipping_agent=self.shipping_agent_user.shipping_agent),
+        )
+
+    def test_post(self):
+        # Arrange
+        request = self._setup({}, self.shipping_agent_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
+        self.assertEqual(harbor_dues_form.status, Status.DRAFT.value)
+        self._assert_redirects_to_list_view(response)
+
+    def test_post_not_permitted(self):
+        # Arrange
+        request = self._setup({}, self.port_authority_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)
+
+
 class TestApproveView(TestActionViewMixin, TestCase):
     view_class = ApproveView
+
+    def test_get_queryset(self):
+        self._assert_get_queryset_result(
+            self.port_authority_user,
+            Status.NEW,
+            Q(port_of_call__portauthority=self.port_authority_user.port_authority),
+        )
 
     def test_post(self):
         # Arrange
@@ -1242,6 +1282,13 @@ class TestApproveView(TestActionViewMixin, TestCase):
 
 class TestRejectView(TestActionViewMixin, TestCase):
     view_class = RejectView
+
+    def test_get_queryset(self):
+        self._assert_get_queryset_result(
+            self.port_authority_user,
+            Status.NEW,
+            Q(port_of_call__portauthority=self.port_authority_user.port_authority),
+        )
 
     def test_post(self):
         # Arrange
