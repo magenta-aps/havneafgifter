@@ -27,6 +27,7 @@ class HavneafgiftView:
                 **context,
                 "version": settings.VERSION,
                 "contact_email": settings.CONTACT_EMAIL,
+                "landing_modal": HavneafgiftView.landing_modal(self.request),
             }
         )
 
@@ -39,6 +40,16 @@ class HavneafgiftView:
         return HttpResponseRedirect(
             reverse(viewname, kwargs={"pk": form.pk})
             + (f"?{urlencode(query)}" if query else "")
+        )
+
+    @staticmethod
+    def landing_modal(request):
+        return (
+            hasattr(request, "user")
+            and hasattr(request, "session")
+            and request.user.is_authenticated
+            and request.user.user_type == UserType.PORT_AUTHORITY
+            and not request.session.get("harbor_user_modal")
         )
 
 
