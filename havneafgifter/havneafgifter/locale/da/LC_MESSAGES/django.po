@@ -660,17 +660,19 @@ msgstr "Kontakt"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Bemærk"
-msgstr ""
+msgstr "Bemærk"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid ""
 "Du må først fakturere et anløb, når dette beløb har status \"Godkendt\" i "
 "Talippoq."
 msgstr ""
+"Du må først fakturere et anløb, når dette beløb har status \"Godkendt\" i "
+"Talippoq."
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Forstået"
-msgstr ""
+msgstr "Forstået"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
