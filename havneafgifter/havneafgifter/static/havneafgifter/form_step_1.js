@@ -11,7 +11,7 @@
         const vesselTypeSelect = $("#id_vessel_type");
         const shippingAgent = $("#id_shipping_agent");
         const submitButton = $("button[type=submit][value=NEW]");
-        const submitDraftButton = $("button[type=submit][value=DRAFT]");
+        const submitDraftButton = $("button[name=status][type=submit][value=DRAFT]");
         const userTypeData = form.data("user-type");
 
         const isShipUserSelectingShippingAgent = function () {
@@ -33,7 +33,7 @@
                 return gettext("Continue");
             } else {
                 if (isShipUserSelectingShippingAgent()) {
-                    return gettext("Send to agent");
+                    return gettext("Forward to agent");
                 } else {
                     return gettext("Save as draft");
                 }

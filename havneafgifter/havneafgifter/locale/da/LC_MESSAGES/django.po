@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-23 06:49-0100\n"
+"POT-Creation-Date: 2024-10-25 12:43-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -713,7 +713,6 @@ msgstr ""
 "formular til en shippingagent"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
-#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Save as draft"
@@ -721,13 +720,19 @@ msgstr "Gem som kladde"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
 msgid ""
-"Please note: you are about to send this form to your shipping agent, who "
-"will be notified that they must complete and submit the form to the relevant "
-"port authority."
+"Please note: You are about to send this form to your shipping agent. You "
+"hereby confirm that the form is correct and furthermore give your shipping "
+"agent authority to finish the form and forward it the Greenlandic harbour "
+"authorities."
 msgstr ""
-"Bemærk venligst: du er ved at sende denne formular til din shippingagent som "
-"vil få besked om at de skal færdiggøre og indsende formularen til relevante "
-"havnemyndighed."
+"Bemærk venligst: Du er ved at sende denne formular til din agent. Du "
+"bekræfter hermed formularens rigtighed og giver skibets agent fuldmagt til "
+"at færdiggøre formularen og sende den videre til de grønlandske "
+"havnemyndigheder."
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
+msgid "I accept - forward to agent"
+msgstr "Jeg accepterer - send til agent"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
 msgid "Please note: when a form is submitted, it can no longer be edited."
@@ -809,7 +814,6 @@ msgstr ""
 "passagerer, der ilandsættes."
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Send to agent"
 msgstr "Send til agent"
 
@@ -853,6 +857,10 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Harbour Dues/Port Tax"
 msgstr "Havneafgift"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_form.html
+msgid "Forward to agent"
+msgstr "Send til agent"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "IMO numbers should be 7 digits"
