@@ -32,6 +32,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
@@ -505,7 +506,6 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
 
         form.calculate_tax(save=True)
         receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
-
         return HttpResponse(receipt.html)
 
     def get_object(self, queryset=None):
@@ -1011,3 +1011,9 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             return self.form_valid(form, formset1, formset2)
         else:
             return self.form_invalid(form, formset1, formset2)
+
+
+class LandingModalOkView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        request.session["harbor_user_modal"] = True
+        return HttpResponse(status=204)
