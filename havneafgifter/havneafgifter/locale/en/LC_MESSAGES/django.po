@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-16 14:01-0100\n"
+"POT-Creation-Date: 2024-10-23 06:49-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -611,6 +611,22 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Contact"
 msgstr "Contact"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Bemærk"
+msgstr "Please notice"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid ""
+"Du må først fakturere et anløb, når dette beløb har status \"Godkendt\" i "
+"Talippoq."
+msgstr ""
+"You may only send an invoice to the shipping agent on the forms with an "
+"\"Approved\" status in Talippoq."
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Forstået"
+msgstr "Understood"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html

@@ -58,6 +58,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                     "can_withdraw": False,
                     "can_approve": False,
                     "can_reject": False,
+                    "landing_modal": False,
                 }
             ),
         )

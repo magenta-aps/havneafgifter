@@ -2254,3 +2254,11 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         # make sure we get an error message
         soup = BeautifulSoup(response.content, "html.parser")
         self.assertIn("Du har ikke rettighed til at se denne side.", soup.get_text())
+
+
+class TestLandingModalOkView(HarborDuesFormMixin, TestCase):
+    def test_post(self):
+        self.client.force_login(self.port_user)
+        response = self.client.post(reverse("havneafgifter:landing_modal_ok"))
+        self.assertEqual(response.status_code, 204)
+        self.assertTrue(self.client.session.get("harbor_user_modal"))
