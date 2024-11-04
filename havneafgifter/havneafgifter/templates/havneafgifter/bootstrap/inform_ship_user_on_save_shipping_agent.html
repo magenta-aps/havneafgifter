@@ -8,13 +8,12 @@
 {% block modal_body %}
 <p>
     {% blocktrans trimmed %}
-    Please note: you are about to send this form to your shipping agent,
-    who will be notified that they must complete and submit the form to
-    the relevant port authority.
+    Please note: You are about to send this form to your shipping agent.
+    You hereby confirm that the form is correct and furthermore give your shipping agent authority to finish the form and forward it the Greenlandic harbour authorities.
     {% endblocktrans %}
 </p>
 {% endblock %}
 
 {% block modal_ok_button %}
-<button type="submit" class="btn btn-primary" name="confirm" value="DRAFT" data-bs-dismiss="modal">{% translate 'Save as draft' %}</button>
+<button type="submit" class="btn btn-primary" name="confirm" value="DRAFT" data-bs-dismiss="modal">{% translate 'I accept - forward to agent' %}</button>
 {% endblock %}
