@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "metrics",
     "tempus_dominus",
     "simple_history",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
