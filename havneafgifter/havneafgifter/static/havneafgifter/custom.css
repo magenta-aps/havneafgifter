@@ -1,3 +1,24 @@
+/* Customize colors, etc. to match design */
+:root {
+    --bs-body-bg: #DFEEF7;
+    --bs-body-color: #276B93;
+    --bs-link-color: #276B93;
+    --bs-link-color-rgb: rgb(39, 107, 147);
+    --bs-gray: #D7E0E6;
+}
+.container {
+    padding: 2rem;
+    background: var(--bs-white);
+    border-radius: 1rem;
+    box-shadow: 0 0 1rem var(--bs-gray);
+}
+.card {
+    background: var(--bs-white);
+}
+.form-control {
+    background: var(--bs-white);
+}
+
 /* Align "django-select2" widgets with Bootstrap general look */
 .select2-selection {
     border-color: #dee2e6 !important;
@@ -40,10 +61,11 @@
 table.receipt td p {
     font-style: italic;
 }
+
 .tooltip.error-tooltip {
-  --bs-tooltip-bg: #2c0b0e;
-  --bs-tooltip-color: #dee2e6;
+    --bs-tooltip-bg: #2c0b0e;
+    --bs-tooltip-color: #dee2e6;
 }
 .tooltip.error-tooltip .tooltip-inner {
-  border: 1px solid var(--bs-danger);
+    border: 1px solid var(--bs-danger);
 }
