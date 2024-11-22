@@ -15,8 +15,12 @@ class HarborDuesFormFilter(django_filters.FilterSet):
 
 class HarborDuesFormTable(tables.Table):
     view = tables.TemplateColumn(
-        template_name="havneafgifter/bootstrap/open_details.html"
+        template_name="havneafgifter/bootstrap/open_details.html",
+        attrs={"cell": {"class": "d-none d-sm-table-cell"}},
     )
+    id = tables.Column(attrs={"cell": {"class": "d-none d-sm-table-cell"}})
+    date = tables.Column(attrs={"cell": {"class": "d-none d-sm-table-cell"}})
+    pdf = tables.Column(attrs={"cell": {"class": "d-none d-sm-table-cell"}})
 
     class Meta:
         model = HarborDuesForm

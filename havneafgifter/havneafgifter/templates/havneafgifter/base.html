@@ -26,7 +26,11 @@
 <body>
 {% block header %}
     <header>
-        <nav class="nav navbar flex-column flex-sm-row p-1 bg-dark" data-bs-theme="dark">
+        <nav class="nav navbar flex-column flex-sm-row p-1 bg-dark fixed-top navbar-expand-sm" data-bs-theme="dark">
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navbarCollapse" class="navbar-collapse collapse">
             {% if user.is_authenticated %}
                 {% if user.can_create %}
                     <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="nav-link">
@@ -79,6 +83,7 @@
                 </div>
             </form>
             {# endif #}
+            </div>
 
         </nav>
     </header>

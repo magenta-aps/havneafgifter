@@ -12,6 +12,20 @@
     {% bootstrap_button button_type="submit" content=_("Filter") %}
 </form>
 
+<div class="table-responsive">
 {% render_table table %}
+</div>
+
+<script nonce="{{request.csp_nonce}}">
+    $(function(){
+        $(".table-responsive table").on("click", "tr", function(event){
+            const row = $(event.target).parents("tr");
+            const link = row.find("a.btn").attr("href");
+            if (link) {
+                window.location=link;
+            }
+        });
+    });
+</script>
 
 {% endblock content %}
