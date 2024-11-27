@@ -46,15 +46,27 @@ ENV COMMIT_TAG=${COMMIT_TAG:-HEAD}
 COPY requirements.txt /app/requirements.txt
 COPY mypy.ini /app/mypy.ini
 
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt &&  \
+    rm /app/requirements.txt
 
 ARG COMMIT_TAG
 ENV COMMIT_TAG=${COMMIT_TAG:-HEAD}
 
-USER havneafgifter
-COPY ./docker/entrypoint.sh /entrypoint.sh
 COPY --chown=havneafgifter:havneafgifter ./havneafgifter /app
+RUN chown -R havneafgifter:havneafgifter /app
+COPY ./docker/entrypoint.sh /entrypoint.sh
 EXPOSE 8000
+USER havneafgifter
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
+RUN django-admin compilemessages --locale=kl --locale=da --locale=en
+
+# temporarily use the dev env, to make manage.py work (to run collectstatic)
+COPY --chown=havneafgifter:havneafgifter ./dev-environment/havneafgifter.env havneafgifter.env
+# hadolint ignore=SC1091
+RUN set -a &&  \
+    source havneafgifter.env &&  \
+    set +a &&  \
+    python manage.py collectstatic --no-input --clear
+
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
