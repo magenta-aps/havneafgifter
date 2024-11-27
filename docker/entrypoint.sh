@@ -68,8 +68,8 @@ fi
 
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
-  python manage.py makemessages --locale=en --locale=da --locale=kl --no-obsolete --add-location file --domain django
-  python manage.py makemessages --locale=en --locale=da --locale=kl --no-obsolete --add-location file --domain djangojs
+  python manage.py make_messages --locale=en --locale=da --locale=kl --no-obsolete --add-location file --domain django
+  python manage.py make_messages --locale=en --locale=da --locale=kl --no-obsolete --add-location file --domain djangojs
 fi
 if [ "${COMPILEMESSAGES,,}" = true ]; then
   echo 'compiling messages'
