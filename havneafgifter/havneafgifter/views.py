@@ -138,12 +138,10 @@ class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
     form_class = UpdateVesselForm
 
     def get_initial(self):
-        inital = super().get_initial()
-
-        inital["user"] = self.request.user
-        inital["imo"] = self.request.user.username
-
-        return inital
+        initial = super().get_initial()
+        initial["user"] = self.request.user
+        initial["imo"] = self.request.user.username
+        return initial
 
     def get_object(self, queryset=None):
         try:
