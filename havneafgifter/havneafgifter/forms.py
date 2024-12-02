@@ -176,6 +176,42 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         return user
 
 
+class UpdateVesselForm(CSPFormMixin, ModelForm):
+    class Meta:
+        model = Vessel
+        exclude = ["user", "imo"]
+
+    type = ChoiceField(
+        required=False,
+        choices=ShipType.choices,
+        label=_("Vessel type"),
+    )
+
+    name = CharField(
+        required=False,
+        max_length=255,
+        label=_("Vessel name"),
+    )
+
+    owner = CharField(
+        max_length=255,
+        required=False,
+        label=_("Vessel owner"),
+    )
+
+    master = CharField(
+        max_length=255,
+        required=False,
+        label=_("Vessel captain"),
+    )
+
+    gross_tonnage = IntegerField(
+        required=False,
+        validators=[MinValueValidator(0)],
+        label=_("Gross tonnage"),
+    )
+
+
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     class Meta:
         model = HarborDuesForm
@@ -968,7 +1004,6 @@ class BasePortTaxRateFormSet(BootstrapFormSet, TaxRateFormSet):
                 )
 
                 if combination in combinations:
-
                     # compose error message
                     errmsg = (
                         "En sats med denne kombination af "

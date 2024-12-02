@@ -1,0 +1,20 @@
+{% extends 'havneafgifter/bootstrap/modal.html' %}
+
+{% load i18n %}
+
+{% block modal_id %}#informShipUserOnSaveVesselChangeModal{% endblock %}
+{% block modal_title %}{% translate 'Attention' %}{% endblock %}
+
+{% block modal_body %}
+<p>
+    {% blocktrans trimmed %}
+    Please note:
+    By clicking "Save master data" you will edit the master data of the ship in Talippoq. You can always edit the master data again, if a necessity should occur.
+    {% endblocktrans %}
+</p>
+
+{% endblock %}
+
+{% block modal_ok_button %}
+<button type="submit" class="btn btn-primary" name="confirm" data-bs-dismiss="modal">{% translate 'Save master data' %}</button>
+{% endblock %}

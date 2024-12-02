@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-11 11:05-0200\n"
+"POT-Creation-Date: 2024-12-02 12:53-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -700,6 +700,10 @@ msgid "Rates"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+msgid "Edit master data"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
 msgid "Log out"
 msgstr ""
 
@@ -749,6 +753,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_vessel_change.html
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
 msgid "Attention"
 msgstr ""
@@ -781,6 +786,17 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
 msgid "I accept - forward to agent"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_vessel_change.html
+msgid ""
+"Please note: By clicking \"Save master data\" you will edit the master data "
+"of the ship in Talippoq. You can always edit the master data again, if a "
+"necessity should occur."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_vessel_change.html
+msgid "Save master data"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
@@ -967,6 +983,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
+#: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Edit"
 msgstr ""
 
@@ -980,6 +997,7 @@ msgid "Message"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
+#: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Vessel details"
 msgstr ""
 
@@ -1152,6 +1170,10 @@ msgstr ""
 msgid "Harbor tax rate list"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/update_vessel.html
+msgid "Edit vessel to report harbour dues"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/user/password/password_requirements.html
 msgid ""
 "Passwords must be at least 8 characters, and cannot consist of only digits. "
@@ -1235,6 +1257,10 @@ msgstr ""
 
 #: havneafgifter/views.py
 msgid "Please sign in using the IMO number as username"
+msgstr ""
+
+#: havneafgifter/views.py
+msgid "No vessel found"
 msgstr ""
 
 #: havneafgifter/views.py
