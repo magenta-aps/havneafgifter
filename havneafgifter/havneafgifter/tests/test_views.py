@@ -42,6 +42,7 @@ from havneafgifter.models import (
     Status,
     TaxRates,
     User,
+    Vessel,
 )
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 from havneafgifter.views import (
@@ -59,6 +60,7 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateFormView,
     TaxRateListView,
+    UpdateVesselView,
     WithdrawView,
     _CruiseTaxFormSetView,
 )
@@ -87,6 +89,54 @@ class TestSignupVesselView(HarborDuesFormMixin, TestCase):
             self.assertEqual(
                 response.url, reverse("havneafgifter:harbor_dues_form_create")
             )
+
+
+class TestUpdateVesselView(HarborDuesFormMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = UpdateVesselView()
+
+    def test_user_with_ship(self):
+        self.client.force_login(self.ship_user)
+
+        response = self.client.post(
+            reverse("havneafgifter:update_vessel"),
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_without_ship(self):
+        self.client.force_login(self.shipping_agent_user)
+
+        response = self.client.post(
+            reverse("havneafgifter:update_vessel"),
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_form_valid(self):
+        self.client.force_login(self.ship_user)
+
+        self.client.post(
+            reverse("havneafgifter:update_vessel"),
+            {
+                "type": "PASSENGER",
+                "name": "Boaty McBoatface",
+                "owner": "Joakim von And",
+                "master": "Peder Dingo",
+                "gross_tonnage": 1234,
+            },
+        )
+
+        vessel_form = Vessel.objects.get(imo=self.ship_user.username)
+
+        self.assertEqual(vessel_form.type, "PASSENGER")
+        self.assertEqual(vessel_form.name, "Boaty McBoatface")
+        self.assertEqual(vessel_form.owner, "Joakim von And")
+        self.assertEqual(vessel_form.master, "Peder Dingo")
+        self.assertEqual(vessel_form.gross_tonnage, 1234)
 
 
 class TestRootView(TestCase):

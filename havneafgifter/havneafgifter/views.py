@@ -51,6 +51,7 @@ from havneafgifter.forms import (
     SignupVesselForm,
     StatisticsForm,
     TaxRateForm,
+    UpdateVesselForm,
 )
 from havneafgifter.mails import OnApproveMail, OnRejectMail, OnSubmitForReviewMail
 from havneafgifter.models import (
@@ -68,6 +69,7 @@ from havneafgifter.models import (
     Status,
     TaxRates,
     UserType,
+    Vessel,
 )
 from havneafgifter.responses import (
     HavneafgifterResponseBadRequest,
@@ -129,6 +131,28 @@ class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
 
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_create")
+
+
+class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
+    template_name = "havneafgifter/update_vessel.html"
+    form_class = UpdateVesselForm
+
+    def get_initial(self):
+        inital = super().get_initial()
+
+        inital["user"] = self.request.user
+        inital["imo"] = self.request.user.username
+
+        return inital
+
+    def get_object(self, queryset=None):
+        try:
+            return Vessel.objects.get(imo=self.request.user.username)
+        except Vessel.DoesNotExist:
+            raise Http404(_("No vessel found"))
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
 
 
 class LoginView(HavneafgiftView, DjangoLoginView):
@@ -750,7 +774,6 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
         # )
 
     def get_context_data(self, **kwargs):
-
         return super().get_context_data(
             **{
                 **kwargs,

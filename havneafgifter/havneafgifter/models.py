@@ -194,6 +194,15 @@ class User(AbstractUser):
         # For now every user is allowed to use the TaxRateListView
         return True
 
+    @property
+    def can_view_edit_master_data(self) -> bool:
+        user_type: UserType | None = getattr(self, "user_type", None)
+
+        if user_type is UserType.SHIP:
+            return True
+
+        return False
+
 
 class PermissionsMixin(models.Model):
     class Meta:
