@@ -48,6 +48,11 @@
                     {% translate 'Rates' %}
                     </a>
                 {% endif %}
+                {% if user.can_view_edit_master_data %}
+                    <a href="{% url 'havneafgifter:update_vessel' %}" class="nav-link" id="update-vessel-link">
+                    {% translate 'Edit master data' %}
+                    </a>
+                {% endif %}
             {% endif %}
             <span class="navbar-text m-2 pt-2 ms-auto">
                 {{ user.display_name }}

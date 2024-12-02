@@ -24,6 +24,7 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateFormView,
     TaxRateListView,
+    UpdateVesselView,
     WithdrawView,
 )
 
@@ -35,6 +36,11 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "signup/vessel",
         SignupVesselView.as_view(),
         name="signup-vessel",
+    ),
+    path(
+        "rediger/vessel",
+        UpdateVesselView.as_view(),
+        name="update_vessel",
     ),
     path(
         "login",
