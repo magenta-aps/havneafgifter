@@ -38,7 +38,7 @@ from django.views.generic.edit import CreateView, FormView, UpdateView
 from django_fsm import can_proceed
 from django_tables2 import SingleTableMixin, SingleTableView
 from project.util import new_taxrate_start_datetime, omit
-
+from django_tables2.export.views import ExportMixin
 from havneafgifter.forms import (
     AuthenticationForm,
     DisembarkmentForm,
@@ -796,10 +796,11 @@ class TaxRateDetailView(LoginRequiredMixin, DetailView):
         )
 
 
-class StatisticsView(LoginRequiredMixin, CSPViewMixin, SingleTableMixin, GetFormView):
+class StatisticsView(LoginRequiredMixin, ExportMixin, CSPViewMixin, SingleTableMixin, GetFormView):
     form_class = StatisticsForm
     template_name = "havneafgifter/statistik.html"
     table_class = StatistikTable
+    export_name = "statistik"
 
     def dispatch(self, request, *args, **kwargs):
         if (

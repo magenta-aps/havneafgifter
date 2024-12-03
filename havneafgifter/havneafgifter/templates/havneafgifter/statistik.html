@@ -6,6 +6,7 @@
 {% load django_bootstrap5 %}
 {% load render_table from django_tables2 %}
 {% load media_csp %}
+{% load export_url from django_tables2 %}
 
 {% block extra_headers %}
 <script src="{% static 'tempusdominus/popper.min.js' %}" nonce="{{request.csp_nonce}}"></script>
@@ -38,5 +39,6 @@
 </form>
 {% if form.data %}
 {% render_table table %}
+<a href="{% export_url 'xlsx' %}">{% translate 'Eksportér til Excel' %}</a>
 {% endif %}
 {% endblock %}
