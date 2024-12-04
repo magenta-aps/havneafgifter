@@ -38,6 +38,7 @@ class StatistikTable(tables.Table):
     disembarkment_tax_sum = tables.Column(verbose_name=_("Landgangsafgift"))
     harbour_tax_sum = tables.Column(verbose_name=_("Havneafgift"))
     count = tables.Column(verbose_name=_("Antal skibe"))
+    status = tables.Column(verbose_name=_("Status"))
 
 
 class TaxRateTableButtonColumn(tables.Column):

@@ -634,6 +634,11 @@ class StatisticsForm(BootstrapForm):
     port_of_call = ModelMultipleChoiceField(
         label=_("Havn"), queryset=Port.objects.all(), required=False
     )
+    status = MultipleChoiceField(
+        label=_("Status"),
+        choices=Status.choices,
+        required=False,
+    )
 
 
 class TaxRateForm(ModelForm, BootstrapForm):
