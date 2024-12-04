@@ -875,20 +875,16 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
         self._test_filter_expected({}, True)
 
     def test_list_filter_status(self):
-        self._test_filter_expected({"status": Status.NEW}, True)
-        for status in (Status.DRAFT, Status.REJECTED, Status.APPROVED):
-            self._test_filter_expected({"status": status}, False)
+        actual_status = self.harbor_dues_form_data["status"]
+        for status in Status:
+            self._test_filter_expected({"status": status}, status == actual_status)
 
     def test_list_filter_municipality(self):
-        self._test_filter_expected({"municipality": Municipality.AVANNAATA}, True)
-        for municipality in (
-            Municipality.SERMERSOOQ,
-            Municipality.KUJALLEQ,
-            Municipality.NATIONAL_PARK,
-            Municipality.QEQERTALIK,
-            Municipality.QEQQATA,
-        ):
-            self._test_filter_expected({"municipality": municipality}, False)
+        actual_municipality = self.disembarkment1.disembarkment_site.municipality
+        for municipality in Municipality:
+            self._test_filter_expected(
+                {"municipality": municipality}, municipality == actual_municipality
+            )
 
     def test_list_filter_arrival_gte(self):
         arrival = self.harbor_dues_form_data["datetime_of_arrival"]
