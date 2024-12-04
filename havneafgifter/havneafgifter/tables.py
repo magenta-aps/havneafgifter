@@ -1,5 +1,6 @@
 import django_filters
 import django_tables2 as tables
+from django.forms import DateTimeInput
 from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -16,6 +17,18 @@ class HarborDuesFormFilter(django_filters.FilterSet):
         label=_("Municipality"),
         field_name="cruisetaxform__disembarkment__disembarkment_site__municipality",
         choices=Municipality,
+    )
+    arrival_gte = django_filters.DateTimeFilter(
+        label=_("Arrival date after"),
+        field_name="datetime_of_arrival",
+        lookup_expr="gte",
+        widget=DateTimeInput(attrs={"class": "datetimepicker"}),
+    )
+    arrival_lte = django_filters.DateTimeFilter(
+        label=_("Arrival date before"),
+        field_name="datetime_of_arrival",
+        lookup_expr="lte",
+        widget=DateTimeInput(attrs={"class": "datetimepicker"}),
     )
 
 
