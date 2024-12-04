@@ -2117,7 +2117,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         # And the db?
         self.assertEqual(313373.00, PortTaxRate.objects.last().port_tax_rate)
 
-    def test_bisembarkment_tax_rate_formset_change(self):
+    def test_disembarkment_tax_rate_formset_change(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
         )
@@ -2151,7 +2151,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             after_request_dict["disembarkment_tax_rates-4-disembarkment_tax_rate"],
         )
 
-    def test_bisembarkment_tax_rate_formset_insert(self):
+    def test_disembarkment_tax_rate_formset_insert(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
         )
@@ -2187,13 +2187,13 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
             int(original_response_dict["disembarkment_tax_rates-TOTAL_FORMS"]) + 1,
         )
 
-        # Was the recoginsable value found in the newly added form table row?
+        # Was the recognisable value found in the newly added form table row?
         self.assertEqual(
             "42.00",
             after_request_dict["disembarkment_tax_rates-5-disembarkment_tax_rate"],
         )
 
-    def test_bisembarkment_tax_rate_formset_delete(self):
+    def test_disembarkment_tax_rate_formset_delete(self):
         original_response_dict = self.response_to_datafields_dict(
             self.client.get(self.edit_url).content.decode("utf-8")
         )

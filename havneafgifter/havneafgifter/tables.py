@@ -4,13 +4,19 @@ from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from havneafgifter.models import HarborDuesForm, TaxRates
+from havneafgifter.models import HarborDuesForm, Municipality, TaxRates
 
 
 class HarborDuesFormFilter(django_filters.FilterSet):
     class Meta:
         model = HarborDuesForm
         fields = {"status": ["exact"]}
+
+    municipality = django_filters.ChoiceFilter(
+        label=_("Municipality"),
+        field_name="cruisetaxform__disembarkment__disembarkment_site__municipality",
+        choices=Municipality,
+    )
 
 
 class HarborDuesFormTable(tables.Table):
