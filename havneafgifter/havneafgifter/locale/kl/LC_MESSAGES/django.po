@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-04 11:34-0200\n"
+"POT-Creation-Date: 2024-12-04 12:25-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -560,7 +560,7 @@ msgstr ""
 msgid "Disembarkment site"
 msgstr ""
 
-#: havneafgifter/models.py
+#: havneafgifter/models.py havneafgifter/tables.py
 msgid "Municipality"
 msgstr ""
 
@@ -640,6 +640,14 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "ethvert ilandsætningssted"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Arrival date after"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Arrival date before"
 msgstr ""
 
 #: havneafgifter/tables.py

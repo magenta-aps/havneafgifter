@@ -850,6 +850,32 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
         self.view.get(request)
         self.assertNotIn(self.harbor_dues_form, self.view.get_queryset())
 
+    def _test_filter_expected(self, filter: dict, expected: bool):
+        request = self.request_factory.get(path="", data=filter)
+        request.user = User.objects.get(username="admin")
+        self.view.setup(request)
+        self.view.get(request)
+        if expected:
+            self.assertIn(
+                self.harbor_dues_form,
+                self.view.get_queryset(),
+                f"expected harbor_dues_form in queryset of filter {filter}, "
+                "was not found",
+            )
+        else:
+            self.assertNotIn(
+                self.harbor_dues_form,
+                self.view.get_queryset(),
+                f"did not expect harbor_dues_form in queryset of filter {filter}, "
+                "was found",
+            )
+
+    def test_list_filter_status(self):
+        self._test_filter_expected({}, True)
+        self._test_filter_expected({"status": Status.NEW}, True)
+        for status in (Status.DRAFT, Status.REJECTED, Status.APPROVED):
+            self._test_filter_expected({"status": status}, False)
+
 
 class StatisticsTest(TestCase):
     url = reverse("havneafgifter:statistik")
