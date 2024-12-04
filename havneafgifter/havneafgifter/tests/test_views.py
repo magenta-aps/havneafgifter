@@ -871,14 +871,15 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
                 "was found",
             )
 
-    def test_list_filter_status(self):
+    def test_list_filter_empty(self):
         self._test_filter_expected({}, True)
+
+    def test_list_filter_status(self):
         self._test_filter_expected({"status": Status.NEW}, True)
         for status in (Status.DRAFT, Status.REJECTED, Status.APPROVED):
             self._test_filter_expected({"status": status}, False)
 
     def test_list_filter_municipality(self):
-        self._test_filter_expected({}, True)
         self._test_filter_expected({"municipality": Municipality.AVANNAATA}, True)
         for municipality in (
             Municipality.SERMERSOOQ,
@@ -888,6 +889,18 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
             Municipality.QEQQATA,
         ):
             self._test_filter_expected({"municipality": municipality}, False)
+
+    def test_list_filter_arrival_gte(self):
+        arrival = self.harbor_dues_form_data["datetime_of_arrival"]
+        self._test_filter_expected({"arrival_gte": arrival}, True)
+        self._test_filter_expected({"arrival_gte": arrival - timedelta(hours=1)}, True)
+        self._test_filter_expected({"arrival_gte": arrival + timedelta(hours=1)}, False)
+
+    def test_list_filter_arrival_lte(self):
+        arrival = self.harbor_dues_form_data["datetime_of_arrival"]
+        self._test_filter_expected({"arrival_lte": arrival}, True)
+        self._test_filter_expected({"arrival_lte": arrival - timedelta(hours=1)}, False)
+        self._test_filter_expected({"arrival_lte": arrival + timedelta(hours=1)}, True)
 
 
 class StatisticsTest(TestCase):
