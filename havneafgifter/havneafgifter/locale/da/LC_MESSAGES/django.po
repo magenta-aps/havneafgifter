@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-04 13:27-0200\n"
+"POT-Creation-Date: 2024-12-04 13:47-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -191,6 +191,10 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/taxrateform.html
 msgid "Havn"
 msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py havneafgifter/tables.py
+msgid "Status"
+msgstr "Status"
 
 #: havneafgifter/forms.py
 msgid "Gyldighed fra"
@@ -511,10 +515,6 @@ msgstr "Havnens navn"
 #: havneafgifter/models.py
 msgid "Reason text"
 msgstr "Begrundelse (tekst)"
-
-#: havneafgifter/models.py
-msgid "Status"
-msgstr "Status"
 
 #: havneafgifter/models.py
 #, fuzzy
