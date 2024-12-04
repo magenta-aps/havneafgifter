@@ -32,6 +32,7 @@ from havneafgifter.models import (
     DisembarkmentSite,
     DisembarkmentTaxRate,
     HarborDuesForm,
+    Municipality,
     Nationality,
     PassengersByCountry,
     Port,
@@ -857,16 +858,16 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
         self.view.get(request)
         if expected:
             self.assertIn(
-                self.harbor_dues_form,
+                self.cruise_tax_form.harborduesform_ptr,
                 self.view.get_queryset(),
-                f"expected harbor_dues_form in queryset of filter {filter}, "
+                f"expected self.cruise_tax_form in queryset of filter {filter}, "
                 "was not found",
             )
         else:
             self.assertNotIn(
-                self.harbor_dues_form,
+                self.cruise_tax_form.harborduesform_ptr,
                 self.view.get_queryset(),
-                f"did not expect harbor_dues_form in queryset of filter {filter}, "
+                f"did not expect self.cruise_tax_form in queryset of filter {filter}, "
                 "was found",
             )
 
@@ -875,6 +876,18 @@ class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
         self._test_filter_expected({"status": Status.NEW}, True)
         for status in (Status.DRAFT, Status.REJECTED, Status.APPROVED):
             self._test_filter_expected({"status": status}, False)
+
+    def test_list_filter_municipality(self):
+        self._test_filter_expected({}, True)
+        self._test_filter_expected({"municipality": Municipality.AVANNAATA}, True)
+        for municipality in (
+            Municipality.SERMERSOOQ,
+            Municipality.KUJALLEQ,
+            Municipality.NATIONAL_PARK,
+            Municipality.QEQERTALIK,
+            Municipality.QEQQATA,
+        ):
+            self._test_filter_expected({"municipality": municipality}, False)
 
 
 class StatisticsTest(TestCase):

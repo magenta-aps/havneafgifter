@@ -6,6 +6,8 @@ from django.core.management import call_command
 
 from havneafgifter.models import (
     CruiseTaxForm,
+    Disembarkment,
+    DisembarkmentSite,
     HarborDuesForm,
     Nationality,
     Port,
@@ -130,6 +132,11 @@ class HarborDuesFormMixin:
         }
         # Cruise tax form objects (NEW and DRAFT, and NEW without port of call)
         cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.cruise_tax_form_data)
+        cls.disembarkment1 = Disembarkment.objects.create(
+            cruise_tax_form=cls.cruise_tax_form,
+            number_of_passengers=100,
+            disembarkment_site=DisembarkmentSite.objects.get(pk=100),  # Siorapaluk
+        )
         cls.cruise_tax_draft_form = CruiseTaxForm.objects.create(
             **{k: v for k, v in cls.cruise_tax_form_data.items() if k != "status"},
         )
