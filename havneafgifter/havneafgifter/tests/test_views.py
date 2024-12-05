@@ -889,7 +889,7 @@ class StatisticsTest(TestCase):
             disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
         )
         cls.form3 = CruiseTaxForm.objects.create(
-            status=Status.APPROVED,
+            status=Status.REJECTED,
             port_of_call=ports[1],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 3",
@@ -940,6 +940,7 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax_sum": Decimal("0.00"),
                 "harbour_tax_sum": self.form1.harbour_tax,
                 "count": 1,
+                "status": Status.APPROVED.label,
             },
         )
         self.assertDictEqual(
@@ -953,6 +954,7 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax_sum": self.form2.disembarkment_tax,
                 "harbour_tax_sum": self.form2.harbour_tax,
                 "count": 1,
+                "status": Status.APPROVED.label,
             },
         )
         self.assertDictEqual(
@@ -966,6 +968,7 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax_sum": self.form3.disembarkment_tax,
                 "harbour_tax_sum": self.form3.harbour_tax,
                 "count": 1,
+                "status": Status.REJECTED.label,
             },
         )
 
@@ -1113,6 +1116,19 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax_sum": self.form2.disembarkment_tax,
                 "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
                 "count": 2,
+            },
+        )
+
+    def test_filter_status(self):
+        rows = self.get_rows(status=Status.APPROVED)
+        self.assertEqual(len(rows), 1)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
+                "count": 2,
+                "status": Status.APPROVED.label,
             },
         )
 

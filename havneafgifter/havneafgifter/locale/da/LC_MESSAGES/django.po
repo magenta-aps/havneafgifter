@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-02 12:53-0200\n"
+"POT-Creation-Date: 2024-12-04 13:47-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -191,6 +191,10 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/taxrateform.html
 msgid "Havn"
 msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/models.py havneafgifter/tables.py
+msgid "Status"
+msgstr "Status"
 
 #: havneafgifter/forms.py
 msgid "Gyldighed fra"
@@ -513,10 +517,6 @@ msgid "Reason text"
 msgstr "Begrundelse (tekst)"
 
 #: havneafgifter/models.py
-msgid "Status"
-msgstr "Status"
-
-#: havneafgifter/models.py
 #, fuzzy
 #| msgid "Submission date"
 msgid "Form submission date"
@@ -805,9 +805,10 @@ msgid ""
 "Please note: By clicking \"Save master data\" you will edit the master data "
 "of the ship in Talippoq. You can always edit the master data again, if a "
 "necessity should occur."
-msgstr "Bemærk venligst: Ved at trykke på \"Gem Stamdata\" ændrer du i skibets "
-"stamdata i Talippoq. Du kan altid ændre i stamdataene igen, såfremt det bliver "
-"nødvendigt."
+msgstr ""
+"Bemærk venligst: Ved at trykke på \"Gem Stamdata\" ændrer du i skibets "
+"stamdata i Talippoq. Du kan altid ændre i stamdataene igen, såfremt det "
+"bliver nødvendigt."
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_vessel_change.html
 msgid "Save master data"
@@ -1061,6 +1062,10 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Søg"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Eksportér til Excel"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrateform.html

@@ -819,7 +819,7 @@ class StatisticsView(
     def get_table_data(self):
         form = self.get_form()
         if form.is_valid():
-            qs = HarborDuesForm.objects.filter(status=Status.APPROVED)
+            qs = HarborDuesForm.objects.all()
             group_fields = []
             shortcut_fields = {
                 "municipality": F(
@@ -835,7 +835,13 @@ class StatisticsView(
                     if field_value:
                         filter_fields[f"datetime_of_{action}__{op}"] = field_value
 
-            for field in ("municipality", "vessel_type", "port_of_call", "site"):
+            for field in (
+                "municipality",
+                "vessel_type",
+                "port_of_call",
+                "site",
+                "status",
+            ):
                 field_value = form.cleaned_data[field]
                 if field_value:
                     filter_fields[f"{field}__in"] = field_value
@@ -872,8 +878,9 @@ class StatisticsView(
                     "disembarkment_tax_sum",
                     "harbour_tax_sum",
                     "count",
+                    "status",
                 )
-            qs.order_by("municipality", "vessel_type", "port_of_call", "site")
+            qs.order_by("municipality", "vessel_type", "port_of_call", "site", "status")
 
             items = list(qs)
             for item in items:
@@ -892,6 +899,10 @@ class StatisticsView(
                 vessel_type = item.get("vessel_type")
                 if vessel_type:
                     item["vessel_type"] = ShipType(vessel_type).label
+
+                status = item.get("status")
+                if status:
+                    item["status"] = Status(status).label
             return items
         return []
 
