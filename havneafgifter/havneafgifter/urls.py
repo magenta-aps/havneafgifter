@@ -27,6 +27,7 @@ from havneafgifter.views import (
     UpdateVesselView,
     WithdrawView,
 )
+from havneafgifter.views2 import HarborDuesFormCreateView as NewHarborDuesFormCreateView
 
 app_name = "havneafgifter"
 
@@ -151,4 +152,9 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="tax_rate_clone",
     ),
     path("modal/ok", LandingModalOkView.as_view(), name="landing_modal_ok"),
+    path(
+        "form/create/",
+        NewHarborDuesFormCreateView.as_view(),
+        name="new_harbor_dues_form_create",
+    ),
 ]
