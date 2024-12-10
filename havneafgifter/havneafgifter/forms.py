@@ -546,6 +546,22 @@ class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
     )
 
 
+class PassengersByCountryForm2(DynamicFormMixin, CSPFormMixin, Form):
+    nationality = ChoiceField(
+        choices=Nationality,
+        required=True,
+    )
+    number_of_passengers = DynamicField(
+        IntegerField,
+        required=lambda form: True if form.initial.get("pk") else False,
+        min_value=0,
+    )
+    pk = IntegerField(
+        required=False,
+        widget=HiddenInput(),
+    )
+
+
 class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
     disembarkment_site = DynamicField(
         ChoiceField,
@@ -587,6 +603,22 @@ class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
 
     def get_municipality_display(self):
         return self.initial_disembarkment_site.get_municipality_display()
+
+
+class DisembarkmentForm2(DynamicFormMixin, CSPFormMixin, Form):
+    disembarkment_site = DynamicField(
+        ModelChoiceField,
+        queryset=DisembarkmentSite.objects.all(),
+        required=True,
+    )
+    number_of_passengers = DynamicField(
+        IntegerField,
+        required=lambda form: True if form.initial.get("pk") else False,
+    )
+    pk = IntegerField(
+        required=False,
+        widget=HiddenInput(),
+    )
 
 
 class ReasonForm(DynamicFormMixin, CSPFormMixin, ModelForm):
