@@ -9,13 +9,16 @@
 {% load i18n %}
 {% load django_bootstrap5 %}
 {% load csp %}
+{% load compress %}
 
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}">
+    {% compress css %}
+        <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen">
+    {% endcompress %}
     <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}"/>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'jquery/jquery-3.7.1.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
