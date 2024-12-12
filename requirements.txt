@@ -28,6 +28,8 @@ django-tempus-dominus==5.1.2.17
 django-weasyprint==2.3.0
 django_csp==3.8
 django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@a7b2832256b492db035d1d88ea2304f627fb33e4
+django_compressor==4.5.1
+django-libsass==0.9
 elementpath==4.6.0
 fonttools==4.54.1
 gunicorn==22.0.0

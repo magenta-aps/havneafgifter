@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "tempus_dominus",
     "simple_history",
     "django_extensions",
+    "compressor",
 ]
 
 MIDDLEWARE = [
@@ -326,5 +327,14 @@ if os.environ.get("HOST_DOMAIN", False):
     ]
 TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
 TEMPUS_DOMINUS_INCLUDE_ASSETS = False
+
+COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
+LIBSASS_OUTPUT_STYLE = "compressed"
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+]
 
 from .login_settings import *  # noqa
