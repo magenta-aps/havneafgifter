@@ -1,0 +1,20 @@
+// Override Bootstrap defaults here
+
+$primary: #276b93;
+$secondary: #6599b7;
+$success: #207255;
+$info: #3157a1;
+/* $warning: ?;  FIXME: This colour is usually yellow, but not defined in the design guide */
+$danger: #af1d1d;
+$light: #f5f7f8;
+$dark: #222222;
+
+@import "./bootstrap/scss/bootstrap";
+// Additional styling here
+
+body {
+  background-color: #f8fcff;
+}
+.container {
+  background-color: #ffffff;
+}
