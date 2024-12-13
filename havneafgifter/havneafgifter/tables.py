@@ -46,6 +46,20 @@ class HarborDuesFormTable(tables.Table):
             }</span>"""
         )
 
+    def render_status(self, record):
+        cls_map = {
+            Status.DRAFT: "badge-draft",
+            Status.NEW: "badge-waiting",
+            Status.APPROVED: "badge-approved",
+            Status.REJECTED: "badge-rejected",
+        }
+        cls = cls_map[record.status]
+        return format_html(
+            f"""<span class="badge rounded-pill {cls}">{
+                record.get_status_display()
+            }</span>"""
+        )
+
 
 class StatistikTable(tables.Table):
     orderable = False
