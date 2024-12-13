@@ -27,11 +27,7 @@
     display: none;
 }
 
-/* card.html base template */
-.card {
-    width: 45rem;
-}
-
+/* All form field labels must be bold */
 .form-label {
     font-weight: bold;
 }

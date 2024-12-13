@@ -10,24 +10,55 @@ $light: #f5f7f8;
 $dark: #222222;
 
 @import "./bootstrap/scss/bootstrap";
-// Additional styling here
 
+// Additional styling here
 body {
   background-color: #f8fcff;
-
 }
 header {
   margin: 0 3rem;
 }
 .content {
-  margin: 1rem 3rem 3rem 3rem;
-  padding: 3rem;
+  margin: $spacer 3 * $spacer 3 * $spacer 3 * $spacer;
+  padding: 3 * $spacer;
   background-color: #ffffff;
-  border-radius: 1rem;
-  box-shadow: 0 0 1rem #ddd; /* TODO: use $lightgrey? */
+  border-radius: $spacer;
+  box-shadow: 0 0 $spacer #ddd; /* TODO: use $lightgrey? */
 }
 .card {
-  padding: 3rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 1rem #ddd; /* TODO: use $lightgrey? */
+  min-width: 35vw;
+  padding: 3 * $spacer;
+  border-color: transparent;
+  border-radius: $spacer;
+  box-shadow: 0 0 $spacer #ddd; /* TODO: use $lightgrey? */
+}
+.card-header {
+  background-color: transparent;
+  border: none;
+}
+
+// Nav
+header nav .navbar-nav a {
+  text-decoration: none;
+}
+
+// Settings ("wheel") menu
+#settings {
+  padding: $spacer;
+  min-width: 12vw;
+  border-color: transparent;
+  border-radius: 0.5 * $spacer;
+  box-shadow: 0 0 0.5 * $spacer #ddd; /* TODO: use $lightgrey? */
+}
+#settings h4 {
+  margin-bottom: 2 * $spacer;
+}
+#settings h5 {
+  margin-top: 2 * $spacer;
+  margin-bottom: $spacer;
+}
+#settings select[name=language] {
+  width: auto;
+  appearance: menulist-button;
+  border: none;
 }
