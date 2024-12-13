@@ -14,7 +14,20 @@ $dark: #222222;
 
 body {
   background-color: #f8fcff;
+
 }
-.container {
+header {
+  margin: 0 3rem;
+}
+.content {
+  margin: 1rem 3rem 3rem 3rem;
+  padding: 3rem;
   background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem #ddd; /* TODO: use $lightgrey? */
+}
+.card {
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem #ddd; /* TODO: use $lightgrey? */
 }
