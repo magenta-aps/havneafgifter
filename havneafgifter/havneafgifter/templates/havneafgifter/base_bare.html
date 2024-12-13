@@ -1,0 +1,19 @@
+{% extends "havneafgifter/base.html" %}
+{% comment %}
+SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+SPDX-License-Identifier: MPL-2.0
+{% endcomment %}
+
+{% load i18n %}
+{% load django_bootstrap5 %}
+
+{% block body %}
+{% block object_actions %}
+{% endblock object_actions %}
+<div class="row mt-3">
+    {# Displays messages from the Django 'messages' framework #}
+    {% bootstrap_messages %}
+</div>
+{% block content %}
+{% endblock content %}
+{% endblock body %}

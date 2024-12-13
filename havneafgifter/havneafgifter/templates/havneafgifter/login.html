@@ -11,35 +11,35 @@
 {% endblock %}
 
 {% block card_content %}
-<form method="post">
+<form method="post" class="form">
     {% csrf_token %}
     <div class="row">
-    <div class="col-md-5 mb-3">
-        {{form.username}}
-        {% if form.username.errors %}
-        <div class="invalid-feedback">{{ form.username.errors }}</div>
-        {% endif %}
-    </div>
-    <div class="col-md-5 mb-3">
-        {{form.password}}
-        {% if form.password.errors %}
-        <div class="invalid-feedback">{{ form.password.errors }}</div>
-        {% endif %}
-    </div>
-    <div class="col-md-2 mb-3">
-        <button type="submit" class="btn btn-primary">{% translate 'Log in' %}</button>
-    </div>
+        <div class="col-md-5 mb-3">
+            {{ form.username }}
+            {% if form.username.errors %}
+            <div class="invalid-feedback">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-5 mb-3">
+            {{ form.password }}
+            {% if form.password.errors %}
+            <div class="invalid-feedback">{{ form.password.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-2 mb-3">
+            <button type="submit" class="btn btn-primary">{% translate 'Log in' %}</button>
+        </div>
     </div>
     <input type="hidden" name="next" value="{{ next }}">
 </form>
 <div class="row">
-    <div class="col-12">
-        <a href="{% url 'mitid:login' %}{% if back %}?back={{back|urlencode}}{% endif %}">{% translate "Log in using MitID" %}</a>
+    <div class="col-12 my-2">
+        <a href="{% url 'mitid:login' %}{% if back %}?back={{ back|urlencode }}{% endif %}">{% translate "Log in using MitID" %}</a>
     </div>
-    <div class="col-12">
+    <div class="col-12 my-2">
         <a href="{% url 'password_reset' %}">{% translate 'Forgot your password?' %}</a>
     </div>
-    <div class="col-12">
+    <div class="col-12 my-2">
         <a href="{% url 'havneafgifter:signup-vessel' %}">{% translate 'Register vessel to report harbour dues' %}</a>
     </div>
 </div>
