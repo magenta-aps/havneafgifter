@@ -12,6 +12,5 @@ def bootstrap_status_badge(form: HarborDuesForm | CruiseTaxForm) -> dict:
         Status.NEW: "bg-primary",
         Status.APPROVED: "bg-success",
         Status.REJECTED: "bg-danger",
-        # Status.DONE: "bg-light",
     }
     return {"form": form, "bg": mapping[form.status]}
