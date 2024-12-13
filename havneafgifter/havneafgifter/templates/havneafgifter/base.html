@@ -1,23 +1,18 @@
 {% comment %}
-    SPDX-FileCopyrightText: 2024 MagentaApS
-    <info@magenta.dk>
-
-    SPDX-License-Identifier: MPL-2.0
+SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+SPDX-License-Identifier: MPL-2.0
 {% endcomment %}
-
 {% load static %}
 {% load i18n %}
-{% load django_bootstrap5 %}
 {% load csp %}
 {% load compress %}
-
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% compress css %}
-        <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen">
+    <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen">
     {% endcompress %}
     <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}"/>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
@@ -27,9 +22,10 @@
     {% endblock %}
 </head>
 <body>
-{% block header %}
+    {% block nav %}
     <header>
-        <nav class="nav navbar flex-column flex-sm-row p-1 bg-dark" data-bs-theme="dark">
+        <nav class="nav navbar">
+            <h1 class="navbar-brand">Talippoq.gl</h1>
             {% if user.is_authenticated %}
                 {% if user.can_create %}
                     <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="nav-link">
@@ -68,7 +64,6 @@
             <button type="button" class="btn btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
                 {% translate "About" %}
             </button>
-
             {% get_language_info_list for LANGUAGES as languages %}
             {# if settings.USE_I18N and languages|length > 1 #}
             <form action="{% url 'set_language' %}" method="post" class="navbar-form navbar-right mx-1 my-2">
@@ -87,25 +82,12 @@
                 </div>
             </form>
             {# endif #}
-
         </nav>
     </header>
-{% endblock %}
-
-<div class="container">
-    {% block object_actions %}
-    {% endblock %}
-
-    <div class="row mt-3">
-        {# Displays messages from the Django 'messages' framework #}
-        {% bootstrap_messages %}
-    </div>
-
-    {% block content %}
-    {% endblock %}
-</div>
-
-{% block modals %}
+    {% endblock nav %}
+    {% block body %}
+    {% endblock body %}
+    {% block modals %}
     <div id="about_modal" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -135,39 +117,37 @@
             </div>
         </div>
     </div>
-
-{% if landing_modal %}
-<div id="landing_modal" class="modal" data-bs-backdrop="static">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{% translate "Bemærk" %}</h5>
-            </div>
-            <div class="modal-body">
-                {% translate 'Du må først fakturere et anløb, når dette beløb har status "Godkendt" i Talippoq.' %}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% translate "Forstået" %}</button>
+    {% if landing_modal %}
+    <div id="landing_modal" class="modal" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% translate "Bemærk" %}</h5>
+                </div>
+                <div class="modal-body">
+                    {% translate 'Du må først fakturere et anløb, når dette beløb har status "Godkendt" i Talippoq.' %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% translate "Forstået" %}</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<script nonce="{{ request.csp_nonce }}">
-    $(function() {
-        const csrftoken = "{{ csrf_token }}";
-        const landing_modal = $('#landing_modal');
-        landing_modal.modal('show');
-        landing_modal.on("hide.bs.modal", function (){
-            $.ajax({
-                method: "post",
-                url: "{% url 'havneafgifter:landing_modal_ok' %}",
-                headers: {"X-CSRFToken": csrftoken}
+    <script nonce="{{ request.csp_nonce }}">
+        $(function() {
+            const csrftoken = "{{ csrf_token }}";
+            const landing_modal = $('#landing_modal');
+            landing_modal.modal('show');
+            landing_modal.on("hide.bs.modal", function (){
+                $.ajax({
+                    method: "post",
+                    url: "{% url 'havneafgifter:landing_modal_ok' %}",
+                    headers: {"X-CSRFToken": csrftoken}
+                });
             });
         });
-    });
-</script>
-{% endif %}
-
-{% endblock %}
+    </script>
+    {% endif %}
+    {% endblock modals %}
 </body>
 </html>
