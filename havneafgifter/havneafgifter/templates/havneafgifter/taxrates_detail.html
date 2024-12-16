@@ -20,7 +20,7 @@
         </div>
     {% endif %}
 
-    <table class="table table-bordered">
+    <table class="table table-sideways table-light table-borderless">
 
         <tbody>
 
@@ -42,7 +42,7 @@
         </tbody>
     </table>
 
-    <table class="table table-bordered">
+    <table class="table table-light">
         <tbody>
         <tr>
             <th>Afgifter pr. bruttoton:</th>
@@ -63,7 +63,7 @@
         </tbody>
     </table>
 
-    <table class="table table-bordered">
+    <table class="table table-light">
         <tbody>
         <tr>
             <th>Afgifter pr. ilandsætningssted:</th>
@@ -77,10 +77,6 @@
         {% endfor %}
         </tbody>
     </table>
-
-
-    <hr/>
-
 
     <form method="post">
         {% csrf_token %}

@@ -305,7 +305,7 @@ class Nationality(models.TextChoices):
 
 class Status(models.TextChoices):
     DRAFT = ("DRAFT", _("Draft"))
-    NEW = ("NEW", _("Awaiting approval"))  # NEW is kept to align with other products
+    NEW = ("NEW", _("Awaiting"))  # NEW is kept to align with other products
     APPROVED = ("APPROVED", _("Approved"))
     REJECTED = ("REJECTED", _("Rejected"))
     # TODO: DONE or something similar will be introduced when the system
@@ -565,7 +565,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         null=False,
         blank=False,
         auto_now_add=True,
-        verbose_name=_("Form submission date"),
+        verbose_name=_("Submitted"),
     )
 
     port_of_call = models.ForeignKey(
@@ -601,7 +601,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             RegexValidator(r"\d{7}"),
             imo_validator,
         ],
-        verbose_name=_("IMO-number"),
+        verbose_name=_("IMO-no."),
     )
 
     vessel_owner = models.CharField(
@@ -629,13 +629,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     datetime_of_arrival = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_("Arrival date/time"),
+        verbose_name=_("Arrival"),
     )
 
     datetime_of_departure = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name=_("Departure date/time"),
+        verbose_name=_("Departure"),
     )
 
     gross_tonnage = models.PositiveIntegerField(
@@ -1513,7 +1513,7 @@ class Vessel(models.Model):
             RegexValidator(r"\d{7}"),
             imo_validator,
         ],
-        verbose_name=_("IMO-number"),
+        verbose_name=_("IMO-no."),
     )
 
     owner = models.CharField(

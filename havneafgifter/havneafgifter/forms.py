@@ -107,7 +107,7 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
             RegexValidator(r"\d{7}"),
             imo_validator,
         ],
-        label=_("IMO-number"),
+        label=_("IMO-no."),
     )
 
     first_name = CharField(
@@ -276,7 +276,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         ],
         initial=lambda form: getattr(form._vessel, "imo", None),
         disabled=lambda form: form.user_is_ship,
-        label=_("IMO-number"),
+        label=_("IMO-no."),
     )
 
     vessel_owner = DynamicField(
