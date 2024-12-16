@@ -27,11 +27,6 @@
     display: none;
 }
 
-/* All form field labels must be bold */
-.form-label {
-    font-weight: bold;
-}
-
 /* Emphasise form receipt help texts */
 table.receipt td p {
     font-style: italic;

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 09:02-0200\n"
+"POT-Creation-Date: 2024-12-17 06:25-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -634,6 +634,10 @@ msgid "ethvert ilandsætningssted"
 msgstr ""
 
 #: havneafgifter/tables.py
+msgid "Operation"
+msgstr ""
+
+#: havneafgifter/tables.py
 msgid "Landgangsafgift"
 msgstr ""
 
@@ -674,6 +678,7 @@ msgid "Havneafgifter"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "My forms"
 msgstr ""
 
@@ -690,6 +695,7 @@ msgid "Edit master data"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Create new"
 msgstr ""
@@ -826,7 +832,7 @@ msgid "Save"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
-msgid "Open"
+msgid "Show"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
@@ -924,11 +930,15 @@ msgid "IMO numbers should be 7 digits"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-msgid "Harbor dues list"
+msgid "Filters"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-msgid "Filter"
+msgid "Search"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
+msgid "forms"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html

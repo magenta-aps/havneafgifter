@@ -744,6 +744,7 @@ class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableVie
     def get_context_data(self, **context):
         context = super().get_context_data(**context)
         context["form"] = self.filterset.form
+        context["count"] = self.get_queryset().count()
         return context
 
 
