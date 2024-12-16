@@ -18,200 +18,200 @@ SPDX-License-Identifier: MPL-2.0
 
 {% block headline %}
 {% if form.has_port_of_call %}
-Umiarsuit takornariartaatit: Umiarsualivinnut, ilaasunut avatangiisinullu iluarsaassinermullu akitsuutit
-<br>
-Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintenance Fee
+<div>Cruise Ships: Port Tax, Passenger Tax ("Pax Tax") and Environmental and Maintenance Fee</div>
+<div class="secondary">Umiarsuit takornariartaatit: Umiarsualivinnut, ilaasunut avatangiisinullu iluarsaassinermullu akitsuutit</div>
 {% else %}
-Umiarsuit takornariartaatit: Avatangiisinut iluarsaassinermullu akitsuutit
-<br>
-Cruise Ships: Environmental and Maintenance Fee
+<div>Cruise Ships: Environmental and Maintenance Fee</div>
+<div class="secondary">Umiarsuit takornariartaatit: Avatangiisinut iluarsaassinermullu akitsuutit</div>
 {% endif %}
 {% endblock %}
 
 {% block extra_main %}
 <tr>
-    <th scope="row">
-        Umiarsualivimmut tuliannermi siunertaq
-        <br>
-        Purpose of port call
-    </th>
+    <td>
+        <div>Purpose of port call</div>
+        <div class="secondary">Umiarsualivimmut tuliannermi siunertaq</div>
+    </td>
     <td colspan="3">
-        <p>
-            Siunertaq / Purpose
-        </p>
         Cruise
     </td>
 </tr>
-
-{% if form.has_port_of_call %}
-<tr>
-    <th colspan="4">
-        Umiarsualivimmiinnermut akitsuut / Port Tax
-    </th>
-</tr>
-
-<tr>
-    <th scope="row">
-        Bruttoton(s) (BT)
-        <br>
-        Gross Tonnage (GT)
-    </th>
-    <td class="table-active">
-        {{ form.gross_tonnage }}
-    </td>
-    <th scope="row">
-        BT-mut ataatsimut DKK
-        <br>
-        DKK per/BT
-    </th>
-    <td class="table-active">
-        {{ form.tax_per_gross_ton }} DKK
-    </td>
-</tr>
-
-<tr>
-    <th scope="row">
-        Taleqqaneq (nalunaaquttap akunneri 24-kkaartut)
-        <br>
-        Length of stay (commenced 24-hour intervals)
-    </th>
-    <td class="table-active">
-        {{ form.duration_in_days }}
-    </td>
-    <th scope="row">
-        Umiarsualivimmiinner mut akitsuut
-        <br>
-        Port Tax
-    </th>
-    <td class="table-active">
-        {{ form.harbour_tax }} DKK
-    </td>
-</tr>
-{% endif %}
-{% endblock %}
+{% endblock extra_main %}
 
 {% block additional_tables %}
-<div class="col-12">
-    {% if form.has_port_of_call %}
-    {# Item: total number of passengers, total pax tax #}
-    <h2>
-        Ilaasunut akitsuut
-        <br>
-        Pax Tax (cruise ships)
-    </h2>
-    <table class="table table-bordered">
-        <tbody>
-            <tr>
-                <th scope="row">
-                    Talinnermi ilaasut amerlassusaat
-                    <br>
-                    Number of passengers on board at arrival at port
-                </th>
-                <td colspan="2">
-                    Amerlassutsit
-                    <br>
-                    Number
-                </td>
-                <td class="table-active">
-                    {{ form.number_of_passengers }}
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    Akitsuut
-                    <br>
-                    Tax rate
-                </th>
-                <td>
-                    Ilaasumut ataatsimut DKK
-                    <br>
-                    DKK per passenger
-                </td>
-                <td>
-                    50
-                </td>
-                <td>
-                    Ilaasunut akitsuut
-                    <br>
-                    Pax Tax
-                </td>
-                <td>
-                    {{ form.pax_tax }} DKK
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    {# List: passengers by country #}
-    <h2>
-        Ilaasut sumiuussusai qassiunerilu
-        <br>
-        Nationality and number of passengers
-    </h2>
-    <table class="table table-bordered">
-        <tbody>
-            {% for p in form.passengers_by_country.all %}
-            <tr>
-                <td colspan="2">
-                    {{ p.get_nationality_display }}
-                </td>
-                <td class="table-active" colspan="2">
-                    {{ p.number_of_passengers }}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    {# List: disembarkments #}
-    <h2>
-        Avatangiisinut iluarsaassinermullu akitsuut
-        <br>
-        Environmental and Maintenance Fee
-    </h2>
-    <table class="table table-bordered">
+{% if form.has_port_of_call %}
+<section>
+    <h2>Port Tax</h2>
+    <h2 class="secondary">Umiarsualivimmiinnermut akitsuut</h2>
+    <table class="table">
         <thead>
             <tr>
                 <th>
-                    Piffiit kommunimit toqqarneqartut / locations selected by the municipality:
+                    <div>Gross Tonnage (GT)</div>
+                    <div class="secondary">Bruttoton(s) (BT)</div>
                 </th>
-                <th rowspan="2">
-                    Akitsuut
-                    <br>
-                    Fee rate
-                    <sup>1</sup>
+                <th>
+                    <div>Length of stay (commenced 24-hour intervals)</div>
+                    <div class="secondary">Taleqqaneq (nalunaaquttap akunneri 24-kkaartut)</div>
                 </th>
-                <th rowspan="2">
-                    Niusoqarnerani umiarsuarmi ilaasut amerlassusaat (Piffimmi niusut amerlassusii pinnagit)
-                    <br>
-                    Number of passengers on board at the time of disembarkment (not the number of passengers that disembarked at the site)
-                    <sup>2</sup>
+                <th>
+                    <div>DKK per/BT</div>
+                    <div class="secondary">BT-mut ataatsimut DKK</div>
                 </th>
-                <th rowspan="2">
-                    Aningaasat akiligassat
-                    <br>
-                    Payable fee
+                <th>
+                    <div>Port Tax</div>
+                    <div class="secondary">Umiarsualivimmiinner mut akitsuut</div>
                 </th>
             </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    {{ form.gross_tonnage }}
+                </td>
+                <td>
+                    {{ form.duration_in_days }}
+                </td>
+                <td>
+                    {{ form.tax_per_gross_ton }} DKK
+                </td>
+                <td>
+                    {{ form.harbour_tax|default_if_none:0 }} DKK
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2"></td>
+                <td>
+                    Total fee
+                </td>
+                <td>
+                    {{ form.harbour_tax|default_if_none:0 }} DKK
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</section>
+{% endif %}
+
+{% if form.has_port_of_call %}
+<section>
+    {# Item: total number of passengers, total pax tax #}
+    <h2>Pax Tax (cruise ships)</h2>
+    <h2 class="secondary">Ilaasunut akitsuut</h2>
+    <div class="col-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <div>Number of passengers on board at arrival at port</div>
+                        <div class="secondary">Talinnermi ilaasut amerlassusaat</div>
+                    </th>
+                    <th>
+                        <div>Tax rate per passenger</div>
+                        <div class="secondary">Akitsuut</div>
+                    </th>
+                    <th>
+                        <div>Pax Tax</div>
+                        <div class="secondary">Ilaasunut akitsuut</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {{ form.number_of_passengers }}
+                    </td>
+                    <td>
+                        50,00 DKK
+                    </td>
+                    <td>
+                        {{ form.pax_tax }} DKK
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td>
+                        Total fee
+                    </td>
+                    <td>
+                        {{ form.pax_tax }} DKK
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    {# List: passengers by country #}
+    <h2>Nationality and number of passengers</h2>
+    <h2 class="secondary">Ilaasut sumiuussusai qassiunerilu</h2>
+    <div class="col-6">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Nationality
+                    </th>
+                    <th>
+                        Number of passengers
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in form.passengers_by_country.all %}
+                <tr>
+                    <td>
+                        {{ p.get_nationality_display }}
+                    </td>
+                    <td>
+                        {{ p.number_of_passengers }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
+<section>
+    {# List: disembarkments #}
+    <h2>Environmental and Maintenance Fee</h2>
+    <h2 class="secondary">Avatangiisinut iluarsaassinermullu akitsuut</h2>
+    <table class="table">
+        <thead>
             <tr>
                 <th>
-                    Niuffik / Disembarkments in:
+                    <div>Docks for disembarkment</div>
+                    <div class="secondary">Niuffik</div>
+                </th>
+                <th>
+                    <div>Fee rate<sup>1</sup></div>
+                    <div class="secondary">Akitsuut</div>
+                </th>
+                <th>
+                    <div>
+                        Number of passengers on board at the time of disembarkment
+                        <sup>2</sup>
+                        <sup>3</sup>
+                    </div>
+                    <div class="secondary">Niusoqarnerani umiarsuarmi ilaasut amerlassusaat</div>
+                </th>
+                <th>
+                    <div>Aningaasat akiligassat</div>
+                    <div class="secondary">Payable fee</div>
                 </th>
             </tr>
         </thead>
         <tbody>
             {% for d in disembarkment_tax_items %}
-            {% ifchanged d.disembarkment.disembarkment_site.municipality %}
-            <tr>
-                <th scope="row" colspan="4">
-                    {{ d.disembarkment.disembarkment_site.get_municipality_display }}
-                </th>
-            </tr>
-            {% endifchanged %}
             <tr>
                 <td>
                     {{ d.disembarkment.disembarkment_site.name }}
+                    ({{ d.disembarkment.disembarkment_site.get_municipality_display }})
                 </td>
                 <td>
                     {% if d.taxrate %}
@@ -220,7 +220,7 @@ Cruise Ships: Environmental and Maintenance Fee
                     0,00 DKK
                     {% endif %}
                 </td>
-                <td class="table-active">
+                <td>
                     {{ d.disembarkment.number_of_passengers }}
                 </td>
                 <td>
@@ -231,47 +231,58 @@ Cruise Ships: Environmental and Maintenance Fee
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3">
+                <td colspan="2"></td>
+                <td>
+                    Total fee
+                </td>
+                <td>
+                    {{ form.disembarkment_tax }} DKK
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
                     <p>
                         <sup>1</sup>
-                        Kommuni akitsuuteqartitsippat, akitsuut uani takuneqarsinnaavoq. Akiliut annerpaamik DKK 50-iuvoq.
-                        <br>
                         If a fee is levied in the municipality, a fee rate chosen by the municipality will be shown here. The maximum fee rate is DKK 50.
+                        /
+                        <span class="secondary">Kommuni akitsuuteqartitsippat, akitsuut uani takuneqarsinnaavoq. Akiliut annerpaamik DKK 50-iuvoq.</span>
                     </p>
                     <p>
                         <sup>2</sup>
-                        Umiarsualivimmiinnermi kingullermi niusoqarsimappat qulaanilu sumiiffik allattoqqappat, niusoqarnerani umiarsuarmiittut allattukkit (piffimmi niusut allattornagit)
-                        <br>
-                        If disembarkments have occured since the last call at a Greenlandic harbour and the location is listed above, insert the number of passengers on board the cruise ship at the time of disembarkment (not the number of passengers that disembarked at the site).
+                        This number does not mean the number of passengers that disembarked at the site.
+                        /
+                        <span class="secondary">Piffimmi niusut amerlassusii pinnagit</span>
                     </p>
-                </td>
-                <td class="fw-bold">
-                    {{ form.disembarkment_tax }} DKK
+                    <p>
+                        <sup>3</sup>
+                        If disembarkments have occurred since the last call at a Greenlandic harbour and the location is listed above, insert the number of passengers on board the cruise ship at the time of disembarkment (not the number of passengers that disembarked at the site).
+                        /
+                        <span class="secondary">
+                            Umiarsualivimmiinnermi kingullermi niusoqarsimappat qulaanilu sumiiffik allattoqqappat, niusoqarnerani umiarsuarmiittut allattukkit (piffimmi niusut allattornagit)
+                        </span>
+                    </p>
                 </td>
             </tr>
         </tfoot>
     </table>
+</section>
 
+<section>
     {# Item: summary table with totals #}
-    <h1>
-        {% if form.has_port_of_call %}
-        Akitsuut akilligassarlu (umiarsualivimmiinnermi akiliut ilaasumullu akitsuut) avatangiisinullu iluarsaassinermullu akitsuut
-        <br>
-        Payable Tax and Fee (Port Tax and Pax Tax) and Environmental and Maintenance Fee
-        {% else %}
-        Akiligassaq avatangiisinut iluarsaassinermullu akitsuutit
-        <br>
-        Payable Environmental and Maintenance Fee
-        {% endif %}
-    </h1>
-    <table class="table table-striped">
+    {% if form.has_port_of_call %}
+    <h2>Payable Tax and Fee (Port Tax and Pax Tax) and Environmental and Maintenance Fee</h2>
+    <h2 class="secondary">Akitsuut akilligassarlu (umiarsualivimmiinnermi akiliut ilaasumullu akitsuut) avatangiisinullu iluarsaassinermullu akitsuut</h2>
+    {% else %}
+    <h2>Payable Environmental and Maintenance Fee</h2>
+    <h2 class="secondary">Akiligassaq avatangiisinut iluarsaassinermullu akitsuutit</h2>
+    {% endif %}
+    <table class="table">
         <tbody>
             {% if form.has_port_of_call %}
             <tr>
                 <td colspan="3">
-                    Umiarsualivimmiinnermut akiliut
-                    <br>
-                    Port Tax:
+                    <div>Port Tax</div>
+                    <div class="secondary">Umiarsualivimmiinnermut akiliut</div>
                 </td>
                 <td>
                     {{ form.harbour_tax }} DKK
@@ -279,9 +290,8 @@ Cruise Ships: Environmental and Maintenance Fee
             </tr>
             <tr>
                 <td colspan="3">
-                    Ilaasumut akitsuut
-                    <br>
-                    Pax Tax
+                    <div>Pax Tax</div>
+                    <div class="secondary">Ilaasumut akitsuut</div>
                 </td>
                 <td>
                     {{ form.pax_tax }} DKK
@@ -290,19 +300,17 @@ Cruise Ships: Environmental and Maintenance Fee
             {% endif %}
             <tr>
                 <td colspan="3">
-                    Avatangiisinut iluarsaassinermullu akitsuut
-                    <br>
-                    Environmental and Maintenance Fee
+                    <div>Environmental and Maintenance Fee</div>
+                    <div class="secondary">Avatangiisinut iluarsaassinermullu akitsuut</div>
                 </td>
                 <td>
                     {{ form.disembarkment_tax }} DKK
                 </td>
             </tr>
             <tr>
-                <td colspan="3" class="fw-bold">
-                    Umiarsualivimmi oqartussanut akiligassaq katillugu
-                    <br>
-                    The total amount payable to the Harbour Administration
+                <td colspan="3">
+                    <div class="fw-bold">The total amount payable to the Harbour Administration</div>
+                    <div class="secondary fw-bold">Umiarsualivimmi oqartussanut akiligassaq katillugu</div>
                 </td>
                 <td class="fw-bold">
                     {{ form.total_tax }} DKK
@@ -310,5 +318,5 @@ Cruise Ships: Environmental and Maintenance Fee
             </tr>
         </tbody>
     </table>
-</div>
-{% endblock %}
+</section>
+{% endblock additional_tables %}

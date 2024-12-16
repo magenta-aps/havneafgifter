@@ -27,10 +27,6 @@
     display: none;
 }
 
-/* Emphasise form receipt help texts */
-table.receipt td p {
-    font-style: italic;
-}
 .tooltip.error-tooltip {
   --bs-tooltip-bg: #2c0b0e;
   --bs-tooltip-color: #dee2e6;

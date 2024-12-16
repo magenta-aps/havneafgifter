@@ -8,9 +8,9 @@ register = template.Library()
 @register.inclusion_tag("havneafgifter/bootstrap/status_badge.html")
 def bootstrap_status_badge(form: HarborDuesForm | CruiseTaxForm) -> dict:
     mapping = {
-        Status.DRAFT: "bg-secondary",
-        Status.NEW: "bg-primary",
-        Status.APPROVED: "bg-success",
-        Status.REJECTED: "bg-danger",
+        Status.DRAFT: "badge-draft",
+        Status.NEW: "badge-waiting",
+        Status.APPROVED: "badge-approved",
+        Status.REJECTED: "badge-rejected",
     }
     return {"form": form, "bg": mapping[form.status]}

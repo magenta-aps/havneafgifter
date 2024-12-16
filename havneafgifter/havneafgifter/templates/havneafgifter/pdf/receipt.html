@@ -19,12 +19,12 @@ SPDX-License-Identifier: MPL-2.0
     @top-right {
         font-size: 7pt;
         text-align: right;
-        content: 'Umiarsualivimmut Akileraaruti - {{ form.pk }}, {{ form.date|localize }} / Harbour dues - {{ form.pk }}, {{ form.date|localize }}';
+        content: 'Harbour dues - {{ form.pk }}, {{ form.date|localize }} / Umiarsualivimmut Akileraaruti - {{ form.pk }}, {{ form.date|localize }}';
     }
 
     @bottom-center {
         font-size: 7pt;
-        content: 'https://havneafgifter.gl';
+        content: 'https://talippoq.aka.gl';
     }
 }
 
@@ -76,66 +76,74 @@ table.table-striped td:first-child {
 }
 {% endblock %}
 
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">{% translate "Harbor dues" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% blocktrans trimmed with form_id=form.pk %}
+            Form {{ form_id }}
+            {% endblocktrans %}
+        </li>
+    </ol>
+</nav>
+{% endblock breadcrumb %}
+
+{% block object_title %}
+<h1 class="primary">Harbour dues &ndash; {{ form.pk }}</h1>
+<h1 class="secondary">Umiarsualivimmut Akileraaruti &ndash; {{ form.pk }}</h1>
+<p>{{ form.date|localize }}</p>
+{% if form.latest_rejection %}
+<div class="alert alert-danger">
+    {% with user=form.latest_rejection.history_user.display_name %}
+    {% with date=form.latest_rejection.history_date|date|localize %}
+    <p>
+        <i>
+        {% blocktrans trimmed with user=user date=date %}
+        Rejected by "{{ user }}" on {{ date }}
+        {% endblocktrans %}
+        </i>
+    </p>
+    <div>
+        <b>{% translate 'Message' %}:</b>
+    </div>
+    <div>
+        {{ form.latest_rejection.reason_text|linebreaksbr }}
+    </div>
+    {% endwith %}
+    {% endwith %}
+</div>
+{% endif %}
+{% endblock object_title %}
+
 {% block object_actions %}
 {# This block is only rendered when outputting HTML (not PDF) #}
-<div class="row pt-3 pb-3 mb-3">
-    <div class="col-12">
-        <nav class="navbar navbar-expand-lg">
-            <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-primary">
-                {% translate 'View PDF' %}
-            </a>
-            {% if can_edit %}
-            <a href="{% url 'havneafgifter:draft_edit' pk=form.pk %}" class="btn btn-primary ms-2">
-                {% translate 'Edit' %}
-            </a>
-            {% endif %}
-            {% if can_withdraw %}
-            <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                {% translate 'Withdraw forwarded form' %}
-            </button>
-            {% endif %}
-            {% if can_approve %}
-            <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#approveModal">
-                {% translate 'Approve' %}
-            </button>
-            {% endif %}
-            {% if can_reject %}
-            <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                {% translate 'Reject' %}
-            </button>
-            {% endif %}
-            {% if can_create %}
-            <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary ms-2 ms-auto">
-                {% translate 'Create new' %}
-            </a>
-            {% endif %}
-        </nav>
-    </div>
-    <div class="col-3">
-        {% bootstrap_status_badge form %}
-    </div>
-    {% if form.latest_rejection %}
-    <div class="col-12 pt-3">
-        <div class="alert alert-danger">
-            {% with user=form.latest_rejection.history_user.display_name %}
-            {% with date=form.latest_rejection.history_date|date|localize %}
-            <p>
-                {% blocktrans trimmed with user=user date=date %}
-                Rejected by "{{ user }}" on {{ date }}
-                {% endblocktrans %}
-            </p>
-            <p>
-                <b>{% translate 'Message' %}:</b>
-            </p>
-            <p>
-                {{ form.latest_rejection.reason_text|linebreaksbr }}
-            </p>
-            {% endwith %}
-            {% endwith %}
-        </div>
-    </div>
+<nav class="object-actions navbar navbar-expand-lg d-flex justify-content-end">
+    {% bootstrap_status_badge form %}
+    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-primary">
+        {% translate 'View PDF' %}
+    </a>
+    {% if can_edit %}
+    <a href="{% url 'havneafgifter:draft_edit' pk=form.pk %}" class="btn btn-primary ms-2">
+        {% translate 'Edit' %}
+    </a>
     {% endif %}
-</div>
+    {% if can_withdraw %}
+    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+        {% translate 'Withdraw forwarded form' %}
+    </button>
+    {% endif %}
+    {% if can_approve %}
+    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#approveModal">
+        {% translate 'Approve' %}
+    </button>
+    {% endif %}
+    {% if can_reject %}
+    <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
+        {% translate 'Reject' %}
+    </button>
+    {% endif %}
+</nav>
 {% endblock %}
 
 {% block modals %}
@@ -146,152 +154,118 @@ table.table-striped td:first-child {
 {% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row receipt">
     <div class="col-12">
-        <h1>
-            Umiarsualivimmut Akileraaruti &ndash; {{ form.pk }}, {{ form.date|localize }}
-            /
-            Harbour dues &ndash; {{ form.pk }}, {{ form.date|localize }}
-        </h1>
+        <section>
+            <h2>{% block headline %}{% endblock %}</h2>
+            <table class="table">
+                <tbody>
+                    {% if form.has_port_of_call %}
+                    <tr>
+                        <td>
+                            <div>Port of call</div>
+                            <div class="secondary">Umiarsualivik nunaliffik</div>
+                        </td>
+                        <td colspan="3">
+                            {{ form.port_of_call|default_if_none:"" }}
+                        </td>
+                    </tr>
+                    {% endif %}
 
-        <h2>
-            {% block headline %}
-            {% endblock %}
-        </h2>
+                    {% if form.nationality %}
+                    <tr>
+                        <td>
+                            <div>Nationality</div>
+                            <div class="secondary">Sumiuussuseq</div>
+                        </td>
+                        <td colspan="3">
+                            {{ form.get_nationality_display|default_if_none:"-" }}
+                        </td>
+                    </tr>
+                    {% endif %}
 
-        <table class="table table-bordered receipt">
-            <tbody>
-                {% if form.has_port_of_call %}
-                <tr>
-                    <th scope="row">
-                        Umiarsualivik nunaliffik
-                        <br>
-                        Port of call
-                    </th>
-                    <td class="table-active" colspan="3">
-                        {{ form.port_of_call|default_if_none:"" }}
-                    </td>
-                </tr>
-                {% endif %}
+                    <tr>
+                        <td>
+                            <div>Vessel</div>
+                            <div class="secondary">Angallat</div>
+                        </td>
+                        <td>
+                            <i>Name / <span class="secondary">Angallatip aqqa</span></i>
+                            <div>{{ form.vessel_name|default_if_none:"" }}</div>
+                        </td>
+                        <td colspan="2">
+                            <i>Registration / <span class="secondary">Angallatip nalunaarsorneqarnerata normua</span></i>
+                            <div>{{ form.vessel_imo }}</div>
+                        </td>
+                    </tr>
 
-                {% if form.nationality %}
-                <tr>
-                    <th scope="row">
-                        Sumiuussuseq
-                        <br>
-                        Nationality
-                    </th>
-                    <td class="table-active" colspan="3">
-                        {{ form.get_nationality_display|default_if_none:"-" }}
-                    </td>
-                </tr>
-                {% endif %}
+                    <tr>
+                        <td>
+                            <div>Owner</div>
+                            <div class="secondary">Piginnittoq</div>
+                        </td>
+                        <td colspan="3">
+                            {{ form.vessel_owner|default_if_none:"" }}
+                        </td>
+                    </tr>
 
-                <tr>
-                    <th scope="row">
-                        Angallat
-                        <br>
-                        Vessel
-                    </th>
-                    <td class="table-active" colspan="3">
-                        <p>
-                            Angallatip aqqa nalunaarsorneqarnermullu normua / Name and registration
-                        </p>
-                        {{ form.vessel_name|default_if_none:"" }}
-                        <br>
-                        {{ form.vessel_imo }}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            <div>Master</div>
+                            <div class="secondary">Umiarsuup naalagaa</div>
+                        </td>
+                        <td colspan="3">
+                            {{ form.vessel_master|default_if_none:"" }}
+                        </td>
+                    </tr>
 
-                <tr>
-                    <th scope="row">
-                        Piginnittoq
-                        <br>
-                        Owner
-                    </th>
-                    <td class="table-active" colspan="3">
-                        <p>
-                            Ateq / Name
-                        </p>
-                        {{ form.vessel_owner|default_if_none:"" }}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            <div>Shipping agent/company</div>
+                            <div class="secondary">Umiarsuaatileqatigiiffik</div>
+                        </td>
+                        <td colspan="3">
+                            {{ form.shipping_agent|default_if_none:"" }}
+                        </td>
+                    </tr>
 
-                <tr>
-                    <th scope="row">
-                        Umiarsuup naalagaa
-                        <br>
-                        Master
-                    </th>
-                    <td class="table-active" colspan="3">
-                        <p>
-                            Ateq / Name
-                        </p>
-                        {{ form.vessel_master|default_if_none:"" }}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            <div>Time of arrival</div>
+                            <div class="secondary">Piffisasaq nunaliffik</div>
+                        </td>
+                        <td>
+                            <i>Date / <span class="secondary">Ulloq</span></i>
+                            <div>{{ form.datetime_of_arrival|date:"j-n-Y" }}</div>
+                        </td>
+                        <td colspan="2">
+                            <i>Time / <span class="secondary">Nalunaaqutaq</span></i>
+                            <div>{{ form.datetime_of_arrival|date:"H:i" }}</div>
+                        </td>
+                    </tr>
 
-                <tr>
-                    <th scope="row">
-                        Umiarsuaatileqatigiiffik
-                        <br>
-                        Shipping agent / company
-                    </th>
-                    <td class="table-active" colspan="3">
-                        <p>
-                            Ateq / Name
-                        </p>
-                        {{ form.shipping_agent|default_if_none:"" }}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            <div>Time of departure</div>
+                            <div class="secondary">Piffissaq aallarfissaq</div>
+                        </td>
+                        <td>
+                            <i>Date / <span class="secondary">Ulloq</span></i>
+                            <div>{{ form.datetime_of_departure|date:"j-n-Y" }}</div>
+                        </td>
+                        <td colspan="2">
+                            <i>Time / <span class="secondary">Nalunaaqutaq</span></i>
+                            <div>{{ form.datetime_of_departure|date:"H:i" }}</div>
+                        </td>
+                    </tr>
 
-                <tr>
-                    <th scope="row">
-                        Piffisasaq nunaliffik
-                        <br>
-                        Time of arrival
-                    </th>
-                    <td class="table-active">
-                        <p>
-                            Ulloq / Date
-                        </p>
-                        {{ form.datetime_of_arrival|date:"j-n-Y" }}
-                    </td>
-                    <td class="table-active" colspan="2">
-                        <p>
-                            Nalunaaqutaq / Time
-                        </p>
-                        {{ form.datetime_of_arrival|date:"H:i" }}
-                    </td>
-                </tr>
-
-                <tr>
-                    <th scope="row">
-                        Piffissaq aallarfissaq
-                        <br>
-                        Time of departure
-                    </th>
-                    <td class="table-active">
-                        <p>
-                            Ulloq / Date
-                        </p>
-                        {{ form.datetime_of_departure|date:"j-n-Y" }}
-                    </td>
-                    <td class="table-active" colspan="2">
-                        <p>
-                            Nalunaaqutaq / Time
-                        </p>
-                        {{ form.datetime_of_departure|date:"H:i" }}
-                    </td>
-                </tr>
-
-                {% block extra_main %}
-                {% endblock %}
-            </tbody>
-        </table>
+                    {% block extra_main %}
+                    {% endblock %}
+                </tbody>
+            </table>
+        </section>
+        {% block additional_tables %}
+        {% endblock %}
     </div>
-
-    {% block additional_tables %}
-    {% endblock %}
 </div>
 {% endblock %}
