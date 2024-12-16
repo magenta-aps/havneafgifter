@@ -528,7 +528,9 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             raise PermissionDenied
 
         form.calculate_tax(save=True)
-        receipt = form.get_receipt(base="havneafgifter/base.html", request=request)
+        receipt = form.get_receipt(
+            base="havneafgifter/base_default.html", request=request
+        )
         return HttpResponse(receipt.html)
 
     def get_object(self, queryset=None):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-04 13:47-0200\n"
+"POT-Creation-Date: 2024-12-16 09:02-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,8 +55,8 @@ msgid "Password"
 msgstr "Kodeord"
 
 #: havneafgifter/forms.py havneafgifter/models.py
-msgid "IMO-number"
-msgstr "IMO-nummer"
+msgid "IMO-no."
+msgstr "IMO-nr."
 
 #: havneafgifter/forms.py
 msgid "First name"
@@ -102,11 +102,11 @@ msgstr "Nationalitet"
 msgid "Shipping agent"
 msgstr "Shippingagent"
 
-#: havneafgifter/forms.py havneafgifter/models.py
+#: havneafgifter/forms.py
 msgid "Arrival date/time"
 msgstr "Ankomstdato og -tidspunkt"
 
-#: havneafgifter/forms.py havneafgifter/models.py
+#: havneafgifter/forms.py
 msgid "Departure date/time"
 msgstr "Afgangsdato og -tidspunkt"
 
@@ -435,8 +435,8 @@ msgid "Draft"
 msgstr "Kladde"
 
 #: havneafgifter/models.py
-msgid "Awaiting approval"
-msgstr "Afventer godkendelse"
+msgid "Awaiting"
+msgstr "Afventer"
 
 #: havneafgifter/models.py
 msgid "Approved"
@@ -517,14 +517,20 @@ msgid "Reason text"
 msgstr "Begrundelse (tekst)"
 
 #: havneafgifter/models.py
-#, fuzzy
-#| msgid "Submission date"
-msgid "Form submission date"
-msgstr "Indberetningsdato"
+msgid "Submitted"
+msgstr "Indsendt"
 
 #: havneafgifter/models.py
 msgid "Vessel nationality"
 msgstr "Skibets nationalitet"
+
+#: havneafgifter/models.py
+msgid "Arrival"
+msgstr "Ankomst"
+
+#: havneafgifter/models.py
+msgid "Departure"
+msgstr "Afgang"
 
 #: havneafgifter/models.py
 msgid "Calculated harbour tax"
@@ -683,11 +689,6 @@ msgid "Havneafgifter"
 msgstr "Havneafgifter"
 
 #: havneafgifter/templates/havneafgifter/base.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Create new"
-msgstr "Opret ny"
-
-#: havneafgifter/templates/havneafgifter/base.html
 msgid "My forms"
 msgstr "Mine blanketter"
 
@@ -704,12 +705,13 @@ msgid "Edit master data"
 msgstr "Redigér stamdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
-msgid "Log out"
-msgstr "Log ud"
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Create new"
+msgstr "Opret ny"
 
 #: havneafgifter/templates/havneafgifter/base.html
-msgid "About"
-msgstr "Om"
+msgid "About Talippoq"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Version"
@@ -720,8 +722,20 @@ msgid "Source code"
 msgstr "Kildekode"
 
 #: havneafgifter/templates/havneafgifter/base.html
+msgid "Github - Havneafgifter"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
 msgid "Contact"
 msgstr "Kontakt"
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Language"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Log out"
+msgstr "Log ud"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Bemærk"

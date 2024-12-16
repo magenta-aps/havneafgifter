@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from havneafgifter.models import HarborDuesForm, TaxRates
+from havneafgifter.models import HarborDuesForm, Status, TaxRates
 
 
 class HarborDuesFormFilter(django_filters.FilterSet):
@@ -18,6 +18,8 @@ class HarborDuesFormTable(tables.Table):
         template_name="havneafgifter/bootstrap/open_details.html"
     )
 
+    status = tables.Column()
+
     class Meta:
         model = HarborDuesForm
         exclude = (
@@ -26,6 +28,21 @@ class HarborDuesFormTable(tables.Table):
             "vessel_type",
             "nationality",
             "harbour_tax",
+            "pdf",
+        )
+
+    def render_status(self, record):
+        cls_map = {
+            Status.DRAFT: "badge-draft",
+            Status.NEW: "badge-waiting",
+            Status.APPROVED: "badge-approved",
+            Status.REJECTED: "badge-rejected",
+        }
+        cls = cls_map[record.status]
+        return format_html(
+            f"""<span class="badge rounded-pill {cls}">{
+                record.get_status_display()
+            }</span>"""
         )
 
 
