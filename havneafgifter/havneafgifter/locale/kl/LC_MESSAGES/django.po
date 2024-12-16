@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-04 13:47-0200\n"
+"POT-Creation-Date: 2024-12-16 09:02-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,7 +55,7 @@ msgid "Password"
 msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
-msgid "IMO-number"
+msgid "IMO-no."
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -104,11 +104,11 @@ msgstr ""
 msgid "Shipping agent"
 msgstr "Umiarsuaatileqatigiiffik"
 
-#: havneafgifter/forms.py havneafgifter/models.py
+#: havneafgifter/forms.py
 msgid "Arrival date/time"
 msgstr "Piffisasaq nunaliffik"
 
-#: havneafgifter/forms.py havneafgifter/models.py
+#: havneafgifter/forms.py
 msgid "Departure date/time"
 msgstr "Piffissaq aallarfissaq"
 
@@ -433,7 +433,7 @@ msgid "Draft"
 msgstr ""
 
 #: havneafgifter/models.py
-msgid "Awaiting approval"
+msgid "Awaiting"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -515,12 +515,20 @@ msgid "Reason text"
 msgstr ""
 
 #: havneafgifter/models.py
-msgid "Form submission date"
+msgid "Submitted"
 msgstr ""
 
 #: havneafgifter/models.py
 msgid "Vessel nationality"
 msgstr "Sumiuussuseq"
+
+#: havneafgifter/models.py
+msgid "Arrival"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Departure"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Calculated harbour tax"
@@ -683,11 +691,6 @@ msgid "Havneafgifter"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Create new"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/base.html
 msgid "My forms"
 msgstr ""
 
@@ -704,11 +707,12 @@ msgid "Edit master data"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
-msgid "Log out"
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Create new"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
-msgid "About"
+msgid "About Talippoq"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
@@ -720,7 +724,19 @@ msgid "Source code"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+msgid "Github - Havneafgifter"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
 msgid "Contact"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Language"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "Log out"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html

@@ -37,6 +37,8 @@ $dark: $dark-grey;
 $badge-font-size: 1em;
 $badge-font-weight: normal;
 
+$border-color: $grey;
+
 @import "./bootstrap/scss/bootstrap";
 
 // Additional styling here
@@ -119,7 +121,7 @@ a {
 }
 
 .table th {
-  background-color: $light-grey !important;
+  background-color: $light-grey;
   border-bottom: 0;
 
   padding-top: 10px;
@@ -142,11 +144,27 @@ table tbody > tr:last-child > td {
   border-bottom: 0;
 }
 
-// Rounds the top left and right side of the table
-table th:first-child {
-  border-radius: 10px 0 0 0;
+// We want the headers of  sideways tables to have the same color as the background
+.table-sideways th {
+  background-color: $lightest-grey;
 }
 
-table th:last-child {
-  border-radius: 0 10px 0 0;
+// 0.625rem (10px) rounding of all tables
+.table {
+  overflow: hidden !important;
+  border-radius: 0.625 * $spacer;
+}
+
+// Forces all table headers to be `dark-primary`
+.table > :not(caption) > * > th {
+  color: $dark-primary;
+}
+
+// ...and the headers that act as links (sorting)
+.table > :not(caption) > * > th > a {
+  color: $dark-primary;
+}
+
+.table-light {
+  border-color: $grey;
 }

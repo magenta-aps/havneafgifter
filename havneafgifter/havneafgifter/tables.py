@@ -28,6 +28,7 @@ class HarborDuesFormTable(tables.Table):
             "vessel_type",
             "nationality",
             "harbour_tax",
+            "pdf",
         )
 
     def render_status(self, record):
