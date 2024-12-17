@@ -267,11 +267,11 @@ table tfoot td p {
                         </td>
                         <td class="col-3">
                             <i>Date / <span class="secondary">Ulloq</span></i>
-                            <div>{{ form.datetime_of_arrival|date:"j-n-Y" }}</div>
+                            <div>{{ form.datetime_of_arrival|date:"SHORT_DATE_FORMAT" }}</div>
                         </td>
                         <td colspan="2">
                             <i>Time / <span class="secondary">Nalunaaqutaq</span></i>
-                            <div>{{ form.datetime_of_arrival|date:"H:i" }}</div>
+                            <div>{{ form.datetime_of_arrival|date:"TIME_FORMAT" }}</div>
                         </td>
                     </tr>
 
@@ -282,11 +282,11 @@ table tfoot td p {
                         </td>
                         <td class="col-3">
                             <i>Date / <span class="secondary">Ulloq</span></i>
-                            <div>{{ form.datetime_of_departure|date:"j-n-Y" }}</div>
+                            <div>{{ form.datetime_of_departure|date:"SHORT_DATE_FORMAT" }}</div>
                         </td>
                         <td colspan="2">
                             <i>Time / <span class="secondary">Nalunaaqutaq</span></i>
-                            <div>{{ form.datetime_of_departure|date:"H:i" }}</div>
+                            <div>{{ form.datetime_of_departure|date:"TIME_FORMAT" }}</div>
                         </td>
                     </tr>
 

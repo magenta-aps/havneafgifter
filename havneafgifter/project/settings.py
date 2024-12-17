@@ -207,6 +207,7 @@ USE_L10N = True
 USE_TZ = True
 THOUSAND_SEPARATOR = "."
 DECIMAL_SEPARATOR = ","
+FORMAT_MODULE_PATH = ["havneafgifter.formats"]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -325,6 +326,7 @@ if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [
         os.environ["HOST_DOMAIN"],
     ]
+
 TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
 TEMPUS_DOMINUS_INCLUDE_ASSETS = False
 
