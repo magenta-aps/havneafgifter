@@ -1,4 +1,4 @@
-{% extends "havneafgifter/base.html" %}
+{% extends "havneafgifter/card.html" %}
 
 {% comment %}
 SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
@@ -7,57 +7,22 @@ SPDX-License-Identifier: MPL-2.0
 {% endcomment %}
 
 {% load i18n %}
+{% load django_bootstrap5 %}
 
-{% block title %}{% translate 'Password reset confirmation' %}{% endblock %}
+{% block title %}{% translate 'Password reset confirmation' %}{% endblock title %}
 
-{% block content %}
-    {% if form.non_field_errors %}
-    <div class="row justify-content-md-center">
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <div class="justify-content-md-center d-flex align-items-center vh-100">
-        <div class="card">
-            <h5 class="card-header">{% translate 'Password reset confirmation' %}</h5>
-            <div class="card-body">
-                {% if validlink %}
-                    <p>{% translate "Please enter your new password twice so we can verify you typed it in correctly." %}</p>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" autocomplete="username" value="{{ form.user.get_username }}" />
-                        <div class="row my-1">
-                            <div class="col-4">
-                                <label for="id_new_password1">{% translate 'New password:' %}</label>
-                            </div>
-                            <div class="col-8">
-                                {{ form.new_password1 }}
-                                {{ form.new_password1.errors }}
-                            </div>
-                        </div>
-                        <div class="row my-1">
-                            <div class="col-4">
-                                <label for="id_new_password2">{% translate 'Confirm password:' %}</label>
-                            </div>
-                            <div class="col-8">
-                                {{ form.new_password2 }}
-                                {{ form.new_password2.errors }}
-                            </div>
-                        </div>
-                        <div class="row my-1 mt-3 mb-3">
-                            <small>
-                                {% include "./password_requirements.html" %}
-                            </small>
-                        </div>
-                        <button class="btn btn-primary float-end" type="submit">{% translate 'Change my password' %}</button>
-                    </form>
-                {% else %}
-                    <p>{% translate "The password reset link was invalid, possibly because it has already been used.  Please request a new password reset." %}</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+{% block card_title %}{% translate 'Password reset confirmation' %}{% endblock card_title %}
+
+{% block card_content %}
+{% if validlink %}
+    <p>{% translate "Please enter your new password twice so we can verify you typed it in correctly." %}</p>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" autocomplete="username" value="{{ form.user.get_username }}" />
+        {% bootstrap_form form wrapper_class="" %}
+        <button class="btn btn-primary mt-3" type="submit">{% translate 'Change my password' %}</button>
+    </form>
+{% else %}
+    <p>{% translate "The password reset link was invalid, possibly because it has already been used.  Please request a new password reset." %}</p>
+{% endif %}
 {% endblock %}

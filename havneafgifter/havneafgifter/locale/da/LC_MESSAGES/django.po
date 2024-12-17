@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-17 06:25-0200\n"
+"POT-Creation-Date: 2024-12-17 12:11-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -711,7 +711,6 @@ msgstr "Redigér stamdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Create new"
 msgstr "Opret ny"
 
@@ -1030,14 +1029,13 @@ msgid "Harbour Dues"
 msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "View PDF"
-msgstr "Vis PDF"
+msgid "Harbor dues"
+msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
-#: havneafgifter/templates/havneafgifter/taxrates_detail.html
-#: havneafgifter/templates/havneafgifter/update_vessel.html
-msgid "Edit"
-msgstr "Rediger"
+#, python-format
+msgid "Form %(form_id)s"
+msgstr "Blanket %(form_id)s"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #, python-format
@@ -1047,6 +1045,16 @@ msgstr "Afvist af \"%(user)s\" den %(date)s"
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Message"
 msgstr "Besked"
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "View PDF"
+msgstr "Vis PDF"
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+#: havneafgifter/templates/havneafgifter/update_vessel.html
+msgid "Edit"
+msgstr "Rediger"
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 #: havneafgifter/templates/havneafgifter/update_vessel.html
@@ -1232,21 +1240,16 @@ msgstr "Havneafgifts-liste"
 msgid "Edit vessel to report harbour dues"
 msgstr "Rediger skib for at rapportere havneafgifter"
 
-#: havneafgifter/templates/havneafgifter/user/password/password_requirements.html
-msgid ""
-"Passwords must be at least 8 characters, and cannot consist of only digits. "
-"Passwords cannot be too similar to your name, username or email address. "
-"Avoid using very common passwords."
-msgstr ""
-"Kodeord skal være mindst 8 tegn lange, og må ikke kun bestå af tal. Kodeord "
-"må ikke minde om dit navn, brugernavn eller email-adresse. Undgå at bruge "
-"meget almindelige kodeord."
-
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_done.html
 msgid "Password reset"
 msgstr "Nulstil kodeord"
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
+#: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
+msgid "Reset your password"
+msgstr "Nulstil dit kodeord"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 msgid ""
@@ -1257,12 +1260,13 @@ msgstr ""
 "instrukser til hvordan man sætter et nyt."
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
-msgid "Email address:"
-msgstr "Email-adresse:"
-
-#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
 msgid "Reset my password"
 msgstr "Nulstil mit kodeord"
+
+#: havneafgifter/templates/havneafgifter/user/password/reset_begin.html
+#: havneafgifter/templates/havneafgifter/user/password/reset_done.html
+msgid "Return to login"
+msgstr "Tilbage til login"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 msgid "Your password has been set.  You may go ahead and log in now."
@@ -1279,14 +1283,6 @@ msgid ""
 msgstr ""
 "Indtast venligst dit nye kodeord to gange så vi kan bekræfte at du har "
 "indtastet det korrekt."
-
-#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
-msgid "New password:"
-msgstr "Nyt kodeord:"
-
-#: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
-msgid "Confirm password:"
-msgstr "Bekræft kodeord:"
 
 #: havneafgifter/templates/havneafgifter/user/password/reset_confirm.html
 msgid "Change my password"
@@ -1315,10 +1311,6 @@ msgid ""
 msgstr ""
 "Hvis du ikke modtager en email skal du sørge for at du har indtastet samme "
 "adresse som du registrerede dig med, og har checket din spam-mappe."
-
-#: havneafgifter/templates/havneafgifter/user/password/reset_done.html
-msgid "Return to login"
-msgstr "Tilbage til login"
 
 #: havneafgifter/view_mixins.py
 msgid ""

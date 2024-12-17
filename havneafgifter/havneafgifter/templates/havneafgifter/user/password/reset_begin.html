@@ -1,4 +1,4 @@
-{% extends "havneafgifter/base.html" %}
+{% extends "havneafgifter/card.html" %}
 
 {% comment %}
 SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
@@ -7,38 +7,26 @@ SPDX-License-Identifier: MPL-2.0
 {% endcomment %}
 
 {% load i18n %}
+{% load django_bootstrap5 %}
 
-{% block title %}{% translate 'Password reset' %}{% endblock %}
+{% block title %}{% translate 'Password reset' %}{% endblock title %}
 
-{% block content %}
-    {% if form.non_field_errors %}
-    <div class="row justify-content-md-center">
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <div class="justify-content-md-center d-flex align-items-center vh-100">
-        <div class="card">
-            <h5 class="card-header">{% translate 'Password reset' %}</h5>
-            <div class="card-body">
-                <p>{% translate 'Forgotten your password? Enter your email address below, and we’ll email instructions for setting a new one.' %}</p>
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="row my-1">
-                        <div class="col-4">
-                            <label for="id_email">{% translate 'Email address:' %}</label>
-                        </div>
-                        <div class="col-8">
-                            {{ form.email }}
-                            {{ form.email.errors  }}
-                            <button class="btn btn-primary float-end" type="submit">{% translate 'Reset my password' %}</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+{% block card_title %}{% translate 'Reset your password' %}{% endblock card_title %}
+
+{% block card_content %}
+<p>{% translate 'Forgotten your password? Enter your email address below, and we’ll email instructions for setting a new one.' %}</p>
+<form method="POST">
+    {% csrf_token %}
+    <div class="d-flex align-items-end">
+        <div class="col-4">
+            {% bootstrap_form form wrapper_class="" %}
+        </div>
+        <div class="col-4">
+            <button class="btn btn-primary mx-3" type="submit">{% translate 'Reset my password' %}</button>
         </div>
     </div>
-{% endblock %}
+</form>
+<div class="row mt-3 pt-3">
+    <a href="{% url 'havneafgifter:login' %}">{% translate 'Return to login' %}</a>
+</div>
+{% endblock card_content %}
