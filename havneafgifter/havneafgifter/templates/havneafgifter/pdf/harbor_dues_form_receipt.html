@@ -35,11 +35,11 @@ SPDX-License-Identifier: MPL-2.0
     <table class="table">
         <thead>
             <tr>
-                <th>
+                <th class="col-3">
                     <div>Gross tonnage (GT)</div>
                     <div class="secondary">Bruttoton(s) (BT)</div>
                 </th>
-                <th>
+                <th class="col-3">
                     {% if form.vessel_type in PASSENGER_OR_FISHER %}
                     <div>24 hours started</div>
                     <div class="secondary">Ullut unnuallu qassissaat</div>
@@ -48,11 +48,11 @@ SPDX-License-Identifier: MPL-2.0
                     <div class="secondary">Sap. Ak. qassissaat</div>
                     {% endif %}
                 </th>
-                <th>
+                <th class="col-3">
                     <div>DKK per/BT</div>
                     <div class="secondary">BT-mut ataatsimut DKK</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>Dues</div>
                     <div class="secondary">Akileraarutit</div>
                 </th>
@@ -60,31 +60,31 @@ SPDX-License-Identifier: MPL-2.0
         </thead>
         <tbody>
             <tr>
-                <td>
+                <td class="col-3">
                     {{ form.gross_tonnage|default_if_none:"" }}
                 </td>
-                <td>
+                <td class="col-3">
                     {% if form.vessel_type in PASSENGER_OR_FISHER %}
                     {{ form.duration_in_days }}
                     {% elif form.vessel_type in FREIGHTER_OR_OTHER %}
                     {{ form.duration_in_weeks }}
                     {% endif %}
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.tax_per_gross_ton|default_if_none:0 }} DKK
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.harbour_tax|default_if_none:0 }} DKK
                 </td>
             </tr>
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2"></td>
-                <td>
+                <td class="col-3" colspan="2"></td>
+                <td class="col-3">
                     Total fee
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.harbour_tax|default_if_none:0 }} DKK
                 </td>
             </tr>

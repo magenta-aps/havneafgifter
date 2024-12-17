@@ -194,7 +194,7 @@ table.table-striped td:first-child {
                 <tbody>
                     {% if form.has_port_of_call %}
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Port of call</div>
                             <div class="secondary">Umiarsualivik nunaliffik</div>
                         </td>
@@ -206,7 +206,7 @@ table.table-striped td:first-child {
 
                     {% if form.nationality %}
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Nationality</div>
                             <div class="secondary">Sumiuussuseq</div>
                         </td>
@@ -217,11 +217,11 @@ table.table-striped td:first-child {
                     {% endif %}
 
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Vessel</div>
                             <div class="secondary">Angallat</div>
                         </td>
-                        <td>
+                        <td class="col-3">
                             <i>Name / <span class="secondary">Angallatip aqqa</span></i>
                             <div>{{ form.vessel_name|default_if_none:"" }}</div>
                         </td>
@@ -232,7 +232,7 @@ table.table-striped td:first-child {
                     </tr>
 
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Owner</div>
                             <div class="secondary">Piginnittoq</div>
                         </td>
@@ -242,7 +242,7 @@ table.table-striped td:first-child {
                     </tr>
 
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Master</div>
                             <div class="secondary">Umiarsuup naalagaa</div>
                         </td>
@@ -252,7 +252,7 @@ table.table-striped td:first-child {
                     </tr>
 
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Shipping agent/company</div>
                             <div class="secondary">Umiarsuaatileqatigiiffik</div>
                         </td>
@@ -262,11 +262,11 @@ table.table-striped td:first-child {
                     </tr>
 
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Time of arrival</div>
                             <div class="secondary">Piffisasaq nunaliffik</div>
                         </td>
-                        <td>
+                        <td class="col-3">
                             <i>Date / <span class="secondary">Ulloq</span></i>
                             <div>{{ form.datetime_of_arrival|date:"j-n-Y" }}</div>
                         </td>
@@ -277,11 +277,11 @@ table.table-striped td:first-child {
                     </tr>
 
                     <tr>
-                        <td>
+                        <td class="col-3">
                             <div>Time of departure</div>
                             <div class="secondary">Piffissaq aallarfissaq</div>
                         </td>
-                        <td>
+                        <td class="col-3">
                             <i>Date / <span class="secondary">Ulloq</span></i>
                             <div>{{ form.datetime_of_departure|date:"j-n-Y" }}</div>
                         </td>

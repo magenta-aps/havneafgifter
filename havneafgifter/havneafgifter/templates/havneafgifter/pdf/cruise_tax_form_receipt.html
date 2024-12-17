@@ -46,19 +46,19 @@ SPDX-License-Identifier: MPL-2.0
     <table class="table">
         <thead>
             <tr>
-                <th>
+                <th class="col-3">
                     <div>Gross Tonnage (GT)</div>
                     <div class="secondary">Bruttoton(s) (BT)</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>Length of stay (commenced 24-hour intervals)</div>
                     <div class="secondary">Taleqqaneq (nalunaaquttap akunneri 24-kkaartut)</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>DKK per/BT</div>
                     <div class="secondary">BT-mut ataatsimut DKK</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>Port Tax</div>
                     <div class="secondary">Umiarsualivimmiinner mut akitsuut</div>
                 </th>
@@ -66,16 +66,16 @@ SPDX-License-Identifier: MPL-2.0
         </thead>
         <tbody>
             <tr>
-                <td>
+                <td class="col-3">
                     {{ form.gross_tonnage }}
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.duration_in_days }}
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.tax_per_gross_ton }} DKK
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.harbour_tax|default_if_none:0 }} DKK
                 </td>
             </tr>
@@ -83,10 +83,10 @@ SPDX-License-Identifier: MPL-2.0
         <tfoot>
             <tr>
                 <td colspan="2"></td>
-                <td>
+                <td class="col-3">
                     Total fee
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.harbour_tax|default_if_none:0 }} DKK
                 </td>
             </tr>
@@ -100,46 +100,49 @@ SPDX-License-Identifier: MPL-2.0
     {# Item: total number of passengers, total pax tax #}
     <h2>Pax Tax (cruise ships)</h2>
     <h2 class="secondary">Ilaasunut akitsuut</h2>
-    <div class="col-8">
+    <div class="col-12">
         <table class="table">
             <thead>
                 <tr>
-                    <th>
+                    <th class="col-3">
                         <div>Number of passengers on board at arrival at port</div>
                         <div class="secondary">Talinnermi ilaasut amerlassusaat</div>
                     </th>
-                    <th>
+                    <th class="col-3">
                         <div>Tax rate per passenger</div>
                         <div class="secondary">Akitsuut</div>
                     </th>
-                    <th>
+                    <th class="col-3">
                         <div>Pax Tax</div>
                         <div class="secondary">Ilaasunut akitsuut</div>
                     </th>
+                    <th class="col-3"></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>
+                    <td class="col-3">
                         {{ form.number_of_passengers }}
                     </td>
-                    <td>
+                    <td class="col-3">
                         50,00 DKK
                     </td>
-                    <td>
+                    <td class="col-3">
                         {{ form.pax_tax }} DKK
                     </td>
+                    <td class="col-3"></td>
                 </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <td></td>
-                    <td>
+                    <td class="col-3"></td>
+                    <td class="col-3">
                         Total fee
                     </td>
-                    <td>
+                    <td class="col-3">
                         {{ form.pax_tax }} DKK
                     </td>
+                    <td class="col-3"></td>
                 </tr>
             </tfoot>
         </table>
@@ -152,10 +155,10 @@ SPDX-License-Identifier: MPL-2.0
         <table class="table">
             <thead>
                 <tr>
-                    <th>
+                    <th class="col-3">
                         Nationality
                     </th>
-                    <th>
+                    <th class="col-3">
                         Number of passengers
                     </th>
                 </tr>
@@ -163,10 +166,10 @@ SPDX-License-Identifier: MPL-2.0
             <tbody>
                 {% for p in form.passengers_by_country.all %}
                 <tr>
-                    <td>
+                    <td class="col-3">
                         {{ p.get_nationality_display }}
                     </td>
-                    <td>
+                    <td class="col-3">
                         {{ p.number_of_passengers }}
                     </td>
                 </tr>
@@ -184,15 +187,15 @@ SPDX-License-Identifier: MPL-2.0
     <table class="table">
         <thead>
             <tr>
-                <th>
+                <th class="col-3">
                     <div>Docks for disembarkment</div>
                     <div class="secondary">Niuffik</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>Fee rate<sup>1</sup></div>
                     <div class="secondary">Akitsuut</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>
                         Number of passengers on board at the time of disembarkment
                         <sup>2</sup>
@@ -200,7 +203,7 @@ SPDX-License-Identifier: MPL-2.0
                     </div>
                     <div class="secondary">Niusoqarnerani umiarsuarmi ilaasut amerlassusaat</div>
                 </th>
-                <th>
+                <th class="col-3">
                     <div>Aningaasat akiligassat</div>
                     <div class="secondary">Payable fee</div>
                 </th>
@@ -209,21 +212,21 @@ SPDX-License-Identifier: MPL-2.0
         <tbody>
             {% for d in disembarkment_tax_items %}
             <tr>
-                <td>
+                <td class="col-3">
                     {{ d.disembarkment.disembarkment_site.name }}
                     ({{ d.disembarkment.disembarkment_site.get_municipality_display }})
                 </td>
-                <td>
+                <td class="col-3">
                     {% if d.taxrate %}
                     {{ d.taxrate.disembarkment_tax_rate }} DKK
                     {% else %}
                     0,00 DKK
                     {% endif %}
                 </td>
-                <td>
+                <td class="col-3">
                     {{ d.disembarkment.number_of_passengers }}
                 </td>
-                <td>
+                <td class="col-3">
                     {{ d.tax }} DKK
                 </td>
             </tr>
@@ -232,10 +235,10 @@ SPDX-License-Identifier: MPL-2.0
         <tfoot>
             <tr>
                 <td colspan="2"></td>
-                <td>
+                <td class="col-3">
                     Total fee
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.disembarkment_tax }} DKK
                 </td>
             </tr>
@@ -280,39 +283,39 @@ SPDX-License-Identifier: MPL-2.0
         <tbody>
             {% if form.has_port_of_call %}
             <tr>
-                <td colspan="3">
+                <td class="col-3" colspan="2">
                     <div>Port Tax</div>
                     <div class="secondary">Umiarsualivimmiinnermut akiliut</div>
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.harbour_tax }} DKK
                 </td>
             </tr>
             <tr>
-                <td colspan="3">
+                <td class="col-3" colspan="2">
                     <div>Pax Tax</div>
                     <div class="secondary">Ilaasumut akitsuut</div>
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.pax_tax }} DKK
                 </td>
             </tr>
             {% endif %}
             <tr>
-                <td colspan="3">
+                <td class="col-3" colspan="2">
                     <div>Environmental and Maintenance Fee</div>
                     <div class="secondary">Avatangiisinut iluarsaassinermullu akitsuut</div>
                 </td>
-                <td>
+                <td class="col-3">
                     {{ form.disembarkment_tax }} DKK
                 </td>
             </tr>
             <tr>
-                <td colspan="3">
+                <td class="col-3" colspan="2">
                     <div class="fw-bold">The total amount payable to the Harbour Administration</div>
                     <div class="secondary fw-bold">Umiarsualivimmi oqartussanut akiligassaq katillugu</div>
                 </td>
-                <td class="fw-bold">
+                <td class="col-3 fw-bold">
                     {{ form.total_tax }} DKK
                 </td>
             </tr>
