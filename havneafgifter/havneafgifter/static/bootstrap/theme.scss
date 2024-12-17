@@ -106,6 +106,9 @@ header {
   border-radius: $spacer;
   box-shadow: 0 0 $spacer $light-grey;
 }
+.card-container {
+  height: 80vh;
+}
 .card {
   min-width: 35vw;
   padding: 3 * $spacer;
@@ -113,7 +116,11 @@ header {
   border-radius: $spacer;
   box-shadow: 0 0 $spacer $light-grey;
 }
+.card-body {
+  padding: 0;
+}
 .card-header {
+  padding: 0 0 2 * $spacer 0;
   background-color: transparent;
   border: none;
 }

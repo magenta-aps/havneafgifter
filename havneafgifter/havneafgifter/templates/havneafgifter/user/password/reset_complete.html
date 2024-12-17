@@ -1,4 +1,4 @@
-{% extends "havneafgifter/base.html" %}
+{% extends "havneafgifter/card.html" %}
 
 {% comment %}
 SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
@@ -8,16 +8,13 @@ SPDX-License-Identifier: MPL-2.0
 
 {% load i18n %}
 
-{% block title %}{% translate 'Password reset' %}{% endblock %}
+{% block title %}{% translate 'Password reset' %}{% endblock title %}
 
-{% block content %}
-    <div class="justify-content-md-center d-flex align-items-center vh-100">
-        <div class="card">
-            <h5 class="card-header">{% translate 'Password reset' %}</h5>
-            <div class="card-body">
-                <p>{% translate "Your password has been set.  You may go ahead and log in now." %}</p>
-                <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate 'Log in' %}</a>
-            </div>
-        </div>
-    </div>
+{% block card_title %}{% translate 'Reset your password' %}{% endblock card_title %}
+
+{% block card_content %}
+<p>{% translate "Your password has been set.  You may go ahead and log in now." %}</p>
+<div class="mt-3 pt-3">
+    <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate 'Log in' %}</a>
+</div>
 {% endblock %}
