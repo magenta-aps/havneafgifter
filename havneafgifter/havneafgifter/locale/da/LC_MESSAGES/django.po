@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 09:02-0200\n"
+"POT-Creation-Date: 2024-12-17 06:25-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -649,6 +649,10 @@ msgid "ethvert ilandsætningssted"
 msgstr ""
 
 #: havneafgifter/tables.py
+msgid "Operation"
+msgstr ""
+
+#: havneafgifter/tables.py
 msgid "Landgangsafgift"
 msgstr ""
 
@@ -689,6 +693,7 @@ msgid "Havneafgifter"
 msgstr "Havneafgifter"
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "My forms"
 msgstr "Mine blanketter"
 
@@ -698,13 +703,14 @@ msgstr "Statistikker"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Rates"
-msgstr ""
+msgstr "Satser"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Edit master data"
 msgstr "Redigér stamdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Create new"
 msgstr "Opret ny"
@@ -731,7 +737,7 @@ msgstr "Kontakt"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Language"
-msgstr ""
+msgstr "Sprog"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Log out"
@@ -858,8 +864,8 @@ msgid "Save"
 msgstr "Gem"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
-msgid "Open"
-msgstr "Åben"
+msgid "Show"
+msgstr "Vis"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
@@ -961,12 +967,16 @@ msgid "IMO numbers should be 7 digits"
 msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-msgid "Harbor dues list"
-msgstr "Havneafgiftsliste"
+msgid "Filters"
+msgstr "Filtre"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-msgid "Filter"
-msgstr "Filtrer"
+msgid "Search"
+msgstr "Søg"
+
+#: havneafgifter/templates/havneafgifter/harborduesform_list.html
+msgid "forms"
+msgstr "blanketter"
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
 msgid "Logged out"

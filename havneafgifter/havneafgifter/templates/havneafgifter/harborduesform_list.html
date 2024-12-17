@@ -5,12 +5,30 @@
 {% load render_table from django_tables2 %}
 
 {% block content %}
-<h1>{% translate "Harbor dues list" %}</h1>
 
-<form method="get">
-    {% bootstrap_form form %}
-    {% bootstrap_button button_type="submit" content=_("Filter") %}
+<div class="d-flex align-items-center mb-5">
+  <h1 class="me-4">{% translate "My forms" %}</h1>
+  <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary">
+    {% translate 'Create new' %}
+  </a>
+</div>
+
+<p><b>{% translate "Filters" %}</b></p>
+
+<form method="get" class="mb-5">
+  <div class="row">
+    <div class="col-3">
+      {% bootstrap_form form %}
+    </div>
+    <div class="d-flex col align-items-end">
+      <div class="mb-3">
+        {% bootstrap_button button_type="submit" content=_("Search") %}
+      </div>
+    </div>
+  </div>
 </form>
+
+<p>{{ count }} {% translate "forms" %}</p>
 
 {% render_table table %}
 
