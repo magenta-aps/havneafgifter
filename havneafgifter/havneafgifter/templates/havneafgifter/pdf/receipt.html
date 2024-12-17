@@ -35,6 +35,10 @@ SPDX-License-Identifier: MPL-2.0
     font-family: sans-serif;
 }
 
+.col-3 {
+    width: 25%;
+}
+
 .secondary {
     color: #777;
 }
@@ -62,11 +66,11 @@ sup {
 }
 
 table {
+    width: 100%;
     page-break-inside: avoid;
 }
 
 table th {
-    width: 1%;
     vertical-align: top;
     font-weight: normal;
     border-bottom: 1pt solid #ddd;
@@ -82,7 +86,6 @@ table tfoot td p {
 }
 
 table td {
-    width: 1%;
     word-wrap: break-word;
     line-height: 150%;
 }
@@ -98,10 +101,6 @@ table td p {
 
 table tfoot td p {
     font-weight: normal;
-}
-
-table.table-striped td:first-child {
-    width: 10%;
 }
 {% endblock %}
 
