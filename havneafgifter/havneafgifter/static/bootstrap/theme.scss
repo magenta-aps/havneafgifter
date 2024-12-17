@@ -83,14 +83,14 @@ header {
   padding: 3 * $spacer;
   background-color: #ffffff;
   border-radius: $spacer;
-  box-shadow: 0 0 $spacer #ddd; /* TODO: use $lightgrey? */
+  box-shadow: 0 0 $spacer $light-grey;
 }
 .card {
   min-width: 35vw;
   padding: 3 * $spacer;
   border-color: transparent;
   border-radius: $spacer;
-  box-shadow: 0 0 $spacer #ddd; /* TODO: use $lightgrey? */
+  box-shadow: 0 0 $spacer $light-grey;
 }
 .card-header {
   background-color: transparent;
@@ -108,7 +108,7 @@ header nav .navbar-nav a {
   min-width: 12vw;
   border-color: transparent;
   border-radius: 0.5 * $spacer;
-  box-shadow: 0 0 0.5 * $spacer #ddd; /* TODO: use $lightgrey? */
+  box-shadow: 0 0 0.5 * $spacer $light-grey;
 }
 #settings h4 {
   margin-bottom: 2 * $spacer;
@@ -210,10 +210,13 @@ nav.object-actions {
   padding: 0;
 }
 div.receipt section {
-  background-color: $light-grey;
+  background-color: $lightest-grey;
   padding: 2 * $spacer;
   border-radius: $spacer;
   margin-bottom: 3 * $spacer;
+}
+div.receipt table {
+  margin: 3 * $spacer 0;
 }
 div.receipt table th,
 div.receipt table td {
