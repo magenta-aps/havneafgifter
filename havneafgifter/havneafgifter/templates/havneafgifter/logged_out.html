@@ -1,20 +1,20 @@
-{% extends "havneafgifter/base_bare.html" %}
+{% extends "havneafgifter/card.html" %}
+
+{% comment %}
+SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+
+SPDX-License-Identifier: MPL-2.0
+{% endcomment %}
+
 {% load i18n %}
 
-{% block title %}
-{% translate "Logged out" %}
-{% endblock %}
+{% block title %}{% translate 'Logged out' %}{% endblock title %}
 
-{% block content %}
-<div class="justify-content-md-center d-flex align-items-center vh-100">
-    <div class="card">
-        <h5 class="card-header">{% translate "Logged out" %}</h5>
-        <div class="card-body">
-            <p>
-                {% translate "You are now logged out. We recommend that you close this browser tab to remove remaining cookie data" %}
-            </p>
-            <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate "Log in" %}</a>
-        </div>
-    </div>
+{% block card_title %}{% translate 'Logged out' %}{% endblock card_title %}
+
+{% block card_content %}
+<p>{% translate "You are now logged out. We recommend that you close this browser tab to remove remaining cookie data" %}</p>
+<div class="mt-3 pt-3">
+    <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate "Log in" %}</a>
 </div>
 {% endblock %}
