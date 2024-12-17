@@ -43,6 +43,27 @@ $breadcrumb-divider: quote("\203A");
 
 @import "./bootstrap/scss/bootstrap";
 
+// Figtree font
+@font-face {
+  font-family: 'Figtree Normal';
+  font-weight: normal;
+  src: url("../figtree/Figtree-VariableFont_wght.ttf") format("truetype");
+}
+@font-face {
+  font-family: 'Figtree Italic';
+  font-weight: normal;
+  src: url("../figtree/Figtree-Italic-VariableFont_wght.ttf") format("truetype");
+}
+
+body {
+  font-family: "Figtree Normal", "Trebuchet MS", "Helvetica", sans-serif;
+}
+
+i {
+  font-family: "Figtree Italic", "Trebuchet MS", "Helvetica", sans-serif;
+  font-style: normal; /* avoid "double italicization" */
+}
+
 // Additional styling here
 h1 {
   font-size: 32px;
