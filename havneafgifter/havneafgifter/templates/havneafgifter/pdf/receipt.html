@@ -12,14 +12,16 @@ SPDX-License-Identifier: MPL-2.0
 {% load bootstrap_status_badge %}
 
 {% block extra_css %}
+{# This block is only rendered when outputting PDF (not HTML) #}
 @page {
     size: A4;
     margin: 2cm 1cm;
+    font-family: sans-serif;
 
     @top-right {
         font-size: 7pt;
         text-align: right;
-        content: 'Harbour dues - {{ form.pk }}, {{ form.date|localize }} / Umiarsualivimmut Akileraaruti - {{ form.pk }}, {{ form.date|localize }}';
+        content: 'Harbour dues {{ form.pk }} ({{ form.date|localize }}) / Umiarsualivimmut Akileraaruti {{ form.pk }} ({{ form.date|localize }})';
     }
 
     @bottom-center {
@@ -30,18 +32,33 @@ SPDX-License-Identifier: MPL-2.0
 
 .container {
     font-size: 7pt;
+    font-family: sans-serif;
+}
+
+.secondary {
+    color: #777;
+}
+
+section {
+    page-break-inside: avoid;
+    padding: 0.05cm 0.5cm 0.5cm 0.5cm;
+    margin: 0 0 0.5cm 0;
+    background: #f8f8f8;
+    border-radius: 0.5cm;
 }
 
 h1 {
     font-size: 11pt;
     font-weight: bold;
-    margin: 0 0 1cm 0;
 }
 
 h2 {
-    font-size: 11pt;
+    font-size: 9pt;
     font-weight: normal;
-    margin: 1cm 0 0.5cm 0;
+}
+
+sup {
+    font-weight: bold;
 }
 
 table {
@@ -51,11 +68,23 @@ table {
 table th {
     width: 1%;
     vertical-align: top;
+    font-weight: normal;
+    border-bottom: 1pt solid #ddd;
+}
+
+table tfoot td {
+    font-weight: bold;
+    line-height: 100%;
+}
+
+table tfoot td p {
+    font-size: 5pt;
 }
 
 table td {
     width: 1%;
     word-wrap: break-word;
+    line-height: 150%;
 }
 
 table td.table-active {
@@ -77,6 +106,7 @@ table.table-striped td:first-child {
 {% endblock %}
 
 {% block breadcrumb %}
+{# This block is only rendered when outputting HTML (not PDF) #}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">{% translate "Harbor dues" %}</a></li>
@@ -90,6 +120,7 @@ table.table-striped td:first-child {
 {% endblock breadcrumb %}
 
 {% block object_title %}
+{# This block is only rendered when outputting HTML (not PDF) #}
 <h1 class="primary">Harbour dues &ndash; {{ form.pk }}</h1>
 <h1 class="secondary">Umiarsualivimmut Akileraaruti &ndash; {{ form.pk }}</h1>
 <p>{{ form.date|localize }}</p>
@@ -147,6 +178,7 @@ table.table-striped td:first-child {
 {% endblock %}
 
 {% block modals %}
+{# This block is only rendered when outputting HTML (not PDF) #}
 {{ block.super }}
 {% withdraw_form_modal form %}
 {% approve_form_modal form %}
@@ -157,7 +189,7 @@ table.table-striped td:first-child {
 <div class="row receipt">
     <div class="col-12">
         <section>
-            <h2>{% block headline %}{% endblock %}</h2>
+            {% block headline %}{% endblock %}
             <table class="table">
                 <tbody>
                     {% if form.has_port_of_call %}
