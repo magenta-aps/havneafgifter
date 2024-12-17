@@ -13,83 +13,82 @@ SPDX-License-Identifier: MPL-2.0
 {% endblock %}
 
 {% block headline %}
-Umiarsualivimmut Akileraarutit
-<br>
-Harbour Dues
+<h2>Harbour Dues</h2>
+<h2 class="secondary">Umiarsualivimmut Akileraarutit</h2>
 {% endblock %}
 
 {% block additional_tables %}
-<div class="col-12">
-    <h2>
-        {% if form.vessel_type == ShipType.PASSENGER %}
-        Umiarsuaq ilaarsartaat
-        <br>
-        Passenger vessel
-        {% elif form.vessel_type == ShipType.FISHER %}
-        Nunat allamiut aaliasariutaat
-        <br>
-        Foreign fishing vessel
-        {% elif form.vessel_type == ShipType.FREIGHTER %}
-        Umiarsuaq assartuut
-        <br>
-        Cargo vessel
-        {% elif form.vessel_type == ShipType.OTHER %}
-        Umiarsuaq alla
-        <br>
-        Other vessel
-        {% endif %}
-    </h2>
-    <table class="table table-bordered">
-        <tbody>
-            {# This row is the same for all vessel types #}
+<section>
+    {% if form.vessel_type == ShipType.PASSENGER %}
+    <h2>Passenger vessel</h2>
+    <h2 class="secondary">Umiarsuaq ilaarsartaat</h2>
+    {% elif form.vessel_type == ShipType.FISHER %}
+    <h2>Foreign fishing vessel</h2>
+    <h2 class="secondary">Nunat allamiut aaliasariutaat</h2>
+    {% elif form.vessel_type == ShipType.FREIGHTER %}
+    <h2>Cargo vessel</h2>
+    <h2 class="secondary">Umiarsuaq assartuut</h2>
+    {% elif form.vessel_type == ShipType.OTHER %}
+    <h2>Other vessel</h2>
+    <h2 class="secondary">Umiarsuaq alla</h2>
+    {% endif %}
+    <table class="table">
+        <thead>
             <tr>
-                <th scope="row">
-                    Bruttoton(s) (BT)
-                    <br>
-                    Gross tonnage (GT)
+                <th class="col-3">
+                    <div>Gross tonnage (GT)</div>
+                    <div class="secondary">Bruttoton(s) (BT)</div>
                 </th>
-                <td class="table-active">
-                    {{ form.gross_tonnage|default_if_none:"" }}
-                </td>
-                <th scope="row">
-                    BT-mut ataatsimut DKK
-                    <br>
-                    DKK per/BT
-                </th>
-                <td class="table-active">
-                    {{ form.tax_per_gross_ton|default_if_none:0 }} DKK
-                </td>
-            </tr>
-            {# This row varies based on the vessel type #}
-            <tr>
-                <th scope="row">
+                <th class="col-3">
                     {% if form.vessel_type in PASSENGER_OR_FISHER %}
-                    Ullut unnuallu qassissaat
-                    <br>
-                    24 hours started
+                    <div>24 hours started</div>
+                    <div class="secondary">Ullut unnuallu qassissaat</div>
                     {% elif form.vessel_type in FREIGHTER_OR_OTHER %}
-                    Sap. Ak. qassissaat
-                    <br>
-                    Weeks started
+                    <div>Weeks started</div>
+                    <div class="secondary">Sap. Ak. qassissaat</div>
                     {% endif %}
                 </th>
-                <td class="table-active">
+                <th class="col-3">
+                    <div>DKK per/BT</div>
+                    <div class="secondary">BT-mut ataatsimut DKK</div>
+                </th>
+                <th class="col-3">
+                    <div>Dues</div>
+                    <div class="secondary">Akileraarutit</div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="col-3">
+                    {{ form.gross_tonnage|default_if_none:"" }}
+                </td>
+                <td class="col-3">
                     {% if form.vessel_type in PASSENGER_OR_FISHER %}
                     {{ form.duration_in_days }}
                     {% elif form.vessel_type in FREIGHTER_OR_OTHER %}
                     {{ form.duration_in_weeks }}
                     {% endif %}
                 </td>
-                <th scope="row" class="fw-bold">
-                    Akileraarutit
-                    <br>
-                    Dues
-                </th>
-                <td class="table-active fw-bold">
+                <td class="col-3">
+                    {{ form.tax_per_gross_ton|default_if_none:0 }} DKK
+                </td>
+                <td class="col-3">
                     {{ form.harbour_tax|default_if_none:0 }} DKK
                 </td>
             </tr>
         </tbody>
+        <tfoot>
+            <tr>
+                <td class="col-3" colspan="2"></td>
+                <td class="col-3">
+                    Total fee
+                </td>
+                <td class="col-3">
+                    {{ form.harbour_tax|default_if_none:0 }} DKK
+                </td>
+            </tr>
+        </tfoot>
     </table>
-</div>
+</section>
 {% endblock %}

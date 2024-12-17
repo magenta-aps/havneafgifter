@@ -9,4 +9,4 @@ class TestBootstrapStatusBadge(SimpleTestCase):
         form = HarborDuesForm(status=Status.DRAFT)
         context: dict = bootstrap_status_badge(form)
         self.assertIs(context["form"], form)
-        self.assertEqual(context["bg"], "bg-secondary")
+        self.assertEqual(context["bg"], "badge-draft")
