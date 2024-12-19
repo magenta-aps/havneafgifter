@@ -323,9 +323,13 @@ AUTH_USER_MODEL = "havneafgifter.User"
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap5.html"
 
 if os.environ.get("HOST_DOMAIN", False):
-    CSRF_TRUSTED_ORIGINS = [
-        os.environ["HOST_DOMAIN"],
-    ]
+    CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
+CSRF_COOKIE_SECURE = True
+
+if not DEBUG:
+    SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_NAME = "sessionid"
 
 TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
 TEMPUS_DOMINUS_INCLUDE_ASSETS = False

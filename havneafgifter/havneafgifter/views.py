@@ -200,9 +200,11 @@ class PostLoginView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
+            print(f"saml data: {self.request.session.get('saml')}")
             user = authenticate(
                 request=self.request, saml_data=self.request.session.get("saml")
             )
+            print(f"user: {user}")
             if user and user.is_authenticated:
                 login(
                     request=self.request,
