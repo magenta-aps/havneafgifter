@@ -26,7 +26,10 @@
     <h2>{% translate 'Vessel details' %}</h2>
     {% bootstrap_form form %}
 
-    {% bootstrap_button button_type="submit" name="status" content=_("Edit") %}
+    <button type="submit" name="status" class="btn btn-primary d-flex align-items-center">
+        <span class="material-icons">edit</span>
+        <span class="ms-1">{% translate "Edit" %}</span>
+    </button>
 </form>
 
 

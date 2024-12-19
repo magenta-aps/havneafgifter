@@ -15,6 +15,7 @@ SPDX-License-Identifier: MPL-2.0
     <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen" nonce="{{ request.csp_nonce }}">
     {% endcompress %}
     <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}"/>
+    <link href="{% static 'material-design/filled.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}"/>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'jquery/jquery-3.7.1.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <title>{% block title %}{% translate "Havneafgifter" %}{% endblock %}</title>
@@ -30,29 +31,33 @@ SPDX-License-Identifier: MPL-2.0
                 {% if user.is_authenticated %}
                 {% if user.can_view_list %}
                 <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:harbor_dues_form_list' %}">
-                        {% translate 'My forms' %}
+                    <a href="{% url 'havneafgifter:harbor_dues_form_list' %}" class="d-flex align-items-center">
+                        <span class="material-icons">description</span>
+                        <span class="ms-1">{% translate 'My forms' %}</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if user.can_view_statistics %}
                 <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:statistik' %}">
-                        {% translate 'Statistics' %}
+                    <a href="{% url 'havneafgifter:statistik' %}" class="d-flex align-items-center">
+                        <span class="material-icons">bar_chart</span>
+                        <span class="ms-1">{% translate 'Statistics' %}</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if user.can_view_taxratelist %}
                 <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:tax_rate_list' %}">
-                        {% translate 'Rates' %}
+                    <a href="{% url 'havneafgifter:tax_rate_list' %}" class="d-flex align-items-center">
+                        <span class="material-icons">assignment</span>
+                        <span class="ms-1">{% translate 'Rates' %}</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if user.can_view_edit_master_data %}
                 <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:update_vessel' %}" id="update-vessel-link">
-                        {% translate 'Edit master data' %}
+                    <a href="{% url 'havneafgifter:update_vessel' %}" class="d-flex align-items-center">
+                        <span class="material-icons">edit</span>
+                        <span class="ms-1">{% translate 'Edit master data' %}</span>
                     </a>
                 </li>
                 {% endif %}
@@ -61,8 +66,9 @@ SPDX-License-Identifier: MPL-2.0
             <ul class="navbar-nav d-flex align-items-center ms-auto">
                 {% if user.can_create %}
                 <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary">
-                        {% translate 'Create new' %}
+                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary d-flex align-items-center">
+                        <span class="material-icons">add</span>
+                        <span class="ms-1">{% translate 'Create new' %}</span>
                     </a>
                 </li>
                 {% endif %}
