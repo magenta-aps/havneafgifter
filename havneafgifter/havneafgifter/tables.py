@@ -66,7 +66,7 @@ class TaxRateTableButtonColumn(tables.Column):
 
     def render(self, value, record, bound_column, **kwargs):
         url = reverse_lazy("havneafgifter:tax_rate_details", args=[record.pk])
-        return format_html('<a href="{}" class="btn btn-primary">Show</a>', url)
+        return format_html(f'<a href="{url}" class="btn btn-primary">{_("Show")}</a>')
 
 
 class TaxRateTable(tables.Table):
@@ -76,3 +76,4 @@ class TaxRateTable(tables.Table):
     class Meta:
         model = TaxRates
         exclude = ("pax_tax_rate",)
+        sequence = ("start_datetime", "end_datetime", "id")

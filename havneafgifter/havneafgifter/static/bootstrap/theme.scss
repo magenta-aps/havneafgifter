@@ -45,12 +45,12 @@ $breadcrumb-divider: quote("\203A");
 
 // Figtree font
 @font-face {
-  font-family: 'Figtree Normal';
+  font-family: "Figtree Normal";
   font-weight: normal;
   src: url("../figtree/Figtree-VariableFont_wght.ttf") format("truetype");
 }
 @font-face {
-  font-family: 'Figtree Italic';
+  font-family: "Figtree Italic";
   font-weight: normal;
   src: url("../figtree/Figtree-Italic-VariableFont_wght.ttf") format("truetype");
 }
@@ -83,6 +83,16 @@ h3 {
 h4 {
   font-size: 18px;
   color: $primary;
+}
+
+// Makes it easier to align buttons with headers (default is 0.5rem)
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: 0;
 }
 
 body {
