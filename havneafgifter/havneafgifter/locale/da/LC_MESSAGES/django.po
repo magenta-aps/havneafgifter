@@ -1200,7 +1200,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Tax Rate Details"
-msgstr "Afgifts-detaljer"
+msgstr "Havneafgiftsdetaljer"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid ""
@@ -1230,11 +1230,11 @@ msgstr "Slet"
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Back"
-msgstr ""
+msgstr "Tilbage"
 
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Harbor tax rate list"
-msgstr "Havneafgifts-liste"
+msgstr "Havneafgiftsliste"
 
 #: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Edit vessel to report harbour dues"

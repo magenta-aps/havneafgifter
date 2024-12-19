@@ -1263,9 +1263,13 @@ class TaxRates(PermissionsMixin, models.Model):
         ],
     )
 
-    start_datetime = models.DateTimeField(null=True, blank=True)
+    start_datetime = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Start date")
+    )
 
-    end_datetime = models.DateTimeField(null=True, blank=True)
+    end_datetime = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("End date")
+    )
 
     def get_port_tax_rate(
         self, port: Port, vessel_type: str, gross_ton: int
