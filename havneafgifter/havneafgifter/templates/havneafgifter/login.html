@@ -27,7 +27,10 @@
             {% endif %}
         </div>
         <div class="col-md-2 mb-3">
-            <button type="submit" class="btn btn-primary">{% translate 'Log in' %}</button>
+            <button type="submit" class="btn btn-primary d-flex align-items-center">
+                <span class="material-icons">login</span>
+                <span class="text-nowrap ms-1">{% translate 'Log in' %}</span>
+            </button>
         </div>
     </div>
     <input type="hidden" name="next" value="{{ next }}">
