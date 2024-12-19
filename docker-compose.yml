@@ -56,7 +56,7 @@ services:
     logging:
       driver: 'none' # Disable saving logs
     ports:
-      - "8052:1025"
+      - "8052:8025"
     networks:
       - mail
 
