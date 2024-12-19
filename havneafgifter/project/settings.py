@@ -324,7 +324,6 @@ DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap5.html"
 
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
-CSRF_COOKIE_SECURE = True
 
 
 TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
