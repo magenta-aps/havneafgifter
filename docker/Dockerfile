@@ -67,6 +67,7 @@ COPY --chown=havneafgifter:havneafgifter ./dev-environment/havneafgifter.env hav
 RUN set -a &&  \
     source havneafgifter.env &&  \
     set +a &&  \
-    python manage.py collectstatic --no-input --clear
+    python manage.py collectstatic --no-input --clear && \
+    python manage.py compress --force
 
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
