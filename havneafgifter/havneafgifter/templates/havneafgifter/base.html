@@ -12,7 +12,7 @@ SPDX-License-Identifier: MPL-2.0
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% compress css %}
-    <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen">
+    <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen" nonce="{{ request.csp_nonce }}">
     {% endcompress %}
     <link href="{% static 'havneafgifter/custom.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}"/>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
