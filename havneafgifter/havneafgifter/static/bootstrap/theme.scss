@@ -70,6 +70,10 @@ h1 {
   color: $black;
 }
 
+h1 a {
+  color: $black;
+}
+
 h2 {
   font-size: 22px;
   color: $dark-primary;
@@ -241,6 +245,19 @@ table tbody > tr:last-child > td {
 
 .form-label {
   font-size: 13px;
+}
+
+.language-picker {
+  background-color: $lightest-primary;
+  border: 0;
+}
+
+.language-picker:focus {
+  box-shadow: none;
+}
+
+.dark-icon {
+  color: $dark-primary;
 }
 
 // Receipt page
