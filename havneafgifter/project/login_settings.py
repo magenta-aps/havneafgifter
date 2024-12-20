@@ -6,7 +6,11 @@ import saml2
 from django.urls import reverse_lazy
 from project.util import strtobool
 
-SESSION_COOKIE_SECURE = True
+DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
+
+SESSION_COOKIE_SECURE = not DEBUG
+if not DEBUG:
+    SESSION_COOKIE_SAMESITE = "None"
 SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
