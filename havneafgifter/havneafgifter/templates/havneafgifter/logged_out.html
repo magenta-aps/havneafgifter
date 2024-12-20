@@ -15,6 +15,11 @@ SPDX-License-Identifier: MPL-2.0
 {% block card_content %}
 <p>{% translate "You are now logged out. We recommend that you close this browser tab to remove remaining cookie data" %}</p>
 <div class="mt-3 pt-3">
-    <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary">{% translate "Log in" %}</a>
+    <div class="d-flex">
+        <a href="{% url 'havneafgifter:login' %}" class="btn btn-primary d-flex align-items-center">
+            <span class="material-icons me-1">login</span>
+            {% translate "Log in" %}
+        </a>
+    </div>
 </div>
 {% endblock %}
