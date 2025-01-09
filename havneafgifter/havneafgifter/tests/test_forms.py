@@ -191,6 +191,13 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase
         self._assert_form_field_disabled(form, "vessel_type")
         self._assert_form_field_disabled(form, "gross_tonnage")
 
+    def test_ship_user_can_submit_without_agent(self):
+        form_data = copy.copy(self.harbor_dues_form_data)
+        form_data["status"] = Status.NEW.value
+        del form_data["shipping_agent"]
+        form = self._get_form_instance(form_data, status=Status.NEW)
+        self.assertTrue(form.is_valid())
+
     def test_shipping_agent_field_is_locked_for_shipping_agents(self):
         # If form is instantiated with a `User` that is a "shipping agent user", the
         # field `shipping_agent` is locked, containing the `ShippingAgent` that the
