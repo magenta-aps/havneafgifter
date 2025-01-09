@@ -508,6 +508,12 @@ class CalculationTest(TestCase):
         # Arrange: populate `instance.date`, which is used as fallback value in
         # `calculate_disembarkment_tax`.
         instance.save()
+        # Fix `instance.date` set by `instance.save(...)` to be in 2024, as
+        # `CalculationTest` relies on one `TaxRates` with empty start and end datetimes,
+        # and two `TaxRates` with end datetimes in 2025.
+        # We want to test the behavior where `instance.calculate_tax()` encounters only
+        # the first `TaxRates` object.
+        instance.date = datetime(2024, 12, 31)
         # Arrange: add disembarkments to this cruise tax form
         Disembarkment.objects.create(
             cruise_tax_form=instance,

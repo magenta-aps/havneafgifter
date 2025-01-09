@@ -22,6 +22,7 @@ services:
       - ./log/havneafgifter.log:/log/havneafgifter.log:rw
       - ./dev-environment/cert:/ssl:ro
       - pdf-data:/storage/pdf:rw
+      - ./dev-environment/cache/:/static/CACHE/:rw
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
