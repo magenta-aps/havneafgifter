@@ -73,7 +73,7 @@ class Command(BaseCommand):
 
         # Add `Vessel` to ship users
         if (groups is not None) and ("Ship" in groups):
-            Vessel.objects.create(
+            Vessel.objects.update_or_create(
                 user=user,
                 imo=user.username,
                 name="Mary",
