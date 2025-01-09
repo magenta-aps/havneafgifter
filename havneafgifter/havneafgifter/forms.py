@@ -297,7 +297,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     shipping_agent = DynamicField(
         ModelChoiceField,
-        required=_required_if_status_is_new,
+        required=False,
         queryset=ShippingAgent.objects.all(),
         initial=lambda form: (form._shipping_agent if form._shipping_agent else None),
         disabled=lambda form: form._shipping_agent is not None,
