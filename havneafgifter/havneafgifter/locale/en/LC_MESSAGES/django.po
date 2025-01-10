@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-17 12:11-0200\n"
+"POT-Creation-Date: 2025-01-10 08:19-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -588,6 +588,16 @@ msgid "Beløbet er for højt"
 msgstr ""
 
 #: havneafgifter/models.py
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "Start date"
+msgstr ""
+
+#: havneafgifter/models.py
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "End date"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Harbour"
 msgstr ""
 
@@ -718,10 +728,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Contact"
 msgstr "Contact"
-
-#: havneafgifter/templates/havneafgifter/base.html
-msgid "Language"
-msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Log out"
@@ -1164,14 +1170,6 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
-msgid "Start date"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/taxrates_detail.html
-msgid "End date"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Passenger tax rate"
 msgstr ""
 
@@ -1181,10 +1179,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Delete"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/taxrates_detail.html
-msgid "Back"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
