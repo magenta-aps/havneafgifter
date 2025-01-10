@@ -56,7 +56,7 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             return form
 
         self._assert_mail_recipients_property_logs_message(
-            "is not linked to a shipping agent, excluding from mail recipients",
+            "specified for submitter, excluding from mail recipients",
             clear_shipping_agent,
         )
 

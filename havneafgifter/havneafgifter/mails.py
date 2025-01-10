@@ -68,18 +68,33 @@ class NotificationMail:
             )
             return None
 
-    def get_shipping_agent_recipient(self) -> MailRecipient | None:
-        if self.form.shipping_agent and self.form.shipping_agent.email:
+    def get_shipping_agent_or_ship_recipient(self) -> MailRecipient | None:
+        if self.form.shipping_agent:
             return MailRecipient(
                 name=self.form.shipping_agent.name,
                 email=self.form.shipping_agent.email,
                 object=self.form.shipping_agent,
             )
         else:
-            logger.info(
-                "%r is not linked to a shipping agent, excluding from mail recipients",
-                self,
+            # No agent - this form must have been submitted by a ship user
+            submitting_user = (
+                self.form.history.first().history_user
+                if self.form.history.first()
+                else None
             )
+            if submitting_user and submitting_user.email:
+                return MailRecipient(
+                    name=submitting_user.display_name,
+                    email=submitting_user.email,
+                    object=submitting_user,
+                )
+            else:
+
+                logger.info(
+                    "%r is not linked to a shipping agent and no email "
+                    + "specified for submitter, excluding from mail recipients",
+                    self,
+                )
             return None
 
     def get_tax_authority_recipient(self) -> MailRecipient | None:
@@ -142,7 +157,7 @@ class OnSubmitForReviewMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm):
         super().__init__(form)
         self.add_recipient(self.get_port_authority_recipient())
-        self.add_recipient(self.get_shipping_agent_recipient())
+        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
         self.add_recipient(self.get_tax_authority_recipient())
 
     @property
@@ -152,20 +167,26 @@ class OnSubmitForReviewMail(NotificationMail):
         # The text varies depending on whether the form concerns a cruise ship, or any
         # other type of vessel.
         result = []
+        submitting_user = (
+            self.form.history.first().history_user
+            if self.form.history.first()
+            else None
+        )
+        submitter_email = submitting_user.email if submitting_user else None
         for lang_code, lang_name in settings.LANGUAGES:
             with translation.override(lang_code):
                 context = {
                     "date": localize(self.form.date),
-                    "agent": (
+                    "submitter": (
                         self.form.shipping_agent.name
                         if self.form.shipping_agent
-                        else ""
+                        else submitter_email or ""
                     ),
                 }
                 if self.form.vessel_type == ShipType.CRUISE:
                     text = (
                         gettext(
-                            "%(agent)s has %(date)s reported port taxes, cruise "
+                            "%(submitter)s has %(date)s reported port taxes, cruise "
                             "passenger taxes, as well as environmental and "
                             "maintenance fees in relation to a ship's call "
                             "at a Greenlandic port. See further details in the "
@@ -176,7 +197,7 @@ class OnSubmitForReviewMail(NotificationMail):
                 else:
                     text = (
                         gettext(
-                            "%(agent)s has %(date)s reported port taxes due to a "
+                            "%(submitter)s has %(date)s reported port taxes due to a "
                             "ship's call at a Greenlandic port. See further details "
                             "in the attached overview."
                         )
@@ -197,8 +218,7 @@ class OnSubmitForReviewMail(NotificationMail):
 class OnApproveMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm):
         super().__init__(form)
-        self.add_recipient(self.get_shipping_agent_recipient())
-        # self.add_recipient(self.get_ship_user_recipient())
+        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
 
     @property
     def mail_body(self):
@@ -212,8 +232,7 @@ class OnApproveMail(NotificationMail):
 class OnRejectMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm):
         super().__init__(form)
-        self.add_recipient(self.get_shipping_agent_recipient())
-        # self.add_recipient(self.get_ship_user_recipient())
+        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
 
     @property
     def mail_body(self):
