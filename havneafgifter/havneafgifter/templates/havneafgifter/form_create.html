@@ -45,39 +45,46 @@
 
     {# Formset asking for number of passenger of each nationality #}
     {% bootstrap_form passenger_formset.management_form %}
-    {% for form in passenger_formset.forms %}
-    <div class="formset-item row mb-3">
-        <div class="col-6 d-flex justify-content-between">
-            {% bootstrap_field form.nationality show_label=False wrapper_class="col-6 me-3" %}
-            {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
-            <div class="col-2">
-                <button class="btn btn-primary">-</button>
-                {% if forloop.last %}
-                <button class="btn btn-primary">+</button>
-                {% endif %}
+    <div class="formset">
+        {% for form in passenger_formset.forms %}
+        <div class="formset-item row mb-3">
+            <div class="col-6 d-flex justify-content-between">
+                {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.nationality show_label=False wrapper_class="col-6 me-3" %}
+                {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
+                <div class="col-2 button-location">
+                    <button class="btn btn-primary minus-button">-</button>
+                    {% if forloop.last %}
+                    <button class="btn btn-primary plus-button">+</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+
 
     <h2>{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h2>
 
     {# Formset asking for number of passengers at each disembarkment site #}
     {% bootstrap_form disembarkment_formset.management_form %}
-    {% for form in disembarkment_formset.forms %}
-    <div class="formset-item row mb-3">
-        <div class="col-6 d-flex justify-content-between">
-            {% bootstrap_field form.disembarkment_site show_label=False wrapper_class="col-6 me-3" %}
-            {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
-            <div class="col-2">
-                <button class="btn btn-primary">-</button>
-                {% if forloop.last %}
-                <button class="btn btn-primary">+</button>
-                {% endif %}
+    <div class="formset">
+        {% for form in disembarkment_formset.forms %}
+        <div class="formset-item row mb-3">
+            <div class="col-6 d-flex justify-content-between">
+                {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.disembarkment_site show_label=False wrapper_class="col-6 me-3" %}
+                {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
+                <div class="col-2 button-location">
+                    <button type="button" class="btn btn-primary minus-button">-</button>
+                    {% if forloop.last %}
+                    <button type="button" class="btn btn-primary plus-button">+</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 
     <hr>
 
@@ -105,5 +112,48 @@
             this.reportValidity();
         }
     });
+
+    function removeItem(e) {
+        e.preventDefault();
+
+        const container = $(e.target).parents(".formset-item");
+
+        const children = $(".formset-item", container.closest(".formset")).not(".d-none")
+
+        // Wont delete the last element
+        if (children.length > 1) {
+            const deleteCheckbox = $(".form-check-input", container)
+            deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
+            container.addClass("d-none")
+
+            const plusButton = $(".plus-button", container)
+
+            if (plusButton.length) {
+                const previous = $(".button-location", container.prevAll(".formset-item").not(".d-none").first())
+                previous.append(plusButton)
+            }
+        } else {
+            alert("{% translate 'You cannot delete the last item' %}")
+        }
+    }
+
+    function addItem(e) {
+        e.preventDefault();
+
+        const container = $(e.target).parents(".formset-item")
+
+        container.clone().insertAfter(container)
+
+        const plusButton = $(".plus-button", container)
+        plusButton.remove()
+
+        $(".plus-button").off("click")
+        $(".minus-button").off("click")
+        $(".plus-button").on("click", addItem);
+        $(".minus-button").on("click", removeItem);
+    }
+
+    $(".plus-button").on("click", addItem)
+    $(".minus-button").on("click", removeItem)
 </script>
 {% endblock content %}
