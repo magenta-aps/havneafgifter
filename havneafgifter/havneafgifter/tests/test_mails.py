@@ -60,6 +60,45 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             clear_shipping_agent,
         )
 
+    class mock_history:
+
+        def first():
+            class mock_head:
+                history_user = None
+
+                def __init__(self, history_user):
+                    self.history_user = history_user
+
+            class mock_user:
+                email = "a@b.com"
+                display_name = "A B"
+
+            return mock_head(history_user=mock_user())
+
+    @patch("havneafgifter.models.HarborDuesForm.history", new=mock_history)
+    @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
+    def test_mail_recipients_sends_to_history_user_when_no_agent(self):
+        def clear_shipping_agent(form):
+            form.shipping_agent = None
+            return form
+
+        self._assert_mail_recipients_property_not_in_logs(
+            "specified for submitter, excluding from mail recipients",
+            clear_shipping_agent,
+        )
+
+    def test_mail_recipients_history(self):
+        def clear_shipping_agent(form):
+            form.shipping_agent = None
+            form.save()
+
+            return form
+
+        self._assert_mail_recipients_property_logs_message(
+            "specified for submitter, excluding from mail recipients",
+            clear_shipping_agent,
+        )
+
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN=None)
     def test_mail_recipients_excludes_missing_skattestyrelsen_email(self):
         self._assert_mail_recipients_property_logs_message(
@@ -178,3 +217,11 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             self.assertTrue(
                 any(record.message.endswith(message) for record in logged.records)
             )
+
+    def _assert_mail_recipients_property_not_in_logs(self, message, modifier=None):
+        with self.assertNoLogs() as logged:
+            self._get_instance(modifier=modifier)
+            if logged:
+                self.assertFalse(
+                    any(record.message.endswith(message) for record in logged.records)
+                )
