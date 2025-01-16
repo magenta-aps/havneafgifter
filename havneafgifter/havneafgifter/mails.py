@@ -167,9 +167,10 @@ class OnSubmitForReviewMail(NotificationMail):
         # The text varies depending on whether the form concerns a cruise ship, or any
         # other type of vessel.
         result = []
+        history_item = self.form.history.first()
         submitting_user = (
-            self.form.history.first().history_user
-            if self.form.history.first()
+            history_item.history_user
+            if history_item
             else None
         )
         submitter_email = submitting_user.email if submitting_user else None
