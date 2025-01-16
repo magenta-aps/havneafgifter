@@ -225,22 +225,23 @@ msgstr "Fejl under afsendelse af email"
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
-"%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
-"as environmental and maintenance fees in relation to a ship's call at a "
+"%(submitter)s has %(date)s reported port taxes, cruise passenger taxes, as "
+"well as environmental and maintenance fees in relation to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
-"%(agent)s har %(date)s indberettet havneafgift, krydstogtpassagerafgift samt "
-"miljø- og vedligeholdelsesgebyr i forbindelse med et skibs anløb i en "
+"%(submitter)s har %(date)s indberettet havneafgift, krydstogtpassagerafgift "
+"samt miljø- og vedligeholdelsesgebyr i forbindelse med et skibs anløb i en "
 "grønlandsk havn. Se yderligere detaljer i vedhæftede oversigt."
 
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
-"%(agent)s has %(date)s reported port taxes due to a ship's call at a "
+"%(submitter)s has %(date)s reported port taxes due to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
-"%(agent)s har %(date)s indberettet havneafgift i forbindelse med et skibs "
-"anløb i en grønlandsk havn. Se yderligere detaljer i vedhæftede oversigt."
+"%(submitter)s har %(date)s indberettet havneafgift i forbindelse med et "
+"skibs anløb i en grønlandsk havn. Se yderligere detaljer i vedhæftede "
+"oversigt."
 
 #: havneafgifter/mails.py
 msgid ""
