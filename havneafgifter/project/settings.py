@@ -330,6 +330,8 @@ TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
 TEMPUS_DOMINUS_INCLUDE_ASSETS = False
 
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
+COMPRESS_REBUILD_TIMEOUT = 0
+COMPRESS_ENABLED = True
 LIBSASS_OUTPUT_STYLE = "compressed"
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 STATICFILES_FINDERS = [
