@@ -77,11 +77,8 @@ class NotificationMail:
             )
         else:
             # No agent - this form must have been submitted by a ship user
-            submitting_user = (
-                self.form.history.first().history_user
-                if self.form.history.first()
-                else None
-            )
+            history_item = self.form.history.first()
+            submitting_user = history_item.history_user if history_item else None
             if submitting_user and submitting_user.email:
                 return MailRecipient(
                     name=submitting_user.display_name,
@@ -168,11 +165,7 @@ class OnSubmitForReviewMail(NotificationMail):
         # other type of vessel.
         result = []
         history_item = self.form.history.first()
-        submitting_user = (
-            history_item.history_user
-            if history_item
-            else None
-        )
+        submitting_user = history_item.history_user if history_item else None
         submitter_email = submitting_user.email if submitting_user else None
         for lang_code, lang_name in settings.LANGUAGES:
             with translation.override(lang_code):
