@@ -221,15 +221,15 @@ msgstr ""
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
-"%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
-"as environmental and maintenance fees in relation to a ship's call at a "
+"%(submitter)s has %(date)s reported port taxes, cruise passenger taxes, as "
+"well as environmental and maintenance fees in relation to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
 
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
-"%(agent)s has %(date)s reported port taxes due to a ship's call at a "
+"%(submitter)s has %(date)s reported port taxes due to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
 

@@ -223,22 +223,22 @@ msgstr ""
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
-"%(agent)s has %(date)s reported port taxes, cruise passenger taxes, as well "
-"as environmental and maintenance fees in relation to a ship's call at a "
+"%(submitter)s has %(date)s reported port taxes, cruise passenger taxes, as "
+"well as environmental and maintenance fees in relation to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
 "Umiarsuit takornariartaatit angisuut umiarsualivimmiinnerannut akitsuummik "
-"aamma avatangiisinut iluarsaassinermillu akiliummik %(agent)s %(date)s, "
+"aamma avatangiisinut iluarsaassinermillu akiliummik %(submitter)s %(date)s, "
 "umiarsuup Kalaallit Nunaanni umiarsualivimmut tulanneranut atatillugu "
 "nalunaaruteqarput. Paasissutissat ilaat ilanngussami takusinnaavatit."
 
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
-"%(agent)s has %(date)s reported port taxes due to a ship's call at a "
+"%(submitter)s has %(date)s reported port taxes due to a ship's call at a "
 "Greenlandic port. See further details in the attached overview."
 msgstr ""
-"%(agent)s %(date)s umiarsuup Kalaallit Nunaanni umiarsualivimmut "
+"%(submitter)s %(date)s umiarsuup Kalaallit Nunaanni umiarsualivimmut "
 "tulanneranut atatillugu nalunaaruteqarput. Paasissutissat ilaat ilanngussami "
 "takusinnaavatit."
 
