@@ -223,9 +223,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             "vessel_owner",
             "vessel_master",
             "shipping_agent",
+            "gross_tonnage",
             "datetime_of_arrival",
             "datetime_of_departure",
-            "gross_tonnage",
             "vessel_type",
         ]
         localized_fields = [
@@ -304,6 +304,15 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("Shipping agent"),
     )
 
+    gross_tonnage = DynamicField(
+        IntegerField,
+        required=_required_if_status_is_new_and_has_port_of_call,
+        validators=[MinValueValidator(0)],
+        initial=lambda form: getattr(form._vessel, "gross_tonnage", None),
+        disabled=lambda form: form.user_is_ship,
+        label=_("Gross tonnage"),
+    )
+
     datetime_of_arrival = DynamicField(
         DateTimeField,
         required=_required_if_status_is_new_and_has_port_of_call,
@@ -326,15 +335,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         ),
         widget=HTML5DateWidget(),
         label=_("Departure date/time"),
-    )
-
-    gross_tonnage = DynamicField(
-        IntegerField,
-        required=_required_if_status_is_new_and_has_port_of_call,
-        validators=[MinValueValidator(0)],
-        initial=lambda form: getattr(form._vessel, "gross_tonnage", None),
-        disabled=lambda form: form.user_is_ship,
-        label=_("Gross tonnage"),
     )
 
     vessel_type = DynamicField(
