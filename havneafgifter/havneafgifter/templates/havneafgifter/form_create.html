@@ -86,11 +86,11 @@
 
     {% if user_is_ship and object.shipping_agent is not None %}
         {# Ship users can only create DRAFT cruise ship forms if a shipping agent has been specified #}
-        {% bootstrap_button button_type="submit" name="status" value="DRAFT" content=_("Forward to agent") %}
+        {% bootstrap_button button_type="submit" name="base-status" value="DRAFT" content=_("Forward to agent") %}
     {% else %}
         {# Pass `status=NEW` or `status=DRAFT` depending on which submit button is used #}
-        {% bootstrap_button button_type="submit" name="status" value="NEW" content=_("Submit") %}
-        {% bootstrap_button button_type="submit" name="status" value="DRAFT" content=_("Save as draft") %}
+        {% bootstrap_button button_type="submit" name="base-status" value="NEW" content=_("Submit") %}
+        {% bootstrap_button button_type="submit" name="base-status" value="DRAFT" content=_("Save as draft") %}
     {% endif %}
     <input type="hidden" name="status" />
 </form>
@@ -157,6 +157,50 @@
         $(".minus-button").on("click", removeItem);
     }
 
+    function portOfCallToggle() {
+        const portOfCall = $("#id_base-port_of_call")
+
+        const grossTonnage = $("#id_base-gross_tonnage")
+        const arrival = $("#id_base-datetime_of_arrival")
+        const departure = $("#id_base-datetime_of_departure")
+        const vesselType = $("#id_base-vessel_type")
+        
+
+        if (portOfCall.val() == -1) {
+            grossTonnage.prop("disabled", true)
+            arrival.prop("disabled", true)
+            departure.prop("disabled", true)
+            vesselType.prop("disabled", true)
+            vesselType.val('CRUISE')
+        } else {
+            grossTonnage.prop("disabled", false)
+            arrival.prop("disabled", false)
+            departure.prop("disabled", false)
+            vesselType.prop("disabled", false)
+        }
+    }
+
+    function toggleCruiseFormsets() {
+        const formsets = $(".formset")
+        const formsetChildren = $(".formset *")
+        const dropdown = $("#id_base-vessel_type")
+
+        if (dropdown.val() === "CRUISE") {
+            formsetChildren.prop('disabled', false);
+            formsets.show()
+        } else {
+            formsetChildren.prop('disabled', true);
+            formsets.hide()
+        }
+    }
+
+    // Initial
+    $(document).ready(toggleCruiseFormsets)
+    $(document).ready(portOfCallToggle)
+
+    // Dynamic
+    $("#id_base-vessel_type").on("change", toggleCruiseFormsets)
+    $("#id_base-port_of_call").on("change", portOfCallToggle)
     $(".plus-button").on("click", addItem)
     $(".minus-button").on("click", removeItem)
 </script>
