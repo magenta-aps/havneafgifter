@@ -8,7 +8,7 @@ from django.utils import translation
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.mails import EmailMessage, OnSubmitForReviewMail
-from havneafgifter.models import HarborDuesForm, ShipType
+from havneafgifter.models import HarborDuesForm, ShipType, User
 from havneafgifter.tests.mixins import HarborDuesFormMixin
 
 
@@ -60,22 +60,14 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             clear_shipping_agent,
         )
 
-    class mock_history:
+    def mock_user():
+        u = User()
+        u.user_name = "username"
+        u.email = "user@email"
 
-        def first():
-            class mock_head:
-                history_user = None
+        return u
 
-                def __init__(self, history_user):
-                    self.history_user = history_user
-
-            class mock_user:
-                email = "a@b.com"
-                display_name = "A B"
-
-            return mock_head(history_user=mock_user())
-
-    @patch("havneafgifter.models.HarborDuesForm.history", new=mock_history)
+    @patch("havneafgifter.mails.NotificationMail.user", new=mock_user)
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
     def test_mail_recipients_sends_to_history_user_when_no_agent(self):
         def clear_shipping_agent(form):
