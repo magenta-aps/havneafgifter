@@ -153,19 +153,17 @@ class HarborDuesFormMixin(
         else:
             # User is all done filling out data for this vessel
             status = form.cleaned_data.get("status")
+            harbor_dues_form.save()
             if status == Status.NEW:
                 harbor_dues_form.submit_for_review()
-                harbor_dues_form.save()
                 self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
             elif status == Status.DRAFT:
                 # Send notification to agent if saved by a ship user.
                 if (
                     self.request.user.user_type == UserType.SHIP
-                    and harbor_dues_form.agent
+                    and harbor_dues_form.shipping_agent
                 ):
                     self.handle_notification_mail(OnSendToAgentMail, harbor_dues_form)
-            else:
-                harbor_dues_form.save()
 
             # Go to detail view to display result.
             return self.get_redirect_for_form(

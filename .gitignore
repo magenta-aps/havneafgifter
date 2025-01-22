@@ -8,6 +8,8 @@ data/er/*
 *.sqlite3
 **/.coverage
 *.log.*
+*.swp
+*changelog.*
 
 *.venv*/
 *.vscode/

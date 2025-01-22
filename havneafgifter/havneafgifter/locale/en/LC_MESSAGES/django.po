@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-22 07:58-0200\n"
+"POT-Creation-Date: 2025-01-23 11:08-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -257,7 +257,7 @@ msgstr ""
 
 #: havneafgifter/mails.py
 #, python-format
-msgid "(%submitter) has (%date) created a port tax form for you to complete"
+msgid "%(submitter)s has %(date)s created a port tax form for you to complete"
 msgstr ""
 
 #: havneafgifter/mails.py
