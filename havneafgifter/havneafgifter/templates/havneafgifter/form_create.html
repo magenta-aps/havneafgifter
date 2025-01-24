@@ -44,6 +44,7 @@
     {% bootstrap_form passenger_formset.management_form %}
     <div class="formset bg-light rounded-3 mt-3 p-4">
         <h2 class="pb-3">{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}</h2>
+        {% bootstrap_form passenger_total_form %}
         {% for form in passenger_formset.forms %}
         <div class="formset-item row mb-3">
             <div class="col-6 d-flex justify-content-between">
@@ -51,9 +52,9 @@
                 {% bootstrap_field form.nationality show_label=False wrapper_class="col-7 me-5" %}
                 {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
                 <div class="col-2 button-location">
-                    <button class="btn btn-primary minus-button">-</button>
+                    <button type="button" class="btn btn-primary minus-button">-</button>
                     {% if forloop.last %}
-                    <button class="btn btn-primary plus-button">+</button>
+                    <button type="button" class="btn btn-primary plus-button">+</button>
                     {% endif %}
                 </div>
             </div>
@@ -100,6 +101,9 @@
 {% inform_ship_user_on_submit_modal object %}
 
 <script nonce="{{ request.csp_nonce }}">
+    // Used to create unique IDs
+    let count = 1
+
     $(document).ready(function() {
         const foo = $("[for=id_base-vessel_type]")
         foo.append($('<span class="material-icons dark-icon ms-1 align-text-bottom" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top">info</span>'))
@@ -146,7 +150,27 @@
 
         const container = $(e.target).parents(".formset-item")
 
-        container.clone().insertAfter(container)
+        let prefix = ""
+
+        const clonedContainer = container.clone()
+
+        const namedElements = $("[name*=-]", clonedContainer)
+
+        namedElements.each(function() {
+            const el = $(this)
+            const newName = el.attr("name").replace(/(.*)-(\d)-(.*)/, (fullMatch, group1, group2, group3) => {
+                prefix = group1
+                // Construct the new string using the captured groups
+                return `${group1}-${count}-${group3}`;
+            });
+            el.attr("name", newName)
+        })
+        count++
+
+        const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
+        total.val(count)
+
+        clonedContainer.insertAfter(container)
 
         const plusButton = $(".plus-button", container)
         plusButton.remove()
