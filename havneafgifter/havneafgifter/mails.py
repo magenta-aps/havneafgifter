@@ -245,8 +245,28 @@ class OnApproveMail(NotificationMail):
         self.add_recipient(self.get_port_authority_recipient())
 
     @property
+    def mail_subject(self):
+        return "Harbor dues form approved in Talippoq"
+
+    @property
     def mail_body(self):
-        return gettext("Your harbor dues form has been approved")
+        town = (
+            self.form.port_of_call.portauthority.name
+            if self.form.port_of_call
+            else settings.APPROVER_NO_PORT_OF_CALL
+        )
+        context = {
+            "town": town,
+            "id": str(self.form.id),
+        }
+        return (
+            gettext(
+                "The port authority in %(town)s has approved your harbor"
+                + " dues form %(id)s.\n"
+                + "You should expect to receive an invoice from the port authority."
+            )
+            % context
+        )
 
     @property
     def success_message(self) -> str:
@@ -261,8 +281,32 @@ class OnRejectMail(NotificationMail):
         self.add_recipient(self.get_port_authority_recipient())
 
     @property
+    def mail_subject(self):
+        return "Harbor dues form rejected in Talippoq"
+
+    @property
     def mail_body(self):
-        return gettext("Your harbor dues form has been rejected")
+        town = (
+            self.form.port_of_call.portauthority.name
+            if self.form.port_of_call
+            else settings.APPROVER_NO_PORT_OF_CALL
+        )
+        context = {
+            "town": town,
+            "id": str(self.form.id),
+        }
+        return (
+            gettext(
+                "The port authority in %(town)s has rejected your harbor"
+                + " dues form %(id)s."
+                + "\n"
+                + "Log on to Talippoq and edit your form as directed by the"
+                + " port authority. If you have any questions concerning the"
+                + " rejection you should contact the local port authority or the"
+                + " Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
+            )
+            % context
+        )
 
     @property
     def success_message(self) -> str:

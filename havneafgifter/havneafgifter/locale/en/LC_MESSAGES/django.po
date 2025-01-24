@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-23 11:08-0200\n"
+"POT-Creation-Date: 2025-01-24 12:15-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -240,7 +240,10 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/mails.py
-msgid "Your harbor dues form has been approved"
+#, python-format
+msgid ""
+"The port authority in %(town)s has approved your harbor dues form %(id)s.\n"
+"You should expect to receive an invoice from the port authority."
 msgstr ""
 
 #: havneafgifter/mails.py
@@ -248,7 +251,12 @@ msgid "An approval notification has been sent to the form submitter"
 msgstr ""
 
 #: havneafgifter/mails.py
-msgid "Your harbor dues form has been rejected"
+#, python-format
+msgid ""
+"The port authority in %(town)s has rejected your harbor dues form %(id)s.\n"
+"Log on to Talippoq and edit your form as directed by the port authority. If "
+"you have any questions concerning the rejection you should contact the local "
+"port authority or the Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
 msgstr ""
 
 #: havneafgifter/mails.py
@@ -261,7 +269,7 @@ msgid "%(submitter)s has %(date)s created a port tax form for you to complete"
 msgstr ""
 
 #: havneafgifter/mails.py
-msgid "This form was successfully sent to your agent."
+msgid "This form was successfully sent to your agent"
 msgstr ""
 
 #: havneafgifter/models.py

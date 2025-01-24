@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-23 11:08-0200\n"
+"POT-Creation-Date: 2025-01-24 12:15-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -252,16 +252,31 @@ msgstr ""
 "havnemyndigheden og den grønlandske skattestyrelse."
 
 #: havneafgifter/mails.py
-msgid "Your harbor dues form has been approved"
-msgstr "Din havneafgifts-formular er blevet godkendt"
+#, python-format
+msgid ""
+"The port authority in %(town)s has approved your harbor dues form %(id)s.\n"
+"You should expect to receive an invoice from the port authority."
+msgstr ""
+"Havnemyndigheden i %(town)s har godkendt din indberetning %(id)s i Talippoq.\n"
+"Du kan nu afvente en faktura fra havnemyndigheden."
+
 
 #: havneafgifter/mails.py
 msgid "An approval notification has been sent to the form submitter"
 msgstr "En godkendelses-notifikation er blevet sendt til formularens afsender"
 
 #: havneafgifter/mails.py
-msgid "Your harbor dues form has been rejected"
-msgstr "Din havneafgifts-formular er blevet afvist"
+#, python-format
+msgid ""
+"The port authority in %(town)s has rejected your harbor dues form %(id)s.\n"
+"Log on to Talippoq and edit your form as directed by the port authority. If "
+"you have any questions concerning the rejection you should contact the local "
+"port authority or the Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
+msgstr ""
+"Havnemyndigheden i %(town)s har afvist din indberetning %(id)s i Talippoq.\n"
+"Log ind på Talippoq og ret din indberetning efter havnemyndighedens "
+"anvisninger. Har du spørgsmål angående afvisningen bør du kontakte den "
+"lokale havnemyndighed eller Skattestyrelsen på aka-talippoq@nanoq.gl"
 
 #: havneafgifter/mails.py
 msgid "A rejection notification has been sent to the form submitter"
@@ -273,7 +288,7 @@ msgid "%(submitter)s has %(date)s created a port tax form for you to complete"
 msgstr ""
 
 #: havneafgifter/mails.py
-msgid "This form was successfully sent to your agent."
+msgid "This form was successfully sent to your agent"
 msgstr ""
 
 #: havneafgifter/models.py
