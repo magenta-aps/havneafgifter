@@ -13,7 +13,7 @@ from havneafgifter.receipts import (
     HarborDuesFormReceipt,
     Receipt,
 )
-from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 
 
 class _PDFMixin:
@@ -89,7 +89,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
         )
 
 
-class TestHarborDuesFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
+class TestHarborDuesFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.instance: HarborDuesFormReceipt = HarborDuesFormReceipt(
@@ -115,7 +115,7 @@ class TestHarborDuesFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
         )
 
 
-class TestCruiseTaxFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
+class TestCruiseTaxFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.instance: CruiseTaxFormReceipt = CruiseTaxFormReceipt(self.cruise_tax_form)
@@ -143,7 +143,7 @@ class TestCruiseTaxFormReceipt(HarborDuesFormMixin, _PDFMixin, TestCase):
 
 
 class TestCruiseTaxFormReceiptWithoutPortOfCall(
-    HarborDuesFormMixin, _PDFMixin, TestCase
+    HarborDuesFormTestMixin, _PDFMixin, TestCase
 ):
     def setUp(self):
         super().setUp()

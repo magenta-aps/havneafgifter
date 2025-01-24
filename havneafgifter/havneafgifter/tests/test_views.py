@@ -25,7 +25,12 @@ from django.urls import reverse
 from django_tables2.rows import BoundRows
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
-from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail, SendResult
+from havneafgifter.mails import (
+    NotificationMail,
+    OnSendToAgentMail,
+    OnSubmitForReviewMail,
+    SendResult,
+)
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -42,9 +47,10 @@ from havneafgifter.models import (
     Status,
     TaxRates,
     User,
+    UserType,
     Vessel,
 )
-from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 from havneafgifter.views import (
     ApproveView,
     EnvironmentalTaxCreateView,
@@ -66,7 +72,7 @@ from havneafgifter.views import (
 )
 
 
-class TestSignupVesselView(HarborDuesFormMixin, TestCase):
+class TestSignupVesselView(HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -91,7 +97,7 @@ class TestSignupVesselView(HarborDuesFormMixin, TestCase):
             )
 
 
-class TestUpdateVesselView(HarborDuesFormMixin, TestCase):
+class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -239,6 +245,15 @@ class TestHandleNotificationMailMixin(ParametrizedTestCase, TestCase):
         def send_email(self) -> SendResult:
             return SendResult(mail=self, succeeded=True, msg=EmailMessage())
 
+    @staticmethod
+    def mock_user():
+        u = User()
+        u.user_name = "username"
+        u.email = "user@email"
+        u.save()
+
+        return u
+
     class MockErrorMail(NotificationMail):
         def send_email(self) -> SendResult:
             return SendResult(mail=self, succeeded=False, msg=EmailMessage())
@@ -267,6 +282,7 @@ class TestHandleNotificationMailMixin(ParametrizedTestCase, TestCase):
         # Arrange
         instance = HandleNotificationMailMixin()
         instance.request = RequestFactory().get("")
+        instance.request.user = self.mock_user()
         with patch(
             "havneafgifter.view_mixins.messages.add_message"
         ) as mock_add_message:
@@ -302,7 +318,7 @@ class RequestMixin:
 
 
 class TestHarborDuesFormCreateView(
-    ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
+    ParametrizedTestCase, HarborDuesFormTestMixin, RequestMixin, TestCase
 ):
     view_class = HarborDuesFormCreateView
 
@@ -381,6 +397,7 @@ class TestHarborDuesFormCreateView(
     @parametrize(
         "username,status,permitted,email_expected",
         [
+            ("9074729", Status.DRAFT.value, True, True),
             ("shipping_agent", Status.DRAFT.value, True, False),
             ("shipping_agent", Status.NEW.value, True, True),
             ("port_auth", Status.DRAFT.value, False, False),
@@ -413,9 +430,13 @@ class TestHarborDuesFormCreateView(
                 self.assertIsInstance(response, HttpResponseRedirect)
                 if email_expected:
                     # Assert that we call the `_send_email` method as expected
+                    if user.user_type == UserType.SHIP:
+                        mail_class = OnSendToAgentMail
+                    else:
+                        mail_class = OnSubmitForReviewMail
+
                     mock_handle_notification_mail.assert_called_once_with(
-                        OnSubmitForReviewMail,
-                        HarborDuesForm.objects.latest("pk"),
+                        mail_class, HarborDuesForm.objects.latest("pk")
                     )
             else:
                 # Assert that we receive a 403 error response
@@ -423,7 +444,7 @@ class TestHarborDuesFormCreateView(
 
 
 class TestCruiseTaxFormSetView(
-    ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
+    ParametrizedTestCase, HarborDuesFormTestMixin, RequestMixin, TestCase
 ):
     view_class = _CruiseTaxFormSetView
 
@@ -738,7 +759,7 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
             )
 
 
-class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -773,7 +794,7 @@ class TestReceiptDetailView(ParametrizedTestCase, HarborDuesFormMixin, TestCase)
         self.assertIsNone(self.view.get_object())
 
 
-class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
+class TestPreviewPDFView(HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -793,7 +814,7 @@ class TestPreviewPDFView(HarborDuesFormMixin, TestCase):
         self.assertIsInstance(response, HttpResponseNotFound)
 
 
-class TestHarborDuesFormListView(HarborDuesFormMixin, TestCase):
+class TestHarborDuesFormListView(HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -1134,7 +1155,7 @@ class StatisticsTest(TestCase):
 
 
 class TestHarborDuesFormUpdateView(
-    ParametrizedTestCase, HarborDuesFormMixin, RequestMixin, TestCase
+    ParametrizedTestCase, HarborDuesFormTestMixin, RequestMixin, TestCase
 ):
     @classmethod
     def setUpTestData(cls):
@@ -1252,7 +1273,7 @@ class TestHarborDuesFormUpdateView(
         )
 
 
-class TestActionViewMixin(HarborDuesFormMixin, RequestMixin):
+class TestActionViewMixin(HarborDuesFormTestMixin, RequestMixin):
     view_class = None  # must be overridden by subclass
 
     @classmethod
@@ -1381,7 +1402,7 @@ class TestRejectView(TestActionViewMixin, TestCase):
         self.assertIsInstance(response, HttpResponseForbidden)
 
 
-class TestTaxRateListView(HarborDuesFormMixin, TestCase):
+class TestTaxRateListView(HarborDuesFormTestMixin, TestCase):
     view_class = TaxRateListView
 
     @classmethod
@@ -1423,7 +1444,7 @@ class TestTaxRateListView(HarborDuesFormMixin, TestCase):
         self.assertIn('class="btn btn-primary"', response.content.decode("utf-8"))
 
 
-class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
+class TestTaxRateDetailView(HarborDuesFormTestMixin, TestCase):
     view_class = TaxRateDetailView
 
     @classmethod
@@ -1517,7 +1538,7 @@ class TestTaxRateDetailView(HarborDuesFormMixin, TestCase):
         self.assertEqual(response.status_code, 302)
 
 
-class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
+class TestTaxRateFormView(HarborDuesFormTestMixin, TestCase):
     view_class = TaxRateFormView
 
     @classmethod
@@ -2322,7 +2343,7 @@ class TestTaxRateFormView(HarborDuesFormMixin, TestCase):
         self.assertIn("Du har ikke rettighed til at se denne side.", soup.get_text())
 
 
-class TestLandingModalOkView(HarborDuesFormMixin, TestCase):
+class TestLandingModalOkView(HarborDuesFormTestMixin, TestCase):
     def test_post(self):
         self.client.force_login(self.port_user)
         response = self.client.post(reverse("havneafgifter:landing_modal_ok"))

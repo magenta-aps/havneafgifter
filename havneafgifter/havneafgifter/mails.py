@@ -10,7 +10,7 @@ from django.templatetags.l10n import localize
 from django.utils import translation
 from django.utils.translation import gettext
 
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, User, UserType
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +30,28 @@ class SendResult:
 
 
 class NotificationMail:
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         self.form: HarborDuesForm | CruiseTaxForm = form
         self.recipients: list[MailRecipient] = []
+        self.user: User | None = user
 
     def add_recipient(self, recipient: MailRecipient | None) -> None:
         if recipient is not None:
             self.recipients.append(recipient)
         return None
+
+    def get_local_port_recipient(self) -> MailRecipient | None:
+        if self.form.port_of_call and self.form.port_of_call.users.exists():
+            port_user = self.form.port_of_call.users.all()[0]
+            return MailRecipient(
+                name=port_user.display_name, email=port_user.email, object=port_user
+            )
+
+        else:
+            logger.info(
+                "%r is not linked to a local port user, excluding from recipients",
+            )
+            return None
 
     def get_port_authority_recipient(self) -> MailRecipient | None:
         if (
@@ -62,37 +76,51 @@ class NotificationMail:
             )
         else:
             logger.info(
-                "%r is not linked to a port authority, excluding from "
-                "mail recipients",
+                "%r is not linked to a port authority, excluding from mail recipients",
                 self,
             )
             return None
 
-    def get_shipping_agent_or_ship_recipient(self) -> MailRecipient | None:
-        if self.form.shipping_agent:
+    def get_shipping_agent_recipient(self) -> MailRecipient | None:
+        if self.form.shipping_agent and self.form.shipping_agent.email:
             return MailRecipient(
                 name=self.form.shipping_agent.name,
                 email=self.form.shipping_agent.email,
                 object=self.form.shipping_agent,
             )
+            logger.info(
+                "%r is not linked to a shipping agent, excluding from mail recipients",
+                self,
+            )
+        return None
+
+    def get_ship_recipient(self) -> MailRecipient | None:
+        # The contact email for a ship is through the associated user.
+        # Ships with no associated users have no contact emails.
+        if self.user and self.user.user_type == UserType.SHIP:
+            vessel_contact: User | None = self.user
+        else:
+            vessel_imo = self.form.vessel_imo
+            vessel_contact = User.objects.filter(username=vessel_imo).first()
+        # If there is such a user, we've got it now.
+        if vessel_contact:
+            return MailRecipient(
+                name=vessel_contact.display_name,
+                email=vessel_contact.email,
+                object=vessel_contact,
+            )
+        logger.info(
+            "%r is not linked to a ship user, excluding from mail recipients",
+            self,
+        )
+        return None
+
+    def get_shipping_agent_or_ship_recipient(self) -> MailRecipient | None:
+        if self.form.shipping_agent:
+            return self.get_shipping_agent_recipient()
         else:
             # No agent - this form must have been submitted by a ship user
-            history_item = self.form.history.first()
-            submitting_user = history_item.history_user if history_item else None
-            if submitting_user and submitting_user.email:
-                return MailRecipient(
-                    name=submitting_user.display_name,
-                    email=submitting_user.email,
-                    object=submitting_user,
-                )
-            else:
-
-                logger.info(
-                    "%r is not linked to a shipping agent and no email "
-                    + "specified for submitter, excluding from mail recipients",
-                    self,
-                )
-            return None
+            return self.get_ship_recipient()
 
     def get_tax_authority_recipient(self) -> MailRecipient | None:
         if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
@@ -151,9 +179,10 @@ class NotificationMail:
 
 
 class OnSubmitForReviewMail(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
-        super().__init__(form)
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
         self.add_recipient(self.get_port_authority_recipient())
+        self.add_recipient(self.get_local_port_recipient())
         self.add_recipient(self.get_shipping_agent_or_ship_recipient())
         self.add_recipient(self.get_tax_authority_recipient())
 
@@ -164,8 +193,7 @@ class OnSubmitForReviewMail(NotificationMail):
         # The text varies depending on whether the form concerns a cruise ship, or any
         # other type of vessel.
         result = []
-        history_item = self.form.history.first()
-        submitting_user = history_item.history_user if history_item else None
+        submitting_user = self.user if self.user else None
         submitter_email = submitting_user.email if submitting_user else None
         for lang_code, lang_name in settings.LANGUAGES:
             with translation.override(lang_code):
@@ -210,9 +238,11 @@ class OnSubmitForReviewMail(NotificationMail):
 
 
 class OnApproveMail(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
-        super().__init__(form)
-        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
+        self.add_recipient(self.get_shipping_agent_recipient())
+        self.add_recipient(self.get_ship_recipient())
+        self.add_recipient(self.get_port_authority_recipient())
 
     @property
     def mail_body(self):
@@ -224,9 +254,11 @@ class OnApproveMail(NotificationMail):
 
 
 class OnRejectMail(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm):
-        super().__init__(form)
-        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
+        self.add_recipient(self.get_shipping_agent_recipient())
+        self.add_recipient(self.get_ship_recipient())
+        self.add_recipient(self.get_port_authority_recipient())
 
     @property
     def mail_body(self):
@@ -235,3 +267,27 @@ class OnRejectMail(NotificationMail):
     @property
     def success_message(self) -> str:
         return gettext("A rejection notification has been sent to the form submitter")
+
+
+class OnSendToAgentMail(NotificationMail):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
+        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
+
+    @property
+    def mail_body(self):
+        context = {
+            "submitter": self.user.email if self.user else "",
+            "date": localize(self.form.date),
+        }
+
+        return (
+            gettext(
+                "%(submitter)s has %(date)s created a port tax form for you to complete"
+            )
+            % context
+        )
+
+    @property
+    def success_message(self) -> str:
+        return gettext("This form was successfully sent to your agent")

@@ -18,7 +18,7 @@ from havneafgifter.models import (
 )
 
 
-class HarborDuesFormMixin:
+class HarborDuesFormTestMixin:
     @classmethod
     def setUpTestData(cls):
         call_command("create_groups", verbosity=1)
