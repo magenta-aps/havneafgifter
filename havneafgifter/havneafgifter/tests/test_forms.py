@@ -28,10 +28,10 @@ from havneafgifter.models import (
     TaxRates,
     Vessel,
 )
-from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 
 
-class TestSignupVesselForm(HarborDuesFormMixin, TestCase):
+class TestSignupVesselForm(HarborDuesFormTestMixin, TestCase):
     def test_form_save_hashes_password(self):
         # Arrange
         instance = SignupVesselForm(data=self.ship_user_form_data)
@@ -51,7 +51,7 @@ class TestSignupVesselForm(HarborDuesFormMixin, TestCase):
         self.assertEqual(user.vessel.imo, user.username)
 
 
-class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     def test_clean_does_nothing_if_draft(self):
         data = copy.copy(self.harbor_dues_form_data)
         form = self._get_form_instance(data, status=Status.DRAFT)
@@ -251,7 +251,7 @@ class TestPassengersByCountryForm(TestCase):
         )
 
 
-class TestDisembarkmentForm(HarborDuesFormMixin, TestCase):
+class TestDisembarkmentForm(HarborDuesFormTestMixin, TestCase):
     def test_disembarkment_site_initial(self):
         ds = DisembarkmentSite.objects.first()
         form = DisembarkmentForm(initial={"disembarkment_site": ds.pk})
@@ -301,7 +301,7 @@ class TestPassengersTotalForm(SimpleTestCase):
         self.assertIn("total_number_of_passengers", instance.errors)
 
 
-class TestBasePortTaxRateFormSet(HarborDuesFormMixin, TestCase):
+class TestBasePortTaxRateFormSet(HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -549,7 +549,7 @@ class TestBasePortTaxRateFormSet(HarborDuesFormMixin, TestCase):
         self.assertEqual(initial_object_count, DisembarkmentTaxRate.objects.count())
 
 
-class TestBaseDisembarkmentTaxRateFormSet(HarborDuesFormMixin, TestCase):
+class TestBaseDisembarkmentTaxRateFormSet(HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -1093,7 +1093,7 @@ class TestBaseDisembarkmentTaxRateFormSet(HarborDuesFormMixin, TestCase):
         self.assertEqual(PortTaxRate.objects.count(), initial_object_count)
 
 
-class TestTaxRateForm(HarborDuesFormMixin, TestCase):
+class TestTaxRateForm(HarborDuesFormTestMixin, TestCase):
     """
     Ensure that TaxRates with start_date less than 1 week in advance
     can't be made or edited

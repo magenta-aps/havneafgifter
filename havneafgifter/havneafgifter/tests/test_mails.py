@@ -7,19 +7,89 @@ from django.test import TestCase, override_settings
 from django.utils import translation
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
-from havneafgifter.mails import EmailMessage, OnSubmitForReviewMail
-from havneafgifter.models import HarborDuesForm, ShipType
-from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.mails import (
+    EmailMessage,
+    OnApproveMail,
+    OnSendToAgentMail,
+    OnSubmitForReviewMail,
+)
+from havneafgifter.models import HarborDuesForm, ShipType, User
+from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 
 
-class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
+    def test_missing_agent(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        form.shipping_agent = None
+        form.save()
+        instance = OnApproveMail(form)
+        # There should be two recipients, for the ship & for the port authority
+        self.assertEqual(len(instance.mail_recipients), 2)
+
+    def test_ship_user(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        instance = OnApproveMail(form, self.ship_user)
+        # There should be three recipients.
+        self.assertEqual(len(instance.mail_recipients), 3)
+
+    def test_no_ship_user(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        form.vessel_imo = "no such"
+        form.save()
+
+        instance = OnApproveMail(form)
+
+        # There should be two recipients - no ship user.
+        self.assertEqual(len(instance.mail_recipients), 2)
+
+
+class TestOnSendToAgentMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
+    def test_mail_recipients(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        instance = OnSendToAgentMail(form)
+        self.assertListEqual(
+            instance.mail_recipients,
+            [
+                instance.form.shipping_agent.email,
+            ],
+        )
+
+    def test_mail_body(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        instance = OnSendToAgentMail(form)
+        self.assertTrue(
+            instance.mail_body.endswith("created a port tax form for you to complete")
+        )
+
+    def test_success_message(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        instance = OnSendToAgentMail(form)
+        self.assertTrue(
+            instance.success_message == "This form was successfully sent to your agent"
+        )
+
+
+class TestOnSubmitForReviewMail(
+    ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
+):
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
+    @patch(
+        "havneafgifter.mails.NotificationMail.get_local_port_recipient",
+        lambda self: User(),
+    )
     def test_mail_recipients(self):
         instance = self._get_instance()
         self.assertListEqual(
             instance.mail_recipients,
             [
                 instance.form.port_of_call.portauthority.email,
+                "",
                 instance.form.shipping_agent.email,
                 settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
             ],
@@ -50,32 +120,16 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             clear_port_authority,
         )
 
-    def test_mail_recipients_excludes_missing_shipping_agent(self):
-        def clear_shipping_agent(form):
-            form.shipping_agent = None
+    def test_mail_recipients_excludes_missing_port_user(self):
+        def clear_port_user(form):
+            form.port_of_call.users.all().delete()
             return form
 
         self._assert_mail_recipients_property_logs_message(
-            "specified for submitter, excluding from mail recipients",
-            clear_shipping_agent,
+            "is not linked to a local port user, excluding from recipients",
+            clear_port_user,
         )
 
-    class mock_history:
-
-        def first():
-            class mock_head:
-                history_user = None
-
-                def __init__(self, history_user):
-                    self.history_user = history_user
-
-            class mock_user:
-                email = "a@b.com"
-                display_name = "A B"
-
-            return mock_head(history_user=mock_user())
-
-    @patch("havneafgifter.models.HarborDuesForm.history", new=mock_history)
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
     def test_mail_recipients_sends_to_history_user_when_no_agent(self):
         def clear_shipping_agent(form):
@@ -83,18 +137,6 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             return form
 
         self._assert_mail_recipients_property_not_in_logs(
-            "specified for submitter, excluding from mail recipients",
-            clear_shipping_agent,
-        )
-
-    def test_mail_recipients_history(self):
-        def clear_shipping_agent(form):
-            form.shipping_agent = None
-            form.save()
-
-            return form
-
-        self._assert_mail_recipients_property_logs_message(
             "specified for submitter, excluding from mail recipients",
             clear_shipping_agent,
         )
@@ -205,15 +247,28 @@ class TestOnSubmitForReviewMail(ParametrizedTestCase, HarborDuesFormMixin, TestC
             f"Talippoq: {harbor_dues_form.pk:05} ({harbor_dues_form.date})",
         )
 
-    def _get_instance(self, modifier=None):
+    @staticmethod
+    def mock_user(has_user_email=True):
+        u = User()
+        u.user_name = "username"
+        if has_user_email:
+            u.email = "user@email"
+        u.save()
+
+        return u
+
+    def _get_instance(self, modifier=None, has_user_email=True):
         form = HarborDuesForm(**self.harbor_dues_form_data)
+        user = self.mock_user(has_user_email)
         if modifier:
             form = modifier(form)
-        return OnSubmitForReviewMail(form)
+        return OnSubmitForReviewMail(form, user)
 
-    def _assert_mail_recipients_property_logs_message(self, message, modifier=None):
+    def _assert_mail_recipients_property_logs_message(
+        self, message, modifier=None, has_user_email=True
+    ):
         with self.assertLogs() as logged:
-            self._get_instance(modifier=modifier)
+            self._get_instance(modifier=modifier, has_user_email=has_user_email)
             self.assertTrue(
                 any(record.message.endswith(message) for record in logged.records)
             )

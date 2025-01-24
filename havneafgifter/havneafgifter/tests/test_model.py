@@ -26,10 +26,10 @@ from havneafgifter.models import (
     imo_validator_bool,
 )
 from havneafgifter.receipts import CruiseTaxFormReceipt, HarborDuesFormReceipt
-from havneafgifter.tests.mixins import HarborDuesFormMixin
+from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 
 
-class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class ModelTest(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -179,7 +179,7 @@ class ModelTest(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         self.assertEqual(instance.tax_per_gross_ton, expected_tax_per_gross_ton)
 
 
-class TestUser(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestUser(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -341,7 +341,7 @@ class TestPort(TestCase):
         self.assertEqual(str(instance), f"{port_name} ({authority_name})")
 
 
-class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
+class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     maxDiff = None
 
     @parametrize(
@@ -576,7 +576,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormMixin, TestCase):
         self.assertIsNone(self.harbor_dues_form.latest_rejection)
 
 
-class TestCruiseTaxForm(HarborDuesFormMixin, TestCase):
+class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
     def test_has_port_of_call(self):
         self.assertTrue(self.cruise_tax_form.has_port_of_call)
         self.assertFalse(self.cruise_tax_form_without_port_of_call.has_port_of_call)
@@ -640,7 +640,7 @@ class TestDisembarkmentSite(TestCase):
         self.assertEqual(str(instance), "Naturen (Avannaata)")
 
 
-class TestVessel(HarborDuesFormMixin, TestCase):
+class TestVessel(HarborDuesFormTestMixin, TestCase):
     def test_str(self):
         self.assertEqual(str(self.ship_user_vessel), self.ship_user_vessel.imo)
 

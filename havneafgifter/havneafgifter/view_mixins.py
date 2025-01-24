@@ -9,7 +9,11 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from django_fsm import can_proceed, has_transition_perm
 
-from havneafgifter.mails import NotificationMail, OnSubmitForReviewMail
+from havneafgifter.mails import (
+    NotificationMail,
+    OnSendToAgentMail,
+    OnSubmitForReviewMail,
+)
 from havneafgifter.models import (
     CruiseTaxForm,
     HarborDuesForm,
@@ -59,7 +63,7 @@ class HandleNotificationMailMixin:
         mail_class: type[NotificationMail],
         form: HarborDuesForm | CruiseTaxForm,
     ):
-        mail = mail_class(form)
+        mail = mail_class(form, self.request.user)  # type: ignore
         result = mail.send_email()
         messages.add_message(
             self.request,  # type: ignore
@@ -149,12 +153,17 @@ class HarborDuesFormMixin(
         else:
             # User is all done filling out data for this vessel
             status = form.cleaned_data.get("status")
+            harbor_dues_form.save()
             if status == Status.NEW:
                 harbor_dues_form.submit_for_review()
-                harbor_dues_form.save()
                 self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
-            else:
-                harbor_dues_form.save()
+            elif status == Status.DRAFT:
+                # Send notification to agent if saved by a ship user.
+                if (
+                    self.request.user.user_type == UserType.SHIP
+                    and harbor_dues_form.shipping_agent
+                ):
+                    self.handle_notification_mail(OnSendToAgentMail, harbor_dues_form)
 
             # Go to detail view to display result.
             return self.get_redirect_for_form(
