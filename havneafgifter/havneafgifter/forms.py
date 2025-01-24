@@ -242,9 +242,13 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     )
 
     port_of_call = DynamicField(
-        ModelChoiceField,
+        ChoiceField,
         required=_required_if_status_is_new_and_has_port_of_call,
-        queryset=Port.objects.all(),
+        choices=lambda form: (
+            BLANK_CHOICE_DASH
+            + [(port.pk, port.name) for port in Port.objects.all()]
+            + [(-1, _("Ingen ankomsthavn"))]
+        ),
         label=_("Port of call"),
     )
 
