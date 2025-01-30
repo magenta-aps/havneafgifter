@@ -427,7 +427,7 @@ class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetV
 
         # User is now all done filling out data for cruise ship.
         # Handle `status` (DRAFT or NEW) and send email if NEW.
-        if submitted_for_review:
+        if submitted_for_review or self.request.user.user_type == UserType.SHIP:
             self._cruise_tax_form.save(update_fields=("status",))
             self.handle_notification_mail(OnSubmitForReviewMail, self._cruise_tax_form)
 
