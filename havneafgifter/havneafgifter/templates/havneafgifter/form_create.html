@@ -83,8 +83,6 @@
         {% endfor %}
     </div>
 
-    <hr>
-
     {% if user_is_ship and object.shipping_agent is not None %}
         {# Ship users can only create DRAFT cruise ship forms if a shipping agent has been specified #}
         {% bootstrap_button button_type="submit" name="base-status" value="DRAFT" content=_("Forward to agent") %}
