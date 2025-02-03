@@ -154,7 +154,7 @@ table tfoot td p {
         {% translate 'View PDF' %}
     </a>
     {% if can_edit %}
-    <a href="{% url 'havneafgifter:draft_edit' pk=form.pk %}" class="btn btn-primary ms-2">
+    <a href="{% url 'havneafgifter:new_harbor_dues_form_edit' pk=form.pk %}" class="btn btn-primary ms-2">
         {% translate 'Edit' %}
     </a>
     {% endif %}
