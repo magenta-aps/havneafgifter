@@ -54,7 +54,12 @@ from havneafgifter.forms import (
     TaxRateForm,
     UpdateVesselForm,
 )
-from havneafgifter.mails import OnApproveMail, OnRejectMail, OnSubmitForReviewMail
+from havneafgifter.mails import (
+    OnApproveMail,
+    OnRejectMail,
+    OnSendToAgentMail,
+    OnSubmitForReviewMail,
+)
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -426,10 +431,17 @@ class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetV
         ).delete()
 
         # User is now all done filling out data for cruise ship.
-        # Handle `status` (DRAFT or NEW) and send email if NEW.
-        if submitted_for_review or self.request.user.user_type == UserType.SHIP:
+        # Handle `status` (DRAFT or NEW) and send email if NEW or if a SHIP
+        # user saves as DRAFT with an agent attached.
+        send_to_agent = (
+            self.request.user.user_type == UserType.SHIP
+            and self._cruise_tax_form.shipping_agent
+            and self._cruise_tax_form.status == Status.DRAFT
+        )
+        if submitted_for_review or send_to_agent:
             self._cruise_tax_form.save(update_fields=("status",))
-            self.handle_notification_mail(OnSubmitForReviewMail, self._cruise_tax_form)
+            mail_type = OnSendToAgentMail if send_to_agent else OnSubmitForReviewMail
+            self.handle_notification_mail(mail_type, self._cruise_tax_form)
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
