@@ -179,6 +179,20 @@
         $(".minus-button").on("click", removeItem);
     }
 
+    function toggleCruiseFormsets() {
+        const formsets = $(".formset")
+        const formsetChildren = $(".formset *")
+        const dropdown = $("#id_base-vessel_type")
+
+        if (dropdown.val() === "CRUISE") {
+            formsetChildren.prop('disabled', false);
+            formsets.show()
+        } else {
+            formsetChildren.prop('disabled', true);
+            formsets.hide()
+        }
+    }
+
     function portOfCallToggle() {
         const portOfCall = $("#id_base-port_of_call")
 
@@ -194,25 +208,12 @@
             departure.prop("disabled", true)
             vesselType.prop("disabled", true)
             vesselType.val('CRUISE')
+            toggleCruiseFormsets()
         } else {
             grossTonnage.prop("disabled", false)
             arrival.prop("disabled", false)
             departure.prop("disabled", false)
             vesselType.prop("disabled", false)
-        }
-    }
-
-    function toggleCruiseFormsets() {
-        const formsets = $(".formset")
-        const formsetChildren = $(".formset *")
-        const dropdown = $("#id_base-vessel_type")
-
-        if (dropdown.val() === "CRUISE") {
-            formsetChildren.prop('disabled', false);
-            formsets.show()
-        } else {
-            formsetChildren.prop('disabled', true);
-            formsets.hide()
         }
     }
 
