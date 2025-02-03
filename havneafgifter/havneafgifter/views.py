@@ -435,7 +435,7 @@ class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetV
         # user saves as DRAFT with an agent attached.
         send_to_agent = (
             self.request.user.user_type == UserType.SHIP
-            and self._cruise_tax_form.agent
+            and self._cruise_tax_form.shipping_agent
             and self._cruise_tax_form.status == Status.DRAFT
         )
         if submitted_for_review or send_to_agent:
