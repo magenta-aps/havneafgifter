@@ -691,6 +691,29 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
     def test_get_context_data_populates_formset(self):
         self._assert_get_context_data_includes_formset("disembarkment_formset")
 
+    def test_form_valid_sends_email_to_agent(self):
+        self._post_formset(
+            # Add new entry for Australia (index 0)
+            {"number_of_passengers": 42},
+            # Add new (empty) entry for Austria (index 1)
+            {"number_of_passengers": 0},
+            # Update existing entry for Belgium (index 2)
+            {"number_of_passengers": 42},
+            user=self.ship_user,
+            # Submit correct number of total passengers
+            total_number_of_passengers=2 * 42,
+        )
+        with patch.object(
+            self.instance, "handle_notification_mail"
+        ) as mock_handle_notification_mail:
+            # Act: trigger DB insert logic
+            self.instance.form_valid(self.instance.get_form())
+            # Assert: verify that we call the `_send_email` method as expected
+            mock_handle_notification_mail.assert_called_once_with(
+                OnSendToAgentMail,
+                self.instance._cruise_tax_form,
+            )
+
     def test_form_valid_creates_objects(self):
         # Arrange
         self._post_formset(
