@@ -160,6 +160,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
     path(
         "form/edit/<int:pk>/",
         NewHarborDuesFormCreateView.as_view(),
-        name="new_harbor_dues_form_create",
+        name="new_harbor_dues_form_edit",
     ),
 ]
