@@ -88,24 +88,21 @@ class HarborDuesFormCreateView(
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
-            self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
-
-        else:
-            self.object = harbor_dues_form.save()
+            self._create_or_update_cruise_tax_form(harbor_dues_form)
 
         status = form.cleaned_data.get("status")
 
         if status == Status.NEW:
-            self.object.submit_for_review()
-            self.object.save()
-            self.handle_notification_mail(OnSubmitForReviewMail, self.object)
+            harbor_dues_form.submit_for_review()
+            harbor_dues_form.save()
+            self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
         else:
-            self.object.save()
+            harbor_dues_form.save()
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
-            self.object,
+            harbor_dues_form,
         )
 
     def _create_or_update_cruise_tax_form(
@@ -208,7 +205,8 @@ class HarborDuesFormCreateView(
             data=self.request.POST,
         )
 
-        if passenger_formset.is_valid() and len(passenger_formset.cleaned_data) > 0:
+        # Non-cruise ships will have a list with an empty dict
+        if passenger_formset.is_valid() and passenger_formset.cleaned_data[0]:
             actual_total = 0
             for item in self._get_passengers_by_country_objects(passenger_formset):
                 actual_total += item.number_of_passengers
@@ -233,29 +231,31 @@ class HarborDuesFormCreateView(
         ):
             response = self.form_valid(base_form)
 
-            # Create or update `PassengersByCountry` objects based on formset data
-            passengers_by_country_objects = self._get_passengers_by_country_objects(
-                passenger_formset
-            )
+            if passenger_formset.cleaned_data[0]:
+                # Create or update `PassengersByCountry` objects based on formset data
+                passengers_by_country_objects = self._get_passengers_by_country_objects(
+                    passenger_formset
+                )
 
-            PassengersByCountry.objects.bulk_create(
-                passengers_by_country_objects,
-                update_conflicts=True,
-                unique_fields=["cruise_tax_form", "nationality"],
-                update_fields=["number_of_passengers"],
-            )
+                PassengersByCountry.objects.bulk_create(
+                    passengers_by_country_objects,
+                    update_conflicts=True,
+                    unique_fields=["cruise_tax_form", "nationality"],
+                    update_fields=["number_of_passengers"],
+                )
 
-            # Remove any `PassengersByCountry` objects which have 0 passengers after the
-            # "create or update" processing above.
-            PassengersByCountry.objects.filter(
-                cruise_tax_form=self.object,
-                number_of_passengers=0,
-            ).delete()
+                # Remove any `PassengersByCountry` objects which have 0 passengers
+                # after the "create or update" processing above.
+                PassengersByCountry.objects.filter(
+                    cruise_tax_form=self.object,
+                    number_of_passengers=0,
+                ).delete()
 
             # Create or update `Disembarkment` objects based on formset data
             disembarkment_objects = self._get_disembarkment_objects(
                 disembarkment_formset
             )
+
             Disembarkment.objects.bulk_create(
                 disembarkment_objects,
                 update_conflicts=True,
