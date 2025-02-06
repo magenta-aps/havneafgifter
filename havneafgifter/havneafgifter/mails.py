@@ -320,17 +320,22 @@ class OnSendToAgentMail(NotificationMail):
 
     @property
     def mail_body(self):
-        context = {
-            "submitter": self.user.email if self.user else "",
-            "date": localize(self.form.date),
-        }
+        result = []
+        for lang_code, lang_name in settings.LANGUAGES:
+            with translation.override(lang_code):
+                context = {
+                    "submitter": self.user.email if self.user else "",
+                    "date": localize(self.form.date),
+                }
 
-        return (
-            gettext(
-                "%(submitter)s has %(date)s created a port tax form for you to complete"
-            )
-            % context
-        )
+                text = (
+                    gettext(
+                        "%(submitter)s has %(date)s created a port tax form for you to complete"
+                    )
+                    % context
+                )
+                result.append(text)
+        return "\n\n".join(result)
 
     @property
     def success_message(self) -> str:
