@@ -8,7 +8,6 @@ from django.core.validators import MinValueValidator, RegexValidator
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BaseInlineFormSet,
-    BooleanField,
     CharField,
     ChoiceField,
     DateTimeField,
@@ -39,7 +38,6 @@ from dynamic_forms import DynamicField, DynamicFormMixin
 
 from havneafgifter.form_mixins import BootstrapForm, BootstrapFormSet
 from havneafgifter.models import (
-    CruiseTaxForm,
     DisembarkmentSite,
     DisembarkmentTaxRate,
     HarborDuesForm,
@@ -238,7 +236,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     _required_if_status_is_new = lambda form: form._status == Status.NEW  # noqa: E731
 
     _required_if_status_is_new_and_has_port_of_call = lambda form: (  # noqa: E731
-        False if form.has_no_port_of_call else (form._status == Status.NEW)
+        form._status == Status.NEW and form.has_port_of_call
     )
 
     port_of_call = DynamicField(
@@ -350,13 +348,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         label=_("Vessel type"),
     )
 
-    no_port_of_call = DynamicField(
-        BooleanField,
-        required=False,
-        initial=lambda form: form.has_no_port_of_call,
-        label=_("No port of call"),
-    )
-
     status = ChoiceField(
         required=True,
         choices=Status.choices,
@@ -374,33 +365,22 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             getattr(user, "vessel", None) if user.has_group_name("Ship") else None
         )
         super().__init__(*args, **kwargs)
-        self.fields["no_port_of_call"].widget.attrs[
-            "checked"
-        ] = self.has_no_port_of_call
 
     @property
     def user_is_ship(self) -> bool:
         return "Ship" in self._user.group_names
 
     @property
-    def has_no_port_of_call(self) -> bool:
-        # 1. Check whether (unvalidated) form data sets `no_port_of_call`:
-        form_has_no_port_of_call = self.data.get("no_port_of_call")
-        if form_has_no_port_of_call == "on":
-            return True
-        # 2. Check whether model instance appears to have no port of call:
-        self.instance: HarborDuesForm | CruiseTaxForm
-        instance_has_no_port_of_call: bool = (
-            (self.instance.pk is not None)
-            and (self.instance.port_of_call is None)
-            and (self.instance.vessel_type == ShipType.CRUISE)
-        )
-        return instance_has_no_port_of_call
+    def has_port_of_call(self):
+        port_of_call = self.data.get("base-port_of_call")
+        return port_of_call != "-1"
 
     def clean(self):
         cleaned_data = super().clean()
 
-        status = self._status or cleaned_data.get("status")
+        self._status = cleaned_data.get("status")
+        status = self._status
+
         if status == Status.DRAFT:
             return cleaned_data
 
@@ -420,40 +400,12 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
-        no_port_of_call = cleaned_data.get("no_port_of_call")
         vessel_type = cleaned_data.get("vessel_type")
-        # "Port of call" cannot be set if "no port of call" is also set
-        if (port_of_call is not None) and (no_port_of_call is True):
-            raise ValidationError(
-                _("Port of call cannot be filled if 'no port of call' is selected"),
-                code="port_of_call_chosen_but_no_port_of_call_is_true",
-            )
-        # And the opposite: "port of call" must be set if "no port of call" is not set
-        if (
-            (port_of_call is None)
-            and (no_port_of_call is False)
-            and (vessel_type != ShipType.CRUISE)
-        ):
-            raise ValidationError(
-                _("Port of call must be filled if 'no port of call' is not selected"),
-                code="port_of_call_is_empty_and_no_port_of_call_is_false",
-            )
-
-        # Handle "no port of call" vs. "vessel type"
-        # Only cruise ships can select "no port of call"
-        if (vessel_type != ShipType.CRUISE) and (no_port_of_call is True):
-            raise ValidationError(
-                _(
-                    "You can only choose 'no port of call' when the vessel is a "
-                    "cruise ship"
-                ),
-                code="no_port_of_call_cannot_be_true_for_non_cruise_ships",
-            )
 
         # Handle "port of call" vs. "arrival" and "departure" fields
         # If given a port of call, both arrival and departure dates must be given
         # as well.
-        if (port_of_call is not None) and (
+        if (port_of_call and port_of_call.name != "Blank") and (
             datetime_of_arrival is None or datetime_of_departure is None
         ):
             raise ValidationError(
@@ -496,6 +448,23 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                 ]
             )
         return ErrorList()  # empty error list
+
+    def clean_port_of_call(self):
+        port_of_call = self.cleaned_data.get("port_of_call")
+        if isinstance(port_of_call, Port):
+            return port_of_call
+
+        if port_of_call:
+            port_of_call = int(port_of_call)
+        else:
+            return None
+
+        if port_of_call > 0:
+            return Port.objects.get(pk=port_of_call)
+        elif port_of_call == -1:
+            return Port(name="Blank")
+        else:
+            return None
 
 
 class PassengersTotalForm(CSPFormMixin, Form):
@@ -543,7 +512,7 @@ class PassengersByCountryForm2(DynamicFormMixin, CSPFormMixin, Form):
     )
     number_of_passengers = DynamicField(
         IntegerField,
-        required=lambda form: True if form.initial.get("pk") else False,
+        required=True,
         min_value=0,
     )
     pk = IntegerField(
