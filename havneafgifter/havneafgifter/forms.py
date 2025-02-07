@@ -258,7 +258,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         choices=lambda form: (
             BLANK_CHOICE_DASH
             + [(port.pk, port.name) for port in Port.objects.all()]
-            + [(-1, _("Ingen ankomsthavn"))]
+            + [(-1, _("No port of call"))]
         ),
         label=_("Port of call"),
     )
