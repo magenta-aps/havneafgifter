@@ -1323,7 +1323,7 @@ msgid ""
 "you registered with, and check your spam folder."
 msgstr ""
 
-#: havneafgifter/view_mixins.py havneafgifter/views2.py
+#: havneafgifter/view_mixins.py havneafgifter/views.py
 msgid ""
 "You do not have the required permissions to submit harbor dues forms for "
 "review"

@@ -30,7 +30,6 @@ from django.forms import (
 from django.forms.models import inlineformset_factory
 from django.forms.utils import ErrorList
 from django.utils import timezone
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_select2.forms import Select2Widget
@@ -491,23 +490,6 @@ class PassengersTotalForm(CSPFormMixin, Form):
 class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
     nationality = ChoiceField(
         choices=Nationality,
-        disabled=True,
-    )
-    number_of_passengers = DynamicField(
-        IntegerField,
-        required=True,
-        min_value=0,
-        label=lambda form: form.initial["nationality"].label,
-    )
-    pk = IntegerField(
-        required=False,
-        widget=HiddenInput(),
-    )
-
-
-class PassengersByCountryForm2(DynamicFormMixin, CSPFormMixin, Form):
-    nationality = ChoiceField(
-        choices=Nationality,
         required=True,
     )
     number_of_passengers = DynamicField(
@@ -522,49 +504,6 @@ class PassengersByCountryForm2(DynamicFormMixin, CSPFormMixin, Form):
 
 
 class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
-    disembarkment_site = DynamicField(
-        ChoiceField,
-        choices=lambda form: [
-            (form.initial_disembarkment_site.pk, str(form.initial_disembarkment_site))
-        ],
-        disabled=True,
-    )
-    number_of_passengers = DynamicField(
-        IntegerField,
-        label=lambda form: form.initial_disembarkment_site_name,
-    )
-    pk = IntegerField(
-        required=False,
-        widget=HiddenInput(),
-    )
-
-    def clean_disembarkment_site(self):
-        disembarkment_site = self.cleaned_data.get("disembarkment_site")
-        if isinstance(disembarkment_site, DisembarkmentSite):
-            return disembarkment_site
-        return DisembarkmentSite.objects.get(pk=disembarkment_site)
-
-    @cached_property
-    def initial_disembarkment_site(self):
-        disembarkment_site = self.initial.get("disembarkment_site")
-        if isinstance(disembarkment_site, int):
-            disembarkment_site = DisembarkmentSite.objects.get(pk=disembarkment_site)
-        return disembarkment_site
-
-    @cached_property
-    def initial_disembarkment_site_name(self):
-        disembarkment_site = self.initial_disembarkment_site
-        if disembarkment_site.is_outside_populated_areas:
-            field = disembarkment_site._meta.get_field("is_outside_populated_areas")
-            return field.verbose_name
-        else:
-            return disembarkment_site.name
-
-    def get_municipality_display(self):
-        return self.initial_disembarkment_site.get_municipality_display()
-
-
-class DisembarkmentForm2(DynamicFormMixin, CSPFormMixin, Form):
     disembarkment_site = DynamicField(
         ModelChoiceField,
         queryset=DisembarkmentSite.objects.all(),

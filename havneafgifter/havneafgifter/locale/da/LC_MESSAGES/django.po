@@ -1371,7 +1371,7 @@ msgstr ""
 "Hvis du ikke modtager en email skal du sørge for at du har indtastet samme "
 "adresse som du registrerede dig med, og har checket din spam-mappe."
 
-#: havneafgifter/view_mixins.py havneafgifter/views2.py
+#: havneafgifter/view_mixins.py havneafgifter/views.py
 msgid ""
 "You do not have the required permissions to submit harbor dues forms for "
 "review"
