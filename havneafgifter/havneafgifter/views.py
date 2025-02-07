@@ -56,9 +56,12 @@ from havneafgifter.forms import (
 )
 from havneafgifter.mails import (
     OnApproveMail,
+    OnApproveReceipt,
     OnRejectMail,
+    OnRejectReceipt,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
+    OnSubmitForReviewReceipt,
 )
 from havneafgifter.models import (
     CruiseTaxForm,
@@ -442,6 +445,10 @@ class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetV
             self._cruise_tax_form.save(update_fields=("status",))
             mail_type = OnSendToAgentMail if send_to_agent else OnSubmitForReviewMail
             self.handle_notification_mail(mail_type, self._cruise_tax_form)
+            if mail_type == OnSubmitForReviewMail:
+                self.handle_notification_mail(
+                    OnSubmitForReviewReceipt, self._cruise_tax_form
+                )
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
@@ -685,6 +692,7 @@ class ApproveView(
         harbor_dues_form.approve()
         harbor_dues_form.save()
         self.handle_notification_mail(OnApproveMail, harbor_dues_form)
+        self.handle_notification_mail(OnApproveReceipt, harbor_dues_form)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -726,6 +734,7 @@ class RejectView(
         harbor_dues_form.reject(reason=form.cleaned_data["reason"])
         harbor_dues_form.save()
         self.handle_notification_mail(OnRejectMail, harbor_dues_form)
+        self.handle_notification_mail(OnRejectReceipt, harbor_dues_form)
         return response
 
     def get_success_url(self):

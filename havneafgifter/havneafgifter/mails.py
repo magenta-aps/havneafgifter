@@ -193,8 +193,7 @@ class OnSubmitForReviewMail(NotificationMail):
         # The text varies depending on whether the form concerns a cruise ship, or any
         # other type of vessel.
         result = []
-        submitting_user = self.user if self.user else None
-        submitter_email = submitting_user.email if submitting_user else None
+        ship_name = self.form.vessel_name
         for lang_code, lang_name in settings.LANGUAGES:
             with translation.override(lang_code):
                 context = {
@@ -202,7 +201,7 @@ class OnSubmitForReviewMail(NotificationMail):
                     "submitter": (
                         self.form.shipping_agent.name
                         if self.form.shipping_agent
-                        else submitter_email or ""
+                        else ship_name or ""
                     ),
                 }
                 if self.form.vessel_type == ShipType.CRUISE:
@@ -237,12 +236,42 @@ class OnSubmitForReviewMail(NotificationMail):
         )
 
 
+class OnSubmitForReviewReceipt(NotificationMail):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
+        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
+
+    @property
+    def mail_body(self):
+        # The mail body consists of the same text repeated in English, Greenlandic, and
+        # Danish.
+        result = []
+        context = {
+            "id": str(self.form.id),
+            "name": self.form.vessel_name,
+        }
+        for lang_code, lang_name in settings.LANGUAGES:
+            with translation.override(lang_code):
+                text = (
+                    gettext(
+                        "Form %(id)s has been submitted for %(name)s and has been"
+                        + " sent to the port authorities."
+                    )
+                    % context
+                )
+                result.append(text)
+        return "\n\n".join(result)
+
+    @property
+    def success_message(self) -> str:
+        return gettext("An email receipt was successfully sent.")
+
+
 class OnApproveMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         super().__init__(form, user)
         self.add_recipient(self.get_shipping_agent_recipient())
         self.add_recipient(self.get_ship_recipient())
-        self.add_recipient(self.get_port_authority_recipient())
 
     @property
     def mail_subject(self):
@@ -271,6 +300,28 @@ class OnApproveMail(NotificationMail):
     @property
     def success_message(self) -> str:
         return gettext("An approval notification has been sent to the form submitter")
+
+
+class OnApproveReceipt(NotificationMail):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
+        self.add_recipient(self.get_port_authority_recipient())
+
+    @property
+    def mail_subject(self):
+        return gettext("Approved harbor dues form in Talippoq")
+
+    @property
+    def mail_body(self):
+        context = {
+            "id": str(self.form.id),
+        }
+
+        return gettext("Harbour dues form %(id)s has been approved") % context
+
+    @property
+    def success_message(self) -> str:
+        return gettext("An approval receipt was sent to the port authority")
 
 
 class OnRejectMail(NotificationMail):
@@ -313,29 +364,46 @@ class OnRejectMail(NotificationMail):
         return gettext("A rejection notification has been sent to the form submitter")
 
 
-class OnSendToAgentMail(NotificationMail):
+class OnRejectReceipt(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         super().__init__(form, user)
-        self.add_recipient(self.get_shipping_agent_or_ship_recipient())
+        self.add_recipient(self.get_port_authority_recipient())
+
+    @property
+    def mail_subject(self):
+        return gettext("Rejected harbor dues form in Talippoq")
 
     @property
     def mail_body(self):
-        result = []
-        for lang_code, lang_name in settings.LANGUAGES:
-            with translation.override(lang_code):
-                context = {
-                    "submitter": self.user.email if self.user else "",
-                    "date": localize(self.form.date),
-                }
+        context = {
+            "id": str(self.form.id),
+        }
 
-                text = (
-                    gettext(
-                        "%(submitter)s has %(date)s created a port tax form for you to complete"
-                    )
-                    % context
-                )
-                result.append(text)
-        return "\n\n".join(result)
+        return gettext("Harbour dues form %(id)s has been rejected") % context
+
+    @property
+    def success_message(self) -> str:
+        return gettext("A rejection receipt was sent to the port authority")
+
+
+class OnSendToAgentMail(NotificationMail):
+    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
+        super().__init__(form, user)
+        self.add_recipient(self.get_shipping_agent_recipient())
+
+    @property
+    def mail_body(self):
+        context = {
+            "submitter": self.user.email if self.user else "",
+            "date": localize(self.form.date),
+        }
+
+        return (
+            gettext(
+                "%(submitter)s has %(date)s created a port tax form for you to complete"
+            )
+            % context
+        )
 
     @property
     def success_message(self) -> str:

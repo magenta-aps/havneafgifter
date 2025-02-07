@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-24 12:15-0200\n"
+"POT-Creation-Date: 2025-02-10 08:28-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -254,16 +254,40 @@ msgstr ""
 #: havneafgifter/mails.py
 #, python-format
 msgid ""
+"Form %(id)s has been submitted for %(name)s and has been sent to the port "
+"authorities."
+msgstr ""
+
+#: havneafgifter/mails.py
+msgid "An email receipt was successfully sent."
+msgstr ""
+
+#: havneafgifter/mails.py
+#, python-format
+msgid ""
 "The port authority in %(town)s has approved your harbor dues form %(id)s.\n"
 "You should expect to receive an invoice from the port authority."
 msgstr ""
-"Havnemyndigheden i %(town)s har godkendt din indberetning %(id)s i Talippoq.\n"
+"Havnemyndigheden i %(town)s har godkendt din indberetning %(id)s i "
+"Talippoq.\n"
 "Du kan nu afvente en faktura fra havnemyndigheden."
-
 
 #: havneafgifter/mails.py
 msgid "An approval notification has been sent to the form submitter"
 msgstr "En godkendelses-notifikation er blevet sendt til formularens afsender"
+
+#: havneafgifter/mails.py
+msgid "Approved harbor dues form in Talippoq"
+msgstr ""
+
+#: havneafgifter/mails.py
+#, python-format
+msgid "Harbour dues form %(id)s has been approved"
+msgstr ""
+
+#: havneafgifter/mails.py
+msgid "An approval receipt was sent to the port authority"
+msgstr ""
 
 #: havneafgifter/mails.py
 #, python-format
@@ -283,9 +307,24 @@ msgid "A rejection notification has been sent to the form submitter"
 msgstr "En afvisningsmeddelelse er blevet sendt til formularens afsender"
 
 #: havneafgifter/mails.py
+msgid "Rejected harbor dues form in Talippoq"
+msgstr ""
+
+#: havneafgifter/mails.py
+#, python-format
+msgid "Harbour dues form %(id)s has been rejected"
+msgstr ""
+
+#: havneafgifter/mails.py
+msgid "A rejection receipt was sent to the port authority"
+msgstr ""
+
+#: havneafgifter/mails.py
 #, python-format
 msgid "%(submitter)s has %(date)s created a port tax form for you to complete"
 msgstr ""
+"%(submitter)s har %(date)s oprettet en havneafgiftsblanket, som du skal "
+"færdiggøre"
 
 #: havneafgifter/mails.py
 msgid "This form was successfully sent to your agent"
