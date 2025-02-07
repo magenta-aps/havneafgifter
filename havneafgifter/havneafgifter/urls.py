@@ -4,10 +4,10 @@ from django.urls import URLPattern, URLResolver, path
 from django.views.generic import TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
+from havneafgifter.views import ApproveView, EnvironmentalTaxCreateView
+from havneafgifter.views import HarborDuesFormCreateView
+from havneafgifter.views import HarborDuesFormCreateView as NewHarborDuesFormCreateView
 from havneafgifter.views import (
-    ApproveView,
-    EnvironmentalTaxCreateView,
-    HarborDuesFormCreateView,
     HarborDuesFormListView,
     HarborDuesFormUpdateView,
     LandingModalOkView,
@@ -27,7 +27,6 @@ from havneafgifter.views import (
     UpdateVesselView,
     WithdrawView,
 )
-from havneafgifter.views2 import HarborDuesFormCreateView as NewHarborDuesFormCreateView
 
 app_name = "havneafgifter"
 
