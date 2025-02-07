@@ -85,24 +85,32 @@ class HarborDuesFormCreateView(
                 ),
             )
 
+        port_of_call = form.cleaned_data.get("port_of_call")
+
+        if port_of_call is not None and port_of_call.name == "Blank":
+            harbor_dues_form.port_of_call = None
+
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
-            self._create_or_update_cruise_tax_form(harbor_dues_form)
+            self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
+        else:
+            harbor_dues_form.save()
+            self.object = harbor_dues_form
 
         status = form.cleaned_data.get("status")
 
         if status == Status.NEW:
-            harbor_dues_form.submit_for_review()
-            harbor_dues_form.save()
-            self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
+            self.object.submit_for_review()
+            self.object.save()
+            self.handle_notification_mail(OnSubmitForReviewMail, self.object)
         else:
-            harbor_dues_form.save()
+            self.object.save()
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
-            harbor_dues_form,
+            self.object,
         )
 
     def _create_or_update_cruise_tax_form(
@@ -150,7 +158,13 @@ class HarborDuesFormCreateView(
                 return cruise_tax_form
 
     def get_base_form(self, **form_kwargs):
-        return HarborDuesFormForm(self.request.user, prefix="base", **form_kwargs)
+        status = self.request.POST.get("base-status")
+        if status is not None:
+            status = Status(status)
+
+        return HarborDuesFormForm(
+            self.request.user, status=status, prefix="base", **form_kwargs
+        )
 
     def get_passenger_total_form(self, **form_kwargs):
         return PassengersTotalForm(prefix="passenger_total_form", **form_kwargs)

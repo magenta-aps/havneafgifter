@@ -226,5 +226,14 @@
     $("#id_base-port_of_call").on("change", portOfCallToggle)
     $(".plus-button").on("click", addItem)
     $(".minus-button").on("click", removeItem)
+
+    const form = $("form#main");
+
+    // Hook form submit
+    form.on("submit", function (evt) {
+        // Ensure that potentially disabled fields are still POSTed to server
+        const vesselType = $("#id_base-vessel_type")
+        vesselType.prop("disabled", null)
+    });
 </script>
 {% endblock content %}
