@@ -257,10 +257,12 @@ msgid ""
 "Form %(id)s has been submitted for %(name)s and has been sent to the port "
 "authorities."
 msgstr ""
+"Indberetning %(id)s er indsendt for %(name)s og er sendt til "
+"havnemyndighederne."
 
 #: havneafgifter/mails.py
 msgid "An email receipt was successfully sent."
-msgstr ""
+msgstr "Der er sendt en kvittering på email."
 
 #: havneafgifter/mails.py
 #, python-format
@@ -278,16 +280,16 @@ msgstr "En godkendelses-notifikation er blevet sendt til formularens afsender"
 
 #: havneafgifter/mails.py
 msgid "Approved harbor dues form in Talippoq"
-msgstr ""
+msgstr "Godkendt indberetning i Talippoq"
 
 #: havneafgifter/mails.py
 #, python-format
 msgid "Harbour dues form %(id)s has been approved"
-msgstr ""
+msgstr "Indberetning %(id)s er godkendt"
 
 #: havneafgifter/mails.py
 msgid "An approval receipt was sent to the port authority"
-msgstr ""
+msgstr "Der er sendt en kvittering til havnemyndigheden"
 
 #: havneafgifter/mails.py
 #, python-format
@@ -308,16 +310,16 @@ msgstr "En afvisningsmeddelelse er blevet sendt til formularens afsender"
 
 #: havneafgifter/mails.py
 msgid "Rejected harbor dues form in Talippoq"
-msgstr ""
+msgstr "Afvist indberetning i Talippoq"
 
 #: havneafgifter/mails.py
 #, python-format
 msgid "Harbour dues form %(id)s has been rejected"
-msgstr ""
+msgstr "Indberetning %(id)s er afvist"
 
 #: havneafgifter/mails.py
 msgid "A rejection receipt was sent to the port authority"
-msgstr ""
+msgstr "Der er sendt en kvittering til havnemyndigheden"
 
 #: havneafgifter/mails.py
 #, python-format
@@ -328,7 +330,7 @@ msgstr ""
 
 #: havneafgifter/mails.py
 msgid "This form was successfully sent to your agent"
-msgstr ""
+msgstr "Denne indberetning er nu sendt til din agent"
 
 #: havneafgifter/models.py
 msgid "You must specify a port authority if a port is specified"

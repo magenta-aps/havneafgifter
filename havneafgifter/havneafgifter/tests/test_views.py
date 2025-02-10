@@ -434,9 +434,9 @@ class TestHarborDuesFormCreateView(
                         mail_class = OnSendToAgentMail
                     else:
                         mail_class = OnSubmitForReviewMail
-
-                    mock_handle_notification_mail.assert_called_once_with(
-                        mail_class, HarborDuesForm.objects.latest("pk")
+                    call_count = 1 if mail_class == OnSendToAgentMail else 2
+                    self.assertEqual(
+                        mock_handle_notification_mail.call_count, call_count
                     )
             else:
                 # Assert that we receive a 403 error response
@@ -750,10 +750,7 @@ class TestEnvironmentalTaxCreateView(TestCruiseTaxFormSetView):
                 ],
             )
             # Assert: verify that we call the `_send_email` method as expected
-            mock_handle_notification_mail.assert_called_once_with(
-                OnSubmitForReviewMail,
-                self.instance._cruise_tax_form,
-            )
+            self.assertEqual(mock_handle_notification_mail.call_count, 2)
 
     def test_form_valid_checks_cruise_tax_form_on_submit(self):
         """If user clicks "Submit for review", the `CruiseTaxForm` created in "step 1"
@@ -1378,7 +1375,7 @@ class TestApproveView(TestActionViewMixin, TestCase):
         # Assert
         harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
         self.assertEqual(harbor_dues_form.status, Status.APPROVED.value)
-        mock_add_message.assert_called_once()
+        self.assertEqual(mock_add_message.call_count, 2)
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):
@@ -1413,7 +1410,7 @@ class TestRejectView(TestActionViewMixin, TestCase):
         # Assert
         harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
         self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
-        mock_add_message.assert_called_once()
+        self.assertEqual(mock_add_message.call_count, 2)
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):

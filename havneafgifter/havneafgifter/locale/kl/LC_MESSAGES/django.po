@@ -254,6 +254,8 @@ msgid ""
 "Form %(id)s has been submitted for %(name)s and has been sent to the port "
 "authorities."
 msgstr ""
+"Nalunaarsorneqarneq %(id)s nassiunneqarput uunga %(name)s, qitisusumik "
+"umiarsualivinnut oqartussaaffiusumut nassiunneqarlutik."
 
 #: havneafgifter/mails.py
 msgid "An email receipt was successfully sent."
@@ -277,7 +279,7 @@ msgstr ""
 #: havneafgifter/mails.py
 #, python-format
 msgid "Harbour dues form %(id)s has been approved"
-msgstr ""
+msgstr "Nalunaarsorneqarneq %(id)s akuerineqarpoq"
 
 #: havneafgifter/mails.py
 msgid "An approval receipt was sent to the port authority"
