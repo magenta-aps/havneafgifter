@@ -1540,6 +1540,14 @@ class Vessel(models.Model):
         verbose_name=_("Gross tonnage"),
     )
 
+    nationality = models.CharField(
+        max_length=2,
+        null=True,
+        blank=True,
+        choices=countries,
+        verbose_name=_("Vessel nationality"),
+    )
+
     def __str__(self) -> str:
         return self.imo
 
