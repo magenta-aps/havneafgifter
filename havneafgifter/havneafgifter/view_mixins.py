@@ -13,6 +13,7 @@ from havneafgifter.mails import (
     NotificationMail,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
+    OnSubmitForReviewReceipt,
 )
 from havneafgifter.models import (
     CruiseTaxForm,
@@ -157,6 +158,9 @@ class HarborDuesFormMixin(
             if status == Status.NEW:
                 harbor_dues_form.submit_for_review()
                 self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
+                self.handle_notification_mail(
+                    OnSubmitForReviewReceipt, harbor_dues_form
+                )
             elif status == Status.DRAFT:
                 # Send notification to agent if saved by a ship user.
                 if (

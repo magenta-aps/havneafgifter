@@ -13,6 +13,7 @@ class Command(BaseCommand):
         parser.add_argument("-g", "--groups", type=str, nargs="+")
         parser.add_argument("--port-authority", type=str, nargs="+")
         parser.add_argument("--shipping-agent", type=str, nargs="+")
+        parser.add_argument("--email", type=str)
 
     def handle(self, *args, **options):
         user, _ = User.objects.update_or_create(
@@ -22,6 +23,9 @@ class Command(BaseCommand):
                 "is_superuser": options["is_superuser"],
             },
         )
+        if options["email"]:
+            user.email = options["email"]
+            user.save()
         password = options["password"]
         if password and not user.check_password(password):
             user.set_password(password)
