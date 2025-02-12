@@ -24,14 +24,14 @@ class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase)
         form.shipping_agent = None
         form.save()
         instance = OnApproveMail(form)
-        # There should be two recipients, for the ship & for the port authority
+        # There should be one recipient, namely for the ship
         self.assertEqual(len(instance.mail_recipients), 1)
 
     def test_ship_user(self):
 
         form = HarborDuesForm(**self.harbor_dues_form_data)
         instance = OnApproveMail(form, self.ship_user)
-        # There should be three recipients.
+        # There should be two recipients.
         self.assertEqual(len(instance.mail_recipients), 2)
 
     def test_no_ship_user(self):
@@ -42,7 +42,7 @@ class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase)
 
         instance = OnApproveMail(form)
 
-        # There should be two recipients - no ship user.
+        # There should be one recipient only - no ship user.
         self.assertEqual(len(instance.mail_recipients), 1)
 
 
