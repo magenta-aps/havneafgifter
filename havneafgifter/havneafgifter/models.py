@@ -253,7 +253,7 @@ class PermissionsMixin(models.Model):
         return (
             not from_group
             and self.filter_user_permissions(
-                self.__class__.objects.filter(pk=self.pk),
+                self.__class__.objects.filter(pk=self.pk),  # type: ignore
                 user,
                 action,  # type: ignore
             ).exists()

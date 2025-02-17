@@ -4,12 +4,11 @@ from django.urls import URLPattern, URLResolver, path
 from django.views.generic import TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
-from havneafgifter.views import ApproveView, EnvironmentalTaxCreateView
-from havneafgifter.views import HarborDuesFormCreateView
-from havneafgifter.views import HarborDuesFormCreateView as NewHarborDuesFormCreateView
 from havneafgifter.views import (
+    ApproveView,
+    EnvironmentalTaxCreateView,
+    HarborDuesFormCreateView,
     HarborDuesFormListView,
-    HarborDuesFormUpdateView,
     LandingModalOkView,
     LoginView,
     LogoutView,
@@ -117,11 +116,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="receipt_detail_html",
     ),
     path(
-        "blanket/<int:pk>/rediger/",
-        HarborDuesFormUpdateView.as_view(),
-        name="draft_edit",
-    ),
-    path(
         "blanket/<int:pk>/tilbagetraek/",
         WithdrawView.as_view(),
         name="withdraw",
@@ -153,12 +147,12 @@ urlpatterns: List[URLResolver | URLPattern] = [
     path("modal/ok", LandingModalOkView.as_view(), name="landing_modal_ok"),
     path(
         "form/create/",
-        NewHarborDuesFormCreateView.as_view(),
+        HarborDuesFormCreateView.as_view(),
         name="new_harbor_dues_form_create",
     ),
     path(
         "form/edit/<int:pk>/",
-        NewHarborDuesFormCreateView.as_view(),
+        HarborDuesFormCreateView.as_view(),
         name="new_harbor_dues_form_edit",
     ),
 ]
