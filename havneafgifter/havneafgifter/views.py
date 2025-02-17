@@ -92,7 +92,6 @@ from havneafgifter.view_mixins import (
     CacheControlMixin,
     GetFormView,
     HandleNotificationMailMixin,
-    HarborDuesFormMixin,
     HavneafgiftView,
 )
 
@@ -229,10 +228,15 @@ class HarborDuesFormCreateView(
     CSPViewMixin,
     HandleNotificationMailMixin,
     HavneafgiftView,
+    CacheControlMixin,
     DetailView,
 ):
     template_name = "havneafgifter/form_create.html"
     http_method_names = ["get", "post"]
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return self.prevent_response_caching(response)
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
@@ -809,7 +813,7 @@ class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetV
     def _return_to_step_1_with_errors(self, message: str) -> HttpResponse:
         messages.error(self.request, message)
         return self.get_redirect_for_form(
-            "havneafgifter:draft_edit",
+            "havneafgifter:new_harbor_dues_form_edit",
             self._cruise_tax_form,
             status=Status.NEW.value,
         )
@@ -841,49 +845,6 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return HarborDuesForm.objects.get(pk=pk)
             except HarborDuesForm.DoesNotExist:
                 return None
-
-
-class HarborDuesFormUpdateView(HarborDuesFormMixin, CacheControlMixin, UpdateView):
-    model = HarborDuesForm
-    form_class = HarborDuesFormForm
-
-    def get_object(self, queryset=None):
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        try:
-            return CruiseTaxForm.objects.get(pk=pk)
-        except CruiseTaxForm.DoesNotExist:
-            try:
-                return HarborDuesForm.objects.get(pk=pk)
-            except HarborDuesForm.DoesNotExist:
-                return None
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Pass `data` to form to ensure that validation errors are
-        # re-evaluated and displayed.
-        if self.request.method == "GET":
-            kwargs["data"] = model_to_dict(self.object)
-        return kwargs
-
-    def get(self, request, *args, **kwargs):
-        form: HarborDuesForm | CruiseTaxForm | None = self.get_object()
-        if form is None:
-            return HttpResponseRedirect(
-                reverse(
-                    "havneafgifter:receipt_detail_html",
-                    kwargs={"pk": self.kwargs.get(self.pk_url_kwarg)},
-                )
-            )
-        if not form.has_permission(request.user, "change", False):
-            return HttpResponseRedirect(
-                reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
-            )
-        else:
-            response = super().get(self, request, *args, **kwargs)
-            return self.prevent_response_caching(response)
-
-    def get_template_names(self):
-        return ["havneafgifter/harborduesform_form.html"]
 
 
 class PreviewPDFView(ReceiptDetailView):
