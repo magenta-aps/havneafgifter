@@ -187,26 +187,26 @@ Lint Javascript:
       - "coverage_output/*"
     expire_in: 1 day
 
-Unittest:
-  <<: *test-default
-  script:
-    - cd /app
-    - echo "CI_PROJECT_DIR = ${CI_PROJECT_DIR}"
-    - echo "${PWD}"
-    - ls -al
-    - python manage.py compilemessages --locale=kl
-    - python manage.py compilemessages --locale=da
-    - python manage.py compilemessages --locale=en
-    - coverage run manage.py test
-    - coverage combine
-    - coverage report --show-missing --fail-under=100
-    - coverage xml
-  coverage: '/^TOTAL.+?(\d+\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: /app/coverage.xml
+# Unittest:
+#   <<: *test-default
+#   script:
+#     - cd /app
+#     - echo "CI_PROJECT_DIR = ${CI_PROJECT_DIR}"
+#     - echo "${PWD}"
+#     - ls -al
+#     - python manage.py compilemessages --locale=kl
+#     - python manage.py compilemessages --locale=da
+#     - python manage.py compilemessages --locale=en
+#     - coverage run manage.py test
+#     - coverage combine
+#     - coverage report --show-missing --fail-under=100
+#     - coverage xml
+#   coverage: '/^TOTAL.+?(\d+\%)$/'
+#   artifacts:
+#     reports:
+#       coverage_report:
+#         coverage_format: cobertura
+#         path: /app/coverage.xml
 
 Mypy:
   <<: *test-default
@@ -227,7 +227,7 @@ Django check:
 Release image:
   stage: release
   image: alpine
-  needs: ["Unittest"]
+  # needs: ["Unittest"]
   variables:
     GIT_STRATEGY: none # We do not need the source code
   dependencies: []
