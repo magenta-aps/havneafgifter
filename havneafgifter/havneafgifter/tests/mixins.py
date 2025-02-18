@@ -102,7 +102,6 @@ class HarborDuesFormTestMixin:
         }
         cls.harbor_dues_form_form_data = {
             **cls.harbor_dues_form_data,
-            "no_port_of_call": False,
         }
         # The same data, but with related objects replaced by their primary keys.
         # Suitable for testing form POSTs.

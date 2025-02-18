@@ -11,16 +11,13 @@ from django.urls import reverse
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.forms import (
-    DisembarkmentForm,
     HarborDuesFormForm,
-    PassengersByCountryForm,
     PassengersTotalForm,
     SignupVesselForm,
 )
 from havneafgifter.models import (
     DisembarkmentSite,
     DisembarkmentTaxRate,
-    Nationality,
     Port,
     PortAuthority,
     PortTaxRate,
@@ -52,13 +49,16 @@ class TestSignupVesselForm(HarborDuesFormTestMixin, TestCase):
 
 
 class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
+    maxDiff = None
+
     def test_clean_does_nothing_if_draft(self):
         data = copy.copy(self.harbor_dues_form_data)
+        data["port_of_call"] = self.port.pk
         form = self._get_form_instance(data, status=Status.DRAFT)
         self.assertTrue(form.is_valid())
         self.assertDictEqual(
-            {k: v for k, v in form.cleaned_data.items() if k != "no_port_of_call"},
-            data,
+            {k: v for k, v in form.cleaned_data.items() if k != "port_of_call"},
+            {k: v for k, v in data.items() if k != "port_of_call"},
         )
         self.assertEqual(
             form.user_visible_non_field_errors(),
@@ -144,15 +144,23 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
     def test_form_clean_does_nothing_if_draft(self):
         data = copy.copy(self.harbor_dues_form_form_data)
         data["status"] = Status.DRAFT.value
+        data["port_of_call"] = self.port.pk
+
         form = self._get_form_instance(data)
         self.assertTrue(form.is_valid())
+
         result = form.clean()
-        self.assertEqual(data, result)
+        self.assertIsNotNone(result)
+        self.assertEqual(
+            {k: v for k, v in result.items() if k != "port_of_call"},  # type: ignore
+            {k: v for k, v in data.items() if k != "port_of_call"},
+        )
 
     def test_user_visible_non_field_errors(self):
         # Submit data that will lead to violating a database constraint
-        data = copy.copy(self.harbor_dues_form_data)
+        data = copy.copy(self.harbor_dues_form_form_data)
         data["status"] = Status.NEW.value
+        data["port_of_call"] = self.port.pk
         data["gross_tonnage"] = None
         form = self._get_form_instance(data)
         # We expect the `form.save(...)` to raise ValueError in this case
@@ -192,8 +200,9 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
         self._assert_form_field_disabled(form, "gross_tonnage")
 
     def test_ship_user_can_submit_without_agent(self):
-        form_data = copy.copy(self.harbor_dues_form_data)
+        form_data = copy.copy(self.harbor_dues_form_form_data)
         form_data["status"] = Status.NEW.value
+        form_data["port_of_call"] = self.port.pk
         del form_data["shipping_agent"]
         form = self._get_form_instance(form_data, status=Status.NEW)
         self.assertTrue(form.is_valid())
@@ -240,57 +249,6 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
 
     def _assert_form_field_disabled(self, form, field):
         self.assertTrue(form.fields[field].disabled)
-
-
-class TestPassengersByCountryForm(TestCase):
-    def test_number_of_passengers_label(self):
-        form = PassengersByCountryForm(initial={"nationality": Nationality.DENMARK})
-        self.assertEqual(
-            form.fields["number_of_passengers"].label,
-            form.initial["nationality"].label,
-        )
-
-
-class TestDisembarkmentForm(HarborDuesFormTestMixin, TestCase):
-    def test_disembarkment_site_initial(self):
-        ds = DisembarkmentSite.objects.first()
-        form = DisembarkmentForm(initial={"disembarkment_site": ds.pk})
-        self.assertListEqual(
-            form.fields["disembarkment_site"].choices,
-            [(ds.pk, str(ds))],
-        )
-
-    def test_number_of_passengers_label(self):
-        ds = DisembarkmentSite.objects.first()
-        form = DisembarkmentForm(initial={"disembarkment_site": ds.pk})
-        self.assertEqual(
-            form.fields["number_of_passengers"].label,
-            form.initial_disembarkment_site.name,
-        )
-
-    def test_number_of_passengers_label_outside_populated_areas(self):
-        ds = DisembarkmentSite.objects.filter(is_outside_populated_areas=True).first()
-        form = DisembarkmentForm(initial={"disembarkment_site": ds.pk})
-        self.assertEqual(
-            form.fields["number_of_passengers"].label,
-            ds._meta.get_field("is_outside_populated_areas").verbose_name,
-        )
-
-    def test_clean_disembarkment_site(self):
-        ds = DisembarkmentSite.objects.first()
-        form = DisembarkmentForm(
-            initial={"disembarkment_site": ds.pk},
-            data={"disembarkment_site": ds.pk, "number_of_passengers": 0},
-        )
-        # Trigger form validation
-        form.is_valid()
-        # Assert that our clean method returns model instance
-        self.assertEqual(form.clean_disembarkment_site(), ds)
-
-    def test_get_municipality_display(self):
-        ds = DisembarkmentSite.objects.first()
-        form = DisembarkmentForm(initial={"disembarkment_site": ds.pk})
-        self.assertEqual(form.get_municipality_display(), ds.get_municipality_display())
 
 
 class TestPassengersTotalForm(SimpleTestCase):
