@@ -160,6 +160,12 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         validators=[MinValueValidator(0)],
         label=_("Gross tonnage"),
     )
+    nationality = ChoiceField(
+        required=False,
+        choices=countries,
+        widget=Select2Widget(choices=countries),
+        label=_("Nationality"),
+    )
 
     def save(self, commit=True):
         user = super().save(commit=commit)
@@ -172,6 +178,7 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
                 owner=self.cleaned_data["owner"],
                 master=self.cleaned_data["master"],
                 gross_tonnage=self.cleaned_data["gross_tonnage"],
+                nationality=self.cleaned_data["nationality"],
             )
         return user
 
@@ -210,6 +217,12 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
         validators=[MinValueValidator(0)],
         label=_("Gross tonnage"),
     )
+    nationality = ChoiceField(
+        required=False,
+        choices=countries,
+        widget=Select2Widget(choices=countries),
+        label=_("Nationality"),
+    )
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
@@ -247,7 +260,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         queryset=Port.objects.all(),
         label=_("Port of call"),
     )
-    # NOTE: Check if fields, which should be disabled when ship, are ACTUALLY disabled in praksis
     nationality = DynamicField(
         ChoiceField,
         required=_required_if_status_is_new,

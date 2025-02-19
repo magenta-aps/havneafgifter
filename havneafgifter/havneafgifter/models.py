@@ -577,7 +577,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     nationality = models.CharField(
-        max_length=2,
+        max_length=20,
         null=True,
         blank=True,
         choices=countries,
@@ -1541,7 +1541,7 @@ class Vessel(models.Model):
     )
 
     nationality = models.CharField(
-        max_length=2,
+        max_length=20,
         null=True,
         blank=True,
         choices=countries,

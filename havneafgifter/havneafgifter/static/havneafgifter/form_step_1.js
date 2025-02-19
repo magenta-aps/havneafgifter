@@ -58,18 +58,18 @@
         const updateNoPortOfCallState = function () {
             const disabled = isNoPortOfCall() ? "disabled" : null;
 
+            if (disabled===null) { return }
+
             portOfCallSelect.attr("disabled", disabled);
             datetimeInputs.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
             vesselTypeSelect.attr("disabled", disabled);
 
-            if (disabled) {
-                portOfCallSelect.val(null);
-                datetimeInputs.val(null);
-                grossTonnageInput.val(null);
-                // Enforce vessel type CRUISE
-                vesselTypeSelect.val("CRUISE");
-            }
+            portOfCallSelect.val(null);
+            datetimeInputs.val(null);
+            grossTonnageInput.val(null);
+            // Enforce vessel type CRUISE
+            vesselTypeSelect.val("CRUISE");
 
             updateButtonState();
         }

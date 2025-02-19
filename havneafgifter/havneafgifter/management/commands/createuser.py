@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
+from django_countries import countries
 
 from havneafgifter.models import PortAuthority, ShippingAgent, ShipType, User, Vessel
 
@@ -85,4 +86,5 @@ class Command(BaseCommand):
                 owner="Owner",
                 master="Captain",
                 gross_tonnage=1234,
+                nationality=dict(countries)["GL"],
             )
