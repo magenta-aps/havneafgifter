@@ -94,6 +94,11 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="harbor_dues_form_create",
     ),
     path(
+        "blanket/rediger/<int:pk>/",
+        HarborDuesFormCreateView.as_view(),
+        name="harbor_dues_form_edit",
+    ),
+    path(
         "blanket/",
         HarborDuesFormListView.as_view(),
         name="harbor_dues_form_list",
@@ -133,14 +138,4 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="tax_rate_clone",
     ),
     path("modal/ok", LandingModalOkView.as_view(), name="landing_modal_ok"),
-    path(
-        "form/create/",
-        HarborDuesFormCreateView.as_view(),
-        name="new_harbor_dues_form_create",
-    ),
-    path(
-        "form/edit/<int:pk>/",
-        HarborDuesFormCreateView.as_view(),
-        name="new_harbor_dues_form_edit",
-    ),
 ]
