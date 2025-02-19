@@ -28,7 +28,6 @@ services:
       - MIGRATE=true
       - LOAD_FIXTURES=true
       - LOAD_DEMODATA=true
-      - TEST=true
       - HOME=/tmp/
     ports:
       - "8050:8000"
