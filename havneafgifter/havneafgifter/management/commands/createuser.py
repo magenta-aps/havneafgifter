@@ -85,4 +85,5 @@ class Command(BaseCommand):
                 owner="Owner",
                 master="Captain",
                 gross_tonnage=1234,
+                nationality="GL",
             )
