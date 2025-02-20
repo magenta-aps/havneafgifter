@@ -157,6 +157,7 @@ class HarborDuesFormMixin(
             if status == Status.NEW:
                 harbor_dues_form.submit_for_review()
                 harbor_dues_form.save()
+                harbor_dues_form.calculate_tax(save=True)
                 self.handle_notification_mail(OnSubmitForReviewMail, harbor_dues_form)
                 self.handle_notification_mail(
                     OnSubmitForReviewReceipt, harbor_dues_form
@@ -164,6 +165,7 @@ class HarborDuesFormMixin(
             elif status == Status.DRAFT:
                 # Send notification to agent if saved by a ship user.
                 harbor_dues_form.save()
+                harbor_dues_form.calculate_tax(save=True)
                 if (
                     self.request.user.user_type == UserType.SHIP
                     and harbor_dues_form.shipping_agent
