@@ -5,11 +5,8 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.views.generic import FormView
 
-from havneafgifter.models import (
-    CruiseTaxForm,
-    HarborDuesForm,
-    UserType,
-)
+from havneafgifter.mails import NotificationMail
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, UserType
 
 
 class HavneafgiftView:
