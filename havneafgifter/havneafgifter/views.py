@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from csp_helpers.mixins import CSPViewMixin
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import (
@@ -21,6 +22,7 @@ from django.db.models import (
     F,
     IntegerField,
     OuterRef,
+    Q,
     Subquery,
     Sum,
     Value,
@@ -31,6 +33,7 @@ from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, RedirectView
@@ -46,6 +49,7 @@ from havneafgifter.forms import (
     DisembarkmentTaxRateFormSet,
     HarborDuesFormForm,
     PassengersByCountryForm,
+    PassengerStatisticsForm,
     PassengersTotalForm,
     PortTaxRateFormSet,
     ReasonForm,
@@ -87,6 +91,7 @@ from havneafgifter.responses import (
 from havneafgifter.tables import (
     HarborDuesFormFilter,
     HarborDuesFormTable,
+    PassengerStatisticsTable,
     StatistikTable,
     TaxRateTable,
 )
@@ -890,6 +895,78 @@ class StatisticsView(
                     item["status"] = Status(status).label
             return items
         return []
+
+
+class PassengerStatisticsView(StatisticsView):
+    form_class = PassengerStatisticsForm
+    template_name = "havneafgifter/passengerstatistics.html"
+    table_class = PassengerStatisticsTable
+    export_name = "passagerstatistik"
+    
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.can_view_statistics:
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HavneafgifterResponseForbidden(
+                self.request,
+                _("You do not have the required permissions to view passenger statistics"),
+                )
+
+    def get_table_data(self):
+        # Return list of items w. nationality, month and count
+        form = self.get_form()
+        if form.is_valid():
+            qs = PassengersByCountry.objects.all()
+            
+            nationalities = form.cleaned_data["nationality"]
+            if nationalities:
+                qs = qs.filter(nationality__in=nationalities)
+
+            first_month = form.cleaned_data["first_month"]
+            if first_month:
+                qs.filter(cruise_tax_form__datetime_of_arrival__gte=first_month)
+            else:
+                first_month = qs.order_by("cruise_tax_form__datetime_of_arrival")[0].cruise_tax_form.datetime_of_arrival
+
+            last_month = form.cleaned_data["last_month"]
+            if last_month:
+                qs.filter(cruise_tax_form__datetime_of_arrival__lt=last_month+relativedelta(months=1))
+            else:
+                last_month = qs.order_by("-cruise_tax_form__datetime_of_arrival")[0].cruise_tax_form.datetime_of_departure
+
+            months = self.month_list(first_month, last_month)
+
+            items = []
+            for month in months:
+                month_filter = {
+                    "cruise_tax_form__datetime_of_arrival__month": month.month,
+                    "cruise_tax_form__datetime_of_arrival__year" : month.year,
+                }
+                month_qs = qs.filter(**month_filter)
+                for nation, in set(month_qs.values_list("nationality")):
+                    item = {"month": month.strftime("%B, %Y")}
+                    item["count"] = month_qs.filter(nationality=nation).aggregate(
+                        Sum("number_of_passengers")
+                    )["number_of_passengers__sum"]
+                    item["nationality"] = self.nationality_dict[nation]
+                    items.append(item)
+            return items
+
+        return []
+
+    @classmethod
+    def month_list(self, start_date, end_date):
+        start_month = datetime(start_date.year, start_date.month, 1)
+        end_month = datetime(end_date.year, end_date.month, 1)
+        ith_month = start_month
+        month_list = []
+        while ith_month <= end_month:
+            month_list.append(ith_month)
+            ith_month += relativedelta(months=1)
+        
+        return month_list
+    
+    nationality_dict = dict(Nationality.choices)
 
 
 class TaxRateFormView(LoginRequiredMixin, UpdateView):

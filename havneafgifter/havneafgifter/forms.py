@@ -10,6 +10,8 @@ from django.forms import (
     BaseInlineFormSet,
     CharField,
     ChoiceField,
+    DateField,
+    DateInput,
     DateTimeField,
     DateTimeInput,
     EmailField,
@@ -35,7 +37,7 @@ from django_countries import countries
 from django_select2.forms import Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
 
-from havneafgifter.form_mixins import BootstrapForm, BootstrapFormSet
+from havneafgifter.form_mixins import BootstrapForm, BootstrapFormSet, MonthField
 from havneafgifter.models import (
     DisembarkmentSite,
     DisembarkmentTaxRate,
@@ -53,7 +55,6 @@ from havneafgifter.models import (
     Vessel,
     imo_validator,
 )
-
 
 class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
     username = UsernameField(
@@ -80,6 +81,11 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
 
 class HTML5DateWidget(widgets.Input):
     input_type = "datetime-local"
+    template_name = "django/forms/widgets/datetime.html"
+
+
+class HTML5MonthWidget(widgets.Input):
+    input_type = "month"
     template_name = "django/forms/widgets/datetime.html"
 
 
@@ -1070,3 +1076,30 @@ DisembarkmentTaxRateFormSet = inlineformset_factory(
     can_delete=True,
     formset=BaseDisembarkmentTaxRateFormSet,
 )
+
+class PassengerStatisticsForm(BootstrapForm):
+    nationality = MultipleChoiceField(
+        label=_("Nationalitet"),
+        choices=Nationality.choices,
+        required=False,
+    )
+    first_month = MonthField(
+        label=_("Fra"),
+        required=False,
+        widget=DateInput(
+            attrs={
+                "class": "datetimepicker",
+                "placeholder": _("Fra"),
+            }
+        ),
+    )
+    last_month = MonthField(
+        label=_("Til og med"),
+        required=False,
+        widget=DateInput(
+            attrs={
+                "class": "datetimepicker",
+                "placeholder": _("Til og med"),
+            }
+        ),
+    )
