@@ -49,6 +49,7 @@ from havneafgifter.models import (
     Status,
     TaxRates,
     User,
+    UserType,
     Vessel,
     imo_validator,
 )
@@ -367,7 +368,10 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     @property
     def user_is_ship(self) -> bool:
-        return "Ship" in self._user.group_names
+        if self._user.is_authenticated:
+            return self._user.user_type == UserType.SHIP
+        else:
+            return false
 
     @property
     def has_port_of_call(self):
