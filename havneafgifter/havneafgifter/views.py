@@ -77,6 +77,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+    UserType,
     Vessel,
 )
 from havneafgifter.responses import (
@@ -307,7 +308,18 @@ class HarborDuesFormCreateView(
         if status == Status.NEW:
             self.object.submit_for_review()
             self.object.save()
+            self.object.calculate_tax(save=True)
             self.handle_notification_mail(OnSubmitForReviewMail, self.object)
+            self.handle_notification_mail(OnSubmitForReviewReceipt, self.object)
+        elif status == Status.DRAFT:
+            # Send notification to agent if saved by a ship user.
+            self.object.save()
+            self.object.calculate_tax(save=True)
+            if (
+                self.request.user.user_type == UserType.SHIP
+                and harbor_dues_form.shipping_agent
+            ):
+                self.handle_notification_mail(OnSendToAgentMail, self.object)
         else:
             self.object.save()
 
