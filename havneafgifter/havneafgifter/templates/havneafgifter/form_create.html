@@ -5,6 +5,20 @@
 {% load django_bootstrap5 %}
 {% load bootstrap_modal %}
 
+{% block breadcrumb %}
+{# This block is only rendered when outputting HTML (not PDF) #}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">{% translate "Harbor dues" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% blocktrans trimmed with form_id=form.pk %}
+            Form {{ form_id }}
+            {% endblocktrans %}
+        </li>
+    </ol>
+</nav>
+{% endblock breadcrumb %}
+
 {% block title %}
 {% translate "Harbour Dues/Port Tax" %}
 {% endblock %}
@@ -30,7 +44,7 @@
     </ul>
     {% endif %}
 
-    <div class="row bg-light rounded-3 m-0 mt-3 p-4">
+    <div class="row bg-light rounded-3 m-0 mt-4 p-4">
         <div class="col-6">
             {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="nationality,vessel_imo,vessel_master,gross_tonnage,datetime_of_departure,no_port_of_call,status,vessel_type" alert_error_type="none" %}
             {% bootstrap_field base_form.vessel_type wrapper_class="pt-3 " layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
@@ -42,11 +56,13 @@
 
     {# Formset asking for number of passenger of each nationality #}
     {% bootstrap_form passenger_formset.management_form %}
-    <div class="formset bg-light rounded-3 mt-3 p-4">
+    <div class="formset bg-light rounded-3 mt-4 p-4">
         <h2 class="pb-3">{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}</h2>
-        {% bootstrap_form passenger_total_form %}
+        <div class="col-6">
+            {% bootstrap_form passenger_total_form %}
+        </div>
         {% for form in passenger_formset.forms %}
-        <div class="formset-item row mb-3">
+        <div class="formset-item row mb-4">
             <div class="col-6 d-flex justify-content-between">
                 {% bootstrap_field form.DELETE wrapper_class="d-none" %}
                 {% bootstrap_field form.nationality show_label=False wrapper_class="col-7 me-5" %}
@@ -64,7 +80,7 @@
 
     {# Formset asking for number of passengers at each disembarkment site #}
     {% bootstrap_form disembarkment_formset.management_form %}
-    <div class="formset bg-light rounded-3 mt-3 p-4">
+    <div class="formset bg-light rounded-3 mt-4 p-4">
         <h2 class="pb-3">{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h2>
         {% for form in disembarkment_formset.forms %}
         <div class="formset-item row mb-3">
@@ -82,15 +98,16 @@
         </div>
         {% endfor %}
     </div>
-
+    <div class="pt-4">
     {% if user_is_ship and object.shipping_agent is not None %}
         {# Ship users can only create DRAFT cruise ship forms if a shipping agent has been specified #}
         {% bootstrap_button button_type="submit" name="base-status" value="DRAFT" content=_("Forward to agent") %}
     {% else %}
         {# Pass `status=NEW` or `status=DRAFT` depending on which submit button is used #}
-        {% bootstrap_button button_type="submit" name="base-status" value="NEW" content=_("Submit") %}
+        {% bootstrap_button button_type="submit" extra_classes="me-3" name="base-status" value="NEW" content=_("Submit") %}
         {% bootstrap_button button_type="submit" name="base-status" value="DRAFT" content=_("Save as draft") %}
     {% endif %}
+    </div>
     <input type="hidden" name="status" />
 </form>
 {# Popups for ship users #}
