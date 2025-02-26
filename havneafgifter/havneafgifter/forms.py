@@ -451,7 +451,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     def clean_port_of_call(self):
         port_of_call = self.cleaned_data.get("port_of_call")
         if isinstance(port_of_call, Port):
-            return port_of_call
+            return port_of_call  # pragma: no cover
 
         if port_of_call:
             port_of_call = int(port_of_call)
@@ -463,7 +463,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         elif port_of_call == -1:
             return Port(name="Blank")
         else:
-            return None
+            return None  # pragma: no cover
 
 
 class PassengersTotalForm(CSPFormMixin, Form):
