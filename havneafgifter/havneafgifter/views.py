@@ -54,7 +54,15 @@ from havneafgifter.forms import (
     TaxRateForm,
     UpdateVesselForm,
 )
-
+from havneafgifter.mails import (
+    OnApproveMail,
+    OnApproveReceipt,
+    OnRejectMail,
+    OnRejectReceipt,
+    OnSendToAgentMail,
+    OnSubmitForReviewMail,
+    OnSubmitForReviewReceipt,
+)
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
