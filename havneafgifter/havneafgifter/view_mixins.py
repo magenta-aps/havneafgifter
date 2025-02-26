@@ -5,20 +5,11 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.views.generic import FormView
 
-from havneafgifter.mails import (
-    NotificationMail,
-    OnSendToAgentMail,
-    OnSubmitForReviewMail,
-    OnSubmitForReviewReceipt,
-)
 from havneafgifter.models import (
     CruiseTaxForm,
     HarborDuesForm,
-    ShipType,
-    Status,
     UserType,
 )
-from havneafgifter.responses import HavneafgifterResponseForbidden
 
 
 class HavneafgiftView:
