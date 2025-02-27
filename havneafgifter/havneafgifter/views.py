@@ -927,23 +927,23 @@ class PassengerStatisticsView(StatisticsView):
                 qs = qs.filter(nationality__in=nationalities)
 
             first_month = form.cleaned_data["first_month"]
-            if first_month:
+            if qs and first_month:
                 qs.filter(cruise_tax_form__datetime_of_arrival__gte=first_month)
+            elif qs:
+                first_month = qs.order_by("cruise_tax_form__datetime_of_arrival").first().cruise_tax_form.datetime_of_arrival
             else:
-                first_month = qs.order_by("cruise_tax_form__datetime_of_arrival")[
-                    0
-                ].cruise_tax_form.datetime_of_arrival
+                return []
 
             last_month = form.cleaned_data["last_month"]
-            if last_month:
+            if qs and last_month:
                 qs.filter(
                     cruise_tax_form__datetime_of_arrival__lt=last_month
                     + relativedelta(months=1)
                 )
+            elif qs:
+                last_month = qs.order_by("cruise_tax_form__datetime_of_arrival").last().cruise_tax_form.datetime_of_departure
             else:
-                last_month = qs.order_by("-cruise_tax_form__datetime_of_arrival")[
-                    0
-                ].cruise_tax_form.datetime_of_departure
+                return []
 
             months = self.month_list(first_month, last_month)
 
