@@ -917,7 +917,10 @@ class PassengerStatisticsView(StatisticsView):
         # Return list of items w. nationality, month and count
         form = self.get_form()
         if form.is_valid():
-            qs = PassengersByCountry.objects.all()
+            #qs = PassengersByCountry.objects.all()
+            qs = PassengersByCountry.objects.filter(
+                cruise_tax_form__status=Status.APPROVED,
+            )
 
             nationalities = form.cleaned_data["nationality"]
             if nationalities:
