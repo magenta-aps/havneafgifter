@@ -58,6 +58,7 @@ class StatistikTable(tables.Table):
     count = tables.Column(verbose_name=_("Antal skibe"))
     status = tables.Column(verbose_name=_("Status"))
 
+
 class PassengerStatisticsTable(tables.Table):
     orderable = True
     nationality = tables.Column(verbose_name=_("Nationalitet"))

@@ -10,7 +10,6 @@ from django.forms import (
     BaseInlineFormSet,
     CharField,
     ChoiceField,
-    DateField,
     DateInput,
     DateTimeField,
     DateTimeInput,
@@ -55,6 +54,7 @@ from havneafgifter.models import (
     Vessel,
     imo_validator,
 )
+
 
 class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
     username = UsernameField(
@@ -1076,6 +1076,7 @@ DisembarkmentTaxRateFormSet = inlineformset_factory(
     can_delete=True,
     formset=BaseDisembarkmentTaxRateFormSet,
 )
+
 
 class PassengerStatisticsForm(BootstrapForm):
     nationality = MultipleChoiceField(

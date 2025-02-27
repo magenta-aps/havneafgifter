@@ -55,8 +55,9 @@ class BootstrapForm(CSPFormMixin, forms.Form):
         #         field.widget.attrs["class"] = ""
         #     field.widget.attrs["class"] += " custom-file-input"
 
+
 class MonthField(forms.DateField):
     def to_python(self, value):
         if value:
-            value+="-01"
+            value += "-01"
         return super(MonthField, self).to_python(value)

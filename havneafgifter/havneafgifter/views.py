@@ -22,7 +22,6 @@ from django.db.models import (
     F,
     IntegerField,
     OuterRef,
-    Q,
     Subquery,
     Sum,
     Value,
@@ -33,7 +32,6 @@ from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, RedirectView
@@ -902,22 +900,25 @@ class PassengerStatisticsView(StatisticsView):
     template_name = "havneafgifter/passengerstatistics.html"
     table_class = PassengerStatisticsTable
     export_name = "passagerstatistik"
-    
+
     def dispatch(self, request, *args, **kwargs):
         if request.user.can_view_statistics:
             return super().dispatch(request, *args, **kwargs)
         else:
             return HavneafgifterResponseForbidden(
                 self.request,
-                _("You do not have the required permissions to view passenger statistics"),
-                )
+                _(
+                    "You do not have the required permissions "
+                    "to view passenger statistics"
+                ),
+            )
 
     def get_table_data(self):
         # Return list of items w. nationality, month and count
         form = self.get_form()
         if form.is_valid():
             qs = PassengersByCountry.objects.all()
-            
+
             nationalities = form.cleaned_data["nationality"]
             if nationalities:
                 qs = qs.filter(nationality__in=nationalities)
@@ -926,13 +927,20 @@ class PassengerStatisticsView(StatisticsView):
             if first_month:
                 qs.filter(cruise_tax_form__datetime_of_arrival__gte=first_month)
             else:
-                first_month = qs.order_by("cruise_tax_form__datetime_of_arrival")[0].cruise_tax_form.datetime_of_arrival
+                first_month = qs.order_by("cruise_tax_form__datetime_of_arrival")[
+                    0
+                ].cruise_tax_form.datetime_of_arrival
 
             last_month = form.cleaned_data["last_month"]
             if last_month:
-                qs.filter(cruise_tax_form__datetime_of_arrival__lt=last_month+relativedelta(months=1))
+                qs.filter(
+                    cruise_tax_form__datetime_of_arrival__lt=last_month
+                    + relativedelta(months=1)
+                )
             else:
-                last_month = qs.order_by("-cruise_tax_form__datetime_of_arrival")[0].cruise_tax_form.datetime_of_departure
+                last_month = qs.order_by("-cruise_tax_form__datetime_of_arrival")[
+                    0
+                ].cruise_tax_form.datetime_of_departure
 
             months = self.month_list(first_month, last_month)
 
@@ -940,10 +948,10 @@ class PassengerStatisticsView(StatisticsView):
             for month in months:
                 month_filter = {
                     "cruise_tax_form__datetime_of_arrival__month": month.month,
-                    "cruise_tax_form__datetime_of_arrival__year" : month.year,
+                    "cruise_tax_form__datetime_of_arrival__year": month.year,
                 }
                 month_qs = qs.filter(**month_filter)
-                for nation, in set(month_qs.values_list("nationality")):
+                for (nation,) in set(month_qs.values_list("nationality")):
                     item = {"month": month.strftime("%B, %Y")}
                     item["count"] = month_qs.filter(nationality=nation).aggregate(
                         Sum("number_of_passengers")
@@ -963,9 +971,9 @@ class PassengerStatisticsView(StatisticsView):
         while ith_month <= end_month:
             month_list.append(ith_month)
             ith_month += relativedelta(months=1)
-        
+
         return month_list
-    
+
     nationality_dict = dict(Nationality.choices)
 
 
