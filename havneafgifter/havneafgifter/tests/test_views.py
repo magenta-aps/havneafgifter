@@ -2105,3 +2105,157 @@ class TestLandingModalOkView(HarborDuesFormTestMixin, TestCase):
         response = self.client.post(reverse("havneafgifter:landing_modal_ok"))
         self.assertEqual(response.status_code, 204)
         self.assertTrue(self.client.session.get("harbor_user_modal"))
+
+
+class PassengerStatisticsTest(TestCase):
+    url = reverse("havneafgifter:passenger_statistics")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create(username="admin", is_superuser=True)
+        call_command("load_fixtures", verbosity=1)
+        ports = Port.objects.all().order_by("name")
+        cls.form1 = CruiseTaxForm.objects.create(
+            status=Status.APPROVED,
+            port_of_call=ports[0],
+            nationality=Nationality.DENMARK,
+            vessel_name="Testbåd 1",
+            datetime_of_arrival=datetime(2025, 6, 18, 0, 0, 0),
+            datetime_of_departure=datetime(2025, 7, 12, 0, 0, 0),
+            gross_tonnage=1000,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("40000.00"),
+            pax_tax=Decimal("3000.00"),
+            disembarkment_tax=Decimal("20000.00"),
+        )
+        cls.form2 = CruiseTaxForm.objects.create(
+            status=Status.APPROVED,
+            port_of_call=ports[0],
+            nationality=Nationality.NORWAY,
+            vessel_name="Testbåd 2",
+            datetime_of_arrival=datetime(2024, 7, 5, 0, 0, 0),
+            datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
+            gross_tonnage=1000,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("40000.00"),
+            pax_tax=Decimal("3000.00"),
+            disembarkment_tax=Decimal("20000.00"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form2,
+            number_of_passengers=1,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+        )
+        cls.form3 = CruiseTaxForm.objects.create(
+            status=Status.REJECTED,
+            port_of_call=ports[1],
+            nationality=Nationality.SWEDEN,
+            vessel_name="Testbåd 3",
+            datetime_of_arrival=datetime(2025, 7, 2, 0, 0, 0),
+            datetime_of_departure=datetime(2025, 7, 15, 0, 0, 0),
+            gross_tonnage=1000,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("50000.00"),
+            pax_tax=Decimal("8000.00"),
+            disembarkment_tax=Decimal("25000.00"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form3,
+            number_of_passengers=2,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+        )
+        cls.pbc3 = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.form3,
+            nationality=Nationality.SWEDEN,
+            number_of_passengers=7000,
+        )
+        cls.pbc2 = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.form2,
+            nationality=Nationality.NORWAY,
+            number_of_passengers=5000,
+        )
+        cls.pbc1 = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.form1,
+            nationality=Nationality.DENMARK,
+            number_of_passengers=6000,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def nationality(self, nation):
+        return dict(Nationality.choices)[nation]
+
+    def get_rows(self, **filter) -> BoundRows:
+        response = self.client.get(self.url + "?" + urlencode(filter, doseq=True))
+        return response.context_data["table"].rows
+
+    def test_no_access(self):
+        user = User.objects.create(username="intruder", is_superuser=False)
+        self.client.force_login(user)
+        response = self.client.get(
+            self.url + "?" + urlencode({"nationality": "NZ"}, doseq=True)
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_filter_invalid(self):
+        rows = self.get_rows(nationality="NZ")
+        self.assertEqual(len(rows), 0)
+
+    def test_no_filter(self):
+        rows = self.get_rows(dummy="GREAT BIG FISH")
+        self.assertEqual(len(rows), 2)
+        self.assertDictEqual(
+            rows[0].record,
+            {
+                "nationality": self.nationality([self.pbc2.nationality]),
+                "month": "2024, July",
+                "count": self.pbc2.number_of_passengers,
+            },
+        )
+        self.assertDictEqual(
+            rows[1].record,
+            {
+                "nationality": self.nationality([self.pbc1.nationality]),
+                "month": "2025, June",
+                "count": self.pbc1.number_of_passengers,
+            },
+        )
+
+    def test_filter_month(self):
+        rows = self.get_rows(first_month=datetime(2025, 3, 1, 0, 0, 0))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(
+            rows[0].record["nationality"],
+            self.nationality([self.pbc1.nationality]),
+        )
+
+        rows = self.get_rows(last_month=datetime(2026, 6, 27, 0, 0, 0))
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0].record["count"], self.pbc2.number_of_passengers)
+        self.assertEqual(rows[1].record["count"], self.pbc1.number_of_passengers)
+
+        rows = self.get_rows(
+            first_month=datetime(2024, 6, 1, 0, 0, 0),
+            last_month=datetime(2024, 7, 5, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(
+            rows[0].record["nationality"],
+            self.nationality([self.pbc2.nationality]),
+        )
+
+        rows = self.get_rows(
+            first_month=datetime(2026, 6, 1, 0, 0, 0),
+            last_month=datetime(2027, 6, 15, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 0)
+
+    def test_filter_nationality(self):
+        rows = self.get_rows(nationality=["SE"])
+        self.assertEqual(len(rows), 0)
+
+        rows = self.get_rows(nationality=["DK", "NO"])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0].record["count"], self.pbc2.number_of_passengers)
+        self.assertEqual(rows[1].record["count"], self.pbc1.number_of_passengers)
