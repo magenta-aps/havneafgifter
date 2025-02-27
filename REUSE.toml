@@ -20,7 +20,8 @@ path = ["havneafgifter/**",
     "dev-idp/**",
     ".eslint/**",
     "package**.json",
-    "REUSE.toml"]
+    "REUSE.toml",
+    "IMOGenerator.py"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2024 Magenta ApS <info@magenta.dk>"
 SPDX-License-Identifier = "MPL-2.0"
