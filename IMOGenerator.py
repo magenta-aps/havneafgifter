@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: Balraj Singh Bains and Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+# Original by Balraj Singh Bains here:
+# https://gist.github.com/polltery/e664f4846fe473a7d6231a5bdd6509e5
+# Transpiled to python by Magenta ApS in 2025
 def is_imo_valid(imo):
     if imo is None or len(imo) != 7:
         return False
