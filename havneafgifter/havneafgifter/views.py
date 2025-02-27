@@ -917,31 +917,37 @@ class PassengerStatisticsView(StatisticsView):
         # Return list of items w. nationality, month and count
         form = self.get_form()
         if form.is_valid():
-            #qs = PassengersByCountry.objects.all()
             qs = PassengersByCountry.objects.filter(
                 cruise_tax_form__status=Status.APPROVED,
             )
-
             nationalities = form.cleaned_data["nationality"]
             if nationalities:
                 qs = qs.filter(nationality__in=nationalities)
 
             first_month = form.cleaned_data["first_month"]
             if qs and first_month:
-                qs.filter(cruise_tax_form__datetime_of_arrival__gte=first_month)
+                qs = qs.filter(cruise_tax_form__datetime_of_arrival__gte=first_month)
             elif qs:
-                first_month = qs.order_by("cruise_tax_form__datetime_of_arrival").first().cruise_tax_form.datetime_of_arrival
+                first_month = (
+                    qs.order_by("cruise_tax_form__datetime_of_arrival")
+                    .first()
+                    .cruise_tax_form.datetime_of_arrival
+                )
             else:
                 return []
 
             last_month = form.cleaned_data["last_month"]
             if qs and last_month:
-                qs.filter(
+                qs = qs.filter(
                     cruise_tax_form__datetime_of_arrival__lt=last_month
                     + relativedelta(months=1)
                 )
             elif qs:
-                last_month = qs.order_by("cruise_tax_form__datetime_of_arrival").last().cruise_tax_form.datetime_of_departure
+                last_month = (
+                    qs.order_by("cruise_tax_form__datetime_of_arrival")
+                    .last()
+                    .cruise_tax_form.datetime_of_departure
+                )
             else:
                 return []
 

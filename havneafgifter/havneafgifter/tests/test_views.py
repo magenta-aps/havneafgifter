@@ -2109,10 +2109,13 @@ class TestLandingModalOkView(HarborDuesFormTestMixin, TestCase):
 
 class PassengerStatisticsTest(TestCase):
     url = reverse("havneafgifter:passenger_statistics")
+    nationality_dict = dict(Nationality.choices)
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create(username="admin", is_superuser=True)
+        cls.user = User.objects.create(
+            username="admin", is_superuser=True, is_staff=True
+        )
         call_command("load_fixtures", verbosity=1)
         ports = Port.objects.all().order_by("name")
         cls.form1 = CruiseTaxForm.objects.create(
@@ -2183,9 +2186,6 @@ class PassengerStatisticsTest(TestCase):
     def setUp(self):
         self.client.force_login(self.user)
 
-    def nationality(self, nation):
-        return dict(Nationality.choices)[nation]
-
     def get_rows(self, **filter) -> BoundRows:
         response = self.client.get(self.url + "?" + urlencode(filter, doseq=True))
         return response.context_data["table"].rows
@@ -2199,7 +2199,7 @@ class PassengerStatisticsTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_filter_invalid(self):
-        rows = self.get_rows(nationality="NZ")
+        rows = self.get_rows(first_month=datetime(2024, 1, 1, 0, 0))
         self.assertEqual(len(rows), 0)
 
     def test_no_filter(self):
@@ -2208,46 +2208,46 @@ class PassengerStatisticsTest(TestCase):
         self.assertDictEqual(
             rows[0].record,
             {
-                "nationality": self.nationality([self.pbc2.nationality]),
-                "month": "2024, July",
+                "nationality": self.nationality_dict[self.pbc2.nationality],
+                "month": "July, 2024",
                 "count": self.pbc2.number_of_passengers,
             },
         )
         self.assertDictEqual(
             rows[1].record,
             {
-                "nationality": self.nationality([self.pbc1.nationality]),
-                "month": "2025, June",
+                "nationality": self.nationality_dict[self.pbc1.nationality],
+                "month": "June, 2025",
                 "count": self.pbc1.number_of_passengers,
             },
         )
 
     def test_filter_month(self):
-        rows = self.get_rows(first_month=datetime(2025, 3, 1, 0, 0, 0))
+        rows = self.get_rows(first_month="2025-03")
         self.assertEqual(len(rows), 1)
         self.assertEqual(
             rows[0].record["nationality"],
-            self.nationality([self.pbc1.nationality]),
+            self.nationality_dict[self.pbc1.nationality],
         )
 
-        rows = self.get_rows(last_month=datetime(2026, 6, 27, 0, 0, 0))
+        rows = self.get_rows(last_month="2026-06")
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0].record["count"], self.pbc2.number_of_passengers)
         self.assertEqual(rows[1].record["count"], self.pbc1.number_of_passengers)
 
         rows = self.get_rows(
-            first_month=datetime(2024, 6, 1, 0, 0, 0),
-            last_month=datetime(2024, 7, 5, 0, 0, 0),
+            first_month="2024-06",
+            last_month="2024-07",
         )
         self.assertEqual(len(rows), 1)
         self.assertEqual(
             rows[0].record["nationality"],
-            self.nationality([self.pbc2.nationality]),
+            self.nationality_dict[self.pbc2.nationality],
         )
 
         rows = self.get_rows(
-            first_month=datetime(2026, 6, 1, 0, 0, 0),
-            last_month=datetime(2027, 6, 15, 0, 0, 0),
+            first_month="2026-06",
+            last_month="2027-06",
         )
         self.assertEqual(len(rows), 0)
 
