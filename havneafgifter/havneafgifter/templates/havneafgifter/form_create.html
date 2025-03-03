@@ -1,0 +1,265 @@
+{% extends "havneafgifter/base_default.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_modal %}
+
+{% block breadcrumb %}
+{# This block is only rendered when outputting HTML (not PDF) #}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">{% translate "Harbor dues" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% blocktrans trimmed with form_id=form.pk %}
+            Form {{ form_id }}
+            {% endblocktrans %}
+        </li>
+    </ol>
+</nav>
+{% endblock breadcrumb %}
+
+{% block title %}
+{% translate "Harbour Dues/Port Tax" %}
+{% endblock %}
+
+{% block extra_headers %}
+<script nonce="{{ request.csp_nonce }}" src="{% url 'javascript-catalog' %}"></script>
+<script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_actions.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_step_1.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>{% translate "Harbour Dues/Port Tax" %}</h1>
+<form action="." method="post" class="form" id="main" novalidate data-user-type="{{ user.user_type }}">
+    {% csrf_token %}
+    {{ base_form.media.css }}
+    {{ base_form.media.js }}
+
+    {% if base_form.user_visible_non_field_errors %}
+    <ul class="list-unstyled text-danger">
+        {% for error in base_form.user_visible_non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="row bg-light rounded-3 m-0 mt-4 p-4">
+        <div class="col-6">
+            {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="nationality,vessel_imo,vessel_master,gross_tonnage,datetime_of_departure,no_port_of_call,status,vessel_type" alert_error_type="none" %}
+        </div>
+        <div class="col-6">
+            {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="port_of_call,vessel_name,vessel_owner,shipping_agent,datetime_of_arrival,vessel_type,no_port_of_call,status" alert_error_type="none" %}
+        </div>
+        <div class="col-6">
+            {% bootstrap_field base_form.vessel_type wrapper_class="pt-3 " layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
+        </div>
+    </div>
+
+    {# Formset asking for number of passenger of each nationality #}
+    {% bootstrap_form passenger_formset.management_form %}
+    <div class="formset bg-light rounded-3 mt-4 p-4">
+        <h2 class="pb-4">{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}</h2>
+        <div class="col-6">
+            {% bootstrap_form passenger_total_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
+        </div>
+        {% for form in passenger_formset.forms %}
+        <div class="formset-item row mb-4">
+            <div class="col-6 d-flex justify-content-between">
+                {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.nationality show_label=False wrapper_class="col-7 me-5" %}
+                {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
+                <div class="col-2 button-location">
+                    <button type="button" class="btn btn-primary minus-button">-</button>
+                    {% if forloop.last %}
+                    <button type="button" class="btn btn-primary plus-button">+</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# Formset asking for number of passengers at each disembarkment site #}
+    {% bootstrap_form disembarkment_formset.management_form %}
+    <div class="formset bg-light rounded-3 mt-4 p-4">
+        <h2 class="pb-4">{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h2>
+        {% for form in disembarkment_formset.forms %}
+        <div class="formset-item row mb-3">
+            <div class="col-6 d-flex justify-content-between">
+                {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.disembarkment_site show_label=False wrapper_class="col-7 me-5" %}
+                {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
+                <div class="col-2 button-location">
+                    <button type="button" class="btn btn-primary minus-button">-</button>
+                    {% if forloop.last %}
+                    <button type="button" class="btn btn-primary plus-button">+</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="pt-4 btn-toolbar gap-3">
+        {% if user_is_ship and object.shipping_agent is not None %}
+            <button type="submit" name="base-status" value="DRAFT" class="btn btn-primary d-flex align-items-center">
+                <span class="material-icons">send</span>
+                <span class="ms-1">{% translate "Forward to agent" %}</span>
+            </button>
+        {% else %}
+            <button type="submit" name="base-status" value="NEW" class="btn btn-primary d-flex align-items-center">
+                <span class="material-icons">send</span>
+                <span class="ms-1">{% translate "Submit" %}</span>
+            </button>
+            <button type="submit" name="base-status" value="DRAFT" class="btn btn-primary d-flex align-items-center">
+                <span class="material-icons">insert_drive_file</span>
+                <span class="ms-1">{% translate "Save as draft" %}</span>
+            </button>
+        {% endif %}
+    </div>
+    <input type="hidden" name="base-status" />
+</form>
+{# Popups for ship users #}
+{% inform_ship_user_on_save_shipping_agent_modal object %}
+{% inform_ship_user_on_save_no_shipping_agent_modal object %}
+{% inform_ship_user_on_submit_modal object %}
+
+<script nonce="{{ request.csp_nonce }}">
+    // Used to create unique IDs
+    let count = 1
+
+    $(document).ready(function() {
+        const foo = $("[for=id_base-vessel_type]")
+        foo.append($('<span class="material-icons dark-icon ms-1 align-text-bottom" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top">info</span>'))
+
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    });
+
+    $("[name={{ base_form.vessel_imo.name }}]").on("invalid", function () {
+        if (this.validity.tooShort || this.validity.tooLong) {
+            this.setCustomValidity("{% translate 'IMO numbers should be 7 digits' %}");
+        } else {
+            this.setCustomValidity("");
+            this.reportValidity();
+        }
+    });
+
+    function removeItem(e) {
+        e.preventDefault();
+
+        const container = $(e.target).parents(".formset-item");
+
+        const children = $(".formset-item", container.closest(".formset")).not(".d-none")
+
+        // Wont delete the last element
+        if (children.length > 1) {
+            const deleteCheckbox = $(".form-check-input", container)
+            deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
+            container.addClass("d-none")
+
+            const plusButton = $(".plus-button", container)
+
+            if (plusButton.length) {
+                const previous = $(".button-location", container.prevAll(".formset-item").not(".d-none").first())
+                previous.append(plusButton)
+            }
+        } else {
+            alert("{% translate 'You cannot delete the last item' %}")
+        }
+    }
+
+    function addItem(e) {
+        e.preventDefault();
+
+        const container = $(e.target).parents(".formset-item")
+
+        let prefix = ""
+
+        const clonedContainer = container.clone()
+
+        const namedElements = $("[name*=-]", clonedContainer)
+
+        namedElements.each(function() {
+            const el = $(this)
+            const newName = el.attr("name").replace(/(.*)-(\d)-(.*)/, (fullMatch, group1, group2, group3) => {
+                prefix = group1
+                // Construct the new string using the captured groups
+                return `${group1}-${count}-${group3}`;
+            });
+            el.attr("name", newName)
+        })
+        count++
+
+        const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
+        total.val(count)
+
+        clonedContainer.insertAfter(container)
+
+        const plusButton = $(".plus-button", container)
+        plusButton.remove()
+
+        $(".plus-button").off("click")
+        $(".minus-button").off("click")
+        $(".plus-button").on("click", addItem);
+        $(".minus-button").on("click", removeItem);
+    }
+
+    function toggleCruiseFormsets() {
+        const formsets = $(".formset")
+        const formsetChildren = $(".formset *")
+        const dropdown = $("#id_base-vessel_type")
+
+        if (dropdown.val() === "CRUISE") {
+            formsetChildren.prop('disabled', false);
+            formsets.show()
+        } else {
+            formsetChildren.prop('disabled', true);
+            formsets.hide()
+        }
+    }
+
+    function portOfCallToggle() {
+        const portOfCall = $("#id_base-port_of_call")
+
+        const grossTonnage = $("#id_base-gross_tonnage")
+        const arrival = $("#id_base-datetime_of_arrival")
+        const departure = $("#id_base-datetime_of_departure")
+        const vesselType = $("#id_base-vessel_type")
+        
+
+        if (portOfCall.val() == -1) {
+            grossTonnage.prop("disabled", true)
+            arrival.prop("disabled", true)
+            departure.prop("disabled", true)
+            vesselType.prop("disabled", true)
+            vesselType.val('CRUISE')
+            toggleCruiseFormsets()
+        } else {
+            grossTonnage.prop("disabled", false)
+            arrival.prop("disabled", false)
+            departure.prop("disabled", false)
+            vesselType.prop("disabled", false)
+        }
+    }
+
+    // Initial
+    $(document).ready(toggleCruiseFormsets)
+    $(document).ready(portOfCallToggle)
+
+    // Dynamic
+    $("#id_base-vessel_type").on("change", toggleCruiseFormsets)
+    $("#id_base-port_of_call").on("change", portOfCallToggle)
+    $(".plus-button").on("click", addItem)
+    $(".minus-button").on("click", removeItem)
+
+    const form = $("form#main");
+
+    // Hook form submit
+    form.on("submit", function (evt) {
+        // Ensure that potentially disabled fields are still POSTed to server
+        const vesselType = $("#id_base-vessel_type")
+        vesselType.prop("disabled", null)
+    });
+</script>
+{% endblock content %}

@@ -3,15 +3,15 @@
 (function () {
     $(document).ready(function () {
         const form = $("form#main");
-        const noPortOfCallCheckbox = $("#id_no_port_of_call");
-        const portOfCallSelect = $("#id_port_of_call");
-        const imoInput = $("#id_vessel_imo");
-        const datetimeInputs = $("#id_datetime_of_arrival, #id_datetime_of_departure");
-        const grossTonnageInput = $("#id_gross_tonnage");
-        const vesselTypeSelect = $("#id_vessel_type");
-        const shippingAgent = $("#id_shipping_agent");
+        const noPortOfCallCheckbox = $("#id_base-no_port_of_call");
+        const portOfCallSelect = $("#id_base-port_of_call");
+        const imoInput = $("#id_base-vessel_imo");
+        const datetimeInputs = $("#id_base-datetime_of_arrival, #id_datetime_of_departure");
+        const grossTonnageInput = $("#id_base-gross_tonnage");
+        const vesselTypeSelect = $("#id_base-vessel_type");
+        const shippingAgent = $("#id_base-shipping_agent");
         const submitButton = $("button[type=submit][value=NEW]");
-        const submitDraftButton = $("button[name=status][type=submit][value=DRAFT]");
+        const submitDraftButton = $("button[type=submit][value=DRAFT]");
         const userTypeData = form.data("user-type");
 
         const isShipUserSelectingShippingAgent = function () {
@@ -29,14 +29,10 @@
         }
 
         const getDraftButtonText = function () {
-            if (isCruise()) {
-                return gettext("Continue");
+            if (isShipUserSelectingShippingAgent()) {
+                return gettext("Forward to agent");
             } else {
-                if (isShipUserSelectingShippingAgent()) {
-                    return gettext("Forward to agent");
-                } else {
-                    return gettext("Save as draft");
-                }
+                return gettext("Save as draft");
             }
         }
 

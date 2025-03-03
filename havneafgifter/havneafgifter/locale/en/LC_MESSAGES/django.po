@@ -90,6 +90,10 @@ msgstr ""
 msgid "Gross tonnage"
 msgstr ""
 
+#: havneafgifter/forms.py
+msgid "No port of call"
+msgstr ""
+
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Port of call"
 msgstr ""
@@ -111,23 +115,7 @@ msgid "Departure date/time"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "No port of call"
-msgstr ""
-
-#: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
-msgstr ""
-
-#: havneafgifter/forms.py
-msgid "Port of call cannot be filled if 'no port of call' is selected"
-msgstr ""
-
-#: havneafgifter/forms.py
-msgid "Port of call must be filled if 'no port of call' is not selected"
-msgstr ""
-
-#: havneafgifter/forms.py
-msgid "You can only choose 'no port of call' when the vessel is a cruise ship"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -838,6 +826,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Save as draft"
 msgstr ""
@@ -878,6 +867,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Submit"
 msgstr ""
@@ -923,6 +913,7 @@ msgid "Withdraw"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/environmental_tax_create.html
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid "Cruise Ships: Environmental and Maintenance Fee"
 msgstr ""
@@ -976,16 +967,28 @@ msgstr ""
 msgid "Det anvendte login er timet ud. Prøv at logge ind igen."
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Harbour Dues/Port Tax"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/form_create.html
+#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
+msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Forward to agent"
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "IMO numbers should be 7 digits"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/form_create.html
+msgid "You cannot delete the last item"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
@@ -1027,10 +1030,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/login.html
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 msgid "Register vessel to report harbour dues"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/passenger_tax_create.html
@@ -1305,7 +1304,7 @@ msgid ""
 "you registered with, and check your spam folder."
 msgstr ""
 
-#: havneafgifter/view_mixins.py
+#: havneafgifter/view_mixins.py havneafgifter/views.py
 msgid ""
 "You do not have the required permissions to submit harbor dues forms for "
 "review"
