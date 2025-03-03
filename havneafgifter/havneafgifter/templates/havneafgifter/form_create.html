@@ -59,9 +59,9 @@
     {# Formset asking for number of passenger of each nationality #}
     {% bootstrap_form passenger_formset.management_form %}
     <div class="formset bg-light rounded-3 mt-4 p-4">
-        <h2 class="pb-3">{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}</h2>
+        <h2 class="pb-4">{% translate 'Cruise Ships: Passenger Tax ("Pax Tax")' %}</h2>
         <div class="col-6">
-            {% bootstrap_form passenger_total_form %}
+            {% bootstrap_form passenger_total_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         </div>
         {% for form in passenger_formset.forms %}
         <div class="formset-item row mb-4">
@@ -83,7 +83,7 @@
     {# Formset asking for number of passengers at each disembarkment site #}
     {% bootstrap_form disembarkment_formset.management_form %}
     <div class="formset bg-light rounded-3 mt-4 p-4">
-        <h2 class="pb-3">{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h2>
+        <h2 class="pb-4">{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h2>
         {% for form in disembarkment_formset.forms %}
         <div class="formset-item row mb-3">
             <div class="col-6 d-flex justify-content-between">
