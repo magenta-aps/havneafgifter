@@ -6,14 +6,11 @@ from django_mitid_auth.saml.views import AccessDeniedView
 
 from havneafgifter.views import (
     ApproveView,
-    EnvironmentalTaxCreateView,
     HarborDuesFormCreateView,
     HarborDuesFormListView,
-    HarborDuesFormUpdateView,
     LandingModalOkView,
     LoginView,
     LogoutView,
-    PassengerTaxCreateView,
     PostLoginView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -97,29 +94,19 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="harbor_dues_form_create",
     ),
     path(
+        "blanket/rediger/<int:pk>/",
+        HarborDuesFormCreateView.as_view(),
+        name="harbor_dues_form_edit",
+    ),
+    path(
         "blanket/",
         HarborDuesFormListView.as_view(),
         name="harbor_dues_form_list",
     ),
     path(
-        "blanket/opret/passagerer/<int:pk>/",
-        PassengerTaxCreateView.as_view(),
-        name="passenger_tax_create",
-    ),
-    path(
-        "blanket/opret/miljoe/<int:pk>/",
-        EnvironmentalTaxCreateView.as_view(),
-        name="environmental_tax_create",
-    ),
-    path(
         "blanket/<int:pk>/",
         ReceiptDetailView.as_view(),
         name="receipt_detail_html",
-    ),
-    path(
-        "blanket/<int:pk>/rediger/",
-        HarborDuesFormUpdateView.as_view(),
-        name="draft_edit",
     ),
     path(
         "blanket/<int:pk>/tilbagetraek/",

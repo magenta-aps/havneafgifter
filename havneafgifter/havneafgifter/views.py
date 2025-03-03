@@ -14,7 +14,7 @@ from django.contrib.auth import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.db.models import (
     Case,
     Count,
@@ -34,8 +34,8 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, RedirectView
-from django.views.generic.edit import CreateView, FormView, UpdateView
-from django_fsm import can_proceed
+from django.views.generic.edit import CreateView, UpdateView
+from django_fsm import can_proceed, has_transition_perm
 from django_tables2 import SingleTableMixin, SingleTableView
 from django_tables2.export.views import ExportMixin
 from project.util import new_taxrate_start_datetime, omit
@@ -81,7 +81,6 @@ from havneafgifter.models import (
     Vessel,
 )
 from havneafgifter.responses import (
-    HavneafgifterResponseBadRequest,
     HavneafgifterResponseForbidden,
     HavneafgifterResponseNotFound,
 )
@@ -95,7 +94,6 @@ from havneafgifter.view_mixins import (
     CacheControlMixin,
     GetFormView,
     HandleNotificationMailMixin,
-    HarborDuesFormMixin,
     HavneafgiftView,
 )
 
@@ -227,314 +225,318 @@ class PostLoginView(RedirectView):
         return reverse("havneafgifter:root")
 
 
-class HarborDuesFormCreateView(HarborDuesFormMixin, CacheControlMixin, CreateView):
-    model = HarborDuesForm
-    form_class = HarborDuesFormForm
+class HarborDuesFormCreateView(
+    LoginRequiredMixin,
+    CSPViewMixin,
+    HandleNotificationMailMixin,
+    HavneafgiftView,
+    CacheControlMixin,
+    DetailView,
+):
+    template_name = "havneafgifter/form_create.html"
+    http_method_names = ["get", "post"]
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
         return self.prevent_response_caching(response)
 
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        self.object = None
 
-class _CruiseTaxFormSetView(
-    LoginRequiredMixin, CacheControlMixin, HavneafgiftView, FormView
-):
-    """Shared base class for views that create a set of model objects related
-    to a `CruiseTaxForm`, e.g. `PassengersByCountry` or `Disembarkment`.
-    """
+        if pk:
+            try:
+                self.object = CruiseTaxForm.objects.get(pk=pk)
+            except CruiseTaxForm.DoesNotExist:
+                try:
+                    self.object = HarborDuesForm.objects.get(pk=pk)
+                except HarborDuesForm.DoesNotExist:  # pragma: no cover
+                    return self.object  # pragma: no cover
+        return self.object
 
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
-        pk = kwargs["pk"]
-        qs = CruiseTaxForm.filter_user_permissions(
-            CruiseTaxForm.objects.filter(
-                pk=pk,
-                status__in=[Status.DRAFT, Status.REJECTED],
-            ),
-            request.user,
-            "view",
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["base_form"] = self.get_base_form(instance=self.get_object())
+        context["passenger_formset"] = self.get_passenger_formset(
+            initial=self.get_passenger_formset_initial()
         )
-        try:
-            self._cruise_tax_form = qs.get(pk=pk)
-        except CruiseTaxForm.DoesNotExist:
-            self._cruise_tax_form = None
-
-    def get(self, request, *args, **kwargs):
-        response = self._check_permission() or super().get(request, *args, **kwargs)
-        return self.prevent_response_caching(response)
-
-    def post(self, request, *args, **kwargs):
-        return self._check_permission() or super().post(request, *args, **kwargs)
-
-    def get_form(self, form_class=None):
-        factory = formset_factory(
-            self.form_class,
-            can_order=False,
-            can_delete=False,
-            extra=0,
+        context["disembarkment_formset"] = self.get_disembarkment_formset(
+            initial=self.get_disembarkment_formset_initial()
         )
-        return factory(**self.get_form_kwargs())
 
-    def _check_permission(self):
-        if self._cruise_tax_form is None:
+        if isinstance(self.object, CruiseTaxForm):
+            total_num = self.object.number_of_passengers
+        else:
+            total_num = 0
+
+        context["passenger_total_form"] = self.get_passenger_total_form(
+            initial={"total_number_of_passengers": total_num}
+        )
+
+        return context
+
+    def form_valid(self, form):
+        harbor_dues_form = form.save(commit=False)
+
+        if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
+            harbor_dues_form.submit_for_review,
+            self.request.user,
+        ):
             return HavneafgifterResponseForbidden(
                 self.request,
-                _("This form was already submitted and can no longer be edited"),
+                _(
+                    "You do not have the required permissions to submit "
+                    "harbor dues forms for review"
+                ),
             )
 
+        port_of_call = form.cleaned_data.get("port_of_call")
 
-class PassengerTaxCreateView(_CruiseTaxFormSetView):
-    template_name = "havneafgifter/passenger_tax_create.html"
-    form_class = PassengersByCountryForm
+        if port_of_call is not None and port_of_call.name == "Blank":
+            harbor_dues_form.port_of_call = None
 
-    def post(self, request, *args, **kwargs):
-        try:
-            sum_passengers_by_country = sum(
-                pbc.number_of_passengers
-                for pbc in self._get_passengers_by_country_objects()
-            )
-        except ValidationError as e:
-            return HavneafgifterResponseBadRequest(request, e.message)
-        passengers_total_form = PassengersTotalForm(data=request.POST)
-        passengers_total_form.validate_total(sum_passengers_by_country)
-        if not passengers_total_form.is_valid():
-            return self.render_to_response(
-                self.get_context_data(passengers_total_form=passengers_total_form)
-            )
-        return super().post(request, *args, **kwargs)
+        if harbor_dues_form.vessel_type == ShipType.CRUISE:
+            # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
+            # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
+            self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
+        else:
+            harbor_dues_form.save()
+            self.object = harbor_dues_form
 
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-        form_kwargs["initial"] = self._get_initial_formset_data()
-        return form_kwargs
+        status = form.cleaned_data.get("status")
 
-    def get_context_data(self, **kwargs):
-        total_num = self._cruise_tax_form.number_of_passengers
-        context_data = super().get_context_data(**kwargs)
-        context_data["passengers_total_form"] = kwargs.get(
-            "passengers_total_form",
-            PassengersTotalForm(
-                initial={"total_number_of_passengers": total_num},
-            ),
-        )
-        context_data["passengers_by_country_formset"] = self.get_form()
-        return context_data
-
-    def form_valid(self, form):
-        # Populate `CruiseTaxForm.number_of_passengers`
-        passengers_total_form = PassengersTotalForm(data=self.request.POST)
-        assert passengers_total_form.is_valid()
-        self._cruise_tax_form.number_of_passengers = passengers_total_form.cleaned_data[
-            "total_number_of_passengers"
-        ]
-        self._cruise_tax_form.save(update_fields=("number_of_passengers",))
-
-        # Create or update `PassengersByCountry` objects based on formset data
-        passengers_by_country_objects = self._get_passengers_by_country_objects()
-        PassengersByCountry.objects.bulk_create(
-            passengers_by_country_objects,
-            update_conflicts=True,
-            unique_fields=["cruise_tax_form", "nationality"],
-            update_fields=["number_of_passengers"],
-        )
-
-        # Remove any `PassengersByCountry` objects which have 0 passengers after the
-        # "create or update" processing above.
-        PassengersByCountry.objects.filter(
-            cruise_tax_form=self._cruise_tax_form,
-            number_of_passengers=0,
-        ).delete()
-
-        # Go to next step (environmental and maintenance fees)
-        return self.get_redirect_for_form(
-            "havneafgifter:environmental_tax_create",
-            self._cruise_tax_form,
-        )
-
-    def _get_passengers_by_country_objects(self) -> list[PassengersByCountry]:
-        formset = self.get_form()
-        if not formset.is_valid():
-            raise ValidationError(_("Invalid data in passenger count list"))
-        return [
-            PassengersByCountry(
-                cruise_tax_form=self._cruise_tax_form,
-                **cleaned_data,  # type: ignore
-            )
-            for cleaned_data in formset.cleaned_data  # type: ignore
-        ]
-
-    def _get_initial_formset_data(self):
-        def pk(val):
-            if val is not None:
-                return val[0]
-
-        def number_of_passengers(val):
-            if val is not None:
-                return val[1]
-            return 0
-
-        current = {
-            pbc.nationality: (pbc.pk, pbc.number_of_passengers)
-            for pbc in PassengersByCountry.objects.filter(
-                cruise_tax_form=self._cruise_tax_form,
-            )
-        }
-
-        return [
-            {
-                "pk": pk(current.get(nationality)),
-                "number_of_passengers": number_of_passengers(current.get(nationality)),
-                "nationality": nationality,
-            }
-            for nationality in Nationality
-        ]
-
-
-class EnvironmentalTaxCreateView(HandleNotificationMailMixin, _CruiseTaxFormSetView):
-    template_name = "havneafgifter/environmental_tax_create.html"
-    form_class = DisembarkmentForm
-
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-        form_kwargs["initial"] = self._get_initial_formset_data()
-        return form_kwargs
-
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        context_data["object"] = self._cruise_tax_form
-        context_data["disembarkment_formset"] = self.get_form()
-        context_data["user_is_ship"] = self.request.user.user_type == UserType.SHIP
-        return context_data
-
-    def form_valid(self, form):
-        # If user is submitting this cruise tax form for review, make sure we
-        # validate it first, and send the user back to step 1 if the form is
-        # not valid.
-        try:
-            submitted_for_review: bool = (
-                self._validate_cruise_tax_form_submitted_for_review()
-            )
-        except ValidationError as error:
-            return self._return_to_step_1_with_errors(error.message)
-
-        # Create or update `Disembarkment` objects based on formset data
-        disembarkment_objects = self._get_disembarkment_objects()
-        Disembarkment.objects.bulk_create(
-            disembarkment_objects,
-            update_conflicts=True,
-            unique_fields=["cruise_tax_form", "disembarkment_site"],
-            update_fields=["number_of_passengers"],
-        )
-
-        # Remove any `Disembarkment` objects which have 0 passengers after the
-        # "create or update" processing above.
-        Disembarkment.objects.filter(
-            cruise_tax_form=self._cruise_tax_form,
-            number_of_passengers=0,
-        ).delete()
-
-        # User is now all done filling out data for cruise ship.
-        # Handle `status` (DRAFT or NEW) and send email if NEW or if a SHIP
-        # user saves as DRAFT with an agent attached.
-        send_to_agent = (
-            self.request.user.user_type == UserType.SHIP
-            and self._cruise_tax_form.shipping_agent
-            and self._cruise_tax_form.status == Status.DRAFT
-        )
-        if submitted_for_review or send_to_agent:
-            self._cruise_tax_form.save(update_fields=("status",))
-            mail_type = OnSendToAgentMail if send_to_agent else OnSubmitForReviewMail
-            self.handle_notification_mail(mail_type, self._cruise_tax_form)
-            if mail_type == OnSubmitForReviewMail:
-                self.handle_notification_mail(
-                    OnSubmitForReviewReceipt, self._cruise_tax_form
-                )
+        if status == Status.NEW:
+            self.object.submit_for_review()
+            self.object.save()
+            self.object.calculate_tax(save=True)
+            self.handle_notification_mail(OnSubmitForReviewMail, self.object)
+            self.handle_notification_mail(OnSubmitForReviewReceipt, self.object)
+        elif status == Status.DRAFT:
+            # Send notification to agent if saved by a ship user.
+            self.object.save()
+            self.object.calculate_tax(save=True)
+            if (
+                self.request.user.user_type == UserType.SHIP
+                and harbor_dues_form.shipping_agent
+            ):
+                self.handle_notification_mail(OnSendToAgentMail, self.object)
+        else:
+            self.object.save()  # pragma: no cover
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
-            self._cruise_tax_form,
+            self.object,
         )
 
-    def _get_disembarkment_objects(self) -> list[Disembarkment]:
-        formset = self.get_form()
-        disembarkment_objects = [
-            Disembarkment(
-                cruise_tax_form=self._cruise_tax_form,
-                **cleaned_data,  # type: ignore
-            )
-            for cleaned_data in formset.cleaned_data  # type: ignore
-        ]
-        return disembarkment_objects
-
-    def _get_initial_formset_data(self):
-        def pk(val):
-            if val is not None:
-                return val[0]
-
-        def number_of_passengers(val):
-            if val is not None:
-                return val[1]
-            return 0
-
-        current = {
-            d.disembarkment_site: (d.pk, d.number_of_passengers)
-            for d in Disembarkment.objects.filter(
-                cruise_tax_form=self._cruise_tax_form,
-            )
+    def _create_or_update_cruise_tax_form(
+        self, harbor_dues_form: HarborDuesForm
+    ) -> CruiseTaxForm:
+        field_vals = {
+            k: v
+            for k, v in harbor_dues_form.__dict__.items()
+            if not k.startswith("_")  # skip `_state`, etc.
         }
 
+        if harbor_dues_form.pk is None:
+            # The `HarborDuesForm` has not yet been saved to the database.
+            # If we create the corresponding `CruiseTaxForm`, the corresponding
+            # `HarborDuesForm` will be created automatically.
+            return CruiseTaxForm.objects.create(**field_vals)  # pragma: no cover
+        else:
+            # A `CruiseTaxForm` object may already exist for this PK.
+            try:
+                cruise_tax_form = CruiseTaxForm.objects.get(
+                    harborduesform_ptr=harbor_dues_form.pk
+                )
+            except CruiseTaxForm.DoesNotExist:
+                # A `CruiseTaxForm` does not exist, but the user is trying to save a
+                # cruise tax form, i.e. they are editing a harbor dues form and have
+                # changed the vessel type to `CRUISE`. Create the corresponding
+                # `CruiseTaxForm`.
+                return CruiseTaxForm.objects.create(
+                    harborduesform_ptr=harbor_dues_form,
+                    # Copy all fields from `HarborDuesForm` except `status`
+                    **{
+                        k: v
+                        for k, v in field_vals.items()
+                        if k not in ("harborduesform_ptr", "status")
+                    },
+                )
+            else:
+                # A `CruiseTaxForm` exists for this PK.
+                # Update all its fields, except `status`.
+                for k, v in field_vals.items():
+                    if k == "status":
+                        continue
+                    setattr(cruise_tax_form, k, v)
+                cruise_tax_form.save()
+                return cruise_tax_form
+
+    def get_base_form(self, **form_kwargs):
+        status = self.request.POST.get("base-status")
+        if status is not None:
+            status = Status(status)
+
+        return HarborDuesFormForm(
+            self.request.user, status=status, prefix="base", **form_kwargs
+        )
+
+    def get_passenger_total_form(self, **form_kwargs):
+        return PassengersTotalForm(prefix="passenger_total_form", **form_kwargs)
+
+    def get_formset_factory(self, form_class):
+        return formset_factory(form_class, can_order=False, can_delete=True, extra=1)
+
+    def get_passenger_formset(self, **form_kwargs):
+        factory = self.get_formset_factory(PassengersByCountryForm)
+        return factory(prefix="passengers", **form_kwargs)
+
+    def get_disembarkment_formset(self, **form_kwargs):
+        factory = self.get_formset_factory(DisembarkmentForm)
+        return factory(prefix="disembarkment", **form_kwargs)
+
+    def get_passenger_formset_initial(self) -> list[dict]:
         return [
             {
-                "pk": pk(current.get(disembarkment_site)),
-                "number_of_passengers": number_of_passengers(
-                    current.get(disembarkment_site)
-                ),
-                "disembarkment_site": disembarkment_site.pk,
+                "pk": pbc.pk,
+                "number_of_passengers": pbc.number_of_passengers,
+                "nationality": Nationality(pbc.nationality),
             }
-            for disembarkment_site in DisembarkmentSite.objects.all()
+            for pbc in PassengersByCountry.objects.filter(
+                cruise_tax_form=self.get_object(),
+            )
         ]
 
-    def _validate_cruise_tax_form_submitted_for_review(self) -> bool:
-        submitted_for_review = False
+    def get_disembarkment_formset_initial(self):
+        return [
+            {
+                "pk": dis.pk,
+                "number_of_passengers": dis.number_of_passengers,
+                "disembarkment_site": dis.disembarkment_site,
+            }
+            for dis in Disembarkment.objects.filter(cruise_tax_form=self.get_object())
+        ]
 
-        # Determine if user selected "Submit" (status=NEW) or "Save as draft"
-        # (status=DRAFT).
-        status = self.request.POST.get("status")
+    def post(self, request, *args, **kwargs):
+        base_form = self.get_base_form(
+            instance=self.get_object(), data=self.request.POST
+        )
 
-        # Update cruise tax form status, if submitting for review
-        if status == Status.NEW.value and can_proceed(
-            self._cruise_tax_form.submit_for_review
-        ):
-            self._cruise_tax_form.submit_for_review()
-            submitted_for_review = True
+        passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
 
-            # Validate the data on the cruise tax form, taking the new status into
-            # account.
-            form = HarborDuesFormForm(
-                self.request.user,  # type: ignore
-                status=Status.NEW,
-                instance=self._cruise_tax_form,
-                data=model_to_dict(self._cruise_tax_form),
-            )
+        passenger_formset = self.get_passenger_formset(
+            initial=self.get_passenger_formset_initial(),
+            data=self.request.POST,
+        )
 
-            if not form.is_valid():
-                raise ValidationError(
-                    _(
-                        "Cruise tax form contains one or more errors. "
-                        "Please correct them."
-                    )
+        disembarkment_formset = self.get_disembarkment_formset(
+            initial=self.get_disembarkment_formset_initial(),
+            data=self.request.POST,
+        )
+
+        # Non-cruise ships will have a list with an empty dict
+        if (
+            passenger_formset.is_valid() and passenger_formset.cleaned_data[0]
+        ):  # pragma: no cover
+            actual_total = 0
+            for item in self._get_passengers_by_country_objects(passenger_formset):
+                actual_total += item.number_of_passengers
+
+            passenger_total_form.is_valid()
+            passenger_total_form.validate_total(actual_total)
+
+            if not passenger_total_form.is_valid():
+                return self.render_to_response(
+                    context={
+                        "base_form": base_form,
+                        "passenger_total_form": passenger_total_form,
+                        "passenger_formset": passenger_formset,
+                        "disembarkment_formset": disembarkment_formset,
+                    }
                 )
 
-        return submitted_for_review
+        if (
+            base_form.is_valid()
+            and passenger_formset.is_valid()
+            and disembarkment_formset.is_valid()
+        ):
+            response = self.form_valid(base_form)
 
-    def _return_to_step_1_with_errors(self, message: str) -> HttpResponse:
-        messages.error(self.request, message)
-        return self.get_redirect_for_form(
-            "havneafgifter:draft_edit",
-            self._cruise_tax_form,
-            status=Status.NEW.value,
-        )
+            if passenger_formset.cleaned_data[0]:  # pragma: no cover
+                # Create or update `PassengersByCountry` objects based on formset data
+                passengers_by_country_objects = self._get_passengers_by_country_objects(
+                    passenger_formset
+                )
+
+                PassengersByCountry.objects.bulk_create(
+                    passengers_by_country_objects,
+                    update_conflicts=True,
+                    unique_fields=["cruise_tax_form", "nationality"],
+                    update_fields=["number_of_passengers"],
+                )
+
+                # Remove any `PassengersByCountry` objects which have 0 passengers
+                # after the "create or update" processing above.
+                PassengersByCountry.objects.filter(
+                    cruise_tax_form=self.object,
+                    number_of_passengers=0,
+                ).delete()
+
+            # Create or update `Disembarkment` objects based on formset data
+            disembarkment_objects = self._get_disembarkment_objects(
+                disembarkment_formset
+            )
+
+            Disembarkment.objects.bulk_create(
+                disembarkment_objects,
+                update_conflicts=True,
+                unique_fields=["cruise_tax_form", "disembarkment_site"],
+                update_fields=["number_of_passengers"],
+            )
+
+            # Remove any `Disembarkment` objects which have 0 passengers after the
+            # "create or update" processing above.
+            Disembarkment.objects.filter(
+                cruise_tax_form=self.object,
+                number_of_passengers=0,
+            ).delete()
+
+            return response
+
+        else:
+            return self.render_to_response(
+                context={
+                    "base_form": base_form,
+                    "passenger_total_form": passenger_total_form,
+                    "passenger_formset": passenger_formset,
+                    "disembarkment_formset": disembarkment_formset,
+                }
+            )
+
+    def _get_passengers_by_country_objects(
+        self, formset
+    ) -> list[PassengersByCountry]:  # pragma: no cover
+        return [
+            PassengersByCountry(
+                cruise_tax_form=self.object,
+                nationality=cleaned_data["nationality"],
+                number_of_passengers=cleaned_data["number_of_passengers"],
+            )
+            for cleaned_data in formset.cleaned_data  # type: ignore
+            if not cleaned_data.get("DELETE")
+        ]
+
+    def _get_disembarkment_objects(self, formset) -> list[Disembarkment]:
+        return [
+            Disembarkment(
+                cruise_tax_form=self.object,
+                number_of_passengers=cleaned_data["number_of_passengers"],
+                disembarkment_site=cleaned_data["disembarkment_site"],
+            )
+            for cleaned_data in formset.cleaned_data  # type: ignore
+            if cleaned_data != {} and not cleaned_data.get("DELETE")
+        ]
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
@@ -563,49 +565,6 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
                 return HarborDuesForm.objects.get(pk=pk)
             except HarborDuesForm.DoesNotExist:
                 return None
-
-
-class HarborDuesFormUpdateView(HarborDuesFormMixin, CacheControlMixin, UpdateView):
-    model = HarborDuesForm
-    form_class = HarborDuesFormForm
-
-    def get_object(self, queryset=None):
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        try:
-            return CruiseTaxForm.objects.get(pk=pk)
-        except CruiseTaxForm.DoesNotExist:
-            try:
-                return HarborDuesForm.objects.get(pk=pk)
-            except HarborDuesForm.DoesNotExist:
-                return None
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Pass `data` to form to ensure that validation errors are
-        # re-evaluated and displayed.
-        if self.request.method == "GET":
-            kwargs["data"] = model_to_dict(self.object)
-        return kwargs
-
-    def get(self, request, *args, **kwargs):
-        form: HarborDuesForm | CruiseTaxForm | None = self.get_object()
-        if form is None:
-            return HttpResponseRedirect(
-                reverse(
-                    "havneafgifter:receipt_detail_html",
-                    kwargs={"pk": self.kwargs.get(self.pk_url_kwarg)},
-                )
-            )
-        if not form.has_permission(request.user, "change", False):
-            return HttpResponseRedirect(
-                reverse("havneafgifter:receipt_detail_html", kwargs={"pk": form.pk})
-            )
-        else:
-            response = super().get(self, request, *args, **kwargs)
-            return self.prevent_response_caching(response)
-
-    def get_template_names(self):
-        return ["havneafgifter/harborduesform_form.html"]
 
 
 class PreviewPDFView(ReceiptDetailView):
