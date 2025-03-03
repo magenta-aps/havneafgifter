@@ -29,14 +29,10 @@
         }
 
         const getDraftButtonText = function () {
-            if (isCruise()) {
-                return gettext("Continue");
+            if (isShipUserSelectingShippingAgent()) {
+                return gettext("Forward to agent");
             } else {
-                if (isShipUserSelectingShippingAgent()) {
-                    return gettext("Forward to agent");
-                } else {
-                    return gettext("Save as draft");
-                }
+                return gettext("Save as draft");
             }
         }
 
