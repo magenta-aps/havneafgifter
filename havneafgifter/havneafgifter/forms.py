@@ -165,6 +165,13 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         label=_("Nationality"),
     )
 
+    nationality = ChoiceField(
+        required=False,
+        choices=countries,
+        widget=Select2Widget(choices=countries),
+        label=_("Nationality"),
+    )
+
     def save(self, commit=True):
         user = super().save(commit=commit)
         if commit:
@@ -215,6 +222,13 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
         validators=[MinValueValidator(0)],
         label=_("Gross tonnage"),
     )
+    nationality = ChoiceField(
+        required=False,
+        choices=countries,
+        widget=Select2Widget(choices=countries),
+        label=_("Nationality"),
+    )
+
     nationality = ChoiceField(
         required=False,
         choices=countries,
@@ -385,7 +399,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         if self._user.is_authenticated:
             return self._user.user_type == UserType.SHIP
         else:
-            return false
+            return False
 
     @property
     def has_port_of_call(self):
