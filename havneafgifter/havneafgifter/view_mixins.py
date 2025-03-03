@@ -17,7 +17,11 @@ class HavneafgiftView:
                 "version": settings.VERSION,
                 "contact_email": settings.CONTACT_EMAIL,
                 "landing_modal": HavneafgiftView.landing_modal(self.request),
-                "user_is_ship": self.request.user.user_type == UserType.SHIP if self.request.user.is_authenticated else False,
+                "user_is_ship": (
+                    self.request.user.user_type == UserType.SHIP
+                    if self.request.user.is_authenticated
+                    else False
+                ),
             }
         )
 

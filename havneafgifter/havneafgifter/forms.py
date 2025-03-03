@@ -388,7 +388,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         if self._user.is_authenticated:
             return self._user.user_type == UserType.SHIP
         else:
-            return False
+            return False  # pragma: no cover
 
     @property
     def has_port_of_call(self):
