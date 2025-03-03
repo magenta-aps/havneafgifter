@@ -47,10 +47,12 @@
     <div class="row bg-light rounded-3 m-0 mt-4 p-4">
         <div class="col-6">
             {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="nationality,vessel_imo,vessel_master,gross_tonnage,datetime_of_departure,no_port_of_call,status,vessel_type" alert_error_type="none" %}
-            {% bootstrap_field base_form.vessel_type wrapper_class="pt-3 " layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         </div>
         <div class="col-6">
             {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="port_of_call,vessel_name,vessel_owner,shipping_agent,datetime_of_arrival,vessel_type,no_port_of_call,status" alert_error_type="none" %}
+        </div>
+        <div class="col-6">
+            {% bootstrap_field base_form.vessel_type wrapper_class="pt-3 " layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         </div>
     </div>
 
