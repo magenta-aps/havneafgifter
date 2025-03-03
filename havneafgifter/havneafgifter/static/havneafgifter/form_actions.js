@@ -13,7 +13,7 @@
 
         const forms = $("form");
         const mainForm = $("form#main");
-        const hiddenStatus = $("input[name=status]", mainForm);
+        const hiddenStatus = $("input[name=base-status]", mainForm);
         const shippingAgentInput = $("#id_base-shipping_agent", mainForm);
         const shippingAgentData = mainForm.data("shipping-agent");
         const userType = mainForm.data("user-type");
@@ -41,7 +41,7 @@
             // Bail early if user is not a ship user, or we are on step 1 and user is
             // creating a draft cruise tax form. In that case, they should only see the
             // modals on step 3.
-            const vesselType = $("#id-base_vessel_type", mainForm);
+            const vesselType = $("#id_base-vessel_type", mainForm);
             if ((userType !== "ship") || (vesselType.val() === "CRUISE")) {
                 hiddenStatus.remove();
                 return;
@@ -50,7 +50,7 @@
             // If a "ship user" is clicking "Submit" or "Save as draft", show a
             // confirmation popup (modal.) The "ship user" must then either confirm
             // or abort the action.
-            if ((name === "status") && (userType === "ship")) {
+            if ((name === "base-status") && (userType === "ship")) {
                 let modal;
 
                 if (value === "DRAFT") {
