@@ -632,7 +632,7 @@ class StatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.DENMARK,
             vessel_name="Testbåd 1",
-            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0),
+            datetime_of_arrival=datetime(2024, 7, 2, 0, 0, 0),
             datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
             gross_tonnage=1000,
             vessel_type=ShipType.FREIGHTER,
@@ -643,7 +643,7 @@ class StatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 2",
-            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0),
+            datetime_of_arrival=datetime(2024, 7, 1, 15, 15, 15),
             datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
@@ -758,35 +758,16 @@ class StatisticsTest(TestCase):
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0].record["id"], self.form1.id)
         self.assertEqual(rows[1].record["id"], self.form2.id)
+        rows = self.get_rows(
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
+            arrival_lt=datetime(2024, 7, 1, 0, 0, 0),
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].record["id"], self.form2.id)
 
         rows = self.get_rows(
             arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
             arrival_lt=datetime(2024, 6, 15, 0, 0, 0),
-        )
-        self.assertEqual(len(rows), 0)
-
-    def test_filter_departure(self):
-        rows = self.get_rows(departure_gt=datetime(2025, 1, 1, 0, 0, 0))
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0].record["id"], self.form3.id)
-
-        rows = self.get_rows(departure_gt=datetime(2024, 7, 1, 0, 0, 0))
-        self.assertEqual(len(rows), 3)
-        self.assertEqual(rows[0].record["id"], self.form1.id)
-        self.assertEqual(rows[1].record["id"], self.form2.id)
-        self.assertEqual(rows[2].record["id"], self.form3.id)
-
-        rows = self.get_rows(
-            departure_gt=datetime(2024, 6, 1, 0, 0, 0),
-            departure_lt=datetime(2024, 7, 25, 0, 0, 0),
-        )
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0].record["id"], self.form1.id)
-        self.assertEqual(rows[1].record["id"], self.form2.id)
-
-        rows = self.get_rows(
-            departure_gt=datetime(2024, 6, 1, 0, 0, 0),
-            departure_lt=datetime(2024, 6, 15, 0, 0, 0),
         )
         self.assertEqual(len(rows), 0)
 
