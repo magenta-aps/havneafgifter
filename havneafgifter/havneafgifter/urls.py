@@ -11,6 +11,7 @@ from havneafgifter.views import (
     LandingModalOkView,
     LoginView,
     LogoutView,
+    PassengerStatisticsView,
     PostLoginView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -138,4 +139,9 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="tax_rate_clone",
     ),
     path("modal/ok", LandingModalOkView.as_view(), name="landing_modal_ok"),
+    path(
+        "statistik/passagerer/",
+        PassengerStatisticsView.as_view(),
+        name="passenger_statistics",
+    ),
 ]

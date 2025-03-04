@@ -59,6 +59,13 @@ class StatistikTable(tables.Table):
     status = tables.Column(verbose_name=_("Status"))
 
 
+class PassengerStatisticsTable(tables.Table):
+    orderable = True
+    nationality = tables.Column(verbose_name=_("Nationalitet"))
+    month = tables.Column(verbose_name=_("Måned"))
+    count = tables.Column(verbose_name=_("Antal passagerer"))
+
+
 class TaxRateTableButtonColumn(tables.Column):
     """
     Allows TaxRateTable to show a clickable button, instead of just a clickable ID

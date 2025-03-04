@@ -44,6 +44,12 @@ SPDX-License-Identifier: MPL-2.0
                         <span class="ms-1">{% translate 'Statistics' %}</span>
                     </a>
                 </li>
+                <li class="nav-item ms-4">
+                    <a href="{% url 'havneafgifter:passenger_statistics' %}" class="d-flex align-items-center">
+                        <span class="material-icons">groups</span>
+                        <span class="ms-1">{% translate 'Passengerdata' %}</span>
+                    </a>
+                </li>
                 {% endif %}
                 {% if user.can_view_taxratelist %}
                 <li class="nav-item ms-4">
