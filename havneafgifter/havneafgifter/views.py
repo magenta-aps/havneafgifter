@@ -466,6 +466,14 @@ class HarborDuesFormCreateView(
         ):
             response = self.form_valid(base_form)
 
+            if passenger_formset.cleaned_data[0]:
+                total_number_of_passengers = 0
+                for item in self._get_passengers_by_country_objects(passenger_formset):
+                    total_number_of_passengers += item.number_of_passengers
+
+                self.object.number_of_passengers = total_number_of_passengers
+                self.object.save()
+
             if passenger_formset.cleaned_data[0]:  # pragma: no cover
                 # Create or update `PassengersByCountry` objects based on formset data
                 passengers_by_country_objects = self._get_passengers_by_country_objects(
