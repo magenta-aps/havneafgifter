@@ -19,6 +19,10 @@
             return (userTypeData === "ship") && isAgentSelected;
         }
 
+        const isShippingAgent = function () {
+            return (userTypeData === "shipping_agent");
+        }
+
         const isNoPortOfCall = function () {
             return noPortOfCallCheckbox.is(":checked");
         }
@@ -37,7 +41,7 @@
         }
 
         const updateButtonState = function () {
-            if (isCruise() || isShipUserSelectingShippingAgent()) {
+            if ((isCruise() && !isShippingAgent) || isShipUserSelectingShippingAgent()) {
                 // Show only the DRAFT button (hide the NEW button)
                 submitButton.addClass("d-none");
                 submitDraftButton.removeClass("d-none");
