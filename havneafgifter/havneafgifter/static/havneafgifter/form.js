@@ -2,17 +2,19 @@ $(function () {
     $("input.datetimepicker").each(function () {
         new tempusDominus.TempusDominus(this, {
             display: {
-                sideBySide: true,
+                sideBySide: false,
                 calendarWeeks: false,
                 buttons: {
                     clear: true,
                 }, components: {
-                    seconds: true,
+                    clock: false,
+                    hours: false,
+                    minutes: false,
                 },
             }, localization: {
                 hourCycle: "h23",
                 startOfTheWeek: 1,
-                format: "yyyy-MM-dd HH:mm:ss"
+                format: "yyyy-MM-dd"
             }
         });
     });

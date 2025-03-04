@@ -826,11 +826,10 @@ class StatisticsView(
             }
             filter_fields = {}
 
-            for action in ("arrival", "departure"):
-                for op in ("gt", "lt"):
-                    field_value = form.cleaned_data[f"{action}_{op}"]
-                    if field_value:
-                        filter_fields[f"datetime_of_{action}__{op}"] = field_value
+            for op in ("gt", "lt"):
+                field_value = form.cleaned_data[f"arrival_{op}"]
+                if field_value:
+                    filter_fields[f"datetime_of_arrival__{op}"] = field_value
 
             for field in (
                 "municipality",

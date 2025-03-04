@@ -579,28 +579,14 @@ class StatisticsForm(BootstrapForm):
         label=_("Ankomst efter"),
         required=False,
         widget=DateTimeInput(
-            attrs={"class": "datetimepicker", "placeholder": _("Ankomst efter")}
+            attrs={"class": "datetimepicker", "placeholder": _("Ankomst tidligst")}
         ),
     )
     arrival_lt = DateTimeField(
         label=_("Ankomst før"),
         required=False,
         widget=DateTimeInput(
-            attrs={"class": "datetimepicker", "placeholder": _("Ankomst før")}
-        ),
-    )
-    departure_gt = DateTimeField(
-        label=_("Afrejse efter"),
-        required=False,
-        widget=DateTimeInput(
-            attrs={"class": "datetimepicker", "placeholder": _("Afrejse efter")}
-        ),
-    )
-    departure_lt = DateTimeField(
-        label=_("Afrejse før"),
-        required=False,
-        widget=DateTimeInput(
-            attrs={"class": "datetimepicker", "placeholder": _("Afrejse før")}
+            attrs={"class": "datetimepicker", "placeholder": _("Ankomst senest")}
         ),
     )
     vessel_type = MultipleChoiceField(
