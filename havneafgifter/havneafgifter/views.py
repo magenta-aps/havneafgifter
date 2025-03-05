@@ -534,7 +534,8 @@ class HarborDuesFormCreateView(
                 nationality=cleaned_data["nationality"],
                 number_of_passengers=cleaned_data["number_of_passengers"],
             )
-            for cleaned_data in formset.cleaned_data  # type: ignore
+            for cleaned_data in formset.cleaned_data
+            if "nationality" in cleaned_data  # type: ignore
             if not cleaned_data.get("DELETE")
         ]
 

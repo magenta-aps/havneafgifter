@@ -527,7 +527,7 @@ class PassengersTotalForm(CSPFormMixin, Form):
 
 class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
     nationality = ChoiceField(
-        choices=Nationality,
+        choices=BLANK_CHOICE_DASH + [(n, n.label) for n in Nationality],
         required=True,
     )
     number_of_passengers = DynamicField(
