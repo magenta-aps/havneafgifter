@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:28-0200\n"
+"POT-Creation-Date: 2025-03-05 13:18-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -90,6 +90,10 @@ msgstr "Skibets kaptajn"
 msgid "Gross tonnage"
 msgstr "Bruttotonnage"
 
+#: havneafgifter/forms.py havneafgifter/models.py
+msgid "Nationality"
+msgstr "Nationalitet"
+
 #: havneafgifter/forms.py
 msgid "No port of call"
 msgstr "Ingen ankomsthavn"
@@ -97,10 +101,6 @@ msgstr "Ingen ankomsthavn"
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Port of call"
 msgstr "Ankomsthavn"
-
-#: havneafgifter/forms.py havneafgifter/models.py
-msgid "Nationality"
-msgstr "Nationalitet"
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Shipping agent"
@@ -118,7 +118,7 @@ msgstr "Afgangsdato og -tidspunkt"
 msgid "Date of departure cannot be before date of arrival"
 msgstr "Afrejse-datoen kan ikke ligge før ankomst-datoen"
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/tests/test_views.py
 msgid "If reporting port tax, please specify both arrival and departure date"
 msgstr ""
 "Angiv venligst både ankomst- og afgangsdato, når du indrapporterer "
@@ -192,6 +192,18 @@ msgstr ""
 msgid ""
 "Der må ikke oprettes eller redigeres i afgifter, der bliver gyldige om "
 "mindre end 1 uge fra nu."
+msgstr ""
+
+#: havneafgifter/forms.py havneafgifter/tables.py
+msgid "Nationalitet"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Fra"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "Til og med"
 msgstr ""
 
 #: havneafgifter/mails.py
@@ -728,6 +740,14 @@ msgstr ""
 msgid "Antal skibe"
 msgstr ""
 
+#: havneafgifter/tables.py
+msgid "Måned"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Antal passagerer"
+msgstr ""
+
 #: havneafgifter/templates/400.html
 msgid "Bad request (400)"
 msgstr "Ugyldig forespørgsel (400)"
@@ -764,6 +784,11 @@ msgstr "Mine blanketter"
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Statistics"
 msgstr "Statistikker"
+
+#: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/passengerstatistics.html
+msgid "Passengerdata"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Rates"
@@ -858,7 +883,6 @@ msgstr ""
 "formular til en shippingagent"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Save as draft"
@@ -910,7 +934,6 @@ msgstr ""
 "shippingagent, skal du bruge \"Gem som kladde\" i stedet."
 
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_submit.html
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Submit"
@@ -921,6 +944,7 @@ msgid "Close"
 msgstr "Luk"
 
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
+#: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Save"
 msgstr "Gem"
 
@@ -957,27 +981,6 @@ msgstr "Ønsker du at trække denne indberetning tilbage?"
 #: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
 msgid "Withdraw"
 msgstr "Træk tilbage"
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-#: havneafgifter/templates/havneafgifter/form_create.html
-#: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
-msgid "Cruise Ships: Environmental and Maintenance Fee"
-msgstr "Krydstogtskibe: miljø- og vedligeholdelsesafgift"
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-msgid ""
-"Please notice that environmental and maintenance fees apply to <b>all</b> "
-"passengers on board at the time of disembarkment, regardless of how many "
-"passengers disembark. Register total number of passengers on board at the "
-"time of disembarkation."
-msgstr ""
-"Vær opmærksom på at miljø- og vedligeholdelsesafgifter vedrører <b>alle</b> "
-"passagerer ombord på tidspunktet for ilandsætningen, uanset hvor mange "
-"passagerer, der ilandsættes."
-
-#: havneafgifter/templates/havneafgifter/environmental_tax_create.html
-msgid "Send to agent"
-msgstr "Send til agent"
 
 #: havneafgifter/templates/havneafgifter/error/error.html
 msgid "Log ud"
@@ -1017,14 +1020,29 @@ msgid "Det anvendte login er timet ud. Prøv at logge ind igen."
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/form_create.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Harbor dues"
+msgstr "Havneafgift"
+
+#: havneafgifter/templates/havneafgifter/form_create.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#, python-format
+msgid "Form %(form_id)s"
+msgstr "Blanket %(form_id)s"
+
+#: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
 msgid "Harbour Dues/Port Tax"
 msgstr "Havneafgift"
 
 #: havneafgifter/templates/havneafgifter/form_create.html
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
 msgid "Cruise Ships: Passenger Tax (\"Pax Tax\")"
 msgstr "Krydstogtskibe: passagerafgift"
+
+#: havneafgifter/templates/havneafgifter/form_create.html
+#: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
+msgid "Cruise Ships: Environmental and Maintenance Fee"
+msgstr "Krydstogtskibe: miljø- og vedligeholdelsesafgift"
 
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/harborduesform_form.html
@@ -1083,9 +1101,26 @@ msgstr "Glemt dit kodeord?"
 msgid "Register vessel to report harbour dues"
 msgstr "Opret skib for at rapportere havneafgifter"
 
-#: havneafgifter/templates/havneafgifter/passenger_tax_create.html
-msgid "Continue"
-msgstr "Fortsæt"
+#: havneafgifter/templates/havneafgifter/passengerstatistics.html
+msgid ""
+"\n"
+"    Vælg nationalitet og tidsinterval, der ønskes sorteret på.\n"
+"    "
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/passengerstatistics.html
+msgid "Tidsinterval"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/passengerstatistics.html
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Søg"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/passengerstatistics.html
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Eksportér til Excel"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/pdf/cruise_tax_form_receipt.html
 msgid ""
@@ -1098,15 +1133,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/pdf/harbor_dues_form_receipt.html
 msgid "Harbour Dues"
 msgstr "Havneafgift"
-
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Harbor dues"
-msgstr "Havneafgift"
-
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-#, python-format
-msgid "Form %(form_id)s"
-msgstr "Blanket %(form_id)s"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #, python-format
@@ -1123,7 +1149,6 @@ msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
-#: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Edit"
 msgstr "Rediger"
 
@@ -1161,14 +1186,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Afrejse"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Søg"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Eksportér til Excel"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrateform.html
@@ -1371,12 +1388,6 @@ msgstr ""
 "Hvis du ikke modtager en email skal du sørge for at du har indtastet samme "
 "adresse som du registrerede dig med, og har checket din spam-mappe."
 
-#: havneafgifter/view_mixins.py havneafgifter/views.py
-msgid ""
-"You do not have the required permissions to submit harbor dues forms for "
-"review"
-msgstr "Du har ikke de fornødne rettigheder til at indsende en blanket"
-
 #: havneafgifter/views.py
 msgid "Please sign in using the IMO number as username"
 msgstr "Log venligst ind med IMO-nummeret som brugernavn"
@@ -1386,18 +1397,10 @@ msgid "No vessel found"
 msgstr "Intet skib fundet"
 
 #: havneafgifter/views.py
-msgid "This form was already submitted and can no longer be edited"
-msgstr ""
-"Denne blanket er allerede blevet indsendt, og kan ikke længere redigeres"
-
-#: havneafgifter/views.py
-msgid "Invalid data in passenger count list"
-msgstr "Ugyldig data i passengertællerliste"
-
-#: havneafgifter/views.py
-msgid "Cruise tax form contains one or more errors. Please correct them."
-msgstr ""
-"Krydstogtskibs-formularen indeholder en eller flere fejl. Ret dem venligt."
+msgid ""
+"You do not have the required permissions to submit harbor dues forms for "
+"review"
+msgstr "Du har ikke de fornødne rettigheder til at indsende en blanket"
 
 #: havneafgifter/views.py
 msgid ""
@@ -1423,6 +1426,10 @@ msgstr "Du har ikke de fornødne rettigheder til at se statistik"
 #: havneafgifter/views.py
 msgid "You do not have the required permissions to view statistics"
 msgstr "Du har ikke de fornødne rettigheder til at se statistik"
+
+#: havneafgifter/views.py
+msgid "You do not have the required permissions to view passenger statistics"
+msgstr ""
 
 #: havneafgifter/views.py
 msgid "Du har ikke rettighed til at se denne side."
