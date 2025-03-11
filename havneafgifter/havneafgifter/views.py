@@ -826,11 +826,16 @@ class StatisticsView(
             }
             filter_fields = {}
 
-            for action in ("arrival", "departure"):
-                for op in ("gt", "lt"):
-                    field_value = form.cleaned_data[f"{action}_{op}"]
-                    if field_value:
-                        filter_fields[f"datetime_of_{action}__{op}"] = field_value
+            field_value = form.cleaned_data["arrival_gt"]
+            if field_value:
+                filter_fields["datetime_of_arrival__gt"] = field_value
+
+            field_value = form.cleaned_data["arrival_lt"]
+            if field_value:
+                # Offset added to catch arrivals ON the date of the last chosen date
+                filter_fields["datetime_of_arrival__lt"] = field_value + relativedelta(
+                    days=1
+                )
 
             for field in (
                 "municipality",
