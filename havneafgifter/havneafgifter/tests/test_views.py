@@ -740,6 +740,19 @@ class StatisticsTest(TestCase):
             },
         )
 
+    def test_filter_port_authority(self):
+        rows = self.get_rows(
+            port_authority=PortAuthority.objects.get(
+                name="Royal Arctic Line A/S",
+            ).pk
+        )
+        self.assertEqual(len(rows), 3)
+
+        rows = self.get_rows(
+            port_authority=PortAuthority.objects.get(name="Mittarfeqarfiit").pk,
+        )
+        self.assertEqual(len(rows), 0)
+
     def test_filter_arrival(self):
         rows = self.get_rows(arrival_gt=datetime(2025, 1, 1, 0, 0, 0))
         self.assertEqual(len(rows), 1)
