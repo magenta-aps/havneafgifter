@@ -746,7 +746,7 @@ class StatisticsTest(TestCase):
                 name="Royal Arctic Line A/S",
             ).pk
         )
-        self.assertEqual(len(rows), 3)
+        self.assertEqual(len(rows), 1)
 
         rows = self.get_rows(
             port_authority=PortAuthority.objects.get(name="Mittarfeqarfiit").pk,
