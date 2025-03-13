@@ -30,6 +30,7 @@
     {% csrf_token %}
     {% media_csp form %}
     {% include "havneafgifter/statistik/field_multiselect.html" with field=form.municipality %}
+    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.port_authority %}
     {% include "havneafgifter/statistik/field_range.html" with field1=form.arrival_gt field2=form.arrival_lt label=_("Ankomst") %}
     {% include "havneafgifter/statistik/field_multiselect.html" with field=form.vessel_type %}
     {% include "havneafgifter/statistik/field_multiselect.html" with field=form.site %}
