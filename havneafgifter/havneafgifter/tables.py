@@ -51,12 +51,39 @@ class StatistikTable(tables.Table):
     orderable = False
     municipality = tables.Column(verbose_name=_("Kommune"))
     vessel_type = tables.Column(verbose_name=_("Skibstype"))
+
+    # New
+    vessel_name = tables.Column(verbose_name=_("Skibsnavn"))
+
     port_of_call = tables.Column(verbose_name=_("Havn"))
     site = tables.Column(verbose_name=_("Landgangssted"))
-    disembarkment_tax_sum = tables.Column(verbose_name=_("Landgangsafgift"))
-    harbour_tax_sum = tables.Column(verbose_name=_("Havneafgift"))
-    count = tables.Column(verbose_name=_("Antal skibe"))
+    
+    # New
+    port_authority = tables.Column(verbose_name=_("Havnemyndighed"))
+    gross_tonnage = tables.Column(verbose_name=_("Bruttoton"), visible=False)
+    date_of_arrival = tables.Column(verbose_name=_("Ankomstdato"), visible=False)
+    date_of_departure = tables.Column(verbose_name=_("Afsejlingsdato"), visible=False)
+    number_of_passengers = tables.Column(verbose_name=_("Antal pax"), visible=False)
+    harbour_tax = tables.Column(verbose_name=_("Havneafgift"), visible=False) # Missing #NOTE: Currenty, individual harbour taxes are NOT saved
+    pax_tax = tables.Column(verbose_name=_("Paxtax"), visible=False)
+
+    # NOTE: Disembarkment and environment are possibly the same fee. Stan has been notified
+    # NOTE: Currently, individual disembarkment taxes are NOT saved
+    disembarkment_tax = tables.Column(verbose_name=_("Landgangsafgift"), visible=False)
+
+    # New
+    # environment_maintenance_fee = tables.Column(
+    #     verbose_name=_("Miljø- og vdligeholdelsesafgift"),
+    #     visible=False,
+    # ) # Missing. Needs clarification
+
+    harbour_tax_sum = tables.Column(verbose_name=_("Summeret Havneafgift"))
+    disembarkment_tax_sum = tables.Column(verbose_name=_("Summeret Landgangsafgift"))
+    #count = tables.Column(verbose_name=_("Antal skibe"), visible=False)
     status = tables.Column(verbose_name=_("Status"))
+
+    # New
+    id = tables.Column(verbose_name=_("Blanket ID"), visible=False)
 
 
 class PassengerStatisticsTable(tables.Table):
