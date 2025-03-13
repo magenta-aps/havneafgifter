@@ -823,6 +823,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 else:
                     payments = datetime_range.started_days
                 range_port_tax = payments * port_taxrate.port_tax_rate * gross_tonnage
+                #NOTE: As with disembarkment taxes, should harbour taxes be saved separately per. harbour?
                 harbour_tax += range_port_tax
             details.append(
                 {
@@ -1080,6 +1081,8 @@ class CruiseTaxForm(HarborDuesForm):
                 else None
             )
             tax = Decimal(0)
+            # NOTE: #62718 - Should we save the disembarkment's individual disembarkmen
+            # taxes? Await answer from Stan and Niels Olav
             if disembarkment_tax_rate is not None:
                 tax = (
                     disembarkment.number_of_passengers

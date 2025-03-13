@@ -75,6 +75,7 @@ from havneafgifter.models import (
     Nationality,
     PassengersByCountry,
     Port,
+    PortAuthority,
     PortTaxRate,
     ShipType,
     Status,
@@ -817,6 +818,8 @@ class StatisticsView(
                     "cruisetaxform__disembarkment__disembarkment_site__municipality"
                 ),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
+                "number_of_passengers": F("cruisetaxform__number_of_passengers"),
+                "pax_tax": F("cruisetaxform__pax_tax"),
                 "port_authority": F("port_of_call__portauthority"),
             }
             filter_fields = {}
@@ -843,15 +846,15 @@ class StatisticsView(
                 field_value = form.cleaned_data[field]
                 if field_value:
                     filter_fields[f"{field}__in"] = field_value
-                    group_fields.append(field)
+                    #group_fields.append(field)
 
             qs = qs.annotate(**shortcut_fields)
             qs = qs.filter(**filter_fields)
+
             if group_fields:
                 qs = qs.values(*group_fields).distinct()
             else:
                 qs = qs.values().distinct()
-
             qs = qs.annotate(
                 disembarkment_tax_sum=Coalesce(
                     Sum(
@@ -863,25 +866,39 @@ class StatisticsView(
                     ),
                     Decimal("0.00"),
                 ),
-                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
+                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")), #NOTE: #62718 This might be superfluous
                 count=Count("pk", distinct=True),
             )
             if not group_fields:
                 qs = qs.values(
+                    "datetime_of_arrival",
+                    "datetime_of_departure",
+                    "port_authority",
                     "id",
                     "municipality",
+                    "vessel_name",
                     "vessel_type",
                     "port_of_call",
                     "site",
-                    "disembarkment_tax_sum",
+                    "number_of_passengers",
+                    "disembarkment_tax_sum", #NOTE: #62718, should this be shown for non-harbours?
                     "harbour_tax_sum",
-                    "count",
+                    "pax_tax",
+                    "gross_tonnage",
                     "status",
                 )
             qs.order_by("municipality", "vessel_type", "port_of_call", "site", "status")
 
             items = list(qs)
             for item in items:
+                datetime_of_arrival = item.get("datetime_of_arrival")
+                if datetime_of_arrival:
+                    item["date_of_arrival"] = datetime_of_arrival.date().isoformat()
+
+                datetime_of_departure = item.get("datetime_of_departure")
+                if datetime_of_departure:
+                    item["date_of_departure"] = datetime_of_departure.date().isoformat()
+
                 municipality = item.get("municipality")
                 if municipality:
                     item["municipality"] = Municipality(municipality).label
@@ -889,6 +906,12 @@ class StatisticsView(
                 port_of_call = item.get("port_of_call")
                 if port_of_call:
                     item["port_of_call"] = Port.objects.get(pk=port_of_call).name
+
+                port_authority = item.get("port_authority")
+                if port_authority:
+                    item["port_authority"] = PortAuthority.objects.get(
+                        pk=port_authority,
+                    ).name
 
                 site = item.get("site")
                 if site:
@@ -901,6 +924,14 @@ class StatisticsView(
                 status = item.get("status")
                 if status:
                     item["status"] = Status(status).label
+
+                site = item.get("site")
+                port_of_call = item.get("port_of_call")
+                if site and port_of_call and not site == port_of_call:
+                    item["harbour_tax_sum"] = None
+                    item["pax_tax"] = None
+                    item["number_of_passengers"] = None
+
             return items
         return []
 
