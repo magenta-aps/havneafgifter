@@ -44,6 +44,7 @@ from havneafgifter.models import (
     Municipality,
     Nationality,
     Port,
+    PortAuthority,
     PortTaxRate,
     ShippingAgent,
     ShipType,
@@ -573,6 +574,11 @@ class StatisticsForm(BootstrapForm):
     municipality = MultipleChoiceField(
         label=_("Kommune"),
         choices=Municipality.choices,
+        required=False,
+    )
+    port_authority = ModelMultipleChoiceField(
+        label=_("Havnemyndighed"),
+        queryset=PortAuthority.objects.all(),
         required=False,
     )
     arrival_gt = DateTimeField(

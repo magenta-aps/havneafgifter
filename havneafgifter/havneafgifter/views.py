@@ -823,6 +823,7 @@ class StatisticsView(
                     "cruisetaxform__disembarkment__disembarkment_site__municipality"
                 ),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
+                "port_authority": F("port_of_call__portauthority"),
             }
             filter_fields = {}
 
@@ -840,6 +841,7 @@ class StatisticsView(
             for field in (
                 "municipality",
                 "vessel_type",
+                "port_authority",
                 "port_of_call",
                 "site",
                 "status",
