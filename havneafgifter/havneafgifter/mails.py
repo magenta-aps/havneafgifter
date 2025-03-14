@@ -167,7 +167,7 @@ class NotificationMail:
 
     @property
     def mail_body(self):
-        raise NotImplementedError("must be implemented by subclass")  # pragma: no cover
+        raise NotImplementedError("must be implemented by subclass")
 
     @property
     def success_message(self) -> str:
