@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-11 08:53-0200\n"
+"POT-Creation-Date: 2025-03-14 12:17-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -159,15 +159,15 @@ msgid "Ankomst efter"
 msgstr ""
 
 #: havneafgifter/forms.py
+msgid "Ankomst tidligst"
+msgstr ""
+
+#: havneafgifter/forms.py
 msgid "Ankomst før"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Afrejse efter"
-msgstr ""
-
-#: havneafgifter/forms.py
-msgid "Afrejse før"
+msgid "Ankomst senest"
 msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/tables.py
@@ -1185,11 +1185,7 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Ankomst"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Afrejse"
+msgid "Periode"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrateform.html

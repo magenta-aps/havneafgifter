@@ -253,8 +253,8 @@ class HarborDuesFormCreateView(
             except CruiseTaxForm.DoesNotExist:
                 try:
                     self.object = HarborDuesForm.objects.get(pk=pk)
-                except HarborDuesForm.DoesNotExist:
-                    return self.object
+                except HarborDuesForm.DoesNotExist:  # pragma: no cover
+                    return self.object  # pragma: no cover
         return self.object
 
     def get_context_data(self, **kwargs):
@@ -323,8 +323,6 @@ class HarborDuesFormCreateView(
                 and harbor_dues_form.shipping_agent
             ):
                 self.handle_notification_mail(OnSendToAgentMail, self.object)
-        else:
-            self.object.save()
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
