@@ -406,7 +406,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         if self._user.is_authenticated:
             return self._user.user_type == UserType.SHIP
         else:
-            return False  # pragma: no cover
+            return False
 
     @property
     def has_port_of_call(self):
@@ -490,7 +490,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     def clean_port_of_call(self):
         port_of_call = self.cleaned_data.get("port_of_call")
         if isinstance(port_of_call, Port):
-            return port_of_call  # pragma: no cover
+            return port_of_call
 
         if port_of_call:
             port_of_call = int(port_of_call)
@@ -502,7 +502,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         elif port_of_call == -1:
             return Port(name="Blank")
         else:
-            return None  # pragma: no cover
+            return None
 
 
 class PassengersTotalForm(CSPFormMixin, Form):
