@@ -251,10 +251,11 @@ class HarborDuesFormCreateView(
             try:
                 self.object = CruiseTaxForm.objects.get(pk=pk)
             except CruiseTaxForm.DoesNotExist:
-                try:
-                    self.object = HarborDuesForm.objects.get(pk=pk)
-                except HarborDuesForm.DoesNotExist:
-                    return self.object
+                self.object = (
+                    HarborDuesForm.objects.get(pk=pk)
+                    if HarborDuesForm.objects.filter(pk=pk).exists()
+                    else None
+                )
         return self.object
 
     def get_context_data(self, **kwargs):
@@ -301,7 +302,7 @@ class HarborDuesFormCreateView(
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
-            self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
+            self.object = self._update_cruise_tax_form(harbor_dues_form)
         else:
             harbor_dues_form.save()
             self.object = harbor_dues_form
@@ -323,8 +324,6 @@ class HarborDuesFormCreateView(
                 and harbor_dues_form.shipping_agent
             ):
                 self.handle_notification_mail(OnSendToAgentMail, self.object)
-        else:
-            self.object.save()
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
@@ -332,7 +331,7 @@ class HarborDuesFormCreateView(
             self.object,
         )
 
-    def _create_or_update_cruise_tax_form(
+    def _update_cruise_tax_form(
         self, harbor_dues_form: HarborDuesForm
     ) -> CruiseTaxForm:
         field_vals = {
@@ -341,40 +340,36 @@ class HarborDuesFormCreateView(
             if not k.startswith("_")  # skip `_state`, etc.
         }
 
-        if harbor_dues_form.pk is None:
-            # The `HarborDuesForm` has not yet been saved to the database.
-            # If we create the corresponding `CruiseTaxForm`, the corresponding
-            # `HarborDuesForm` will be created automatically.
-            return CruiseTaxForm.objects.create(**field_vals)
+        # A `CruiseTaxForm` object may already exist for this PK.
+        # Note: This method is *only* called in form_valid above, and we know
+        # that the first thing it does is saving the form.
+        try:
+            cruise_tax_form = CruiseTaxForm.objects.get(
+                harborduesform_ptr=harbor_dues_form.pk
+            )
+        except CruiseTaxForm.DoesNotExist:
+            # A `CruiseTaxForm` does not exist, but the user is trying to save a
+            # cruise tax form, i.e. they are editing a harbor dues form and have
+            # changed the vessel type to `CRUISE`. Create the corresponding
+            # `CruiseTaxForm`.
+            return CruiseTaxForm.objects.create(
+                harborduesform_ptr=harbor_dues_form,
+                # Copy all fields from `HarborDuesForm` except `status`
+                **{
+                    k: v
+                    for k, v in field_vals.items()
+                    if k not in ("harborduesform_ptr", "status")
+                },
+            )
         else:
-            # A `CruiseTaxForm` object may already exist for this PK.
-            try:
-                cruise_tax_form = CruiseTaxForm.objects.get(
-                    harborduesform_ptr=harbor_dues_form.pk
-                )
-            except CruiseTaxForm.DoesNotExist:
-                # A `CruiseTaxForm` does not exist, but the user is trying to save a
-                # cruise tax form, i.e. they are editing a harbor dues form and have
-                # changed the vessel type to `CRUISE`. Create the corresponding
-                # `CruiseTaxForm`.
-                return CruiseTaxForm.objects.create(
-                    harborduesform_ptr=harbor_dues_form,
-                    # Copy all fields from `HarborDuesForm` except `status`
-                    **{
-                        k: v
-                        for k, v in field_vals.items()
-                        if k not in ("harborduesform_ptr", "status")
-                    },
-                )
-            else:
-                # A `CruiseTaxForm` exists for this PK.
-                # Update all its fields, except `status`.
-                for k, v in field_vals.items():
-                    if k == "status":
-                        continue
-                    setattr(cruise_tax_form, k, v)
-                cruise_tax_form.save()
-                return cruise_tax_form
+            # A `CruiseTaxForm` exists for this PK.
+            # Update all its fields, except `status`.
+            for k, v in field_vals.items():
+                if k == "status":
+                    continue
+                setattr(cruise_tax_form, k, v)
+            cruise_tax_form.save()
+            return cruise_tax_form
 
     def get_base_form(self, **form_kwargs):
         status = self.request.POST.get("base-status")
@@ -448,7 +443,7 @@ class HarborDuesFormCreateView(
             passenger_total_form.validate_total(actual_total)
 
             if not passenger_total_form.is_valid():
-                return self.render_to_response(
+                return self.render_to_response(  # pragma: no cover
                     context={
                         "base_form": base_form,
                         "passenger_total_form": passenger_total_form,
