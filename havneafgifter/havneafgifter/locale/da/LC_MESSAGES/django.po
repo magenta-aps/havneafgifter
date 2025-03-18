@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-14 12:17-0200\n"
+"POT-Creation-Date: 2025-03-18 09:55-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -659,6 +659,14 @@ msgid "Tallet er for stort"
 msgstr ""
 
 #: havneafgifter/models.py
+msgid "Landsætningsafgift for pågældende anløb"
+msgstr ""
+
+#: havneafgifter/models.py
+msgid "Tax rate used for existing calculation"
+msgstr ""
+
+#: havneafgifter/models.py
 #, fuzzy
 #| msgid "Tax per passenger"
 msgid "Afgift pr. passager"
@@ -733,15 +741,47 @@ msgid "Operation"
 msgstr ""
 
 #: havneafgifter/tables.py
+msgid "Skibsnavn"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Havnemyndighed"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Bruttoton"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Ankomstdato"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Afsejlingsdato"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Antal pax"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Paxtax"
+msgstr ""
+
+#: havneafgifter/tables.py
 msgid "Landgangsafgift"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Havneafgift"
+msgid "Summeret Havneafgift"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Antal skibe"
+msgid "Summeret Landgangsafgift"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Blanket ID"
 msgstr ""
 
 #: havneafgifter/tables.py

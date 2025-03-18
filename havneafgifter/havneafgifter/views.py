@@ -812,12 +812,12 @@ class StatisticsView(
         form = self.get_form()
         if form.is_valid():
             qs = HarborDuesForm.objects.all()
-            group_fields = []
             shortcut_fields = {
                 "municipality": F(
                     "cruisetaxform__disembarkment__disembarkment_site__municipality"
                 ),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
+                "disembarkment": F("cruisetaxform__disembarkment"),
                 "number_of_passengers": F("cruisetaxform__number_of_passengers"),
                 "pax_tax": F("cruisetaxform__pax_tax"),
                 "port_authority": F("port_of_call__portauthority"),
@@ -846,15 +846,11 @@ class StatisticsView(
                 field_value = form.cleaned_data[field]
                 if field_value:
                     filter_fields[f"{field}__in"] = field_value
-                    #group_fields.append(field)
 
             qs = qs.annotate(**shortcut_fields)
             qs = qs.filter(**filter_fields)
 
-            if group_fields:
-                qs = qs.values(*group_fields).distinct()
-            else:
-                qs = qs.values().distinct()
+            qs = qs.values().distinct()
             qs = qs.annotate(
                 disembarkment_tax_sum=Coalesce(
                     Sum(
@@ -866,36 +862,36 @@ class StatisticsView(
                     ),
                     Decimal("0.00"),
                 ),
-                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")), #NOTE: #62718 This might be superfluous
+                harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
                 count=Count("pk", distinct=True),
             )
-            if not group_fields:
-                qs = qs.values(
-                    "datetime_of_arrival",
-                    "datetime_of_departure",
-                    "port_authority",
-                    "id",
-                    "municipality",
-                    "vessel_name",
-                    "vessel_type",
-                    "port_of_call",
-                    "site",
-                    "number_of_passengers",
-                    "disembarkment_tax_sum", #NOTE: #62718, should this be shown for non-harbours?
-                    "harbour_tax_sum",
-                    "pax_tax",
-                    "gross_tonnage",
-                    "status",
-                )
-            qs.order_by("municipality", "vessel_type", "port_of_call", "site", "status")
+            qs = qs.values(
+                "municipality",
+                "vessel_name",
+                "vessel_type",
+                "port_of_call",
+                "site",
+                "number_of_passengers",
+                "disembarkment_tax_sum",
+                "disembarkment",
+                "harbour_tax_sum",
+                "pax_tax",
+                "gross_tonnage",
+                "status",
+                "datetime_of_arrival",
+                "datetime_of_departure",
+                "port_authority",
+                "id",
+            )
+            qs = qs.order_by("datetime_of_arrival", "id", "municipality", "vessel_type", "port_of_call", "site", "status")
 
             items = list(qs)
             for item in items:
-                datetime_of_arrival = item.get("datetime_of_arrival")
+                datetime_of_arrival = item.pop("datetime_of_arrival")
                 if datetime_of_arrival:
                     item["date_of_arrival"] = datetime_of_arrival.date().isoformat()
 
-                datetime_of_departure = item.get("datetime_of_departure")
+                datetime_of_departure = item.pop("datetime_of_departure")
                 if datetime_of_departure:
                     item["date_of_departure"] = datetime_of_departure.date().isoformat()
 
@@ -916,6 +912,12 @@ class StatisticsView(
                 site = item.get("site")
                 if site:
                     item["site"] = DisembarkmentSite.objects.get(pk=site).name
+                
+                disembarkment = item.get("disembarkment")
+                if disembarkment:
+                    disembarkment = Disembarkment.objects.get(pk=disembarkment)
+                    item["disembarkment_tax"] = disembarkment.get_disembarkment_tax(save=True)
+                    item["disembarked_passengers"] = disembarkment.number_of_passengers
 
                 vessel_type = item.get("vessel_type")
                 if vessel_type:
@@ -927,10 +929,13 @@ class StatisticsView(
 
                 site = item.get("site")
                 port_of_call = item.get("port_of_call")
+                # NOTE: There's a possible problem if ships have No port of call
                 if site and port_of_call and not site == port_of_call:
                     item["harbour_tax_sum"] = None
                     item["pax_tax"] = None
                     item["number_of_passengers"] = None
+                    item["disembarkment_tax_sum"] = None
+
 
             return items
         return []
