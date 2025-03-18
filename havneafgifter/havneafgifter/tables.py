@@ -62,7 +62,9 @@ class StatistikTable(tables.Table):
     pax_tax = tables.Column(verbose_name=_("Paxtax"), visible=False)
     disembarkment_tax = tables.Column(verbose_name=_("Landgangsafgift"))
     harbour_tax_sum = tables.Column(verbose_name=_("Summeret Havneafgift"))
-    disembarkment_tax_sum = tables.Column(verbose_name=_("Summeret Landgangsafgift"), visible=False)
+    disembarkment_tax_sum = tables.Column(
+        verbose_name=_("Summeret Landgangsafgift"), visible=False
+    )
     status = tables.Column(verbose_name=_("Status"))
     id = tables.Column(verbose_name=_("Blanket ID"), visible=False)
 

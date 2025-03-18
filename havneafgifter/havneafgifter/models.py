@@ -823,7 +823,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 else:
                     payments = datetime_range.started_days
                 range_port_tax = payments * port_taxrate.port_tax_rate * gross_tonnage
-                #NOTE: As with disembarkment taxes, should harbour taxes be saved separately per. harbour?
                 harbour_tax += range_port_tax
             details.append(
                 {
@@ -1065,16 +1064,16 @@ class CruiseTaxForm(HarborDuesForm):
         self.calculate_passenger_tax(save=save)
         self.calculate_disembarkment_tax(save=save)
 
-    def calculate_disembarkment_tax(self, save: bool = True, force_recalculation: bool = False):
+    def calculate_disembarkment_tax(
+        self, save: bool = True, force_recalculation: bool = False
+    ):
         disembarkment_date = self.datetime_of_arrival or self.date
-        taxrate = TaxRates.objects.filter(
-            Q(start_datetime__isnull=True) | Q(start_datetime__lte=disembarkment_date),
-            Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
-        ).first()
         disembarkment_tax = Decimal(0)
         details = []
         for disembarkment in self.disembarkment_set.all():
-            tax = disembarkment.get_disembarkment_tax(save=save, force_recalculation=force_recalculation)
+            tax = disembarkment.get_disembarkment_tax(
+                save=save, force_recalculation=force_recalculation
+            )
             if tax is not None:
                 disembarkment_tax += tax
 
@@ -1240,7 +1239,7 @@ class Disembarkment(PermissionsMixin, models.Model):
     )
 
     disembarkment_tax = models.DecimalField(
-        null = True,
+        null=True,
         blank=True,
         decimal_places=2,
         max_digits=9,
@@ -1255,14 +1254,17 @@ class Disembarkment(PermissionsMixin, models.Model):
         verbose_name=_("Tax rate used for existing calculation"),
     )
 
-    def get_disembarkment_tax(self, save: bool = True, force_recalculation: bool = False):
+    def get_disembarkment_tax(
+        self, save: bool = True, force_recalculation: bool = False
+    ):
         if self.disembarkment_tax and not force_recalculation:
             return self.disembarkment_tax
         else:
             cruisetaxform = self.cruise_tax_form
             disembarkment_date = cruisetaxform.datetime_of_arrival or cruisetaxform.date
             taxrate = TaxRates.objects.filter(
-                Q(start_datetime__isnull=True) | Q(start_datetime__lte=disembarkment_date),
+                Q(start_datetime__isnull=True)
+                | Q(start_datetime__lte=disembarkment_date),
                 Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
             ).first()
             disembarkment_tax_rate = (
@@ -1276,10 +1278,20 @@ class Disembarkment(PermissionsMixin, models.Model):
                     self.number_of_passengers
                     * disembarkment_tax_rate.disembarkment_tax_rate
                 )
+                used_disembarkment_tax_rate = (
+                    disembarkment_tax_rate.disembarkment_tax_rate
+                )
+            else:
+                used_disembarkment_tax_rate = None
             if save:
                 self.disembarkment_tax = disembarkment_tax
-                self.used_disembarkment_tax_rate = disembarkment_tax_rate.disembarkment_tax_rate
-                self.save(update_fields=("disembarkment_tax", "used_disembarkment_tax_rate",))
+                self.used_disembarkment_tax_rate = used_disembarkment_tax_rate
+                self.save(
+                    update_fields=(
+                        "disembarkment_tax",
+                        "used_disembarkment_tax_rate",
+                    )
+                )
             return disembarkment_tax
 
     @classmethod

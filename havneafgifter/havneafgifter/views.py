@@ -883,7 +883,15 @@ class StatisticsView(
                 "port_authority",
                 "id",
             )
-            qs = qs.order_by("datetime_of_arrival", "id", "municipality", "vessel_type", "port_of_call", "site", "status")
+            qs = qs.order_by(
+                "datetime_of_arrival",
+                "id",
+                "municipality",
+                "vessel_type",
+                "port_of_call",
+                "site",
+                "status",
+            )
 
             items = list(qs)
             for item in items:
@@ -912,11 +920,13 @@ class StatisticsView(
                 site = item.get("site")
                 if site:
                     item["site"] = DisembarkmentSite.objects.get(pk=site).name
-                
+
                 disembarkment = item.get("disembarkment")
                 if disembarkment:
                     disembarkment = Disembarkment.objects.get(pk=disembarkment)
-                    item["disembarkment_tax"] = disembarkment.get_disembarkment_tax(save=True)
+                    item["disembarkment_tax"] = disembarkment.get_disembarkment_tax(
+                        save=True
+                    )
                     item["disembarked_passengers"] = disembarkment.number_of_passengers
 
                 vessel_type = item.get("vessel_type")
@@ -935,7 +945,6 @@ class StatisticsView(
                     item["pax_tax"] = None
                     item["number_of_passengers"] = None
                     item["disembarkment_tax_sum"] = None
-
 
             return items
         return []
