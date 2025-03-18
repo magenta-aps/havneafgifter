@@ -1273,6 +1273,7 @@ class Disembarkment(PermissionsMixin, models.Model):
                 else None
             )
             disembarkment_tax = Decimal(0)
+            used_disembarkment_tax_rate = Decimal(0)
             if disembarkment_tax_rate is not None:
                 disembarkment_tax = (
                     self.number_of_passengers
@@ -1281,8 +1282,6 @@ class Disembarkment(PermissionsMixin, models.Model):
                 used_disembarkment_tax_rate = (
                     disembarkment_tax_rate.disembarkment_tax_rate
                 )
-            else:
-                used_disembarkment_tax_rate = None
             if save:
                 self.disembarkment_tax = disembarkment_tax
                 self.used_disembarkment_tax_rate = used_disembarkment_tax_rate

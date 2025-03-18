@@ -193,6 +193,12 @@ class CalculationTest(TestCase):
             disembarkment_tax_rate=Decimal(30),
             disembarkment_site=None,
         )
+        cls.disembarkment_tax2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rates1,
+            municipality=Municipality.QEQQATA,
+            disembarkment_tax_rate=Decimal(30),
+            disembarkment_site=None,
+        )
         ShippingAgent.objects.create(name="Birgers Bodega", email="birger@hotmail.com")
         cls.harborduesform1 = CruiseTaxForm.objects.create(
             port_of_call=Port.objects.get(name="Test1"),
