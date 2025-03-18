@@ -474,7 +474,7 @@ class CalculationTest(TestCase):
             {
                 "disembarkment": self.disembarkment2,
                 "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
-                "taxrate": self.disembarkment_tax2,
+                "taxrate": self.disembarkment_tax2.disembarkment_tax_rate,
                 "tax": Decimal("600.00"),  # 20 people * 30 kr
             },
         )
@@ -483,7 +483,7 @@ class CalculationTest(TestCase):
             {
                 "disembarkment": self.disembarkment1,
                 "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
-                "taxrate": self.disembarkment_tax1,
+                "taxrate": self.disembarkment_tax1.disembarkment_tax_rate,
                 "tax": Decimal("400.00"),  # 100 people * 40 kr
             },
         )
