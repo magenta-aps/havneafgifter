@@ -151,10 +151,6 @@ msgid "Kommune"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Havnemyndighed"
-msgstr ""
-
-#: havneafgifter/forms.py
 msgid "Ankomst efter"
 msgstr ""
 

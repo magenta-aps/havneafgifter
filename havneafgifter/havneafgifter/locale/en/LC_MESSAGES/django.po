@@ -718,10 +718,6 @@ msgid "Skibsnavn"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Havnemyndighed"
-msgstr ""
-
-#: havneafgifter/tables.py
 msgid "Bruttoton"
 msgstr ""
 
