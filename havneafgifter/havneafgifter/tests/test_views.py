@@ -390,7 +390,14 @@ class TestHarborDuesFormCreateView(
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(instance), model_class)
 
-    # def test_creates_cruise_with_passengers(self):
+    def test_post_invalid_passengers_total(self):
+        with patch(
+            "havneafgifter.forms.PassengersTotalForm.is_valid", lambda form: False
+        ) as mock_is_valid:
+            self.client.force_login(self.ship_user)
+            response = self.client.get(reverse("havneafgifter:harbor_dues_form_create"))
+            self.assertEqual(mock_is_valid(None), False)
+            self.assertEqual(response.status_code, 200)
 
     def test_ship_user(self):
         self.client.force_login(self.ship_user)

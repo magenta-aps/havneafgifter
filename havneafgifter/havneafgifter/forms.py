@@ -487,7 +487,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     def clean_port_of_call(self):
         port_of_call = self.cleaned_data.get("port_of_call")
         if isinstance(port_of_call, Port):
-            return port_of_call  # pragma: no cover
+            return port_of_call
 
         if port_of_call:
             port_of_call = int(port_of_call)

@@ -21,11 +21,8 @@ from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 class TestNotificationMail(TestCase):
     def test_mail_body(self):
         mail = NotificationMail(HarborDuesForm())
-        try:
-            body = mail.mail_body
-            print(body)
-        except NotImplementedError as e:
-            self.assertEqual(str(e), "must be implemented by subclass")
+        with self.assertRaises(NotImplementedError):
+            mail.mail_body
 
 
 class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):

@@ -302,7 +302,7 @@ class HarborDuesFormCreateView(
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
-            self.object = self._update_cruise_tax_form(harbor_dues_form)
+            self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
         else:
             harbor_dues_form.save()
             self.object = harbor_dues_form
@@ -331,7 +331,7 @@ class HarborDuesFormCreateView(
             self.object,
         )
 
-    def _update_cruise_tax_form(
+    def _create_or_update_cruise_tax_form(
         self, harbor_dues_form: HarborDuesForm
     ) -> CruiseTaxForm:
         field_vals = {
@@ -340,36 +340,40 @@ class HarborDuesFormCreateView(
             if not k.startswith("_")  # skip `_state`, etc.
         }
 
-        # A `CruiseTaxForm` object may already exist for this PK.
-        # Note: This method is *only* called in form_valid above, and we know
-        # that the first thing it does is saving the form.
-        try:
-            cruise_tax_form = CruiseTaxForm.objects.get(
-                harborduesform_ptr=harbor_dues_form.pk
-            )
-        except CruiseTaxForm.DoesNotExist:
-            # A `CruiseTaxForm` does not exist, but the user is trying to save a
-            # cruise tax form, i.e. they are editing a harbor dues form and have
-            # changed the vessel type to `CRUISE`. Create the corresponding
-            # `CruiseTaxForm`.
-            return CruiseTaxForm.objects.create(
-                harborduesform_ptr=harbor_dues_form,
-                # Copy all fields from `HarborDuesForm` except `status`
-                **{
-                    k: v
-                    for k, v in field_vals.items()
-                    if k not in ("harborduesform_ptr", "status")
-                },
-            )
+        if harbor_dues_form.pk is None:
+            # The `HarborDuesForm` has not yet been saved to the database.
+            # If we create the corresponding `CruiseTaxForm`, the corresponding
+            # `HarborDuesForm` will be created automatically.
+            return CruiseTaxForm.objects.create(**field_vals)  # pragma: no cover
         else:
-            # A `CruiseTaxForm` exists for this PK.
-            # Update all its fields, except `status`.
-            for k, v in field_vals.items():
-                if k == "status":
-                    continue
-                setattr(cruise_tax_form, k, v)
-            cruise_tax_form.save()
-            return cruise_tax_form
+            # A `CruiseTaxForm` object may already exist for this PK.
+            try:
+                cruise_tax_form = CruiseTaxForm.objects.get(
+                    harborduesform_ptr=harbor_dues_form.pk
+                )
+            except CruiseTaxForm.DoesNotExist:
+                # A `CruiseTaxForm` does not exist, but the user is trying to save a
+                # cruise tax form, i.e. they are editing a harbor dues form and have
+                # changed the vessel type to `CRUISE`. Create the corresponding
+                # `CruiseTaxForm`.
+                return CruiseTaxForm.objects.create(
+                    harborduesform_ptr=harbor_dues_form,
+                    # Copy all fields from `HarborDuesForm` except `status`
+                    **{
+                        k: v
+                        for k, v in field_vals.items()
+                        if k not in ("harborduesform_ptr", "status")
+                    },
+                )
+            else:
+                # A `CruiseTaxForm` exists for this PK.
+                # Update all its fields, except `status`.
+                for k, v in field_vals.items():
+                    if k == "status":
+                        continue
+                    setattr(cruise_tax_form, k, v)
+                cruise_tax_form.save()
+                return cruise_tax_form
 
     def get_base_form(self, **form_kwargs):
         status = self.request.POST.get("base-status")
