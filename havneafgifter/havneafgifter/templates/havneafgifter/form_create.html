@@ -231,7 +231,9 @@
         if (portOfCall.val() == -1) {
             grossTonnage.prop("disabled", true)
             arrival.prop("disabled", true)
+            arrival.val(null)
             departure.prop("disabled", true)
+            departure.val(null)
             vesselType.prop("disabled", true)
             vesselType.val('CRUISE')
             toggleCruiseFormsets()
