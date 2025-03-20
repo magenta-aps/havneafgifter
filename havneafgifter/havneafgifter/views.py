@@ -442,12 +442,11 @@ class HarborDuesFormCreateView(
             actual_total = 0
             for item in self._get_passengers_by_country_objects(passenger_formset):
                 actual_total += item.number_of_passengers
-
             passenger_total_form.is_valid()
             passenger_total_form.validate_total(actual_total)
 
             if not passenger_total_form.is_valid():
-                return self.render_to_response(  # pragma: no cover
+                return self.render_to_response(
                     context={
                         "base_form": base_form,
                         "passenger_total_form": passenger_total_form,
