@@ -176,6 +176,15 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
                 "Gross tonnage cannot be empty",
             )
 
+    def test_clean_port_of_call(self):
+
+        form = HarborDuesFormForm(self.ship_user, data=self.harbor_dues_form_data)
+        sample_port = Port.objects.get(name="Nordhavn")
+        form.is_valid()
+        form.cleaned_data["port_of_call"] = sample_port
+        returned_port = form.clean_port_of_call()
+        self.assertEqual(sample_port, returned_port)
+
     def test_get_vessel_info_for_ship_user(self):
         # If form is instantiated with a `User` that is a "ship user", the fields
         # `vessel_name`, `vessel_imo`, etc. are pre-filled using data from

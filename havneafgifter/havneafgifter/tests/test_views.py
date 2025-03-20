@@ -390,8 +390,6 @@ class TestHarborDuesFormCreateView(
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(instance), model_class)
 
-    # def test_creates_cruise_with_passengers(self):
-
     def test_ship_user(self):
         self.client.force_login(self.ship_user)
         response = self.client.get(reverse("havneafgifter:harbor_dues_form_create"))
@@ -944,6 +942,39 @@ class TestHarborDuesFormUpdateView(
         cruise_tax_form = CruiseTaxForm.objects.get(pk=self.cruise_tax_draft_form.pk)
         self.assertEqual(cruise_tax_form.status, Status.DRAFT)
         self.assertEqual(cruise_tax_form.vessel_name, "Peder Dingo")
+
+    def test_post_invalid_passengers_total(self):
+        # Arrange
+        self.client.force_login(self.shipping_agent_user)
+        # Act
+        response = self.client.post(
+            self._get_update_view_url(self.cruise_tax_draft_form.pk),
+            data={
+                "base-status": Status.DRAFT.value,
+                "base-vessel_type": ShipType.CRUISE.value,
+                "base-port_of_call": -1,
+                "base-vessel_name": "Peder Dingo",
+                "passengers-TOTAL_FORMS": 2,
+                "passengers-INITIAL_FORMS": 0,
+                "passengers-MIN_NUM_FORMS": 0,
+                "passengers-MAX_NUM_FORMS": 1000,
+                "passenger_total_form-total_number_of_passengers": 1000,
+                "passengers-0-nationality": "AS",
+                "passengers-0-number_of_passengers": 300,
+                "passengers-1-nationality": "CA",
+                "passengers-1-number_of_passengers": 800,
+                "disembarkment-TOTAL_FORMS": 1,
+                "disembarkment-INITIAL_FORMS": 0,
+                "disembarkment-MIN_NUM_FORMS": 0,
+                "disembarkment-MAX_NUM_FORMS": 1000,
+            },
+        )
+        # Assert
+        cruise_tax_form = CruiseTaxForm.objects.get(pk=self.cruise_tax_draft_form.pk)
+        self.assertEqual(cruise_tax_form.status, Status.DRAFT)
+        # Name is not changed because the number of passengers is invalid.
+        self.assertEqual(cruise_tax_form.vessel_name, "Mary")
+        self.assertEqual(response.status_code, 200)
 
     def test_update_harbor_dues_form_to_cruise_tax_form(self):
         """It should be possible to "upgrade" a harbor dues form to a cruise tax form

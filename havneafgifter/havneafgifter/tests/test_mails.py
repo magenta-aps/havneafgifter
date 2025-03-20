@@ -9,12 +9,20 @@ from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.mails import (
     EmailMessage,
+    NotificationMail,
     OnApproveMail,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
 )
 from havneafgifter.models import HarborDuesForm, ShipType, User
 from havneafgifter.tests.mixins import HarborDuesFormTestMixin
+
+
+class TestNotificationMail(TestCase):
+    def test_mail_body(self):
+        mail = NotificationMail(HarborDuesForm())
+        with self.assertRaises(NotImplementedError):
+            mail.mail_body
 
 
 class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
