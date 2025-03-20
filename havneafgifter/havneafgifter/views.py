@@ -251,10 +251,11 @@ class HarborDuesFormCreateView(
             try:
                 self.object = CruiseTaxForm.objects.get(pk=pk)
             except CruiseTaxForm.DoesNotExist:
-                try:
-                    self.object = HarborDuesForm.objects.get(pk=pk)
-                except HarborDuesForm.DoesNotExist:  # pragma: no cover
-                    return self.object  # pragma: no cover
+                self.object = (
+                    HarborDuesForm.objects.get(pk=pk)
+                    if HarborDuesForm.objects.filter(pk=pk).exists()
+                    else None
+                )
         return self.object
 
     def get_context_data(self, **kwargs):
@@ -323,8 +324,6 @@ class HarborDuesFormCreateView(
                 and harbor_dues_form.shipping_agent
             ):
                 self.handle_notification_mail(OnSendToAgentMail, self.object)
-        else:
-            self.object.save()  # pragma: no cover
 
         # Go to detail view to display result.
         return self.get_redirect_for_form(
@@ -439,13 +438,10 @@ class HarborDuesFormCreateView(
         )
 
         # Non-cruise ships will have a list with an empty dict
-        if (
-            passenger_formset.is_valid() and passenger_formset.cleaned_data[0]
-        ):  # pragma: no cover
+        if passenger_formset.is_valid() and passenger_formset.cleaned_data[0]:
             actual_total = 0
             for item in self._get_passengers_by_country_objects(passenger_formset):
                 actual_total += item.number_of_passengers
-
             passenger_total_form.is_valid()
             passenger_total_form.validate_total(actual_total)
 
@@ -474,7 +470,7 @@ class HarborDuesFormCreateView(
                 self.object.number_of_passengers = total_number_of_passengers
                 self.object.save()
 
-            if passenger_formset.cleaned_data[0]:  # pragma: no cover
+            if passenger_formset.cleaned_data[0]:
                 # Create or update `PassengersByCountry` objects based on formset data
                 passengers_by_country_objects = self._get_passengers_by_country_objects(
                     passenger_formset
@@ -525,9 +521,7 @@ class HarborDuesFormCreateView(
                 }
             )
 
-    def _get_passengers_by_country_objects(
-        self, formset
-    ) -> list[PassengersByCountry]:  # pragma: no cover
+    def _get_passengers_by_country_objects(self, formset) -> list[PassengersByCountry]:
         return [
             PassengersByCountry(
                 cruise_tax_form=self.object,
