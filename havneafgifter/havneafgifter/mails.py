@@ -65,8 +65,7 @@ class NotificationMail:
                 object=self.form.port_of_call.portauthority,
             )
         elif (
-            isinstance(self.form, CruiseTaxForm)
-            and not self.form.has_port_of_call
+            not self.form.has_port_of_call
             and settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL
         ):
             return MailRecipient(

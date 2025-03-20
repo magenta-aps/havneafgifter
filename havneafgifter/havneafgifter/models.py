@@ -400,6 +400,7 @@ class PortAuthority(PermissionsMixin, models.Model):
         max_length=32,
         null=False,
         blank=False,
+        unique=True,
         verbose_name=_("Port authority company name"),
         validators=[
             MaxLengthValidator(32, message=_("Navnet er for langt")),
@@ -892,6 +893,20 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         if user.port is None:
             # This port authority user has access to *all* ports belonging to the
             # port authority.
+
+            if (
+                user.port_authority
+                and user.port_authority.name == settings.APPROVER_NO_PORT_OF_CALL
+            ):
+                # This port authority user is in charge of forms with no port
+                # of call
+                base_filter = base_filter | Q(
+                    # 1. Port authority users cannot see DRAFT forms
+                    status__in=[Status.NEW, Status.APPROVED, Status.REJECTED],
+                    # 2. No port of call
+                    port_of_call__isnull=True,
+                )
+
             return base_filter
         else:
             # This port authority user has access to *a specific* port belonging to the
