@@ -818,7 +818,9 @@ class StatisticsView(
                 ),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
                 "disembarkment": F("cruisetaxform__disembarkment"),
-                "number_of_passengers": F("cruisetaxform__number_of_passengers"),
+                "number_of_passengers": F(
+                    "cruisetaxform__disembarkment__number_of_passengers"
+                ),
                 "pax_tax": F("cruisetaxform__pax_tax"),
                 "port_authority": F("port_of_call__portauthority"),
             }
@@ -852,18 +854,22 @@ class StatisticsView(
 
             qs = qs.values().distinct()
             qs = qs.annotate(
+                # NOTE: Create a field for total tax (havneafgift + summeret landgangsafgift)
                 disembarkment_tax_sum=Coalesce(
                     Sum(
                         Subquery(
                             CruiseTaxForm.objects.filter(id=OuterRef("pk")).values(
                                 "disembarkment_tax"
                             )
-                        )
+                        ),
                     ),
                     Decimal("0.00"),
                 ),
                 harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
-                count=Count("pk", distinct=True),
+                total_tax=Coalesce(
+                    F("disembarkment_tax_sum") + F("harbour_tax_sum") + F("pax_tax"),
+                    Decimal("0.00"),
+                ),
             )
             qs = qs.values(
                 "municipality",
@@ -872,10 +878,10 @@ class StatisticsView(
                 "port_of_call",
                 "site",
                 "number_of_passengers",
-                "disembarkment_tax_sum",
                 "disembarkment",
                 "harbour_tax_sum",
                 "pax_tax",
+                "total_tax",
                 "gross_tonnage",
                 "status",
                 "datetime_of_arrival",
@@ -943,8 +949,7 @@ class StatisticsView(
                 if site and port_of_call and not site == port_of_call:
                     item["harbour_tax_sum"] = None
                     item["pax_tax"] = None
-                    item["number_of_passengers"] = None
-                    item["disembarkment_tax_sum"] = None
+                    item["total_tax"] = None
 
             return items
         return []

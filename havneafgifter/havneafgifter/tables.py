@@ -56,15 +56,13 @@ class StatistikTable(tables.Table):
     site = tables.Column(verbose_name=_("Landgangssted"))
     port_authority = tables.Column(verbose_name=_("Havnemyndighed"))
     gross_tonnage = tables.Column(verbose_name=_("Bruttoton"), visible=False)
-    date_of_arrival = tables.Column(verbose_name=_("Ankomstdato"), visible=True)
+    date_of_arrival = tables.Column(verbose_name=_("Ankomstdato"), visible=False)
     date_of_departure = tables.Column(verbose_name=_("Afsejlingsdato"), visible=False)
-    number_of_passengers = tables.Column(verbose_name=_("Antal pax"), visible=False)
+    number_of_passengers = tables.Column(verbose_name=_("Antal PAX"), visible=False)
     pax_tax = tables.Column(verbose_name=_("Paxtax"), visible=False)
-    disembarkment_tax = tables.Column(verbose_name=_("Landgangsafgift"))
-    harbour_tax_sum = tables.Column(verbose_name=_("Summeret Havneafgift"))
-    disembarkment_tax_sum = tables.Column(
-        verbose_name=_("Summeret Landgangsafgift"), visible=False
-    )
+    disembarkment_tax = tables.Column(verbose_name=_("Miljø- og vedligeholdelsesgebyr"))
+    harbour_tax_sum = tables.Column(verbose_name=_("Havneafgift"))
+    total_tax = tables.Column(verbose_name=_("Samlet afgift"), visible=False)
     status = tables.Column(verbose_name=_("Status"))
     id = tables.Column(verbose_name=_("Blanket ID"), visible=False)
 

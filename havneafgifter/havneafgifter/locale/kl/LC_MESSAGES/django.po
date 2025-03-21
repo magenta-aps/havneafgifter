@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 06:11-0200\n"
+"POT-Creation-Date: 2025-03-21 13:13-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -639,7 +639,7 @@ msgstr ""
 "avataaniittunut tulaassinerit allat"
 
 #: havneafgifter/models.py
-msgid "Number of passengers disembarking"
+msgid "Number of passengers at time of disembarkment"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -749,7 +749,7 @@ msgid "Afsejlingsdato"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Antal pax"
+msgid "Antal PAX"
 msgstr ""
 
 #: havneafgifter/tables.py
@@ -757,15 +757,15 @@ msgid "Paxtax"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Landgangsafgift"
+msgid "Miljø- og vedligeholdelsesgebyr"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Summeret Havneafgift"
+msgid "Havneafgift"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Summeret Landgangsafgift"
+msgid "Samlet afgift"
 msgstr ""
 
 #: havneafgifter/tables.py
