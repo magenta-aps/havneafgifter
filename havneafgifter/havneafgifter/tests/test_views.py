@@ -2446,6 +2446,27 @@ class PassengerStatisticsTest(TestCase):
             number_of_passengers=2,
             disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
         )
+        cls.form4 = CruiseTaxForm.objects.create(
+            status=Status.APPROVED,
+            port_of_call=ports[1],
+            nationality=Nationality.FINLAND,
+            vessel_name="Testbåd 4",
+            gross_tonnage=10,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("0.00"),
+            pax_tax=Decimal("0.00"),
+            disembarkment_tax=Decimal("5000.00"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form4,
+            number_of_passengers=100,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+        )
+        cls.pbc4 = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.form4,
+            nationality=Nationality.FINLAND,
+            number_of_passengers=100,
+        )
         cls.pbc3 = PassengersByCountry.objects.create(
             cruise_tax_form=cls.form3,
             nationality=Nationality.SWEDEN,
