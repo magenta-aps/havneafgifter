@@ -21,7 +21,7 @@ SPDX-License-Identifier: MPL-2.0
     @top-right {
         font-size: 7pt;
         text-align: right;
-        content: 'Harbour dues {{ form.pk }} ({{ form.date|localize }}) / Umiarsualivimmut Akileraaruti {{ form.pk }} ({{ form.date|localize }})';
+        content: 'Harbour dues {{ form.pk }} ({{ form.date|localize }}) / Umiarsualivimmut Akileraarutit {{ form.pk }} ({{ form.date|localize }})';
     }
 
     @bottom-center {
@@ -121,7 +121,7 @@ table tfoot td p {
 {% block object_title %}
 {# This block is only rendered when outputting HTML (not PDF) #}
 <h1 class="primary">Harbour dues &ndash; {{ form.pk }}</h1>
-<h1 class="secondary">Umiarsualivimmut Akileraaruti &ndash; {{ form.pk }}</h1>
+<h1 class="secondary">Umiarsualivimmut Akileraarutit &ndash; {{ form.pk }}</h1>
 <p>{{ form.date|localize }}</p>
 {% if form.latest_rejection %}
 <div class="alert alert-danger">
