@@ -1012,7 +1012,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             or (
                 action in ("approve", "reject", "invoice")
                 and (
-                    (self.port_of_call is None)
+                    (
+                        self.port_of_call is None
+                        and user.port_authority
+                        and user.port_authority.name
+                        == settings.APPROVER_NO_PORT_OF_CALL
+                    )
                     or (
                         user.has_group_name("PortAuthority")
                         and self._has_port_authority_permission(user)
