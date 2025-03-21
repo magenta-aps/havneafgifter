@@ -984,7 +984,8 @@ class PassengerStatisticsView(StatisticsView):
                 qs = qs.filter(cruise_tax_form__datetime_of_arrival__gte=first_month)
             elif qs:
                 first_month = (
-                    qs.order_by("cruise_tax_form__datetime_of_arrival")
+                    qs.exclude(cruise_tax_form__datetime_of_arrival__isnull=True)
+                    .order_by("cruise_tax_form__datetime_of_arrival")
                     .first()
                     .cruise_tax_form.datetime_of_arrival
                 )
@@ -999,9 +1000,10 @@ class PassengerStatisticsView(StatisticsView):
                 )
             elif qs:
                 last_month = (
-                    qs.order_by("cruise_tax_form__datetime_of_arrival")
+                    qs.exclude(cruise_tax_form__datetime_of_arrival__isnull=True)
+                    .order_by("cruise_tax_form__datetime_of_arrival")
                     .last()
-                    .cruise_tax_form.datetime_of_departure
+                    .cruise_tax_form.datetime_of_arrival
                 )
             else:
                 return []
