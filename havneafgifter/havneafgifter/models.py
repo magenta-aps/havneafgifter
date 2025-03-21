@@ -1014,7 +1014,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 and (
                     (
                         self.port_of_call is None
-                        and user.has_group_name("PortAuthority")
+                        and user.port_authority
                         and user.port_authority.name
                         == settings.APPROVER_NO_PORT_OF_CALL
                     )
