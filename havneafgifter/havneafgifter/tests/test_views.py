@@ -35,6 +35,7 @@ from havneafgifter.models import (
     DisembarkmentSite,
     DisembarkmentTaxRate,
     HarborDuesForm,
+    Municipality,
     Nationality,
     PassengersByCountry,
     Port,
@@ -630,7 +631,7 @@ class StatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.DENMARK,
             vessel_name="Testbåd 1",
-            datetime_of_arrival=datetime(2024, 7, 2, 0, 0, 0),
+            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0),
             datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
             gross_tonnage=1000,
             vessel_type=ShipType.FREIGHTER,
@@ -641,17 +642,23 @@ class StatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 2",
-            datetime_of_arrival=datetime(2024, 7, 1, 15, 15, 15),
+            datetime_of_arrival=datetime(2024, 7, 2, 15, 15, 15),
             datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("40000.00"),
             pax_tax=Decimal("3000.00"),
             disembarkment_tax=Decimal("20000.00"),
-        )
-        Disembarkment.objects.create(
-            cruise_tax_form=cls.form2,
             number_of_passengers=1,
+        )
+        cls.disembarkment2_1 = Disembarkment.objects.create(
+            cruise_tax_form=cls.form2,
+            number_of_passengers=cls.form2.number_of_passengers,
+            disembarkment_site=DisembarkmentSite.objects.get(name=ports[0].name),
+        )
+        cls.disembarkment2_2 = Disembarkment.objects.create(
+            cruise_tax_form=cls.form2,
+            number_of_passengers=cls.form2.number_of_passengers,
             disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
         )
         cls.form3 = CruiseTaxForm.objects.create(
@@ -666,11 +673,12 @@ class StatisticsTest(TestCase):
             harbour_tax=Decimal("50000.00"),
             pax_tax=Decimal("8000.00"),
             disembarkment_tax=Decimal("25000.00"),
-        )
-        Disembarkment.objects.create(
-            cruise_tax_form=cls.form3,
             number_of_passengers=2,
-            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+        )
+        cls.disembarkment3_1 = Disembarkment.objects.create(
+            cruise_tax_form=cls.form3,
+            number_of_passengers=cls.form3.number_of_passengers,
+            disembarkment_site=DisembarkmentSite.objects.get(name=ports[1].name),
         )
 
     def setUp(self):
@@ -694,47 +702,86 @@ class StatisticsTest(TestCase):
 
     def test_no_filter(self):
         rows = self.get_rows(dummy=42)
-        self.assertEqual(len(rows), 3)
+        self.assertEqual(len(rows), 4)
         self.assertDictEqual(
             rows[0].record,
             {
+                "vessel_name": self.form1.vessel_name,
+                "vessel_type": ShipType(self.form1.vessel_type).label,
+                "port_of_call": self.form1.port_of_call.name,
+                "gross_tonnage": self.form1.gross_tonnage,
+                "status": Status(self.form1.status).label,
                 "id": self.form1.id,
-                "port_of_call": "Aasiaat",
-                "vessel_type": "Freighter",
                 "municipality": None,
                 "site": None,
+                "number_of_passengers": None,
                 "disembarkment_tax_sum": Decimal("0.00"),
+                "disembarkment": None,
                 "harbour_tax_sum": self.form1.harbour_tax,
-                "count": 1,
-                "status": Status.APPROVED.label,
+                "pax_tax": None,
+                "port_authority": self.form1.port_of_call.portauthority.name,
+                "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form1.datetime_of_departure.date().isoformat()
+                ),
             },
         )
         self.assertDictEqual(
             rows[1].record,
             {
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
                 "id": self.form2.id,
-                "port_of_call": "Aasiaat",
-                "vessel_type": "Cruise ship",
-                "municipality": "Avannaata",
-                "site": "Qaanaq",
+                "municipality": Municipality(
+                    self.disembarkment2_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_1.disembarkment_site.name,
+                "number_of_passengers": self.form2.number_of_passengers,
                 "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "disembarkment": self.disembarkment2_1.id,
                 "harbour_tax_sum": self.form2.harbour_tax,
-                "count": 1,
-                "status": Status.APPROVED.label,
+                "pax_tax": self.form2.pax_tax,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
         self.assertDictEqual(
             rows[2].record,
             {
-                "id": self.form3.id,
-                "port_of_call": "Ilulissat",
-                "vessel_type": "Cruise ship",
-                "municipality": "Avannaata",
-                "site": "Qaanaq",
-                "disembarkment_tax_sum": self.form3.disembarkment_tax,
-                "harbour_tax_sum": self.form3.harbour_tax,
-                "count": 1,
-                "status": Status.REJECTED.label,
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_2.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_2.disembarkment_site.name,
+                "number_of_passengers": None,
+                "disembarkment_tax_sum": None,
+                "disembarkment": self.disembarkment2_2.id,
+                "harbour_tax_sum": None,
+                "pax_tax": None,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_2.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_2.number_of_passengers,
             },
         )
 
@@ -744,7 +791,7 @@ class StatisticsTest(TestCase):
                 name="Royal Arctic Line A/S",
             ).pk
         )
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 4)
 
         rows = self.get_rows(
             port_authority=PortAuthority.objects.get(name="Mittarfeqarfiit").pk,
@@ -757,24 +804,27 @@ class StatisticsTest(TestCase):
         self.assertEqual(rows[0].record["id"], self.form3.id)
 
         rows = self.get_rows(arrival_gt=datetime(2024, 6, 1, 0, 0, 0))
-        self.assertEqual(len(rows), 3)
+        self.assertEqual(len(rows), 4)
         self.assertEqual(rows[0].record["id"], self.form1.id)
         self.assertEqual(rows[1].record["id"], self.form2.id)
-        self.assertEqual(rows[2].record["id"], self.form3.id)
+        self.assertEqual(rows[2].record["id"], self.form2.id)
+        self.assertEqual(rows[3].record["id"], self.form3.id)
 
         rows = self.get_rows(
             arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
             arrival_lt=datetime(2024, 7, 5, 0, 0, 0),
         )
-        self.assertEqual(len(rows), 2)
+        self.assertEqual(len(rows), 3)
         self.assertEqual(rows[0].record["id"], self.form1.id)
         self.assertEqual(rows[1].record["id"], self.form2.id)
+        self.assertEqual(rows[2].record["id"], self.form2.id)
+
         rows = self.get_rows(
             arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
             arrival_lt=datetime(2024, 7, 1, 0, 0, 0),
         )
         self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0].record["id"], self.form2.id)
+        self.assertEqual(rows[0].record["id"], self.form1.id)
 
         rows = self.get_rows(
             arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
@@ -784,29 +834,40 @@ class StatisticsTest(TestCase):
 
     def test_filter_municipality(self):
         rows = self.get_rows(municipality=960)
-        self.assertEqual(len(rows), 1)
-        self.assertDictEqual(
-            rows[0].record,
-            {
-                "municipality": "Avannaata",
-                "disembarkment_tax_sum": self.form2.disembarkment_tax
-                + self.form3.disembarkment_tax,
-                "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
-                "count": 2,
-            },
-        )
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0].record["id"], self.form2.id)
+        self.assertEqual(rows[0].record["municipality"], "Avannaata")
 
     def test_filter_vessel_type(self):
         rows = self.get_rows(vessel_type="CRUISE")
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 3)
         self.assertDictEqual(
             rows[0].record,
             {
-                "vessel_type": "Cruise ship",
-                "disembarkment_tax_sum": self.form2.disembarkment_tax
-                + self.form3.disembarkment_tax,
-                "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
-                "count": 2,
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_1.disembarkment_site.name,
+                "number_of_passengers": self.form2.number_of_passengers,
+                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "disembarkment": self.disembarkment2_1.id,
+                "harbour_tax_sum": self.form2.harbour_tax,
+                "pax_tax": self.form2.pax_tax,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
 
@@ -815,10 +876,24 @@ class StatisticsTest(TestCase):
         self.assertDictEqual(
             rows[0].record,
             {
-                "vessel_type": "Freighter",
-                "disembarkment_tax_sum": Decimal(0),
+                "vessel_name": self.form1.vessel_name,
+                "vessel_type": ShipType(self.form1.vessel_type).label,
+                "port_of_call": self.form1.port_of_call.name,
+                "gross_tonnage": self.form1.gross_tonnage,
+                "status": Status(self.form1.status).label,
+                "id": self.form1.id,
+                "municipality": None,
+                "site": None,
+                "number_of_passengers": None,
+                "disembarkment_tax_sum": Decimal("0.00"),
+                "disembarkment": None,
                 "harbour_tax_sum": self.form1.harbour_tax,
-                "count": 1,
+                "pax_tax": None,
+                "port_authority": self.form1.port_of_call.portauthority.name,
+                "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form1.datetime_of_departure.date().isoformat()
+                ),
             },
         )
 
@@ -831,11 +906,30 @@ class StatisticsTest(TestCase):
         self.assertDictEqual(
             rows[0].record,
             {
-                "site": "Qaanaq",
-                "disembarkment_tax_sum": self.form2.disembarkment_tax
-                + self.form3.disembarkment_tax,
-                "harbour_tax_sum": self.form2.harbour_tax + self.form3.harbour_tax,
-                "count": 2,
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_2.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_2.disembarkment_site.name,
+                "number_of_passengers": None,
+                "disembarkment_tax_sum": None,
+                "disembarkment": self.disembarkment2_2.id,
+                "harbour_tax_sum": None,
+                "pax_tax": None,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_2.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_2.number_of_passengers,
             },
         )
 
@@ -847,48 +941,203 @@ class StatisticsTest(TestCase):
         port1 = ports[0]
         port2 = ports[1]
         rows = self.get_rows(port_of_call=port1.pk)
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 3)
         self.assertDictEqual(
             rows[0].record,
             {
-                "port_of_call": port1.name,
-                "disembarkment_tax_sum": self.form2.disembarkment_tax,
-                "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
-                "count": 2,
-            },
-        )
-
-        rows = self.get_rows(port_of_call=[port1.pk, port2.pk])
-        self.assertEqual(len(rows), 2)
-        self.assertDictEqual(
-            rows[0].record,
-            {
-                "port_of_call": port2.name,
-                "disembarkment_tax_sum": self.form3.disembarkment_tax,
-                "harbour_tax_sum": self.form3.harbour_tax,
-                "count": 1,
+                "vessel_name": self.form1.vessel_name,
+                "vessel_type": ShipType(self.form1.vessel_type).label,
+                "port_of_call": self.form1.port_of_call.name,
+                "gross_tonnage": self.form1.gross_tonnage,
+                "status": Status(self.form1.status).label,
+                "id": self.form1.id,
+                "municipality": None,
+                "site": None,
+                "number_of_passengers": None,
+                "disembarkment_tax_sum": Decimal("0.00"),
+                "disembarkment": None,
+                "harbour_tax_sum": self.form1.harbour_tax,
+                "pax_tax": None,
+                "port_authority": self.form1.port_of_call.portauthority.name,
+                "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form1.datetime_of_departure.date().isoformat()
+                ),
             },
         )
         self.assertDictEqual(
             rows[1].record,
             {
-                "port_of_call": port1.name,
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_1.disembarkment_site.name,
+                "number_of_passengers": self.form2.number_of_passengers,
                 "disembarkment_tax_sum": self.form2.disembarkment_tax,
-                "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
-                "count": 2,
+                "disembarkment": self.disembarkment2_1.id,
+                "harbour_tax_sum": self.form2.harbour_tax,
+                "pax_tax": self.form2.pax_tax,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
+            },
+        )
+        self.assertDictEqual(
+            rows[2].record,
+            {
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_2.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_2.disembarkment_site.name,
+                "number_of_passengers": None,
+                "disembarkment_tax_sum": None,
+                "disembarkment": self.disembarkment2_2.id,
+                "harbour_tax_sum": None,
+                "pax_tax": None,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_2.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_2.number_of_passengers,
+            },
+        )
+
+        rows = self.get_rows(port_of_call=[port1.pk, port2.pk])
+        self.assertEqual(len(rows), 4)
+        self.assertDictEqual(
+            rows[1].record,
+            {
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_1.disembarkment_site.name,
+                "number_of_passengers": self.form2.number_of_passengers,
+                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "disembarkment": self.disembarkment2_1.id,
+                "harbour_tax_sum": self.form2.harbour_tax,
+                "pax_tax": self.form2.pax_tax,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
+            },
+        )
+        self.assertDictEqual(
+            rows[3].record,
+            {
+                "vessel_name": self.form3.vessel_name,
+                "vessel_type": ShipType(self.form3.vessel_type).label,
+                "port_of_call": self.form3.port_of_call.name,
+                "gross_tonnage": self.form3.gross_tonnage,
+                "status": Status(self.form3.status).label,
+                "id": self.form3.id,
+                "municipality": Municipality(
+                    self.disembarkment3_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment3_1.disembarkment_site.name,
+                "number_of_passengers": self.form3.number_of_passengers,
+                "disembarkment_tax_sum": self.form3.disembarkment_tax,
+                "disembarkment": self.disembarkment3_1.id,
+                "harbour_tax_sum": self.form3.harbour_tax,
+                "pax_tax": self.form3.pax_tax,
+                "port_authority": self.form3.port_of_call.portauthority.name,
+                "date_of_arrival": self.form3.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form3.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment3_1.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment3_1.number_of_passengers,
             },
         )
 
     def test_filter_status(self):
         rows = self.get_rows(status=Status.APPROVED)
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 3)
         self.assertDictEqual(
             rows[0].record,
             {
+                "vessel_name": self.form1.vessel_name,
+                "vessel_type": ShipType(self.form1.vessel_type).label,
+                "port_of_call": self.form1.port_of_call.name,
+                "gross_tonnage": self.form1.gross_tonnage,
+                "status": Status(self.form1.status).label,
+                "id": self.form1.id,
+                "municipality": None,
+                "site": None,
+                "number_of_passengers": None,
+                "disembarkment_tax_sum": Decimal("0.00"),
+                "disembarkment": None,
+                "harbour_tax_sum": self.form1.harbour_tax,
+                "pax_tax": None,
+                "port_authority": self.form1.port_of_call.portauthority.name,
+                "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form1.datetime_of_departure.date().isoformat()
+                ),
+            },
+        )
+        self.assertDictEqual(
+            rows[1].record,
+            {
+                "vessel_name": self.form2.vessel_name,
+                "vessel_type": ShipType(self.form2.vessel_type).label,
+                "port_of_call": self.form2.port_of_call.name,
+                "gross_tonnage": self.form2.gross_tonnage,
+                "status": Status(self.form2.status).label,
+                "id": self.form2.id,
+                "municipality": Municipality(
+                    self.disembarkment2_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment2_1.disembarkment_site.name,
+                "number_of_passengers": self.form2.number_of_passengers,
                 "disembarkment_tax_sum": self.form2.disembarkment_tax,
-                "harbour_tax_sum": self.form1.harbour_tax + self.form2.harbour_tax,
-                "count": 2,
-                "status": Status.APPROVED.label,
+                "disembarkment": self.disembarkment2_1.id,
+                "harbour_tax_sum": self.form2.harbour_tax,
+                "pax_tax": self.form2.pax_tax,
+                "port_authority": self.form2.port_of_call.portauthority.name,
+                "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form2.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
+                    save=False
+                ),
+                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
 

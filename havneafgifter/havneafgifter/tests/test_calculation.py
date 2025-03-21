@@ -193,6 +193,12 @@ class CalculationTest(TestCase):
             disembarkment_tax_rate=Decimal(30),
             disembarkment_site=None,
         )
+        cls.disembarkment_tax2 = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.tax_rates1,
+            municipality=Municipality.QEQQATA,
+            disembarkment_tax_rate=Decimal(30),
+            disembarkment_site=None,
+        )
         ShippingAgent.objects.create(name="Birgers Bodega", email="birger@hotmail.com")
         cls.harborduesform1 = CruiseTaxForm.objects.create(
             port_of_call=Port.objects.get(name="Test1"),
@@ -474,7 +480,7 @@ class CalculationTest(TestCase):
             {
                 "disembarkment": self.disembarkment2,
                 "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
-                "taxrate": self.disembarkment_tax2,
+                "taxrate": self.disembarkment_tax2.disembarkment_tax_rate,
                 "tax": Decimal("600.00"),  # 20 people * 30 kr
             },
         )
@@ -483,7 +489,7 @@ class CalculationTest(TestCase):
             {
                 "disembarkment": self.disembarkment1,
                 "date": datetime(2024, 12, 15, 8, 0, 0, tzinfo=timezone.utc),
-                "taxrate": self.disembarkment_tax1,
+                "taxrate": self.disembarkment_tax1.disembarkment_tax_rate,
                 "tax": Decimal("400.00"),  # 100 people * 40 kr
             },
         )

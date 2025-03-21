@@ -1064,36 +1064,28 @@ class CruiseTaxForm(HarborDuesForm):
         self.calculate_passenger_tax(save=save)
         self.calculate_disembarkment_tax(save=save)
 
-    def calculate_disembarkment_tax(self, save: bool = True):
+    def calculate_disembarkment_tax(
+        self, save: bool = True, force_recalculation: bool = False
+    ):
         disembarkment_date = self.datetime_of_arrival or self.date
-        taxrate = TaxRates.objects.filter(
-            Q(start_datetime__isnull=True) | Q(start_datetime__lte=disembarkment_date),
-            Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
-        ).first()
         disembarkment_tax = Decimal(0)
         details = []
         for disembarkment in self.disembarkment_set.all():
-            disembarkment_site = disembarkment.disembarkment_site
-            disembarkment_tax_rate = (
-                taxrate.get_disembarkment_tax_rate(disembarkment_site)
-                if taxrate
-                else None
+            tax = disembarkment.get_disembarkment_tax(
+                save=save, force_recalculation=force_recalculation
             )
-            tax = Decimal(0)
-            if disembarkment_tax_rate is not None:
-                tax = (
-                    disembarkment.number_of_passengers
-                    * disembarkment_tax_rate.disembarkment_tax_rate
-                )
+            if tax is not None:
                 disembarkment_tax += tax
+
             details.append(
                 {
                     "disembarkment": disembarkment,
                     "date": disembarkment_date,
-                    "taxrate": disembarkment_tax_rate,
-                    "tax": tax,
+                    "taxrate": disembarkment.used_disembarkment_tax_rate,
+                    "tax": tax or Decimal(0),
                 }
             )
+
         if save:
             self.disembarkment_tax = disembarkment_tax
             self.save(update_fields=("disembarkment_tax",))
@@ -1245,6 +1237,61 @@ class Disembarkment(PermissionsMixin, models.Model):
     disembarkment_site = models.ForeignKey(
         DisembarkmentSite, null=False, blank=False, on_delete=models.CASCADE
     )
+
+    disembarkment_tax = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=9,
+        verbose_name=_("Landsætningsafgift for pågældende anløb"),
+    )
+
+    used_disembarkment_tax_rate = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=4,
+        verbose_name=_("Tax rate used for existing calculation"),
+    )
+
+    def get_disembarkment_tax(
+        self, save: bool = True, force_recalculation: bool = False
+    ):
+        if self.disembarkment_tax and not force_recalculation:
+            return self.disembarkment_tax
+        else:
+            cruisetaxform = self.cruise_tax_form
+            disembarkment_date = cruisetaxform.datetime_of_arrival or cruisetaxform.date
+            taxrate = TaxRates.objects.filter(
+                Q(start_datetime__isnull=True)
+                | Q(start_datetime__lte=disembarkment_date),
+                Q(end_datetime__isnull=True) | Q(end_datetime__gte=disembarkment_date),
+            ).first()
+            disembarkment_tax_rate = (
+                taxrate.get_disembarkment_tax_rate(self.disembarkment_site)
+                if taxrate
+                else None
+            )
+            disembarkment_tax = Decimal(0)
+            used_disembarkment_tax_rate = Decimal(0)
+            if disembarkment_tax_rate is not None:
+                disembarkment_tax = (
+                    self.number_of_passengers
+                    * disembarkment_tax_rate.disembarkment_tax_rate
+                )
+                used_disembarkment_tax_rate = (
+                    disembarkment_tax_rate.disembarkment_tax_rate
+                )
+            if save:
+                self.disembarkment_tax = disembarkment_tax
+                self.used_disembarkment_tax_rate = used_disembarkment_tax_rate
+                self.save(
+                    update_fields=(
+                        "disembarkment_tax",
+                        "used_disembarkment_tax_rate",
+                    )
+                )
+            return disembarkment_tax
 
     @classmethod
     def _filter_user_permissions(
