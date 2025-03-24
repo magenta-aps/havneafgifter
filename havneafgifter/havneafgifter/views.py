@@ -16,17 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import (
-    Case,
-    Count,
-    F,
-    IntegerField,
-    OuterRef,
-    Subquery,
-    Sum,
-    Value,
-    When,
-)
+from django.db.models import Case, F, IntegerField, OuterRef, Subquery, Sum, Value, When
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -818,7 +808,9 @@ class StatisticsView(
                 ),
                 "site": F("cruisetaxform__disembarkment__disembarkment_site"),
                 "disembarkment": F("cruisetaxform__disembarkment"),
-                "number_of_passengers": F("cruisetaxform__number_of_passengers"),
+                "number_of_passengers": F(
+                    "cruisetaxform__disembarkment__number_of_passengers"
+                ),
                 "pax_tax": F("cruisetaxform__pax_tax"),
                 "port_authority": F("port_of_call__portauthority"),
             }
@@ -858,12 +850,14 @@ class StatisticsView(
                             CruiseTaxForm.objects.filter(id=OuterRef("pk")).values(
                                 "disembarkment_tax"
                             )
-                        )
+                        ),
                     ),
                     Decimal("0.00"),
                 ),
                 harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
-                count=Count("pk", distinct=True),
+                total_tax=Coalesce(F("disembarkment_tax_sum"), Decimal("0.00"))
+                + Coalesce(F("harbour_tax_sum"), Decimal("0.00"))
+                + Coalesce(F("pax_tax"), Decimal("0.00")),
             )
             qs = qs.values(
                 "municipality",
@@ -872,10 +866,10 @@ class StatisticsView(
                 "port_of_call",
                 "site",
                 "number_of_passengers",
-                "disembarkment_tax_sum",
                 "disembarkment",
                 "harbour_tax_sum",
                 "pax_tax",
+                "total_tax",
                 "gross_tonnage",
                 "status",
                 "datetime_of_arrival",
@@ -927,7 +921,6 @@ class StatisticsView(
                     item["disembarkment_tax"] = disembarkment.get_disembarkment_tax(
                         save=True
                     )
-                    item["disembarked_passengers"] = disembarkment.number_of_passengers
 
                 vessel_type = item.get("vessel_type")
                 if vessel_type:
@@ -943,8 +936,7 @@ class StatisticsView(
                 if site and port_of_call and not site == port_of_call:
                     item["harbour_tax_sum"] = None
                     item["pax_tax"] = None
-                    item["number_of_passengers"] = None
-                    item["disembarkment_tax_sum"] = None
+                    item["total_tax"] = None
 
             return items
         return []
