@@ -893,6 +893,8 @@ class StatisticsView(
             )
 
             items = list(qs)
+            form_ids = set(qs.values_list("id", flat=True))
+
             for item in items:
                 datetime_of_arrival = item.pop("datetime_of_arrival")
                 if datetime_of_arrival:
@@ -937,11 +939,15 @@ class StatisticsView(
 
                 site = item.get("site")
                 port_of_call = item.get("port_of_call")
-                # NOTE: There's a possible problem if ships have No port of call
-                if site and port_of_call and not site == port_of_call:
+                id = item.get("id")
+                if (
+                    site and port_of_call and site != port_of_call
+                ) or id not in form_ids:
                     item["harbour_tax_sum"] = None
                     item["pax_tax"] = None
                     item["total_tax"] = None
+                else:
+                    form_ids.remove(id)
 
             return items
         return []
