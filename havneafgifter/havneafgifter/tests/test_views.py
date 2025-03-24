@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser, Group
 from django.core.exceptions import PermissionDenied
@@ -680,6 +681,25 @@ class StatisticsTest(TestCase):
             number_of_passengers=cls.form3.number_of_passengers,
             disembarkment_site=DisembarkmentSite.objects.get(name=ports[1].name),
         )
+        cls.form4 = CruiseTaxForm.objects.create(
+            status=Status.REJECTED,
+            port_of_call=None,
+            nationality=Nationality.JAPAN,
+            vessel_name="Testbåd 4",
+            datetime_of_arrival=datetime(2026, 8, 1, 0, 0, 0),
+            datetime_of_departure=datetime(2026, 9, 1, 0, 0, 0),
+            gross_tonnage=10,
+            vessel_type=ShipType.CRUISE,
+            harbour_tax=Decimal("500.00"),
+            pax_tax=Decimal("20.00"),
+            disembarkment_tax=Decimal("25.00"),
+            number_of_passengers=10,
+        )
+        cls.disembarkment4_1 = Disembarkment.objects.create(
+            cruise_tax_form=cls.form4,
+            number_of_passengers=9,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Saarloq"),
+        )
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -702,7 +722,7 @@ class StatisticsTest(TestCase):
 
     def test_no_filter(self):
         rows = self.get_rows(dummy=42)
-        self.assertEqual(len(rows), 4)
+        self.assertEqual(len(rows), 5)
         self.assertDictEqual(
             rows[0].record,
             {
@@ -791,7 +811,37 @@ class StatisticsTest(TestCase):
                 name="Royal Arctic Line A/S",
             ).pk
         )
-        self.assertEqual(len(rows), 4)
+        self.assertEqual(len(rows), 5)
+        self.assertDictEqual(
+            rows[4].record,
+            {
+                "vessel_name": self.form4.vessel_name,
+                "vessel_type": ShipType(self.form4.vessel_type).label,
+                "port_of_call": None,
+                "gross_tonnage": self.form4.gross_tonnage,
+                "status": Status(self.form4.status).label,
+                "id": self.form4.id,
+                "municipality": Municipality(
+                    self.disembarkment4_1.disembarkment_site.municipality
+                ).label,
+                "site": self.disembarkment4_1.disembarkment_site.name,
+                "number_of_passengers": self.disembarkment4_1.number_of_passengers,
+                "disembarkment": self.disembarkment4_1.id,
+                "harbour_tax_sum": self.form4.harbour_tax,
+                "pax_tax": self.form4.pax_tax,
+                "total_tax": self.form4.harbour_tax
+                + self.form4.pax_tax
+                + self.form4.disembarkment_tax,
+                "port_authority": settings.APPROVER_NO_PORT_OF_CALL,
+                "date_of_arrival": self.form4.datetime_of_arrival.date().isoformat(),
+                "date_of_departure": (
+                    self.form4.datetime_of_departure.date().isoformat()
+                ),
+                "disembarkment_tax": self.disembarkment4_1.get_disembarkment_tax(
+                    save=False
+                ),
+            },
+        )
 
         rows = self.get_rows(
             port_authority=PortAuthority.objects.get(name="Mittarfeqarfiit").pk,
@@ -800,11 +850,11 @@ class StatisticsTest(TestCase):
 
     def test_filter_arrival(self):
         rows = self.get_rows(arrival_gt=datetime(2025, 1, 1, 0, 0, 0))
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0].record["id"], self.form3.id)
 
         rows = self.get_rows(arrival_gt=datetime(2024, 6, 1, 0, 0, 0))
-        self.assertEqual(len(rows), 4)
+        self.assertEqual(len(rows), 5)
         self.assertEqual(rows[0].record["id"], self.form1.id)
         self.assertEqual(rows[1].record["id"], self.form2.id)
         self.assertEqual(rows[2].record["id"], self.form2.id)
@@ -841,7 +891,7 @@ class StatisticsTest(TestCase):
     def test_filter_vessel_type(self):
         rows = self.get_rows(vessel_type="CRUISE")
         self.maxDiff = None
-        self.assertEqual(len(rows), 3)
+        self.assertEqual(len(rows), 4)
         self.assertDictEqual(
             rows[0].record,
             {
