@@ -129,9 +129,6 @@
     let count = 1
 
     $(document).ready(function() {
-        const foo = $("[for=id_base-vessel_type]")
-        foo.append($('<span class="material-icons dark-icon ms-1 align-text-bottom" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top">info</span>'))
-
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
     });
