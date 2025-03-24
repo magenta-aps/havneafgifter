@@ -16,17 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import (
-    Case,
-    Count,
-    F,
-    IntegerField,
-    OuterRef,
-    Subquery,
-    Sum,
-    Value,
-    When,
-)
+from django.db.models import Case, F, IntegerField, OuterRef, Subquery, Sum, Value, When
 from django.db.models.functions import Coalesce
 from django.forms import formset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -854,7 +844,6 @@ class StatisticsView(
 
             qs = qs.values().distinct()
             qs = qs.annotate(
-                # NOTE: Create a field for total tax (havneafgift + summeret landgangsafgift)
                 disembarkment_tax_sum=Coalesce(
                     Sum(
                         Subquery(
@@ -866,10 +855,9 @@ class StatisticsView(
                     Decimal("0.00"),
                 ),
                 harbour_tax_sum=Coalesce(Sum("harbour_tax"), Decimal("0.00")),
-                total_tax=Coalesce(
-                    F("disembarkment_tax_sum") + F("harbour_tax_sum") + F("pax_tax"),
-                    Decimal("0.00"),
-                ),
+                total_tax=Coalesce(F("disembarkment_tax_sum"), Decimal("0.00"))
+                + Coalesce(F("harbour_tax_sum"), Decimal("0.00"))
+                + Coalesce(F("pax_tax"), Decimal("0.00")),
             )
             qs = qs.values(
                 "municipality",
@@ -933,7 +921,6 @@ class StatisticsView(
                     item["disembarkment_tax"] = disembarkment.get_disembarkment_tax(
                         save=True
                     )
-                    item["disembarked_passengers"] = disembarkment.number_of_passengers
 
                 vessel_type = item.get("vessel_type")
                 if vessel_type:
