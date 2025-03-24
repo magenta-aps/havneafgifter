@@ -715,10 +715,10 @@ class StatisticsTest(TestCase):
                 "municipality": None,
                 "site": None,
                 "number_of_passengers": None,
-                "disembarkment_tax_sum": Decimal("0.00"),
                 "disembarkment": None,
                 "harbour_tax_sum": self.form1.harbour_tax,
                 "pax_tax": None,
+                "total_tax": self.form1.harbour_tax,
                 "port_authority": self.form1.port_of_call.portauthority.name,
                 "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -739,11 +739,13 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_1.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_1.disembarkment_site.name,
-                "number_of_passengers": self.form2.number_of_passengers,
-                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "number_of_passengers": self.disembarkment2_1.number_of_passengers,
                 "disembarkment": self.disembarkment2_1.id,
                 "harbour_tax_sum": self.form2.harbour_tax,
                 "pax_tax": self.form2.pax_tax,
+                "total_tax": self.form2.harbour_tax
+                + self.form2.pax_tax
+                + self.form2.disembarkment_tax,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -752,7 +754,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
         self.assertDictEqual(
@@ -768,11 +769,11 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_2.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_2.disembarkment_site.name,
-                "number_of_passengers": None,
-                "disembarkment_tax_sum": None,
+                "number_of_passengers": self.disembarkment2_2.number_of_passengers,
                 "disembarkment": self.disembarkment2_2.id,
                 "harbour_tax_sum": None,
                 "pax_tax": None,
+                "total_tax": None,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -781,7 +782,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_2.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_2.number_of_passengers,
             },
         )
 
@@ -840,6 +840,7 @@ class StatisticsTest(TestCase):
 
     def test_filter_vessel_type(self):
         rows = self.get_rows(vessel_type="CRUISE")
+        self.maxDiff = None
         self.assertEqual(len(rows), 3)
         self.assertDictEqual(
             rows[0].record,
@@ -854,11 +855,13 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_1.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_1.disembarkment_site.name,
-                "number_of_passengers": self.form2.number_of_passengers,
-                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "number_of_passengers": self.disembarkment2_1.number_of_passengers,
                 "disembarkment": self.disembarkment2_1.id,
                 "harbour_tax_sum": self.form2.harbour_tax,
                 "pax_tax": self.form2.pax_tax,
+                "total_tax": self.form2.harbour_tax
+                + self.form2.pax_tax
+                + self.form2.disembarkment_tax,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -867,7 +870,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
 
@@ -885,10 +887,10 @@ class StatisticsTest(TestCase):
                 "municipality": None,
                 "site": None,
                 "number_of_passengers": None,
-                "disembarkment_tax_sum": Decimal("0.00"),
                 "disembarkment": None,
                 "harbour_tax_sum": self.form1.harbour_tax,
                 "pax_tax": None,
+                "total_tax": self.form1.harbour_tax,
                 "port_authority": self.form1.port_of_call.portauthority.name,
                 "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -916,11 +918,11 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_2.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_2.disembarkment_site.name,
-                "number_of_passengers": None,
-                "disembarkment_tax_sum": None,
+                "number_of_passengers": self.disembarkment2_2.number_of_passengers,
                 "disembarkment": self.disembarkment2_2.id,
                 "harbour_tax_sum": None,
                 "pax_tax": None,
+                "total_tax": None,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -929,7 +931,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_2.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_2.number_of_passengers,
             },
         )
 
@@ -954,10 +955,10 @@ class StatisticsTest(TestCase):
                 "municipality": None,
                 "site": None,
                 "number_of_passengers": None,
-                "disembarkment_tax_sum": Decimal("0.00"),
                 "disembarkment": None,
                 "harbour_tax_sum": self.form1.harbour_tax,
                 "pax_tax": None,
+                "total_tax": self.form1.harbour_tax,
                 "port_authority": self.form1.port_of_call.portauthority.name,
                 "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -978,11 +979,13 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_1.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_1.disembarkment_site.name,
-                "number_of_passengers": self.form2.number_of_passengers,
-                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "number_of_passengers": self.disembarkment2_1.number_of_passengers,
                 "disembarkment": self.disembarkment2_1.id,
                 "harbour_tax_sum": self.form2.harbour_tax,
                 "pax_tax": self.form2.pax_tax,
+                "total_tax": self.form2.pax_tax
+                + self.form2.harbour_tax
+                + self.form2.disembarkment_tax,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -991,7 +994,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
         self.assertDictEqual(
@@ -1007,11 +1009,11 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_2.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_2.disembarkment_site.name,
-                "number_of_passengers": None,
-                "disembarkment_tax_sum": None,
+                "number_of_passengers": self.disembarkment2_2.number_of_passengers,
                 "disembarkment": self.disembarkment2_2.id,
                 "harbour_tax_sum": None,
                 "pax_tax": None,
+                "total_tax": None,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -1020,7 +1022,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_2.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_2.number_of_passengers,
             },
         )
 
@@ -1040,10 +1041,12 @@ class StatisticsTest(TestCase):
                 ).label,
                 "site": self.disembarkment2_1.disembarkment_site.name,
                 "number_of_passengers": self.form2.number_of_passengers,
-                "disembarkment_tax_sum": self.form2.disembarkment_tax,
                 "disembarkment": self.disembarkment2_1.id,
                 "harbour_tax_sum": self.form2.harbour_tax,
                 "pax_tax": self.form2.pax_tax,
+                "total_tax": self.form2.pax_tax
+                + self.form2.harbour_tax
+                + self.form2.disembarkment_tax,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -1052,7 +1055,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
         self.assertDictEqual(
@@ -1068,11 +1070,13 @@ class StatisticsTest(TestCase):
                     self.disembarkment3_1.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment3_1.disembarkment_site.name,
-                "number_of_passengers": self.form3.number_of_passengers,
-                "disembarkment_tax_sum": self.form3.disembarkment_tax,
+                "number_of_passengers": self.disembarkment3_1.number_of_passengers,
                 "disembarkment": self.disembarkment3_1.id,
                 "harbour_tax_sum": self.form3.harbour_tax,
                 "pax_tax": self.form3.pax_tax,
+                "total_tax": self.form3.harbour_tax
+                + self.form3.pax_tax
+                + self.form3.disembarkment_tax,
                 "port_authority": self.form3.port_of_call.portauthority.name,
                 "date_of_arrival": self.form3.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -1081,7 +1085,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment3_1.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment3_1.number_of_passengers,
             },
         )
 
@@ -1100,10 +1103,10 @@ class StatisticsTest(TestCase):
                 "municipality": None,
                 "site": None,
                 "number_of_passengers": None,
-                "disembarkment_tax_sum": Decimal("0.00"),
                 "disembarkment": None,
                 "harbour_tax_sum": self.form1.harbour_tax,
                 "pax_tax": None,
+                "total_tax": self.form1.harbour_tax,
                 "port_authority": self.form1.port_of_call.portauthority.name,
                 "date_of_arrival": self.form1.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -1124,11 +1127,13 @@ class StatisticsTest(TestCase):
                     self.disembarkment2_1.disembarkment_site.municipality
                 ).label,
                 "site": self.disembarkment2_1.disembarkment_site.name,
-                "number_of_passengers": self.form2.number_of_passengers,
-                "disembarkment_tax_sum": self.form2.disembarkment_tax,
+                "number_of_passengers": self.disembarkment2_1.number_of_passengers,
                 "disembarkment": self.disembarkment2_1.id,
                 "harbour_tax_sum": self.form2.harbour_tax,
                 "pax_tax": self.form2.pax_tax,
+                "total_tax": self.form2.pax_tax
+                + self.form2.harbour_tax
+                + self.form2.disembarkment_tax,
                 "port_authority": self.form2.port_of_call.portauthority.name,
                 "date_of_arrival": self.form2.datetime_of_arrival.date().isoformat(),
                 "date_of_departure": (
@@ -1137,7 +1142,6 @@ class StatisticsTest(TestCase):
                 "disembarkment_tax": self.disembarkment2_1.get_disembarkment_tax(
                     save=False
                 ),
-                "disembarked_passengers": self.disembarkment2_1.number_of_passengers,
             },
         )
 

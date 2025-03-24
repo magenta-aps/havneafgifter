@@ -1232,7 +1232,7 @@ class Disembarkment(PermissionsMixin, models.Model):
     number_of_passengers = models.PositiveIntegerField(
         null=False,
         blank=False,
-        verbose_name=_("Number of passengers disembarking"),
+        verbose_name=_("Number of passengers at time of disembarkment"),
         validators=[
             MinValueValidator(0, message=_("Tallet er for lille")),
             MaxValueValidator(20000, message=_("Tallet er for stort")),
