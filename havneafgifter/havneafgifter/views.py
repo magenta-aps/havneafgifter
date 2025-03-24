@@ -812,7 +812,12 @@ class StatisticsView(
                     "cruisetaxform__disembarkment__number_of_passengers"
                 ),
                 "pax_tax": F("cruisetaxform__pax_tax"),
-                "port_authority": F("port_of_call__portauthority"),
+                "port_authority": Coalesce(
+                    F("port_of_call__portauthority"),
+                    PortAuthority.objects.get(
+                        name=settings.APPROVER_NO_PORT_OF_CALL
+                    ).pk,
+                ),
             }
             filter_fields = {}
 
