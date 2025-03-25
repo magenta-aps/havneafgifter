@@ -179,7 +179,7 @@
 
         namedElements.each(function() {
             const el = $(this)
-            const newName = el.attr("name").replace(/(.*)-(\d)-(.*)/, (fullMatch, group1, group2, group3) => {
+            const newName = el.attr("name").replace(/(.*)-(\d+)-(.*)/, (fullMatch, group1, group2, group3) => {
                 prefix = group1
                 // Construct the new string using the captured groups
                 return `${group1}-${count}-${group3}`;
