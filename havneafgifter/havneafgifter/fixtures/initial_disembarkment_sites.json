@@ -11,7 +11,7 @@
     "model": "havneafgifter.disembarkmentsite",
     "pk": 101,
     "fields": {
-        "name": "Qaanaq",
+        "name": "Qaanaaq",
         "municipality": 960
     }
 },
