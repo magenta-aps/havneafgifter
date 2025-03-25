@@ -864,6 +864,7 @@ class StatisticsView(
                 + Coalesce(F("harbour_tax_sum"), Decimal("0.00"))
                 + Coalesce(F("pax_tax"), Decimal("0.00")),
             )
+            # NOTE: USE THE TOTAL_TAX PROPERTY
             qs = qs.values(
                 "municipality",
                 "vessel_name",

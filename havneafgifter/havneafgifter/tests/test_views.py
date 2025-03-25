@@ -660,7 +660,7 @@ class StatisticsTest(TestCase):
         cls.disembarkment2_2 = Disembarkment.objects.create(
             cruise_tax_form=cls.form2,
             number_of_passengers=cls.form2.number_of_passengers,
-            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
         )
         cls.form3 = CruiseTaxForm.objects.create(
             status=Status.REJECTED,
@@ -953,7 +953,7 @@ class StatisticsTest(TestCase):
         self.assertEqual(len(rows), 0)
 
     def test_filter_site(self):
-        rows = self.get_rows(site=DisembarkmentSite.objects.get(name="Qaanaq").pk)
+        rows = self.get_rows(site=DisembarkmentSite.objects.get(name="Qaanaaq").pk)
         self.assertEqual(len(rows), 1)
         self.assertDictEqual(
             rows[0].record,
@@ -2480,7 +2480,7 @@ class PassengerStatisticsTest(TestCase):
         Disembarkment.objects.create(
             cruise_tax_form=cls.form2,
             number_of_passengers=1,
-            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
         )
         cls.form3 = CruiseTaxForm.objects.create(
             status=Status.REJECTED,
@@ -2498,7 +2498,7 @@ class PassengerStatisticsTest(TestCase):
         Disembarkment.objects.create(
             cruise_tax_form=cls.form3,
             number_of_passengers=2,
-            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
         )
         cls.form4 = CruiseTaxForm.objects.create(
             status=Status.APPROVED,
@@ -2514,7 +2514,7 @@ class PassengerStatisticsTest(TestCase):
         Disembarkment.objects.create(
             cruise_tax_form=cls.form4,
             number_of_passengers=100,
-            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaq"),
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
         )
         cls.pbc4 = PassengersByCountry.objects.create(
             cruise_tax_form=cls.form4,
