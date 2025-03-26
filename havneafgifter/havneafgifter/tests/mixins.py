@@ -139,7 +139,6 @@ class HarborDuesFormTestMixin:
                 if k
                 not in (
                     "port_of_call",
-                    "datetime_of_arrival",
                     "datetime_of_departure",
                     "gross_tonnage",
                 )
