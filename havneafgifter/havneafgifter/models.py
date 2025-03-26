@@ -539,13 +539,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                         )
                         # Both absent
                         | (
-                            Q(datetime_of_arrival__isnull=True)
+                            Q(port_of_call__isnull=True)
                             & Q(datetime_of_departure__isnull=True)
                         )
                     )
                 ),
                 name="datetime_of_arrival_and_departure_must_both_be_present_"
-                "or_both_be_null",
+                "or_departure_and_port_of_call_are_null",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
         ]

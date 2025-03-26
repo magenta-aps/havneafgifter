@@ -81,7 +81,7 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
 
 
 class HTML5DateWidget(widgets.Input):
-    input_type = "datetime-local"
+    input_type = "date"
     template_name = "django/forms/widgets/datetime.html"
 
 
@@ -352,7 +352,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 
     datetime_of_arrival = DynamicField(
         DateTimeField,
-        required=_required_if_status_is_new_and_has_port_of_call,
+        required=_required_if_status_is_new,
         initial=lambda form: (
             form.instance.datetime_of_arrival.isoformat()
             if form.instance.datetime_of_arrival
@@ -457,7 +457,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         if self._status == Status.NEW and vessel_type != ShipType.CRUISE:
             fields = {
                 "port_of_call",
-                "datetime_of_arrival",
                 "datetime_of_departure",
                 "gross_tonnage",
             }
@@ -469,7 +468,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
                         params={"field": label},
                         code=f"{field}_cannot_be_empty",
                     )
-
         return cleaned_data
 
     def user_visible_non_field_errors(self) -> ErrorList:
