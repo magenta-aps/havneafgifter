@@ -359,7 +359,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             else None
         ),
         widget=HTML5DateWidget(),
-        label=_("Arrival date/time"),
+        label=_("Arrival date"),
     )
 
     datetime_of_departure = DynamicField(
@@ -371,7 +371,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             else None
         ),
         widget=HTML5DateWidget(),
-        label=_("Departure date/time"),
+        label=_("Departure date"),
     )
 
     vessel_type = DynamicField(

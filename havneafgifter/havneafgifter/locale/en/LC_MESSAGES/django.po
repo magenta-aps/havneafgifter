@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-21 13:13-0200\n"
+"POT-Creation-Date: 2025-03-27 09:56-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -107,11 +107,11 @@ msgid "Shipping agent"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Arrival date/time"
+msgid "Arrival date"
 msgstr ""
 
 #: havneafgifter/forms.py
-msgid "Departure date/time"
+msgid "Departure date"
 msgstr ""
 
 #: havneafgifter/forms.py
