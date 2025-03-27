@@ -502,16 +502,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 name="gross_tonnage_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
-            # `datetime_of_arrival` can only be left blank/NULL for cruise ships
+            # `datetime_of_arrival` can only be left blank/NULL for drafts
             models.CheckConstraint(
-                check=(
-                    Q(status=Status.DRAFT)
-                    | (
-                        Q(vessel_type=ShipType.CRUISE)
-                        | Q(datetime_of_arrival__isnull=False)
-                    )
-                ),
-                name="datetime_of_arrival_cannot_be_null_for_non_cruise_ships",
+                check=(Q(status=Status.DRAFT) | Q(datetime_of_arrival__isnull=False)),
+                name="datetime_of_arrival_cannot_be_null_for_non_drafts",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_departure` can only be left blank/NULL for cruise ships
@@ -526,26 +520,23 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 name="datetime_of_departure_cannot_be_null_for_non_cruise_ships",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
-            # `datetime_of_arrival` and `datetime_of_departure` must either both
-            # be present, or both be blank/NULL.
+            # `datetime_of_departure` must either be present, or must be attached to a
+            # no_port_of_call form
             models.CheckConstraint(
                 check=(
                     Q(status=Status.DRAFT)
                     | (
                         # Both present
-                        (
-                            Q(datetime_of_arrival__isnull=False)
-                            & Q(datetime_of_departure__isnull=False)
-                        )
+                        (Q(datetime_of_departure__isnull=False))
                         # Both absent
                         | (
-                            Q(datetime_of_arrival__isnull=True)
+                            Q(port_of_call__isnull=True)
                             & Q(datetime_of_departure__isnull=True)
                         )
                     )
                 ),
                 name="datetime_of_arrival_and_departure_must_both_be_present_"
-                "or_both_be_null",
+                "or_departure_and_port_of_call_are_null",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
         ]

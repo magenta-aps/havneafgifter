@@ -220,15 +220,12 @@
         const portOfCall = $("#id_base-port_of_call")
 
         const grossTonnage = $("#id_base-gross_tonnage")
-        const arrival = $("#id_base-datetime_of_arrival")
         const departure = $("#id_base-datetime_of_departure")
         const vesselType = $("#id_base-vessel_type")
         
 
         if (portOfCall.val() == -1) {
             grossTonnage.prop("disabled", true)
-            arrival.prop("disabled", true)
-            arrival.val(null)
             departure.prop("disabled", true)
             departure.val(null)
             vesselType.prop("disabled", true)
@@ -236,7 +233,6 @@
             toggleCruiseFormsets()
         } else {
             grossTonnage.prop("disabled", false)
-            arrival.prop("disabled", false)
             departure.prop("disabled", false)
             vesselType.prop("disabled", false)
         }

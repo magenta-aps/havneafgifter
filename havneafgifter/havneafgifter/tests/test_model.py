@@ -372,14 +372,16 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             (ShipType.CRUISE, "port_of_call", False),
             (ShipType.FISHER, "gross_tonnage", True),
             (ShipType.CRUISE, "gross_tonnage", False),
-            (ShipType.FISHER, "datetime_of_arrival", True),
-            (ShipType.CRUISE, "datetime_of_arrival", False),
             (ShipType.FISHER, "datetime_of_departure", True),
             (ShipType.CRUISE, "datetime_of_departure", False),
         ],
     )
     def test_fields_only_nullable_for_cruise_ships(self, vessel_type, field, required):
-        instance = HarborDuesForm(vessel_type=vessel_type, status="done")
+        instance = HarborDuesForm(
+            vessel_type=vessel_type,
+            datetime_of_arrival=datetime(2024, 1, 1),
+            status="done",
+        )
         setattr(instance, field, None)
         if required:
             with self.assertRaises(IntegrityError):
@@ -388,37 +390,59 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             instance.save()
 
     @parametrize(
-        "arrival,departure,should_fail",
+        "arrival,departure,port_of_call,should_fail",
         [
             (
                 None,
                 None,
-                False,
+                lambda: None,
+                True,
             ),
             (
                 datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 datetime(2020, 1, 31, 0, 0, 0, tzinfo=timezone.utc),
+                lambda: Port.objects.all().first(),
                 False,
             ),
             (
                 datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
                 None,
+                lambda: None,
+                False,
+            ),
+            (
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                None,
+                lambda: Port.objects.all().first(),
                 True,
             ),
             (
                 None,
                 datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                lambda: Port.objects.all().first(),
+                True,
+            ),
+            (
+                None,
+                datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                lambda: None,
                 True,
             ),
         ],
     )
     def test_datetime_of_arrival_and_departure_constraints(
-        self, arrival, departure, should_fail
+        self, arrival, departure, port_of_call, should_fail
     ):
+        print(list(Port.objects.all()))
+        for q in Port.objects.all():
+            print(f"PORT: {q.name} pk={q.pk}")
+        qs = Port.objects.filter(pk=1)
+        print(f"FILTER QS: {qs.query}")
         instance = HarborDuesForm(
             vessel_type=ShipType.CRUISE,
             datetime_of_arrival=arrival,
             datetime_of_departure=departure,
+            port_of_call=port_of_call(),
             status="done",
         )
         if should_fail:

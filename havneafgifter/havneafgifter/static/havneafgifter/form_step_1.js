@@ -6,7 +6,7 @@
         const noPortOfCallCheckbox = $("#id_base-no_port_of_call");
         const portOfCallSelect = $("#id_base-port_of_call");
         const imoInput = $("#id_base-vessel_imo");
-        const datetimeInputs = $("#id_base-datetime_of_arrival, #id_datetime_of_departure");
+        const datetimeDepartureInput = $("#id_datetime_of_departure");
         const grossTonnageInput = $("#id_base-gross_tonnage");
         const vesselTypeSelect = $("#id_base-vessel_type");
         const shippingAgent = $("#id_base-shipping_agent");
@@ -61,12 +61,12 @@
             if (disabled===null) { return }
 
             portOfCallSelect.attr("disabled", disabled);
-            datetimeInputs.attr("disabled", disabled);
+            datetimeDepartureInput.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
             vesselTypeSelect.attr("disabled", disabled);
 
             portOfCallSelect.val(null);
-            datetimeInputs.val(null);
+            datetimedepartureInput.val(null);
             grossTonnageInput.val(null);
             // Enforce vessel type CRUISE
             vesselTypeSelect.val("CRUISE");
@@ -96,7 +96,7 @@
             // Ensure that potentially disabled fields are still POSTed to server
             portOfCallSelect.attr("disabled", null);
             imoInput.attr("disabled", null);
-            datetimeInputs.attr("disabled", null);
+            datetimeDepartureInput.attr("disabled", null);
             grossTonnageInput.attr("disabled", null);
             vesselTypeSelect.attr("disabled", null);
             shippingAgent.attr("disabled", null);
