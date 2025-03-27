@@ -81,7 +81,7 @@ class AuthenticationForm(BootstrapForm, DjangoAuthenticationForm):
 
 
 class HTML5DateWidget(widgets.Input):
-    input_type = "date"
+    input_type = "datetime-local"
     template_name = "django/forms/widgets/datetime.html"
 
 
@@ -359,7 +359,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             else None
         ),
         widget=HTML5DateWidget(),
-        label=_("Arrival date"),
+        label=_("Arrival date/time"),
     )
 
     datetime_of_departure = DynamicField(
@@ -371,7 +371,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             else None
         ),
         widget=HTML5DateWidget(),
-        label=_("Departure date"),
+        label=_("Departure date/time"),
     )
 
     vessel_type = DynamicField(
