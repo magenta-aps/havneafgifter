@@ -29,7 +29,7 @@ from havneafgifter.receipts import CruiseTaxFormReceipt, HarborDuesFormReceipt
 from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 
 
-class _ModelTest(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
+class ModelTest(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -170,7 +170,7 @@ class _ModelTest(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     def test_tax_per_gross_ton(
         self, vessel_type: ShipType, expected_tax_per_gross_ton: Decimal
     ) -> None:
-        # The `tax_per_gross_ton` returns the correct value for each vessel type.
+        """The `tax_per_gross_ton` returns the correct value for each vessel type."""
         if vessel_type is ShipType.CRUISE:
             instance = self.cruise_tax_form
         else:
