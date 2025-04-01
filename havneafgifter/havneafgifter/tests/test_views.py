@@ -1568,6 +1568,7 @@ class TestHarborDuesFormUpdateView(
         self.assertEqual(
             len(response.context["base_form"].errors.keys()),
             0,
+            response.context["base_form"].errors,
         )
 
     def _get_update_view_url(self, pk: int, **query) -> str:
