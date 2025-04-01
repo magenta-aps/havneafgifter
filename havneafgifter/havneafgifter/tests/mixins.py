@@ -68,7 +68,7 @@ class HarborDuesFormTestMixin:
         cls.ship_user_vessel = Vessel.objects.create(
             user=cls.ship_user,
             imo=cls.ship_user.username,
-            type=ShipType.FREIGHTER,
+            type=ShipType.OTHER,
             owner="Owner",
             master="Captain",
             gross_tonnage=1234,

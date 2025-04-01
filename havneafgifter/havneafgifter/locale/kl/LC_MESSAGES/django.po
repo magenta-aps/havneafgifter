@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-01 08:06-0100\n"
+"POT-Creation-Date: 2025-04-01 12:12-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,8 +54,8 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: havneafgifter/forms.py havneafgifter/models.py
-msgid "IMO-no."
+#: havneafgifter/forms.py
+msgid "IMO-no. or nickname"
 msgstr ""
 
 #: havneafgifter/forms.py
@@ -103,10 +103,6 @@ msgstr ""
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Port of call"
 msgstr "Umiarsualivik nunaliffik"
-
-#: havneafgifter/forms.py
-msgid "IMO-no. or nickname"
-msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Shipping agent"
@@ -585,6 +581,10 @@ msgstr ""
 #: havneafgifter/models.py
 msgid "Vessel nationality"
 msgstr "Sumiuussuseq"
+
+#: havneafgifter/models.py
+msgid "IMO-no."
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Arrival"
@@ -1381,6 +1381,14 @@ msgstr ""
 msgid ""
 "If you don’t receive an email, please make sure you’ve entered the address "
 "you registered with, and check your spam folder."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid "Enter a valid value."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid "IMO has incorrect content (must be 7 digits)"
 msgstr ""
 
 #: havneafgifter/views.py
