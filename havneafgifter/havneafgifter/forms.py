@@ -499,7 +499,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             return Port(name="Blank")
 
     def clean_vessel_imo(self):
-        vessel_imo = self.cleaned_data["vessel_imo"]
+        vessel_imo = self.cleaned_data.get("vessel_imo")
 
         # Skip validation if vessel type is OTHER
         if self.data.get("base-vessel_type") == ShipType.OTHER:

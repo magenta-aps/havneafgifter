@@ -1400,6 +1400,7 @@ class TestHarborDuesFormUpdateView(
                 "base-vessel_type": ShipType.CRUISE.value,
                 "base-port_of_call": -1,
                 "base-vessel_name": "Peder Dingo",
+                "base-vessel_imo": 1234567,
                 "passengers-TOTAL_FORMS": 2,
                 "passengers-INITIAL_FORMS": 0,
                 "passengers-MIN_NUM_FORMS": 0,
@@ -1474,6 +1475,7 @@ class TestHarborDuesFormUpdateView(
                 "base-vessel_type": ShipType.CRUISE.value,
                 "base-port_of_call": -1,
                 "base-vessel_name": "Peder Dingo",
+                "base-vessel_imo": 1234567,
                 "passengers-TOTAL_FORMS": 1,
                 "passengers-INITIAL_FORMS": 0,
                 "passengers-MIN_NUM_FORMS": 0,
@@ -1515,6 +1517,57 @@ class TestHarborDuesFormUpdateView(
             errors=_(
                 "If reporting port tax, please specify both arrival and departure date"
             ),
+        )
+
+    def test_dynamic_imo_validation(self):
+        # Arrange
+        self.client.force_login(self.shipping_agent_user)
+        # Arrange: introduce invalid IMO for the vessel type
+        data = {
+            "base-port_of_call": 1,
+            "base-vessel_name": "Skib",
+            "base-vessel_owner": "Ejeren",
+            "base-shipping_agent": 1,
+            "base-datetime_of_arrival": "2025-04-01T13:44",
+            "base-nationality": "DK",
+            "base-vessel_imo": "Forkert",
+            "base-vessel_master": "Kaptajnen",
+            "base-gross_tonnage": 123,
+            "base-datetime_of_departure": "2025-04-02T13:44",
+            "base-vessel_type": ShipType.FISHER.value,
+            "base-status": Status.NEW.value,
+        }
+
+        # Act: perform POST request
+        response = self.client.post(
+            self._get_update_view_url(self.cruise_tax_form.pk),
+            data=data,
+        )
+
+        # Assert: check that form error(s) are displayed
+        self.assertGreater(
+            len(response.context["base_form"].errors.keys()),
+            0,
+        )
+        self.assertFormError(
+            response.context["base_form"],
+            field="vessel_imo",
+            errors=[
+                _("Enter a valid value."),
+                _("IMO has incorrect content (must be 7 digits)"),
+            ],
+        )
+
+        # Arrange: change vessel type to other (has no IMO validation)
+        data["base-vessel_type"] = ShipType.OTHER.value
+        response = self.client.post(
+            self._get_update_view_url(self.cruise_tax_form.pk), data=data
+        )
+
+        # Assert: there are no longer any errors
+        self.assertEqual(
+            len(response.context["base_form"].errors.keys()),
+            0,
         )
 
     def _get_update_view_url(self, pk: int, **query) -> str:
