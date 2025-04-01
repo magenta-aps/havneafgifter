@@ -4,7 +4,12 @@ from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    MinValueValidator,
+    RegexValidator,
+)
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BaseInlineFormSet,
@@ -307,13 +312,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         required=_required_if_status_is_new,
         min_length=0,
         max_length=7,
-        validators=[
-            RegexValidator(r"\d{7}"),
-            imo_validator,
-        ],
         initial=lambda form: getattr(form._vessel, "imo", None),
         disabled=lambda form: form.user_is_ship,
-        label=_("IMO-no."),
+        label=_("IMO-no. or nickname"),
     )
 
     vessel_owner = DynamicField(
@@ -496,6 +497,33 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             return Port.objects.get(pk=port_of_call)
         elif port_of_call == -1:
             return Port(name="Blank")
+
+    def clean_vessel_imo(self):
+        vessel_imo = self.cleaned_data["vessel_imo"]
+
+        # Skip validation if vessel type is OTHER
+        if self.data.get("base-vessel_type") == ShipType.OTHER:
+            return vessel_imo
+
+        validators = [
+            MinLengthValidator(7),
+            MaxLengthValidator(7),
+            RegexValidator(r"\d{7}"),
+            imo_validator,
+        ]
+
+        errors = []
+        for validator in validators:
+            try:
+                validator(vessel_imo)
+            except ValidationError as e:
+                errors.append(e)
+
+        # Raise all errors if any occurred
+        if errors:
+            raise ValidationError(errors)
+
+        return vessel_imo
 
 
 class PassengersTotalForm(CSPFormMixin, Form):
