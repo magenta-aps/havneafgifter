@@ -1524,10 +1524,10 @@ class TestHarborDuesFormUpdateView(
         self.client.force_login(self.shipping_agent_user)
         # Arrange: introduce invalid IMO for the vessel type
         data = {
-            "base-port_of_call": 1,
+            "base-port_of_call": self.port.pk,
             "base-vessel_name": "Skib",
             "base-vessel_owner": "Ejeren",
-            "base-shipping_agent": 1,
+            "base-shipping_agent": self.shipping_agent_user.pk,
             "base-datetime_of_arrival": "2025-04-01T13:44",
             "base-nationality": "DK",
             "base-vessel_imo": "Forkert",
