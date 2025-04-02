@@ -465,6 +465,8 @@ class HarborDuesFormCreateView(
                 # Create or update `PassengersByCountry` objects based on formset data
                 passengers_by_country_objects = self._get_passengers_by_country_objects(
                     passenger_formset
+                ) + self._get_passengers_by_country_objects_for_deletion(
+                    passenger_formset
                 )
 
                 PassengersByCountry.objects.bulk_create(
@@ -484,7 +486,7 @@ class HarborDuesFormCreateView(
             # Create or update `Disembarkment` objects based on formset data
             disembarkment_objects = self._get_disembarkment_objects(
                 disembarkment_formset
-            )
+            ) + self._get_disembarkment_objects_for_deletion(disembarkment_formset)
 
             Disembarkment.objects.bulk_create(
                 disembarkment_objects,
@@ -524,6 +526,18 @@ class HarborDuesFormCreateView(
             if not cleaned_data.get("DELETE")
         ]
 
+    def _get_passengers_by_country_objects_for_deletion(
+        self, formset
+    ) -> list[PassengersByCountry]:
+        return [
+            PassengersByCountry(
+                cruise_tax_form=self.object,
+                nationality=deleted_form.cleaned_data["nationality"],
+                number_of_passengers=0,  # This flags the object for deletion
+            )
+            for deleted_form in formset.deleted_forms
+        ]
+
     def _get_disembarkment_objects(self, formset) -> list[Disembarkment]:
         return [
             Disembarkment(
@@ -533,6 +547,16 @@ class HarborDuesFormCreateView(
             )
             for cleaned_data in formset.cleaned_data  # type: ignore
             if cleaned_data != {} and not cleaned_data.get("DELETE")
+        ]
+
+    def _get_disembarkment_objects_for_deletion(self, formset) -> list[Disembarkment]:
+        return [
+            Disembarkment(
+                cruise_tax_form=self.object,
+                number_of_passengers=0,  # This flags the disembarkment for deletion
+                disembarkment_site=deleted_form.cleaned_data["disembarkment_site"],
+            )
+            for deleted_form in formset.deleted_forms
         ]
 
 

@@ -392,6 +392,181 @@ class TestHarborDuesFormCreateView(
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(instance), model_class)
 
+    def test_delete_disembarkment(self):
+        self.client.force_login(self.shipping_agent_user)
+        cruise_tax_form = self.cruise_tax_draft_form
+        cruise_tax_form.number_of_passengers = (
+            self._existing_passengers_by_country.number_of_passengers
+        )
+        cruise_tax_form.save()
+        disembarkment_0 = Disembarkment.objects.create(
+            cruise_tax_form=cruise_tax_form,
+            number_of_passengers=(
+                self._existing_passengers_by_country.number_of_passengers
+            ),
+            disembarkment_site=DisembarkmentSite.objects.all()[0],
+        )
+        disembarkment_1 = Disembarkment.objects.create(
+            cruise_tax_form=cruise_tax_form,
+            number_of_passengers=(
+                self._existing_passengers_by_country.number_of_passengers
+            ),
+            disembarkment_site=DisembarkmentSite.objects.all()[1],
+        )
+
+        # Check pre-post
+        self.assertEqual(len(cruise_tax_form.disembarkment_set.values()), 2)
+
+        # Set up POST data
+        form_data = {
+            "base-port_of_call": cruise_tax_form.port_of_call.id,
+            "base-vessel_name": cruise_tax_form.vessel_name,
+            "base-vessel_owner": cruise_tax_form.vessel_owner,
+            "base-shipping_agent": cruise_tax_form.shipping_agent.pk,
+            "base-datetime_of_arrival": cruise_tax_form.datetime_of_arrival,
+            "base-nationality": cruise_tax_form.nationality,
+            "base-vessel_imo": cruise_tax_form.vessel_imo,
+            "base-vessel_master": cruise_tax_form.vessel_master,
+            "base-gross_tonnage": cruise_tax_form.gross_tonnage,
+            "base-datetime_of_departure": cruise_tax_form.datetime_of_departure,
+            "base-vessel_type": cruise_tax_form.vessel_type,
+            "passengers-TOTAL_FORMS": 1,
+            "passengers-INITIAL_FORMS": 1,
+            "passengers-MIN_NUM_FORMS": 0,
+            "passengers-MAX_NUM_FORMS": 1000,
+            "passenger_total_form-total_number_of_passengers": (
+                cruise_tax_form.number_of_passengers
+            ),
+            "passengers-0-nationality": (
+                cruise_tax_form.passengers_by_country.all()[0].nationality
+            ),
+            "passengers-0-number_of_passengers": (
+                cruise_tax_form.passengers_by_country.all()[0].number_of_passengers
+            ),
+            "disembarkment-TOTAL_FORMS": ["3"],
+            "disembarkment-INITIAL_FORMS": ["2"],
+            "disembarkment-MIN_NUM_FORMS": ["0"],
+            "disembarkment-MAX_NUM_FORMS": ["1000"],
+            "disembarkment-0-disembarkment_site": disembarkment_0.disembarkment_site.pk,
+            "disembarkment-0-number_of_passengers": (
+                disembarkment_0.number_of_passengers
+            ),
+            "disembarkment-1-DELETE": ["on"],  # Mark for deletion
+            "disembarkment-1-disembarkment_site": (
+                disembarkment_1.disembarkment_site.pk
+            ),
+            "disembarkment-1-number_of_passengers": (
+                disembarkment_1.number_of_passengers
+            ),
+            "disembarkment-2-disembarkment_site": [""],
+            "disembarkment-2-number_of_passengers": [""],
+            "base-status": ["DRAFT"],
+        }
+
+        # Post data
+        response = self.client.post(
+            reverse(
+                "havneafgifter:harbor_dues_form_edit",
+                kwargs={"pk": cruise_tax_form.pk},
+            ),
+            # data=self.harbor_dues_form_data_pk,
+            data=form_data,
+        )
+
+        # Ensure we are redirected
+        self.assertEqual(response.status_code, 302)
+        # Assert that now we have correct number of disembarkments after deleting one
+        self.assertEqual(len(cruise_tax_form.disembarkment_set.values()), 1)
+
+    def test_delete_passengers_by_country(self):
+        self.client.force_login(self.shipping_agent_user)
+        cruise_tax_form = self.cruise_tax_draft_form
+        passengers_by_country = PassengersByCountry.objects.create(
+            cruise_tax_form=cruise_tax_form,
+            nationality="AS",
+            number_of_passengers=13,
+        )
+        cruise_tax_form.number_of_passengers = (
+            self._existing_passengers_by_country.number_of_passengers
+            + passengers_by_country.number_of_passengers
+        )
+        cruise_tax_form.save()
+
+        disembarkment_0 = Disembarkment.objects.create(
+            cruise_tax_form=cruise_tax_form,
+            number_of_passengers=(
+                self._existing_passengers_by_country.number_of_passengers
+            ),
+            disembarkment_site=DisembarkmentSite.objects.all()[0],
+        )
+
+        # Check pre-post
+        self.assertEqual(len(cruise_tax_form.passengers_by_country.values()), 2)
+
+        # Set up POST data
+        form_data = {
+            "base-port_of_call": cruise_tax_form.port_of_call.id,
+            "base-vessel_name": cruise_tax_form.vessel_name,
+            "base-vessel_owner": cruise_tax_form.vessel_owner,
+            "base-shipping_agent": cruise_tax_form.shipping_agent.pk,
+            "base-datetime_of_arrival": cruise_tax_form.datetime_of_arrival,
+            "base-nationality": cruise_tax_form.nationality,
+            "base-vessel_imo": cruise_tax_form.vessel_imo,
+            "base-vessel_master": cruise_tax_form.vessel_master,
+            "base-gross_tonnage": cruise_tax_form.gross_tonnage,
+            "base-datetime_of_departure": cruise_tax_form.datetime_of_departure,
+            "base-vessel_type": cruise_tax_form.vessel_type,
+            "passengers-TOTAL_FORMS": 3,
+            "passengers-INITIAL_FORMS": 2,
+            "passengers-MIN_NUM_FORMS": 0,
+            "passengers-MAX_NUM_FORMS": 1000,
+            # We exclude the additional passengers from the created PassengersByCountry
+            # from the number of passengers, because it will be deleted in the form
+            "passenger_total_form-total_number_of_passengers": (
+                cruise_tax_form.number_of_passengers
+                - passengers_by_country.number_of_passengers
+            ),
+            "passengers-0-nationality": (
+                self._existing_passengers_by_country.nationality
+            ),
+            "passengers-0-number_of_passengers": (
+                self._existing_passengers_by_country.number_of_passengers
+            ),
+            "passengers-1-DELETE": "on",  # Mark for deletion
+            "passengers-1-nationality": passengers_by_country.nationality,
+            "passengers-1-number_of_passengers": (
+                passengers_by_country.number_of_passengers
+            ),
+            "passengers-2-nationality": "",
+            "passengers-2-number_of_passengers": "",
+            "disembarkment-TOTAL_FORMS": ["2"],
+            "disembarkment-INITIAL_FORMS": ["1"],
+            "disembarkment-MIN_NUM_FORMS": ["0"],
+            "disembarkment-MAX_NUM_FORMS": ["1000"],
+            "disembarkment-0-disembarkment_site": disembarkment_0.disembarkment_site.pk,
+            "disembarkment-0-number_of_passengers": (
+                disembarkment_0.number_of_passengers
+            ),
+            "disembarkment-1-disembarkment_site": [""],
+            "disembarkment-1-number_of_passengers": [""],
+            "base-status": ["DRAFT"],
+        }
+
+        # Post data
+        response = self.client.post(
+            reverse(
+                "havneafgifter:harbor_dues_form_edit",
+                kwargs={"pk": cruise_tax_form.pk},
+            ),
+            # data=self.harbor_dues_form_data_pk,
+            data=form_data,
+        )
+
+        # Ensure we are redirected
+        self.assertEqual(response.status_code, 302)
+        # Assert that now we have correct number of disembarkments after deleting one
+        self.assertEqual(len(cruise_tax_form.passengers_by_country.values()), 1)
+
     def test_ship_user(self):
         self.client.force_login(self.ship_user)
         response = self.client.get(reverse("havneafgifter:harbor_dues_form_create"))
