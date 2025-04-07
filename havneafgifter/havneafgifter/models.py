@@ -1564,8 +1564,10 @@ class Vessel(models.Model):
         unique=True,
         max_length=7,
         validators=[
-            MinLengthValidator(0),
+            MinLengthValidator(7),
             MaxLengthValidator(7),
+            RegexValidator(r"\d{7}"),
+            imo_validator,
         ],
         verbose_name=_("IMO-no."),
     )

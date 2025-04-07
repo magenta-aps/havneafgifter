@@ -111,21 +111,19 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         ]
 
     username = CharField(
-        min_length=0,
-        max_length=7,
         label=_("IMO-no. or nickname"),
     )
 
     def clean_username(self):
         username = self.cleaned_data.get("username")
 
-        print("username", username)
-
         # Skip validation if vessel type is OTHER
         if self.data.get("type") == ShipType.OTHER:
             return username
 
         validators = [
+            MinLengthValidator(0),
+            MaxLengthValidator(7),
             RegexValidator(r"\d{7}"),
             imo_validator,
         ]
