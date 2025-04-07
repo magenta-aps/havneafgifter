@@ -92,6 +92,49 @@ class TestSignupVesselView(HarborDuesFormTestMixin, TestCase):
                 response.url, reverse("havneafgifter:harbor_dues_form_create")
             )
 
+    def test_form_no_username_validation(self):
+        # Arrange: OTHER with an invalid IMO
+        self.ship_user_form_data["type"] = ShipType.OTHER
+        self.ship_user_form_data["username"] = "notimo"
+        form = self.instance.form_class(data=self.ship_user_form_data)
+        self.instance.setup(self.request_factory.get(""))
+        with patch("havneafgifter.views.messages.success") as mock_success:
+            # Act
+            response = self.instance.form_valid(form)
+            # Assert: new `User` object is member of `Ship` group
+            self.assertIn("Ship", self.instance.object.group_names)
+            # Assert: a message is displayed to the user
+            mock_success.assert_called_once()
+            # Assert: we are redirected to the expected view
+            self.assertIsInstance(response, HttpResponseRedirect)
+            self.assertEqual(
+                response.url, reverse("havneafgifter:harbor_dues_form_create")
+            )
+
+    def test_form_username_validation_errors(self):
+        # Arrange
+        self.ship_user_form_data["type"] = ShipType.FREIGHTER
+        self.ship_user_form_data["username"] = "notimo"
+
+        # Act
+        response = self.client.post(
+            reverse("havneafgifter:signup-vessel"),
+            data=self.ship_user_form_data,
+        )
+
+        self.assertGreater(
+            len(response.context["form"].errors.keys()),
+            0,
+        )
+        self.assertFormError(
+            response.context["form"],
+            field="username",
+            errors=[
+                _("Enter a valid value."),
+                _("IMO has incorrect length (must be 7 digits)"),
+            ],
+        )
+
 
 class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):
     @classmethod
