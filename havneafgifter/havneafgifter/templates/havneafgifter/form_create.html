@@ -63,10 +63,18 @@
         <div class="col-6">
             {% bootstrap_form passenger_total_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         </div>
+        {% if passenger_formset.errors %}
+        <ul class="list-unstyled text-danger">
+            {% for error in passenger_formset.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
         {% for form in passenger_formset.forms %}
         <div class="formset-item row mb-4">
             <div class="col-6 d-flex justify-content-between">
                 {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.id wrapper_class="d-none" %}
                 {% bootstrap_field form.nationality show_label=False wrapper_class="col-7 me-5" %}
                 {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
                 <div class="col-2 button-location">
@@ -88,6 +96,7 @@
         <div class="formset-item row mb-3">
             <div class="col-6 d-flex justify-content-between">
                 {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.id wrapper_class="d-none" %}
                 {% bootstrap_field form.disembarkment_site show_label=False wrapper_class="col-7 me-5" %}
                 {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
                 <div class="col-2 button-location">
@@ -141,7 +150,7 @@
             this.reportValidity();
         }
     });
-    
+
     // Write loop to go through all containers upon initialization and remove delete flags
 
     const origChildren = $(".formset-item")
@@ -162,7 +171,7 @@
         const container = $(e.target).parents(".formset-item");
 
         const children = $(".formset-item", container.closest(".formset")).not(".d-none")
-        
+
         // Wont delete the last element
         if (children.length > 1) {
             const deleteCheckbox = $(".form-check-input", container)
@@ -250,7 +259,7 @@
         const grossTonnage = $("#id_base-gross_tonnage")
         const departure = $("#id_base-datetime_of_departure")
         const vesselType = $("#id_base-vessel_type")
-        
+
 
         if (portOfCall.val() == -1) {
             grossTonnage.prop("disabled", true)
