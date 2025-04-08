@@ -533,6 +533,7 @@ class PassengersTotalForm(CSPFormMixin, Form):
         self.is_valid()
         # Compare total number of passengers to the sum of passengers by country
         total_number_of_passengers = self.cleaned_data["total_number_of_passengers"]
+        print(f"ALLEGED NUMBER OF PAX: {total_number_of_passengers}")
         if total_number_of_passengers != sum_passengers_by_country:
             self.add_error(
                 "total_number_of_passengers",

@@ -415,8 +415,13 @@ class HarborDuesFormCreateView(
         base_form = self.get_base_form(
             instance=self.get_object(), data=self.request.POST
         )
+        print(dir(self.request.POST))
+        print(self.request.POST)
 
         passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
+
+        print("PASSENGER_TOTAL_FORM")
+        print(dir(passenger_total_form))
 
         passenger_formset = self.get_passenger_formset(
             initial=self.get_passenger_formset_initial(),
@@ -432,7 +437,9 @@ class HarborDuesFormCreateView(
         if passenger_formset.is_valid() and passenger_formset.cleaned_data[0]:
             actual_total = 0
             for item in self._get_passengers_by_country_objects(passenger_formset):
+                print(f"{item.nationality}: {item.number_of_passengers}")
                 actual_total += item.number_of_passengers
+            print(f"ACTUAL TOTAL PAX IS: {actual_total}")
             passenger_total_form.is_valid()
             passenger_total_form.validate_total(actual_total)
 
@@ -515,7 +522,20 @@ class HarborDuesFormCreateView(
             )
 
     def _get_passengers_by_country_objects(self, formset) -> list[PassengersByCountry]:
-        return [
+        retu = []
+        for cleaned_data in formset.cleaned_data:
+            print(f"Data: {cleaned_data}")
+            if "nationality" in cleaned_data:  # type: ignore
+                print(f"Nationality: {cleaned_data['nationality']}")
+                if not cleaned_data.get("DELETE"):
+                    retu.append(
+                    PassengersByCountry(
+                        cruise_tax_form=self.object,
+                        nationality=cleaned_data["nationality"],
+                        number_of_passengers=cleaned_data["number_of_passengers"],
+                    )
+                    )
+        ret = [
             PassengersByCountry(
                 cruise_tax_form=self.object,
                 nationality=cleaned_data["nationality"],
@@ -525,6 +545,10 @@ class HarborDuesFormCreateView(
             if "nationality" in cleaned_data  # type: ignore
             if not cleaned_data.get("DELETE")
         ]
+
+        print(f"PBCs: {ret}")
+
+        return retu
 
     def _get_passengers_by_country_objects_for_deletion(
         self, formset
