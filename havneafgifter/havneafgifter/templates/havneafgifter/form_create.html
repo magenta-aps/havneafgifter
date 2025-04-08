@@ -126,7 +126,7 @@
 
 <script nonce="{{ request.csp_nonce }}">
     // Used to create unique IDs
-    let count = 1
+    let count = null
 
     $(document).ready(function() {
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -141,6 +141,20 @@
             this.reportValidity();
         }
     });
+    
+    // Write loop to go through all containers upon initialization and remove delete flags
+
+    const origChildren = $(".formset-item")
+    console.log("Original children")
+    console.log(origChildren)
+    //origChildren.removeClass("d-none")
+    //origChildren.each(function() {
+    //    const child = $(this)
+    //    console.log(["Current child:", child])
+    //    const deleteCheckbox = $(".form-check-input", child.parents(".formset-item"))
+    //    deleteCheckbox.attr("checked", false)
+    //    child.removeClass("d-none")
+    //});
 
     function removeItem(e) {
         e.preventDefault();
@@ -148,11 +162,12 @@
         const container = $(e.target).parents(".formset-item");
 
         const children = $(".formset-item", container.closest(".formset")).not(".d-none")
-
+        
         // Wont delete the last element
         if (children.length > 1) {
             const deleteCheckbox = $(".form-check-input", container)
-            deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
+            //deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
+            deleteCheckbox.attr("checked", true)
             container.addClass("d-none")
 
             const plusButton = $(".plus-button", container)
@@ -161,6 +176,8 @@
                 const previous = $(".button-location", container.prevAll(".formset-item").not(".d-none").first())
                 previous.append(plusButton)
             }
+            console.log("Container:")
+            console.log(container)
         } else {
             alert("{% translate 'You cannot delete the last item' %}")
         }
@@ -177,6 +194,10 @@
 
         const namedElements = $("[name*=-]", clonedContainer)
 
+        // Create a running count, starting at children.length, which lives in root of JS.
+        const children = $(".formset-item", container.closest(".formset")).not(".d-none")
+        count = count || children.length
+        console.log(["Count, pre-add:", count])
         namedElements.each(function() {
             const el = $(this)
             const newName = el.attr("name").replace(/(.*)-(\d+)-(.*)/, (fullMatch, group1, group2, group3) => {
@@ -187,11 +208,18 @@
             el.attr("name", newName)
         })
         count++
+        console.log(["Count:", count])
 
-        const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
-        total.val(count)
+        //const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
+        //total.val(count)
 
         clonedContainer.insertAfter(container)
+        // This should possibly be down here.
+            //const deleteCheckbox = $(".form-check-input", el)
+            //deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
+            //deleteCheckbox.attr("checked", false)
+        // The ID for each line gets overwritten during deletion of elements,
+        // Find way to set unique ID's for each element w.o reordering.
 
         const plusButton = $(".plus-button", container)
         plusButton.remove()

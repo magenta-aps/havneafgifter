@@ -14,6 +14,7 @@ $(function(){
 
             const updateTotal = function() {
                 management.total.val(formContainer.children().length);
+                console.log(["Total:", management.total.val]);
             };
 
             const addForm = function(update) {
