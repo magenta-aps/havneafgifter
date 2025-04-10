@@ -95,8 +95,9 @@ SPDX-License-Identifier: MPL-2.0
 </section>
 {% endif %}
 
-{% if form.has_port_of_call %}
+{% if form.has_port_of_call or form.passengers_by_country.all %}
 <section>
+    {% if form.has_port_of_call %}
     {# Item: total number of passengers, total pax tax #}
     <h2>Pax Tax (cruise ships)</h2>
     <h2 class="secondary">Ilaasunut akitsuut</h2>
@@ -147,6 +148,7 @@ SPDX-License-Identifier: MPL-2.0
             </tfoot>
         </table>
     </div>
+    {% endif %}
 
     {# List: passengers by country #}
     <h2>Nationality and number of passengers</h2>
