@@ -497,6 +497,7 @@ class TestHarborDuesFormCreateView(
             "passenger_total_form-total_number_of_passengers": (
                 cruise_tax_form.number_of_passengers
             ),
+            "passengers-0-id": cruise_tax_form.passengers_by_country.all()[0].id,
             "passengers-0-nationality": (
                 cruise_tax_form.passengers_by_country.all()[0].nationality
             ),
@@ -507,10 +508,12 @@ class TestHarborDuesFormCreateView(
             "disembarkment-INITIAL_FORMS": ["2"],
             "disembarkment-MIN_NUM_FORMS": ["0"],
             "disembarkment-MAX_NUM_FORMS": ["1000"],
+            "disembarkment-0-id": disembarkment_0.id,
             "disembarkment-0-disembarkment_site": disembarkment_0.disembarkment_site.pk,
             "disembarkment-0-number_of_passengers": (
                 disembarkment_0.number_of_passengers
             ),
+            "disembarkment-1-id": disembarkment_1.id,
             "disembarkment-1-DELETE": ["on"],  # Mark for deletion
             "disembarkment-1-disembarkment_site": (
                 disembarkment_1.disembarkment_site.pk
@@ -518,6 +521,7 @@ class TestHarborDuesFormCreateView(
             "disembarkment-1-number_of_passengers": (
                 disembarkment_1.number_of_passengers
             ),
+            "disembarkment-2-id": "",
             "disembarkment-2-disembarkment_site": [""],
             "disembarkment-2-number_of_passengers": [""],
             "base-status": ["DRAFT"],
@@ -586,6 +590,7 @@ class TestHarborDuesFormCreateView(
                 cruise_tax_form.number_of_passengers
                 - passengers_by_country.number_of_passengers
             ),
+            "passengers-0-id": self._existing_passengers_by_country.id,
             "passengers-0-nationality": (
                 self._existing_passengers_by_country.nationality
             ),
@@ -593,16 +598,19 @@ class TestHarborDuesFormCreateView(
                 self._existing_passengers_by_country.number_of_passengers
             ),
             "passengers-1-DELETE": "on",  # Mark for deletion
+            "passengers-1-id": passengers_by_country.id,
             "passengers-1-nationality": passengers_by_country.nationality,
             "passengers-1-number_of_passengers": (
                 passengers_by_country.number_of_passengers
             ),
+            "passengers-2-id": "",
             "passengers-2-nationality": "",
             "passengers-2-number_of_passengers": "",
             "disembarkment-TOTAL_FORMS": ["2"],
             "disembarkment-INITIAL_FORMS": ["1"],
             "disembarkment-MIN_NUM_FORMS": ["0"],
             "disembarkment-MAX_NUM_FORMS": ["1000"],
+            "disembarkment-0-id": disembarkment_0.id,
             "disembarkment-0-disembarkment_site": disembarkment_0.disembarkment_site.pk,
             "disembarkment-0-number_of_passengers": (
                 disembarkment_0.number_of_passengers
