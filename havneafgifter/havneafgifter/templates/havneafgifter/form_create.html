@@ -134,8 +134,6 @@
 {% inform_ship_user_on_submit_modal object %}
 
 <script nonce="{{ request.csp_nonce }}">
-    // Used to create unique IDs
-    let count = null
 
     $(document).ready(function() {
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -154,16 +152,11 @@
     // Write loop to go through all containers upon initialization and remove delete flags
 
     const origChildren = $(".formset-item")
+    // Used to create unique IDs
+    let count = origChildren.length
+
     console.log("Original children")
     console.log(origChildren)
-    //origChildren.removeClass("d-none")
-    //origChildren.each(function() {
-    //    const child = $(this)
-    //    console.log(["Current child:", child])
-    //    const deleteCheckbox = $(".form-check-input", child.parents(".formset-item"))
-    //    deleteCheckbox.attr("checked", false)
-    //    child.removeClass("d-none")
-    //});
 
     function removeItem(e) {
         e.preventDefault();
@@ -219,16 +212,11 @@
         count++
         console.log(["Count:", count])
 
+        //NOTE: This is quite possibly superfluous
         //const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
         //total.val(count)
 
         clonedContainer.insertAfter(container)
-        // This should possibly be down here.
-            //const deleteCheckbox = $(".form-check-input", el)
-            //deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
-            //deleteCheckbox.attr("checked", false)
-        // The ID for each line gets overwritten during deletion of elements,
-        // Find way to set unique ID's for each element w.o reordering.
 
         const plusButton = $(".plus-button", container)
         plusButton.remove()
