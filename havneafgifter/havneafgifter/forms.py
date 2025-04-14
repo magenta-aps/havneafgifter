@@ -33,7 +33,7 @@ from django.forms.utils import ErrorList
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
-from django_select2.forms import Select2Widget
+from django_select2.forms import Select2MultipleWidget, Select2Widget
 from dynamic_forms import DynamicField, DynamicFormMixin
 
 from havneafgifter.form_mixins import BootstrapForm, BootstrapFormSet, MonthField
@@ -566,12 +566,14 @@ class ReasonForm(DynamicFormMixin, CSPFormMixin, ModelForm):
 class StatisticsForm(BootstrapForm):
     municipality = MultipleChoiceField(
         label=_("Kommune"),
-        choices=Municipality.choices,
+        choices=sorted(Municipality.choices, key=lambda x: str(x[1])),
+        widget=Select2MultipleWidget(choices=Municipality.choices),
         required=False,
     )
     port_authority = ModelMultipleChoiceField(
         label=_("Havnemyndighed"),
-        queryset=PortAuthority.objects.all(),
+        queryset=PortAuthority.objects.order_by("name"),
+        widget=Select2MultipleWidget(choices=lambda _: PortAuthority.objects.all()),
         required=False,
     )
     arrival_gt = DateTimeField(
@@ -590,20 +592,26 @@ class StatisticsForm(BootstrapForm):
     )
     vessel_type = MultipleChoiceField(
         label=_("Skibstype"),
-        choices=ShipType.choices,
+        choices=sorted(ShipType.choices, key=lambda x: str(x[1])),
+        widget=Select2MultipleWidget(choices=ShipType.choices),
         required=False,
     )
     site = ModelMultipleChoiceField(
         label=_("Landgangssted"),
-        queryset=DisembarkmentSite.objects.all(),
+        queryset=DisembarkmentSite.objects.order_by("municipality", "name"),
+        widget=Select2MultipleWidget(choices=lambda _: DisembarkmentSite.objects.all()),
         required=False,
     )
     port_of_call = ModelMultipleChoiceField(
-        label=_("Havn"), queryset=Port.objects.all(), required=False
+        label=_("Havn"),
+        queryset=Port.objects.order_by("portauthority", "name"),
+        widget=Select2MultipleWidget(choices=lambda _: Port.objects.all()),
+        required=False,
     )
     status = MultipleChoiceField(
         label=_("Status"),
-        choices=Status.choices,
+        choices=sorted(Status.choices, key=lambda x: str(x[1])),
+        widget=Select2MultipleWidget(choices=Status.choices),
         required=False,
     )
 
