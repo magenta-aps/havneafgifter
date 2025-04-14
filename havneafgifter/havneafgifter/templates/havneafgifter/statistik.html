@@ -17,27 +17,66 @@
 <script src="{% static 'havneafgifter/form.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">{% translate "Harbor dues" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% blocktrans trimmed with form_id=form.pk %}
+            Statistik
+            {% endblocktrans %}
+        </li>
+    </ol>
+</nav>
+{% endblock breadcrumb %}
+
 {% block content %}
-<h1>{% translate "Statistik" %}</h1>
-<div class="alert alert-light">
-    {% blocktranslate %}
-    Vælg feltværdier der skal summeres på.
-    Hver kombination af valgte feltværdier giver en opsummeret række af data for de havneafgift-formularer der passer på kombinationen.
-    Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, og data indgår i de øvrige summationer.
-    {% endblocktranslate %}
-</div>
+<h1 class="mb-4">{% translate "Find statistik" %}</h1>
+{% blocktranslate %}
+Vælg feltværdier der skal summeres på.
+Hver kombination af valgte feltværdier giver en opsummeret række af data for de havneafgift-formularer der passer på kombinationen.
+Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, og data indgår i de øvrige summationer.
+{% endblocktranslate %}
+
 <form action="" method="get">
     {% csrf_token %}
     {% media_csp form %}
-    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.municipality %}
-    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.port_authority %}
-    {% include "havneafgifter/statistik/field_range.html" with field1=form.arrival_gt field2=form.arrival_lt label=_("Periode") %}
-    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.vessel_type %}
-    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.site %}
-    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.port_of_call %}
-    {% include "havneafgifter/statistik/field_multiselect.html" with field=form.status %}
-    {% bootstrap_button button_type="submit" content=_("Søg") %}
+    <div class="row mt-5">
+        <div class="col-3">
+            {% include "havneafgifter/statistik/field_multiselect.html" with field=form.municipality %}
+        </div>
+        <div class="col-3">
+            {% include "havneafgifter/statistik/field_multiselect.html" with field=form.vessel_type %}
+        </div>
+        <div class="col-3">
+            {% include "havneafgifter/statistik/field_multiselect.html" with field=form.site %}
+        </div>
+        <div class="col-3">
+            {% include "havneafgifter/statistik/field_multiselect.html" with field=form.port_of_call %}
+        </div>
+    </div>
+    <div class="row mt-4 mb-4">
+        <div class="col-3">
+            {% include "havneafgifter/statistik/field_multiselect.html" with field=form.port_authority %}
+        </div>
+        <div class="col-3">
+            {% include "havneafgifter/statistik/field_multiselect.html" with field=form.status %}
+        </div>
+        <div class="col-3">
+            <label class="form-label" for="arrival_gt">{% translate "Periode fra"%}</label>
+            <input type="datetime-local" name="arrival_gt" class="form-control">
+        </div>
+        <div class="col-3">
+            <label class="form-label" for="arrival_lt">{% translate "Periode til"%}</label>
+            <input type="datetime-local" name="arrival_lt" class="form-control">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary d-flex align-items-center">
+        <span class="material-icons">search</span>
+        <span class="ms-1">{% translate "Søg" %}</span>
+    </button>
 </form>
+<br>
 {% if form.data %}
 {% render_table table %}
 <a href="{% export_url 'xlsx' %}">{% translate 'Eksportér til Excel' %}</a>
