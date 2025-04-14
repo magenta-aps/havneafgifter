@@ -331,8 +331,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     vessel_imo = DynamicField(
         CharField,
         required=_required_if_status_is_new,
-        min_length=0,
-        max_length=7,
         initial=lambda form: getattr(form._vessel, "imo", None),
         disabled=lambda form: form.user_is_ship,
         label=_("IMO-no. or nickname"),
