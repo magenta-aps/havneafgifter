@@ -113,27 +113,46 @@ class TestSignupVesselView(HarborDuesFormTestMixin, TestCase):
 
     def test_form_username_validation_errors(self):
         # Arrange
-        self.ship_user_form_data["type"] = ShipType.FREIGHTER
-        self.ship_user_form_data["username"] = "notimo"
-
-        # Act
-        response = self.client.post(
-            reverse("havneafgifter:signup-vessel"),
-            data=self.ship_user_form_data,
-        )
-
-        self.assertGreater(
-            len(response.context["form"].errors.keys()),
-            0,
-        )
-        self.assertFormError(
-            response.context["form"],
-            field="username",
-            errors=[
-                _("Enter a valid value."),
-                _("IMO has incorrect length (must be 7 digits)"),
-            ],
-        )
+        tests = [
+            (
+                ShipType.FREIGHTER,
+                [
+                    _("Ensure this value has at least 7 characters (it has 1)."),
+                    _("Enter a valid value."),
+                    _("IMO has incorrect length (must be 7 digits)"),
+                ],
+            ),
+            (
+                ShipType.OTHER,
+                [
+                    _("Ensure this value has at least 2 characters (it has 1)."),
+                    _(
+                        "Enter a valid username. "
+                        "This value may contain only letters, numbers, and "
+                        "@/./+/-/_ characters."
+                    ),
+                ],
+            ),
+        ]
+        for vessel_type, errors in tests:
+            with self.subTest(vessel_type=vessel_type):
+                self.ship_user_form_data["type"] = vessel_type
+                self.ship_user_form_data["username"] = "!"  # invalid in both cases
+                # Act
+                response = self.client.post(
+                    reverse("havneafgifter:signup-vessel"),
+                    data=self.ship_user_form_data,
+                )
+                # Assert
+                self.assertGreater(
+                    len(response.context["form"].errors.keys()),
+                    0,
+                )
+                self.assertFormError(
+                    response.context["form"],
+                    field="username",
+                    errors=errors,
+                )
 
 
 class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):

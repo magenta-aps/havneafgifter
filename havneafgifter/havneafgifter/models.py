@@ -1561,13 +1561,7 @@ class Vessel(models.Model):
 
     imo = models.CharField(
         unique=True,
-        validators=[
-            MinLengthValidator(7),
-            MaxLengthValidator(7),
-            RegexValidator(r"\d{7}"),
-            imo_validator,
-        ],
-        verbose_name=_("IMO-no."),
+        verbose_name=_("IMO-no. or nickname"),
     )
 
     owner = models.CharField(
