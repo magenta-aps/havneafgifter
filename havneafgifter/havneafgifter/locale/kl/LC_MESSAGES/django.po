@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-07 12:00-0100\n"
+"POT-Creation-Date: 2025-04-22 12:49-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1036,6 +1036,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Harbor dues"
 msgstr ""
 
@@ -1181,18 +1182,25 @@ msgid "Statistik"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
-msgid ""
-"\n"
-"    Vælg feltværdier der skal summeres på.\n"
-"    Hver kombination af valgte feltværdier giver en opsummeret række af data "
-"for de havneafgift-formularer der passer på kombinationen.\n"
-"    Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, "
-"og data indgår i de øvrige summationer.\n"
-"    "
+msgid "Find statistik"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Periode"
+msgid ""
+"\n"
+"Vælg feltværdier der skal summeres på.\n"
+"Hver kombination af valgte feltværdier giver en opsummeret række af data for "
+"de havneafgift-formularer der passer på kombinationen.\n"
+"Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, og "
+"data indgår i de øvrige summationer.\n"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Periode fra"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Periode til"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrateform.html
