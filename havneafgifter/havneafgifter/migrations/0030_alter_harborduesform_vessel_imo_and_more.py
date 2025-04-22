@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('havneafgifter', '0029_alter_harborduesform_vessel_imo_and_more'),
+        ('havneafgifter', '0029_remove_harborduesform_datetime_of_arrival_cannot_be_null_for_non_cruise_ships_and_more'),
     ]
 
     operations = [
