@@ -115,14 +115,14 @@ class ValidateIMOMixin:
                 MinLengthValidator(7),
                 MaxLengthValidator(7),
                 RegexValidator(r"\d{7}"),
-                imo_validator,
+                imo_validator,  # type: ignore
             ]
 
         # Run validators against the provided `vessel_imo`
         errors = []
         for validator in validators:
             try:
-                validator(vessel_imo)
+                validator(vessel_imo)  # type: ignore
             except ValidationError as e:
                 errors.append(e)
 
