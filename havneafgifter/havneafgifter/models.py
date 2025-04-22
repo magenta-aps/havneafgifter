@@ -584,15 +584,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
 
     vessel_imo = models.CharField(
-        max_length=7,
         null=True,
         blank=True,
-        validators=[
-            MinLengthValidator(7),
-            MaxLengthValidator(7),
-            RegexValidator(r"\d{7}"),
-            imo_validator,
-        ],
         verbose_name=_("IMO-no."),
     )
 
@@ -1568,14 +1561,7 @@ class Vessel(models.Model):
 
     imo = models.CharField(
         unique=True,
-        max_length=7,
-        validators=[
-            MinLengthValidator(7),
-            MaxLengthValidator(7),
-            RegexValidator(r"\d{7}"),
-            imo_validator,
-        ],
-        verbose_name=_("IMO-no."),
+        verbose_name=_("IMO-no. or nickname"),
     )
 
     owner = models.CharField(
