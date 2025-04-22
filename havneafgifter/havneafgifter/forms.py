@@ -3,8 +3,14 @@ from typing import Any, Dict, List, Tuple
 from csp_helpers.mixins import CSPFormMixin
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
 from django.contrib.auth.forms import BaseUserCreationForm, UsernameField
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    MinValueValidator,
+    RegexValidator,
+)
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BaseInlineFormSet,
@@ -90,7 +96,44 @@ class HTML5MonthWidget(widgets.Input):
     template_name = "django/forms/widgets/datetime.html"
 
 
-class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
+class ValidateIMOMixin:
+    def _clean_imo_or_nickname(self, vessel_imo: str, vessel_type: ShipType):
+        if vessel_type == ShipType.OTHER:
+            # For `ShipType.OTHER` it is not required to provide a valid IMO.
+            # Instead, the user can provide a self-determined value.
+            # However, it must at least be a valid Django username, as it can be used to
+            # log in.
+            validators = [
+                MinLengthValidator(2),
+                MaxLengthValidator(30),
+                # Allow the same characters as Django default `AbstractUser`
+                UnicodeUsernameValidator(),
+            ]
+        else:
+            # All other vessel types must provide a valid IMO.
+            validators = [
+                MinLengthValidator(7),
+                MaxLengthValidator(7),
+                RegexValidator(r"\d{7}"),
+                imo_validator,  # type: ignore
+            ]
+
+        # Run validators against the provided `vessel_imo`
+        errors = []
+        for validator in validators:
+            try:
+                validator(vessel_imo)  # type: ignore
+            except ValidationError as e:
+                errors.append(e)
+
+        # Raise all errors if any occurred
+        if errors:
+            raise ValidationError(errors)
+
+        return vessel_imo
+
+
+class SignupVesselForm(CSPFormMixin, ValidateIMOMixin, BaseUserCreationForm):
     # By inheriting from `BaseUserCreationForm`, this form takes care of
     # asking the user to repeat their desired password, checking that they are
     # identical.
@@ -106,13 +149,7 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         ]
 
     username = CharField(
-        min_length=0,
-        max_length=7,
-        validators=[
-            RegexValidator(r"\d{7}"),
-            imo_validator,
-        ],
-        label=_("IMO-no."),
+        label=_("IMO-no. or nickname"),
     )
 
     first_name = CharField(
@@ -165,12 +202,6 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         validators=[MinValueValidator(0)],
         label=_("Gross tonnage"),
     )
-    nationality = ChoiceField(
-        required=False,
-        choices=countries,
-        widget=Select2Widget(choices=countries),
-        label=_("Nationality"),
-    )
 
     nationality = ChoiceField(
         required=False,
@@ -178,6 +209,11 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         widget=Select2Widget(choices=countries),
         label=_("Nationality"),
     )
+
+    def clean_username(self):
+        vessel_imo = self.cleaned_data.get("username")
+        vessel_type = self.data.get("type")
+        return self._clean_imo_or_nickname(vessel_imo, vessel_type)
 
     def save(self, commit=True):
         user = super().save(commit=commit)
@@ -195,7 +231,7 @@ class SignupVesselForm(CSPFormMixin, BaseUserCreationForm):
         return user
 
 
-class UpdateVesselForm(CSPFormMixin, ModelForm):
+class UpdateVesselForm(CSPFormMixin, ValidateIMOMixin, ModelForm):
     class Meta:
         model = Vessel
         exclude = ["user", "imo"]
@@ -229,12 +265,6 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
         validators=[MinValueValidator(0)],
         label=_("Gross tonnage"),
     )
-    nationality = ChoiceField(
-        required=False,
-        choices=countries,
-        widget=Select2Widget(choices=countries),
-        label=_("Nationality"),
-    )
 
     nationality = ChoiceField(
         required=False,
@@ -243,8 +273,19 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
         label=_("Nationality"),
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
 
-class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
+        # Ensure that vessel type is validated against the new vessel type, if vessel
+        # type is changed.
+        vessel_imo = self.instance.imo
+        vessel_type = cleaned_data.get("type")
+        self._clean_imo_or_nickname(vessel_imo, vessel_type)
+
+        return cleaned_data
+
+
+class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, ModelForm):
     class Meta:
         model = HarborDuesForm
         fields = [
@@ -283,6 +324,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
         ),
         label=_("Port of call"),
     )
+
     nationality = DynamicField(
         ChoiceField,
         required=_required_if_status_is_new,
@@ -305,15 +347,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
     vessel_imo = DynamicField(
         CharField,
         required=_required_if_status_is_new,
-        min_length=0,
-        max_length=7,
-        validators=[
-            RegexValidator(r"\d{7}"),
-            imo_validator,
-        ],
         initial=lambda form: getattr(form._vessel, "imo", None),
         disabled=lambda form: form.user_is_ship,
-        label=_("IMO-no."),
+        label=_("IMO-no. or nickname"),
     )
 
     vessel_owner = DynamicField(
@@ -496,6 +532,11 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ModelForm):
             return Port.objects.get(pk=port_of_call)
         elif port_of_call == -1:
             return Port(name="Blank")
+
+    def clean_vessel_imo(self):
+        vessel_imo = self.cleaned_data.get("vessel_imo")
+        vessel_type = self.data.get("base-vessel_type")
+        return self._clean_imo_or_nickname(vessel_imo, vessel_type)
 
 
 class PassengersTotalForm(CSPFormMixin, Form):

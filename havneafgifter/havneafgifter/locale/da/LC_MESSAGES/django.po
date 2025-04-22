@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-27 10:09-0200\n"
+"POT-Creation-Date: 2025-04-22 12:49-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,9 +54,9 @@ msgstr "Brugernavn eller IMO-nummer"
 msgid "Password"
 msgstr "Kodeord"
 
-#: havneafgifter/forms.py havneafgifter/models.py
-msgid "IMO-no."
-msgstr "IMO-nr."
+#: havneafgifter/forms.py
+msgid "IMO-no. or nickname"
+msgstr "IMO-nr. eller kaldenavn"
 
 #: havneafgifter/forms.py
 msgid "First name"
@@ -595,6 +595,10 @@ msgid "Vessel nationality"
 msgstr "Skibets nationalitet"
 
 #: havneafgifter/models.py
+msgid "IMO-no."
+msgstr "IMO-nr."
+
+#: havneafgifter/models.py
 msgid "Arrival"
 msgstr "Ankomst"
 
@@ -1061,6 +1065,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Harbor dues"
 msgstr "Havneafgift"
 
@@ -1210,18 +1215,25 @@ msgid "Statistik"
 msgstr "Statistik"
 
 #: havneafgifter/templates/havneafgifter/statistik.html
-msgid ""
-"\n"
-"    Vælg feltværdier der skal summeres på.\n"
-"    Hver kombination af valgte feltværdier giver en opsummeret række af data "
-"for de havneafgift-formularer der passer på kombinationen.\n"
-"    Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, "
-"og data indgår i de øvrige summationer.\n"
-"    "
+msgid "Find statistik"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
-msgid "Periode"
+msgid ""
+"\n"
+"Vælg feltværdier der skal summeres på.\n"
+"Hver kombination af valgte feltværdier giver en opsummeret række af data for "
+"de havneafgift-formularer der passer på kombinationen.\n"
+"Hvis ingen feltværdier vælges indenfor et felt, opdeles ikke på feltet, og "
+"data indgår i de øvrige summationer.\n"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Periode fra"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/statistik.html
+msgid "Periode til"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrateform.html
@@ -1423,6 +1435,18 @@ msgid ""
 msgstr ""
 "Hvis du ikke modtager en email skal du sørge for at du har indtastet samme "
 "adresse som du registrerede dig med, og har checket din spam-mappe."
+
+#: havneafgifter/tests/test_views.py
+msgid "Enter a valid value."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid "IMO has incorrect length (must be 7 digits)"
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid "IMO has incorrect content (must be 7 digits)"
+msgstr ""
 
 #: havneafgifter/views.py
 msgid "Please sign in using the IMO number as username"
