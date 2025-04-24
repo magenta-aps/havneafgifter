@@ -25,6 +25,7 @@
 
 {% block extra_headers %}
 <script nonce="{{ request.csp_nonce }}" src="{% url 'javascript-catalog' %}"></script>
+<!-- <script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/formset.js' %}"></script> -->
 <script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_actions.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_step_1.js' %}"></script>
 {% endblock %}
@@ -149,82 +150,76 @@
         }
     });
 
-    // Write loop to go through all containers upon initialization and remove delete flags
+    const recountSubforms = function(formset) {
+        const items = formset.children(".formset-item");
+        let prefix = "";
+        items.each(function (index, element) {
+            console.log(["Current item:", $(this)])
+            console.log(["All inputs:", $(this).find("input")]);
+            $(this).find("input[name],select[name]").each(function (){
+                prefix = this.name.match(/^[^-]+/)[0];
+                this.id = this.id.replace(/-\d+-/, "-"+index+"-");
+                this.name = this.name.replace(/-\d+-/, "-"+index+"-");
+            });
+        });
+        console.log(["Formset prefix:", prefix]);
 
-    const origChildren = $(".formset-item")
-    // Used to create unique IDs
-    let count = origChildren.length
-
-    console.log("Original children")
-    console.log(origChildren)
-
-    function removeItem(e) {
-        e.preventDefault();
-
-        const container = $(e.target).parents(".formset-item");
-
-        const children = $(".formset-item", container.closest(".formset")).not(".d-none")
-
-        // Wont delete the last element
-        if (children.length > 1) {
-            const deleteCheckbox = $(".form-check-input", container)
-            //deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
-            deleteCheckbox.attr("checked", true)
-            container.addClass("d-none")
-
-            const plusButton = $(".plus-button", container)
-
-            if (plusButton.length) {
-                const previous = $(".button-location", container.prevAll(".formset-item").not(".d-none").first())
-                previous.append(plusButton)
-            }
-            console.log("Container:")
-            console.log(container)
-        } else {
-            alert("{% translate 'You cannot delete the last item' %}")
-        }
+        // Update Total Forms value
+        const total = formset.parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
+        total.val(items.length);
+        console.log(["Number of children after recounting:", total]);
     }
 
-    function addItem(e) {
+    function addSubform(e) {
         e.preventDefault();
 
-        const container = $(e.target).parents(".formset-item")
+        const subform = $(e.target).parents(".formset-item")
+        const parentFormset = subform.parents(".formset");
+        const clonedContainer = subform.clone()
 
-        let prefix = ""
+        clonedContainer.insertAfter(subform)
+        recountSubforms(parentFormset);
 
-        const clonedContainer = container.clone()
-
-        const namedElements = $("[name*=-]", clonedContainer)
-
-        // Create a running count, starting at children.length, which lives in root of JS.
-        const children = $(".formset-item", container.closest(".formset")).not(".d-none")
-        count = count || children.length
-        console.log(["Count, pre-add:", count])
-        namedElements.each(function() {
-            const el = $(this)
-            const newName = el.attr("name").replace(/(.*)-(\d+)-(.*)/, (fullMatch, group1, group2, group3) => {
-                prefix = group1
-                // Construct the new string using the captured groups
-                return `${group1}-${count}-${group3}`;
-            });
-            el.attr("name", newName)
-        })
-        count++
-        console.log(["Count:", count])
-
-        //NOTE: This is quite possibly superfluous
-        //const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
-        //total.val(count)
-
-        clonedContainer.insertAfter(container)
-
-        const plusButton = $(".plus-button", container)
+        const plusButton = $(".plus-button", subform)
         plusButton.remove()
 
         $(".plus-button").off("click")
         $(".minus-button").off("click")
-        $(".plus-button").on("click", addItem);
-        $(".minus-button").on("click", removeItem);
+        $(".plus-button").on("click", addSubform);
+        $(".minus-button").on("click", removeSubform);
+    }
+
+    function removeSubform(e) {
+        e.preventDefault();
+
+        const subform = $(e.target).parents(".formset-item");
+        const parentFormset = subform.parents(".formset");
+
+        const children = $(".formset-item", subform.closest(".formset")).not(".d-none")
+
+        // Wont delete the last element
+        if (children.length > 1) {
+            // NOTE: The deleteChekbox might not be needed at all
+            /*
+            const deleteCheckbox = $(".form-check-input", subform)
+            //deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
+            deleteCheckbox.attr("checked", true)
+            subform.addClass("d-none")
+            */
+
+            const plusButton = $(".plus-button", subform)
+
+            if (plusButton.length) {
+                const previous = $(".button-location", subform.prevAll(".formset-item").not(".d-none").first())
+                previous.append(plusButton)
+            }
+
+            subform.remove()
+            recountSubforms(parentFormset);
+
+        } else {
+            alert("{% translate 'You cannot delete the last item' %}")
+        }
     }
 
     function toggleCruiseFormsets() {
@@ -270,8 +265,8 @@
     // Dynamic
     $("#id_base-vessel_type").on("change", toggleCruiseFormsets)
     $("#id_base-port_of_call").on("change", portOfCallToggle)
-    $(".plus-button").on("click", addItem)
-    $(".minus-button").on("click", removeItem)
+    $(".plus-button").on("click", addSubform)
+    $(".minus-button").on("click", removeSubform)
 
     const form = $("form#main");
 
@@ -282,4 +277,5 @@
         vesselType.prop("disabled", null)
     });
 </script>
+<!-- <script src="{% static 'havneafgifter/form.js' %}" nonce="{{ request.csp_nonce }}"></script> -->
 {% endblock content %}

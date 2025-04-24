@@ -239,6 +239,8 @@ class HarborDuesFormCreateView(
         )
         passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
         passenger_formset = self.get_passenger_formset(data=self.request.POST)
+        print(f"UNCLEAN PAX FORMSET:\n{passenger_formset.data}")
+        #print(f"CLEAN PAX FORMSET:\n{passenger_formset.cleaned_data}")
         disembarkment_formset = self.get_disembarkment_formset(data=self.request.POST)
 
         if isinstance(self.object, CruiseTaxForm):
@@ -248,6 +250,7 @@ class HarborDuesFormCreateView(
                 ]
                 actual_total = 0
                 for item in passenger_formset.cleaned_data:
+                    print(f"PAX ITEM: {item}")
                     if not item.get("DELETE", True):
                         actual_total += item.get("number_of_passengers", 0)
                 # Save the total number of passengers entered by the user on the cruise
@@ -404,6 +407,7 @@ class HarborDuesFormCreateView(
                     if k == "status":
                         continue
                     setattr(cruise_tax_form, k, v)
+                #TODO: move total passenger check to here
                 cruise_tax_form.save()
                 return cruise_tax_form
 
