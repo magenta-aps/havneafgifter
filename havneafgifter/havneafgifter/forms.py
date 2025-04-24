@@ -231,16 +231,10 @@ class SignupVesselForm(CSPFormMixin, ValidateIMOMixin, BaseUserCreationForm):
         return user
 
 
-class UpdateVesselForm(CSPFormMixin, ValidateIMOMixin, ModelForm):
+class UpdateVesselForm(CSPFormMixin, ModelForm):
     class Meta:
         model = Vessel
-        exclude = ["user", "imo"]
-
-    type = ChoiceField(
-        required=False,
-        choices=ShipType.choices,
-        label=_("Vessel type"),
-    )
+        exclude = ["user", "imo", "type"]
 
     name = CharField(
         required=False,
@@ -272,17 +266,6 @@ class UpdateVesselForm(CSPFormMixin, ValidateIMOMixin, ModelForm):
         widget=Select2Widget(choices=countries),
         label=_("Nationality"),
     )
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        # Ensure that vessel type is validated against the new vessel type, if vessel
-        # type is changed.
-        vessel_imo = self.instance.imo
-        vessel_type = cleaned_data.get("type")
-        self._clean_imo_or_nickname(vessel_imo, vessel_type)
-
-        return cleaned_data
 
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, ModelForm):

@@ -186,7 +186,6 @@ class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):
         self.client.post(
             reverse("havneafgifter:update_vessel"),
             {
-                "type": "PASSENGER",
                 "name": "Boaty McBoatface",
                 "owner": "Joakim von And",
                 "master": "Peder Dingo",
@@ -196,7 +195,6 @@ class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):
 
         vessel_form = Vessel.objects.get(imo=self.ship_user.username)
 
-        self.assertEqual(vessel_form.type, "PASSENGER")
         self.assertEqual(vessel_form.name, "Boaty McBoatface")
         self.assertEqual(vessel_form.owner, "Joakim von And")
         self.assertEqual(vessel_form.master, "Peder Dingo")
