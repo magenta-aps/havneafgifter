@@ -237,12 +237,20 @@ class HarborDuesFormCreateView(
             instance=self.get_object(),
             data=self.request.POST,
         )
+        print(f"BASE FORM VALID?: {base_form.is_valid()}")
+        print(base_form.clean())
+        print(self.get_object())
+        # NOTE: Here we create a CTF object, so the passenger/disembarkment formsets have something useful to hook onto
+        if base_form.is_valid() and base_form.clean()["vessel_type"] == ShipType.CRUISE:
+            self.object = self._create_or_update_cruise_tax_form(base_form.save(commit=False))
+
         passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
         passenger_formset = self.get_passenger_formset(data=self.request.POST)
 
         disembarkment_formset = self.get_disembarkment_formset(data=self.request.POST)
 
         if isinstance(self.object, CruiseTaxForm):
+            print("IT's A CTF")
             if passenger_formset.is_valid() and passenger_total_form.is_valid():
                 user_total = passenger_total_form.cleaned_data[
                     "total_number_of_passengers"
@@ -259,16 +267,19 @@ class HarborDuesFormCreateView(
                 passenger_total_form.validate_total(actual_total)
 
         if (
-            base_form.is_valid()
-            and passenger_total_form.is_valid()
+            passenger_total_form.is_valid()
             and passenger_formset.is_valid()
             and disembarkment_formset.is_valid()
         ):
             # Save `base_form` data
             response = self.form_valid(base_form)
             # Save related inline model formsets for passengers and disembarkments
+            print("ABOUT TO SAVE SUBFORMSETS")
             passenger_formset.save()
+            print("SAVED PAX FORMSET")
+
             disembarkment_formset.save()
+            print("SAVED SUBFORMSETS")
             return response
         else:
             return self.render_to_response(
@@ -313,6 +324,7 @@ class HarborDuesFormCreateView(
         return context
 
     def form_valid(self, form):
+        print("FORM VALID?")
         harbor_dues_form = form.save(commit=False)
 
         if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
@@ -335,6 +347,7 @@ class HarborDuesFormCreateView(
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
+            print("CREATE OR UPDATE CTF")
             self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
         else:
             harbor_dues_form.save()
@@ -357,7 +370,6 @@ class HarborDuesFormCreateView(
                 and harbor_dues_form.shipping_agent
             ):
                 self.handle_notification_mail(OnSendToAgentMail, self.object)
-
         # Go to detail view to display result.
         return self.get_redirect_for_form(
             "havneafgifter:receipt_detail_html",
@@ -374,6 +386,7 @@ class HarborDuesFormCreateView(
         }
 
         if harbor_dues_form.pk is None:
+            print("NEW HDF")
             # The `HarborDuesForm` has not yet been saved to the database.
             # If we create the corresponding `CruiseTaxForm`, the corresponding
             # `HarborDuesForm` will be created automatically.
@@ -385,6 +398,7 @@ class HarborDuesFormCreateView(
                     harborduesform_ptr=harbor_dues_form.pk
                 )
             except CruiseTaxForm.DoesNotExist:
+                print("NEW CTF")
                 # A `CruiseTaxForm` does not exist, but the user is trying to save a
                 # cruise tax form, i.e. they are editing a harbor dues form and have
                 # changed the vessel type to `CRUISE`. Create the corresponding
@@ -399,6 +413,7 @@ class HarborDuesFormCreateView(
                     },
                 )
             else:
+                print("EXISTING CTF")
                 # A `CruiseTaxForm` exists for this PK.
                 # Update all its fields, except `status`.
                 for k, v in field_vals.items():
@@ -435,6 +450,7 @@ class HarborDuesFormCreateView(
             PassengersByCountry,
             ["id", "nationality", "number_of_passengers"],
         )
+        print(f"INSTANCE CHOICE: {self.object}")
         return factory(prefix="passengers", instance=self.object, **form_kwargs)
 
     def get_disembarkment_formset(self, **form_kwargs):
