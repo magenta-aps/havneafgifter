@@ -526,6 +526,7 @@ class PassengersTotalForm(CSPFormMixin, Form):
     total_number_of_passengers = IntegerField(
         label=_("Total number of passengers"),
         widget=widgets.NumberInput(attrs={"placeholder": "0"}),
+        required=False,
     )
 
     def validate_total(self, sum_passengers_by_country):
@@ -541,38 +542,6 @@ class PassengersTotalForm(CSPFormMixin, Form):
                     "passengers by each nationality"
                 ),
             )
-
-
-class PassengersByCountryForm(DynamicFormMixin, CSPFormMixin, Form):
-    nationality = ChoiceField(
-        choices=BLANK_CHOICE_DASH + [(n, n.label) for n in Nationality],
-        required=True,
-    )
-    number_of_passengers = DynamicField(
-        IntegerField,
-        required=True,
-        min_value=0,
-    )
-    pk = IntegerField(
-        required=False,
-        widget=HiddenInput(),
-    )
-
-
-class DisembarkmentForm(DynamicFormMixin, CSPFormMixin, Form):
-    disembarkment_site = DynamicField(
-        ModelChoiceField,
-        queryset=DisembarkmentSite.objects.all(),
-        required=True,
-    )
-    number_of_passengers = DynamicField(
-        IntegerField,
-        required=lambda form: True if form.initial.get("pk") else False,
-    )
-    pk = IntegerField(
-        required=False,
-        widget=HiddenInput(),
-    )
 
 
 class ReasonForm(DynamicFormMixin, CSPFormMixin, ModelForm):
