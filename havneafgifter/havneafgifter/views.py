@@ -405,7 +405,6 @@ class HarborDuesFormCreateView(
                     if k == "status":
                         continue
                     setattr(cruise_tax_form, k, v)
-                # TODO: move total passenger check to here
                 cruise_tax_form.save()
                 return cruise_tax_form
 
@@ -432,12 +431,10 @@ class HarborDuesFormCreateView(
         )
 
     def get_passenger_formset(self, **form_kwargs):
-        print("GETTING PASSENGER FORMSET")
         factory = self.get_inlineformset_factory(
             PassengersByCountry,
             ["id", "nationality", "number_of_passengers"],
         )
-        print("FACTORY RETRIEVED")
         return factory(prefix="passengers", instance=self.object, **form_kwargs)
 
     def get_disembarkment_formset(self, **form_kwargs):

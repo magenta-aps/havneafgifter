@@ -25,7 +25,6 @@
 
 {% block extra_headers %}
 <script nonce="{{ request.csp_nonce }}" src="{% url 'javascript-catalog' %}"></script>
-<!-- <script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/formset.js' %}"></script> -->
 <script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_actions.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}" src="{% static 'havneafgifter/form_step_1.js' %}"></script>
 {% endblock %}
@@ -154,20 +153,16 @@
         const items = formset.children(".formset-item");
         let prefix = "";
         items.each(function (index, element) {
-            console.log(["Current item:", $(this)])
-            console.log(["All inputs:", $(this).find("input")]);
             $(this).find("input[name],select[name]").each(function (){
                 prefix = this.name.match(/^[^-]+/)[0];
                 this.id = this.id.replace(/-\d+-/, "-"+index+"-");
                 this.name = this.name.replace(/-\d+-/, "-"+index+"-");
             });
         });
-        console.log(["Formset prefix:", prefix]);
 
         // Update Total Forms value
         const total = formset.parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
         total.val(items.length);
-        console.log(["Number of children after recounting:", total]);
     }
 
     function addSubform(e) {
@@ -273,5 +268,4 @@
         vesselType.prop("disabled", null)
     });
 </script>
-<!-- <script src="{% static 'havneafgifter/form.js' %}" nonce="{{ request.csp_nonce }}"></script> -->
 {% endblock content %}
