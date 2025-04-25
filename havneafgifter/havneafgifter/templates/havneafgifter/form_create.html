@@ -63,10 +63,18 @@
         <div class="col-6">
             {% bootstrap_form passenger_total_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         </div>
+        {% if passenger_formset.errors %}
+        <ul class="list-unstyled text-danger">
+            {% for error in passenger_formset.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
         {% for form in passenger_formset.forms %}
         <div class="formset-item row mb-4">
             <div class="col-6 d-flex justify-content-between">
                 {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.id wrapper_class="d-none" %}
                 {% bootstrap_field form.nationality show_label=False wrapper_class="col-7 me-5" %}
                 {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
                 <div class="col-2 button-location">
@@ -88,6 +96,7 @@
         <div class="formset-item row mb-3">
             <div class="col-6 d-flex justify-content-between">
                 {% bootstrap_field form.DELETE wrapper_class="d-none" %}
+                {% bootstrap_field form.id wrapper_class="d-none" %}
                 {% bootstrap_field form.disembarkment_site show_label=False wrapper_class="col-7 me-5" %}
                 {% bootstrap_field form.number_of_passengers show_label=False wrapper_class="col-4 me-3" %}
                 <div class="col-2 button-location">
@@ -125,8 +134,6 @@
 {% inform_ship_user_on_submit_modal object %}
 
 <script nonce="{{ request.csp_nonce }}">
-    // Used to create unique IDs
-    let count = 1
 
     $(document).ready(function() {
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -142,64 +149,68 @@
         }
     });
 
-    function removeItem(e) {
-        e.preventDefault();
+    const recountSubforms = function(formset) {
+        const items = formset.children(".formset-item");
+        let prefix = "";
+        items.each(function (index, element) {
+            $(this).find("input[name],select[name]").each(function (){
+                prefix = this.name.match(/^[^-]+/)[0];
+                this.id = this.id.replace(/-\d+-/, "-"+index+"-");
+                this.name = this.name.replace(/-\d+-/, "-"+index+"-");
+            });
+        });
 
-        const container = $(e.target).parents(".formset-item");
-
-        const children = $(".formset-item", container.closest(".formset")).not(".d-none")
-
-        // Wont delete the last element
-        if (children.length > 1) {
-            const deleteCheckbox = $(".form-check-input", container)
-            deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
-            container.addClass("d-none")
-
-            const plusButton = $(".plus-button", container)
-
-            if (plusButton.length) {
-                const previous = $(".button-location", container.prevAll(".formset-item").not(".d-none").first())
-                previous.append(plusButton)
-            }
-        } else {
-            alert("{% translate 'You cannot delete the last item' %}")
-        }
+        // Update Total Forms value
+        const total = formset.parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
+        total.val(items.length);
     }
 
-    function addItem(e) {
+    function addSubform(e) {
         e.preventDefault();
 
-        const container = $(e.target).parents(".formset-item")
+        const subform = $(e.target).parents(".formset-item")
+        const parentFormset = subform.parents(".formset");
+        const clonedContainer = subform.clone()
 
-        let prefix = ""
+        clonedContainer.insertAfter(subform)
+        recountSubforms(parentFormset);
 
-        const clonedContainer = container.clone()
-
-        const namedElements = $("[name*=-]", clonedContainer)
-
-        namedElements.each(function() {
-            const el = $(this)
-            const newName = el.attr("name").replace(/(.*)-(\d+)-(.*)/, (fullMatch, group1, group2, group3) => {
-                prefix = group1
-                // Construct the new string using the captured groups
-                return `${group1}-${count}-${group3}`;
-            });
-            el.attr("name", newName)
-        })
-        count++
-
-        const total = $(e.target).parents("form").find(`[name=${prefix}-TOTAL_FORMS]`)
-        total.val(count)
-
-        clonedContainer.insertAfter(container)
-
-        const plusButton = $(".plus-button", container)
+        const plusButton = $(".plus-button", subform)
         plusButton.remove()
 
         $(".plus-button").off("click")
         $(".minus-button").off("click")
-        $(".plus-button").on("click", addItem);
-        $(".minus-button").on("click", removeItem);
+        $(".plus-button").on("click", addSubform);
+        $(".minus-button").on("click", removeSubform);
+    }
+
+    function removeSubform(e) {
+        e.preventDefault();
+
+        const subform = $(e.target).parents(".formset-item");
+        const parentFormset = subform.parents(".formset");
+
+        const children = $(".formset-item", subform.closest(".formset")).not(".d-none")
+
+        // Wont delete the last element
+        if (children.length > 1) {
+            const deleteCheckbox = $(".form-check-input", subform)
+            deleteCheckbox.attr("checked", true)
+            subform.addClass("d-none")
+
+            const plusButton = $(".plus-button", subform)
+
+            if (plusButton.length) {
+                const previous = $(".button-location", subform.prevAll(".formset-item").not(".d-none").first())
+                previous.append(plusButton)
+            }
+
+            //subform.remove()
+            recountSubforms(parentFormset);
+
+        } else {
+            alert("{% translate 'You cannot delete the last item' %}")
+        }
     }
 
     function toggleCruiseFormsets() {
@@ -222,7 +233,7 @@
         const grossTonnage = $("#id_base-gross_tonnage")
         const departure = $("#id_base-datetime_of_departure")
         const vesselType = $("#id_base-vessel_type")
-        
+
 
         if (portOfCall.val() == -1) {
             grossTonnage.prop("disabled", true)
@@ -245,8 +256,8 @@
     // Dynamic
     $("#id_base-vessel_type").on("change", toggleCruiseFormsets)
     $("#id_base-port_of_call").on("change", portOfCallToggle)
-    $(".plus-button").on("click", addItem)
-    $(".minus-button").on("click", removeItem)
+    $(".plus-button").on("click", addSubform)
+    $(".minus-button").on("click", removeSubform)
 
     const form = $("form#main");
 

@@ -18,7 +18,7 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
 from django.db.models import Case, F, IntegerField, OuterRef, Subquery, Sum, Value, When
 from django.db.models.functions import Coalesce
-from django.forms import formset_factory, model_to_dict
+from django.forms import inlineformset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -33,10 +33,8 @@ from project.util import new_taxrate_start_datetime, omit
 
 from havneafgifter.forms import (
     AuthenticationForm,
-    DisembarkmentForm,
     DisembarkmentTaxRateFormSet,
     HarborDuesFormForm,
-    PassengersByCountryForm,
     PassengerStatisticsForm,
     PassengersTotalForm,
     PortTaxRateFormSet,
@@ -234,6 +232,54 @@ class HarborDuesFormCreateView(
         response = super().get(request, *args, **kwargs)
         return self.prevent_response_caching(response)
 
+    def post(self, request, *args, **kwargs):
+        base_form = self.get_base_form(
+            instance=self.get_object(),
+            data=self.request.POST,
+        )
+        passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
+        passenger_formset = self.get_passenger_formset(data=self.request.POST)
+
+        disembarkment_formset = self.get_disembarkment_formset(data=self.request.POST)
+
+        if isinstance(self.object, CruiseTaxForm):
+            if passenger_formset.is_valid() and passenger_total_form.is_valid():
+                user_total = passenger_total_form.cleaned_data[
+                    "total_number_of_passengers"
+                ]
+                actual_total = 0
+                for item in passenger_formset.cleaned_data:
+                    if not item.get("DELETE", True):
+                        actual_total += item.get("number_of_passengers", 0)
+                # Save the total number of passengers entered by the user on the cruise
+                # tax form.
+                self.object.number_of_passengers = user_total
+                # Add form error if total number entered does not equal sum of
+                # nationalities.
+                passenger_total_form.validate_total(actual_total)
+
+        if (
+            base_form.is_valid()
+            and passenger_total_form.is_valid()
+            and passenger_formset.is_valid()
+            and disembarkment_formset.is_valid()
+        ):
+            # Save `base_form` data
+            response = self.form_valid(base_form)
+            # Save related inline model formsets for passengers and disembarkments
+            passenger_formset.save()
+            disembarkment_formset.save()
+            return response
+        else:
+            return self.render_to_response(
+                context={
+                    "base_form": base_form,
+                    "passenger_total_form": passenger_total_form,
+                    "passenger_formset": passenger_formset,
+                    "disembarkment_formset": disembarkment_formset,
+                }
+            )
+
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
         self.object = None
@@ -252,12 +298,8 @@ class HarborDuesFormCreateView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["base_form"] = self.get_base_form(instance=self.get_object())
-        context["passenger_formset"] = self.get_passenger_formset(
-            initial=self.get_passenger_formset_initial()
-        )
-        context["disembarkment_formset"] = self.get_disembarkment_formset(
-            initial=self.get_disembarkment_formset_initial()
-        )
+        context["passenger_formset"] = self.get_passenger_formset()
+        context["disembarkment_formset"] = self.get_disembarkment_formset()
 
         if isinstance(self.object, CruiseTaxForm):
             total_num = self.object.number_of_passengers
@@ -378,186 +420,29 @@ class HarborDuesFormCreateView(
     def get_passenger_total_form(self, **form_kwargs):
         return PassengersTotalForm(prefix="passenger_total_form", **form_kwargs)
 
-    def get_formset_factory(self, form_class):
-        return formset_factory(form_class, can_order=False, can_delete=True, extra=1)
+    def get_inlineformset_factory(self, model_class, fields):
+        return inlineformset_factory(
+            CruiseTaxForm,
+            model_class,
+            fields=fields,
+            can_order=False,
+            can_delete=True,
+            extra=1,
+        )
 
     def get_passenger_formset(self, **form_kwargs):
-        factory = self.get_formset_factory(PassengersByCountryForm)
-        return factory(prefix="passengers", **form_kwargs)
+        factory = self.get_inlineformset_factory(
+            PassengersByCountry,
+            ["id", "nationality", "number_of_passengers"],
+        )
+        return factory(prefix="passengers", instance=self.object, **form_kwargs)
 
     def get_disembarkment_formset(self, **form_kwargs):
-        factory = self.get_formset_factory(DisembarkmentForm)
-        return factory(prefix="disembarkment", **form_kwargs)
-
-    def get_passenger_formset_initial(self) -> list[dict]:
-        return [
-            {
-                "pk": pbc.pk,
-                "number_of_passengers": pbc.number_of_passengers,
-                "nationality": Nationality(pbc.nationality),
-            }
-            for pbc in PassengersByCountry.objects.filter(
-                cruise_tax_form=self.get_object(),
-            )
-        ]
-
-    def get_disembarkment_formset_initial(self):
-        return [
-            {
-                "pk": dis.pk,
-                "number_of_passengers": dis.number_of_passengers,
-                "disembarkment_site": dis.disembarkment_site,
-            }
-            for dis in Disembarkment.objects.filter(cruise_tax_form=self.get_object())
-        ]
-
-    def post(self, request, *args, **kwargs):
-        base_form = self.get_base_form(
-            instance=self.get_object(), data=self.request.POST
+        factory = self.get_inlineformset_factory(
+            Disembarkment,
+            ["id", "disembarkment_site", "number_of_passengers"],
         )
-
-        passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
-
-        passenger_formset = self.get_passenger_formset(
-            initial=self.get_passenger_formset_initial(),
-            data=self.request.POST,
-        )
-
-        disembarkment_formset = self.get_disembarkment_formset(
-            initial=self.get_disembarkment_formset_initial(),
-            data=self.request.POST,
-        )
-
-        # Non-cruise ships will have a list with an empty dict
-        if passenger_formset.is_valid() and passenger_formset.cleaned_data[0]:
-            actual_total = 0
-            for item in self._get_passengers_by_country_objects(passenger_formset):
-                actual_total += item.number_of_passengers
-            passenger_total_form.is_valid()
-            passenger_total_form.validate_total(actual_total)
-
-            if not passenger_total_form.is_valid():
-                return self.render_to_response(
-                    context={
-                        "base_form": base_form,
-                        "passenger_total_form": passenger_total_form,
-                        "passenger_formset": passenger_formset,
-                        "disembarkment_formset": disembarkment_formset,
-                    }
-                )
-
-        if (
-            base_form.is_valid()
-            and passenger_formset.is_valid()
-            and disembarkment_formset.is_valid()
-        ):
-            response = self.form_valid(base_form)
-
-            if passenger_formset.cleaned_data[0]:
-                total_number_of_passengers = 0
-                for item in self._get_passengers_by_country_objects(passenger_formset):
-                    total_number_of_passengers += item.number_of_passengers
-
-                self.object.number_of_passengers = total_number_of_passengers
-                self.object.save()
-
-            if passenger_formset.cleaned_data[0]:
-                # Create or update `PassengersByCountry` objects based on formset data
-                passengers_by_country_objects = self._get_passengers_by_country_objects(
-                    passenger_formset
-                ) + self._get_passengers_by_country_objects_for_deletion(
-                    passenger_formset
-                )
-
-                PassengersByCountry.objects.bulk_create(
-                    passengers_by_country_objects,
-                    update_conflicts=True,
-                    unique_fields=["cruise_tax_form", "nationality"],
-                    update_fields=["number_of_passengers"],
-                )
-
-                # Remove any `PassengersByCountry` objects which have 0 passengers
-                # after the "create or update" processing above.
-                PassengersByCountry.objects.filter(
-                    cruise_tax_form=self.object,
-                    number_of_passengers=0,
-                ).delete()
-
-            # Create or update `Disembarkment` objects based on formset data
-            disembarkment_objects = self._get_disembarkment_objects(
-                disembarkment_formset
-            ) + self._get_disembarkment_objects_for_deletion(disembarkment_formset)
-
-            Disembarkment.objects.bulk_create(
-                disembarkment_objects,
-                update_conflicts=True,
-                unique_fields=["cruise_tax_form", "disembarkment_site"],
-                update_fields=["number_of_passengers"],
-            )
-
-            # Remove any `Disembarkment` objects which have 0 passengers after the
-            # "create or update" processing above.
-            Disembarkment.objects.filter(
-                cruise_tax_form=self.object,
-                number_of_passengers=0,
-            ).delete()
-
-            return response
-
-        else:
-            return self.render_to_response(
-                context={
-                    "base_form": base_form,
-                    "passenger_total_form": passenger_total_form,
-                    "passenger_formset": passenger_formset,
-                    "disembarkment_formset": disembarkment_formset,
-                }
-            )
-
-    def _get_passengers_by_country_objects(self, formset) -> list[PassengersByCountry]:
-        return [
-            PassengersByCountry(
-                cruise_tax_form=self.object,
-                nationality=cleaned_data["nationality"],
-                number_of_passengers=cleaned_data["number_of_passengers"],
-            )
-            for cleaned_data in formset.cleaned_data
-            if "nationality" in cleaned_data  # type: ignore
-            if not cleaned_data.get("DELETE")
-        ]
-
-    def _get_passengers_by_country_objects_for_deletion(
-        self, formset
-    ) -> list[PassengersByCountry]:
-        return [
-            PassengersByCountry(
-                cruise_tax_form=self.object,
-                nationality=deleted_form.cleaned_data["nationality"],
-                number_of_passengers=0,  # This flags the object for deletion
-            )
-            for deleted_form in formset.deleted_forms
-        ]
-
-    def _get_disembarkment_objects(self, formset) -> list[Disembarkment]:
-        return [
-            Disembarkment(
-                cruise_tax_form=self.object,
-                number_of_passengers=cleaned_data["number_of_passengers"],
-                disembarkment_site=cleaned_data["disembarkment_site"],
-            )
-            for cleaned_data in formset.cleaned_data  # type: ignore
-            if cleaned_data != {} and not cleaned_data.get("DELETE")
-        ]
-
-    def _get_disembarkment_objects_for_deletion(self, formset) -> list[Disembarkment]:
-        return [
-            Disembarkment(
-                cruise_tax_form=self.object,
-                number_of_passengers=0,  # This flags the disembarkment for deletion
-                disembarkment_site=deleted_form.cleaned_data["disembarkment_site"],
-            )
-            for deleted_form in formset.deleted_forms
-        ]
+        return factory(prefix="disembarkment", instance=self.object, **form_kwargs)
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
