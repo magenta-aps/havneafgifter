@@ -199,13 +199,9 @@
 
         // Wont delete the last element
         if (children.length > 1) {
-            // NOTE: The deleteChekbox might not be needed at all
-            /*
             const deleteCheckbox = $(".form-check-input", subform)
-            //deleteCheckbox.attr("checked", !deleteCheckbox.attr("checked"))
             deleteCheckbox.attr("checked", true)
             subform.addClass("d-none")
-            */
 
             const plusButton = $(".plus-button", subform)
 
@@ -214,7 +210,7 @@
                 previous.append(plusButton)
             }
 
-            subform.remove()
+            //subform.remove()
             recountSubforms(parentFormset);
 
         } else {
