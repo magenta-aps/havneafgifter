@@ -238,6 +238,9 @@ class HarborDuesFormCreateView(
             data=self.request.POST,
         )
 
+        passenger_total_form = None
+        passenger_formset = None
+        disembarkment_formset = None
         if base_form.is_valid():
             if (
                 self.object is None
