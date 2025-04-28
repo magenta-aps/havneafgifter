@@ -285,9 +285,12 @@ class HarborDuesFormCreateView(
             return self.render_to_response(
                 context={
                     "base_form": base_form,
-                    "passenger_total_form": passenger_total_form,
-                    "passenger_formset": passenger_formset,
-                    "disembarkment_formset": disembarkment_formset,
+                    "passenger_total_form": passenger_total_form
+                    or self.get_passenger_total_form(data=self.request.POST),
+                    "passenger_formset": passenger_formset
+                    or self.get_passenger_formset(data=self.request.POST),
+                    "disembarkment_formset": disembarkment_formset
+                    or self.get_disembarkment_formset(data=self.request.POST),
                 }
             )
 
