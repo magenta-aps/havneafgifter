@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-22 12:49-0100\n"
+"POT-Creation-Date: 2025-04-28 07:15-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,15 +46,15 @@ msgstr "Vigtige datoer"
 msgid "This user belongs to"
 msgstr "Denne bruger tilhører"
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/templates/havneafgifter/login.html
 msgid "Username or IMO number"
 msgstr "Brugernavn eller IMO-nummer"
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/templates/havneafgifter/login.html
 msgid "Password"
 msgstr "Kodeord"
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/models.py
 msgid "IMO-no. or nickname"
 msgstr "IMO-nr. eller kaldenavn"
 
@@ -835,6 +835,7 @@ msgid "Passengerdata"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Rates"
 msgstr "Satser"
 
@@ -1066,6 +1067,7 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #: havneafgifter/templates/havneafgifter/statistik.html
+#: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Harbor dues"
 msgstr "Havneafgift"
 
@@ -1128,6 +1130,9 @@ msgstr ""
 "tilbageværende cookie-data"
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
+msgid "Log in again"
+msgstr "Log ind igen"
+
 #: havneafgifter/templates/havneafgifter/login.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 msgid "Log in"
@@ -1207,8 +1212,8 @@ msgid "Contact person details"
 msgstr "Kontaktperson-detaljer"
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
-msgid "Create"
-msgstr "Opret"
+msgid "Opret skib"
+msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
 msgid "Statistik"
@@ -1437,11 +1442,25 @@ msgstr ""
 "adresse som du registrerede dig med, og har checket din spam-mappe."
 
 #: havneafgifter/tests/test_views.py
+msgid "Ensure this value has at least 7 characters (it has 1)."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
 msgid "Enter a valid value."
 msgstr ""
 
 #: havneafgifter/tests/test_views.py
 msgid "IMO has incorrect length (must be 7 digits)"
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid "Ensure this value has at least 2 characters (it has 1)."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid ""
+"Enter a valid username. This value may contain only letters, numbers, and "
+"@/./+/-/_ characters."
 msgstr ""
 
 #: havneafgifter/tests/test_views.py

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-22 12:49-0100\n"
+"POT-Creation-Date: 2025-04-28 07:15-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,15 +46,15 @@ msgstr ""
 msgid "This user belongs to"
 msgstr ""
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/templates/havneafgifter/login.html
 msgid "Username or IMO number"
 msgstr ""
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/templates/havneafgifter/login.html
 msgid "Password"
-msgstr ""
+msgstr "Adgangskode"
 
-#: havneafgifter/forms.py
+#: havneafgifter/forms.py havneafgifter/models.py
 msgid "IMO-no. or nickname"
 msgstr ""
 
@@ -808,6 +808,7 @@ msgid "Passengerdata"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+#: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Rates"
 msgstr ""
 
@@ -1020,6 +1021,7 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/form_create.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #: havneafgifter/templates/havneafgifter/statistik.html
+#: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Harbor dues"
 msgstr ""
 
@@ -1080,6 +1082,9 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html
+msgid "Log in again"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/login.html
 #: havneafgifter/templates/havneafgifter/user/password/reset_complete.html
 msgid "Log in"
@@ -1157,7 +1162,7 @@ msgid "Contact person details"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
-msgid "Create"
+msgid "Opret skib"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/statistik.html
@@ -1373,11 +1378,25 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/tests/test_views.py
+msgid "Ensure this value has at least 7 characters (it has 1)."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
 msgid "Enter a valid value."
 msgstr ""
 
 #: havneafgifter/tests/test_views.py
 msgid "IMO has incorrect length (must be 7 digits)"
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid "Ensure this value has at least 2 characters (it has 1)."
+msgstr ""
+
+#: havneafgifter/tests/test_views.py
+msgid ""
+"Enter a valid username. This value may contain only letters, numbers, and "
+"@/./+/-/_ characters."
 msgstr ""
 
 #: havneafgifter/tests/test_views.py
