@@ -239,7 +239,10 @@ class HarborDuesFormCreateView(
         )
 
         if base_form.is_valid():
-            if self.object == None and base_form.clean()["vessel_type"] == ShipType.CRUISE:
+            if (
+                self.object is None
+                and base_form.clean()["vessel_type"] == ShipType.CRUISE
+            ):
                 self.object = self._create_or_update_cruise_tax_form(
                     base_form.save(commit=False)
                 )
@@ -247,9 +250,15 @@ class HarborDuesFormCreateView(
             passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
             passenger_formset = self.get_passenger_formset(data=self.request.POST)
 
-            disembarkment_formset = self.get_disembarkment_formset(data=self.request.POST)
+            disembarkment_formset = self.get_disembarkment_formset(
+                data=self.request.POST
+            )
 
-            if passenger_formset.is_valid() and passenger_total_form.is_valid() and disembarkment_formset.is_valid():
+            if (
+                passenger_formset.is_valid()
+                and passenger_total_form.is_valid()
+                and disembarkment_formset.is_valid()
+            ):
                 if isinstance(self.object, CruiseTaxForm):
                     user_total = passenger_total_form.cleaned_data[
                         "total_number_of_passengers"
@@ -258,8 +267,8 @@ class HarborDuesFormCreateView(
                     for item in passenger_formset.cleaned_data:
                         if not item.get("DELETE", True):
                             actual_total += item.get("number_of_passengers", 0)
-                    # Save the total number of passengers entered by the user on the cruise
-                    # tax form.
+                    # Save the total number of passengers entered by the user on the
+                    # cruise tax form.
                     self.object.number_of_passengers = user_total
                     # Add form error if total number entered does not equal sum of
                     # nationalities.
