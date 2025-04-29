@@ -761,7 +761,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         else:
             return f"{self.form_id}.pdf"
 
-    def calculate_tax(self, save: bool = True):
+    def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
         self.calculate_harbour_tax(save=save)
 
     def calculate_harbour_tax(
