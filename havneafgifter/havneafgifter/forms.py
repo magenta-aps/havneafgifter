@@ -409,12 +409,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
     def __init__(self, user: User, status: Status | None = None, *args, **kwargs):
         self._user = user
-        print(f"CHECKING INIT STATUS: {status}")
-        print(f"CHECK BOOL STATUS: {bool(status)}")
         if status is None:
             status = Status.DRAFT
         self._status = status
-        print(f"CHECKING INIT _STATUS: {self._status}")
         self._shipping_agent = (
             user.shipping_agent
             if user.shipping_agent is not None and user.has_group_name("Shipping")
@@ -539,11 +536,7 @@ class PassengersTotalForm(CSPFormMixin, Form):
         self.is_valid()
         # Compare total number of passengers to the sum of passengers by country
         total_number_of_passengers = self.cleaned_data["total_number_of_passengers"]
-        if total_number_of_passengers is None:
-            total_number_of_passengers = 0
-        if sum_passengers_by_country is None:
-            sum_passengers_by_country = 0
-        if total_number_of_passengers != sum_passengers_by_country:
+        if (total_number_of_passengers or 0) != (sum_passengers_by_country or 0):
             self.add_error(
                 "total_number_of_passengers",
                 _(
