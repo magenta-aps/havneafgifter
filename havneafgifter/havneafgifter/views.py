@@ -237,48 +237,98 @@ class HarborDuesFormCreateView(
             instance=self.get_object(),
             data=self.request.POST,
         )
-        passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
-        passenger_formset = self.get_passenger_formset(data=self.request.POST)
 
-        disembarkment_formset = self.get_disembarkment_formset(data=self.request.POST)
+        passenger_total_form = None
+        passenger_formset = None
+        disembarkment_formset = None
+        if base_form.is_valid():
+            obj = self.base_form_valid(base_form)
+            # TODO: Kast exception i stedet
+            if isinstance(obj, HttpResponse):
+                return obj
+            passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
+            passenger_formset = self.get_passenger_formset(data=self.request.POST)
 
-        if isinstance(self.object, CruiseTaxForm):
-            if passenger_formset.is_valid() and passenger_total_form.is_valid():
-                user_total = passenger_total_form.cleaned_data[
-                    "total_number_of_passengers"
-                ]
-                actual_total = 0
-                for item in passenger_formset.cleaned_data:
-                    if not item.get("DELETE", True):
-                        actual_total += item.get("number_of_passengers", 0)
-                # Save the total number of passengers entered by the user on the cruise
-                # tax form.
-                self.object.number_of_passengers = user_total
-                # Add form error if total number entered does not equal sum of
-                # nationalities.
-                passenger_total_form.validate_total(actual_total)
-
-        if (
-            base_form.is_valid()
-            and passenger_total_form.is_valid()
-            and passenger_formset.is_valid()
-            and disembarkment_formset.is_valid()
-        ):
-            # Save `base_form` data
-            response = self.form_valid(base_form)
-            # Save related inline model formsets for passengers and disembarkments
-            passenger_formset.save()
-            disembarkment_formset.save()
-            return response
-        else:
-            return self.render_to_response(
-                context={
-                    "base_form": base_form,
-                    "passenger_total_form": passenger_total_form,
-                    "passenger_formset": passenger_formset,
-                    "disembarkment_formset": disembarkment_formset,
-                }
+            disembarkment_formset = self.get_disembarkment_formset(
+                data=self.request.POST
             )
+            if (
+                passenger_formset.is_valid()
+                and passenger_total_form.is_valid()
+                and disembarkment_formset.is_valid()
+            ):
+                if isinstance(self.object, CruiseTaxForm):
+                    user_total = passenger_total_form.cleaned_data[
+                        "total_number_of_passengers"
+                    ]
+                    actual_total = 0
+                    for item in passenger_formset.cleaned_data:
+                        if not item.get("DELETE", True):
+                            actual_total += item.get("number_of_passengers", 0)
+                    # Save the total number of passengers entered by the user on the
+                    # cruise tax form.
+                    self.object.number_of_passengers = user_total
+                    # Add form error if total number entered does not equal sum of
+                    # nationalities.
+                    # TODO: læg denne validering ind så den kaldes under full_clean
+                    passenger_total_form.validate_total(actual_total)
+                if passenger_total_form.is_valid():
+                    status = base_form.cleaned_data.get("status")
+
+                    if status == Status.NEW:
+                        self.object.submit_for_review()
+                        self.save_formsets_and_calculate(
+                            passenger_formset,
+                            disembarkment_formset,
+                        )
+                        # self.object.save()
+                        # self.object.calculate_tax(save=True, force_recalculation=True)
+                        self.handle_notification_mail(
+                            OnSubmitForReviewMail, self.object
+                        )
+                        self.handle_notification_mail(
+                            OnSubmitForReviewReceipt, self.object
+                        )
+                    elif status == Status.DRAFT:
+                        # Send notification to agent if saved by a ship user.
+                        self.save_formsets_and_calculate(
+                            passenger_formset,
+                            disembarkment_formset,
+                        )
+                        # self.object.save()
+                        # self.object.calculate_tax(save=True, force_recalculation=True)
+
+                    # passenger_formset.save()
+                    # disembarkment_formset.save()
+
+                    if (
+                        self.request.user.user_type == UserType.SHIP
+                        and self.object.shipping_agent
+                    ):
+                        self.handle_notification_mail(OnSendToAgentMail, self.object)
+                    return self.get_redirect_for_form(
+                        "havneafgifter:receipt_detail_html",
+                        self.object,
+                    )
+        return self.render_to_response(
+            context={
+                "base_form": base_form,
+                "passenger_total_form": passenger_total_form
+                or self.get_passenger_total_form(data=self.request.POST),
+                "passenger_formset": passenger_formset
+                or self.get_passenger_formset(data=self.request.POST),
+                "disembarkment_formset": disembarkment_formset
+                or self.get_disembarkment_formset(data=self.request.POST),
+            }
+        )
+
+    def save_formsets_and_calculate(self, passenger_formset, disembarkment_formset):
+        # Save object and related inline model formsets for passengers and
+        # disembarkments, and calculate the taxes based thereon
+        self.object.save()
+        passenger_formset.save()
+        disembarkment_formset.save()
+        self.object.calculate_tax(save=True, force_recalculation=True)
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
@@ -312,9 +362,8 @@ class HarborDuesFormCreateView(
 
         return context
 
-    def form_valid(self, form):
+    def base_form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
-
         if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
             harbor_dues_form.submit_for_review,
             self.request.user,
@@ -337,47 +386,25 @@ class HarborDuesFormCreateView(
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
             self.object = self._create_or_update_cruise_tax_form(harbor_dues_form)
         else:
-            harbor_dues_form.save()
             self.object = harbor_dues_form
 
-        status = form.cleaned_data.get("status")
-
-        if status == Status.NEW:
-            self.object.submit_for_review()
-            self.object.save()
-            self.object.calculate_tax(save=True)
-            self.handle_notification_mail(OnSubmitForReviewMail, self.object)
-            self.handle_notification_mail(OnSubmitForReviewReceipt, self.object)
-        elif status == Status.DRAFT:
-            # Send notification to agent if saved by a ship user.
-            self.object.save()
-            self.object.calculate_tax(save=True)
-            if (
-                self.request.user.user_type == UserType.SHIP
-                and harbor_dues_form.shipping_agent
-            ):
-                self.handle_notification_mail(OnSendToAgentMail, self.object)
-
-        # Go to detail view to display result.
-        return self.get_redirect_for_form(
-            "havneafgifter:receipt_detail_html",
-            self.object,
-        )
+        return self.object
 
     def _create_or_update_cruise_tax_form(
-        self, harbor_dues_form: HarborDuesForm
+        self,
+        harbor_dues_form: HarborDuesForm,
     ) -> CruiseTaxForm:
         field_vals = {
             k: v
             for k, v in harbor_dues_form.__dict__.items()
             if not k.startswith("_")  # skip `_state`, etc.
         }
-
         if harbor_dues_form.pk is None:
             # The `HarborDuesForm` has not yet been saved to the database.
             # If we create the corresponding `CruiseTaxForm`, the corresponding
             # `HarborDuesForm` will be created automatically.
-            return CruiseTaxForm.objects.create(**field_vals)  # pragma: no cover
+            # return CruiseTaxForm.objects.create(**field_vals)  # pragma: no cover
+            cruise_tax_form = CruiseTaxForm(**field_vals)
         else:
             # A `CruiseTaxForm` object may already exist for this PK.
             try:
@@ -389,7 +416,7 @@ class HarborDuesFormCreateView(
                 # cruise tax form, i.e. they are editing a harbor dues form and have
                 # changed the vessel type to `CRUISE`. Create the corresponding
                 # `CruiseTaxForm`.
-                return CruiseTaxForm.objects.create(
+                cruise_tax_form = CruiseTaxForm(
                     harborduesform_ptr=harbor_dues_form,
                     # Copy all fields from `HarborDuesForm` except `status`
                     **{
@@ -405,8 +432,7 @@ class HarborDuesFormCreateView(
                     if k == "status":
                         continue
                     setattr(cruise_tax_form, k, v)
-                cruise_tax_form.save()
-                return cruise_tax_form
+        return cruise_tax_form
 
     def get_base_form(self, **form_kwargs):
         status = self.request.POST.get("base-status")
