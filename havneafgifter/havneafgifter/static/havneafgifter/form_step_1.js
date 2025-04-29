@@ -6,7 +6,7 @@
         const noPortOfCallCheckbox = $("#id_base-no_port_of_call");
         const portOfCallSelect = $("#id_base-port_of_call");
         const imoInput = $("#id_base-vessel_imo");
-        const datetimeDepartureInput = $("#id_datetime_of_departure");
+        const datetimeDepartureInput = $("#id_base-datetime_of_departure");
         const grossTonnageInput = $("#id_base-gross_tonnage");
         const vesselTypeSelect = $("#id_base-vessel_type");
         const shippingAgent = $("#id_base-shipping_agent");
@@ -56,17 +56,18 @@
         }
 
         const updateNoPortOfCallState = function () {
+            console.log("updateNoPortOfCallState")
             const disabled = isNoPortOfCall() ? "disabled" : null;
 
             if (disabled===null) { return }
 
-            portOfCallSelect.attr("disabled", disabled);
+            // portOfCallSelect.attr("disabled", disabled);
             datetimeDepartureInput.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
             vesselTypeSelect.attr("disabled", disabled);
 
             portOfCallSelect.val(null);
-            datetimedepartureInput.val(null);
+            datetimeDepartureInput.val(null);
             grossTonnageInput.val(null);
             // Enforce vessel type CRUISE
             vesselTypeSelect.val("CRUISE");
@@ -84,17 +85,10 @@
             updateButtonState();
         });
 
-        // Disable "port of call", etc. inputs, if "no port of call" is selected.
-        // Enforce vessel type CRUISE if "no port of call" is selected.
-        // Update text on submit button depending on the selected vessel type,
-        noPortOfCallCheckbox.on("change", function () {
-            updateNoPortOfCallState();
-        });
-
         // Hook form submit
         form.on("submit", function (evt) {
             // Ensure that potentially disabled fields are still POSTed to server
-            portOfCallSelect.attr("disabled", null);
+            // portOfCallSelect.attr("disabled", null);
             imoInput.attr("disabled", null);
             datetimeDepartureInput.attr("disabled", null);
             grossTonnageInput.attr("disabled", null);

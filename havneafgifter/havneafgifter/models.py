@@ -562,6 +562,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("Submitted"),
     )
 
+    no_port_of_call = models.BooleanField(
+        default=False,
+        verbose_name=_("No port of call"),
+    )
+
     port_of_call = models.ForeignKey(
         Port,
         null=True,

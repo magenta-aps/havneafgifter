@@ -14,6 +14,7 @@ from django.core.validators import (
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BaseInlineFormSet,
+    BooleanField,
     CharField,
     ChoiceField,
     DateInput,
@@ -272,6 +273,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
     class Meta:
         model = HarborDuesForm
         fields = [
+            "no_port_of_call",
             "port_of_call",
             "nationality",
             "vessel_name",
@@ -297,13 +299,17 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
         form._status == Status.NEW and form.has_port_of_call
     )
 
+    no_port_of_call = DynamicField(
+        BooleanField,
+        required=False,
+        label=_("No port of call"),
+    )
+
     port_of_call = DynamicField(
         ChoiceField,
         required=_required_if_status_is_new_and_has_port_of_call,
         choices=lambda form: (
-            BLANK_CHOICE_DASH
-            + [(port.pk, port.name) for port in Port.objects.all()]
-            + [(-1, _("No port of call"))]
+            BLANK_CHOICE_DASH + [(port.pk, port.name) for port in Port.objects.all()]
         ),
         label=_("Port of call"),
     )
