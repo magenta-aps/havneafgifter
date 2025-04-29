@@ -272,7 +272,6 @@ class HarborDuesFormCreateView(
                     # nationalities.
                     # TODO: læg denne validering ind så den kaldes under full_clean
                     passenger_total_form.validate_total(actual_total)
-
                 if passenger_total_form.is_valid():
                     status = base_form.cleaned_data.get("status")
 
@@ -365,7 +364,6 @@ class HarborDuesFormCreateView(
 
     def base_form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
-
         if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
             harbor_dues_form.submit_for_review,
             self.request.user,
@@ -401,7 +399,6 @@ class HarborDuesFormCreateView(
             for k, v in harbor_dues_form.__dict__.items()
             if not k.startswith("_")  # skip `_state`, etc.
         }
-
         if harbor_dues_form.pk is None:
             # The `HarborDuesForm` has not yet been saved to the database.
             # If we create the corresponding `CruiseTaxForm`, the corresponding
