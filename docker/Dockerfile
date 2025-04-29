@@ -25,6 +25,10 @@ RUN mkdir /app && \
     chown -R havneafgifter:havneafgifter /storage/pdf && \
     chmod a+w /storage/pdf
 
+# Font cache for pdf generation
+RUN mkdir -p /home/havneafgifter/.cache/fontconfig && \
+    chown -R havneafgifter /home/havneafgifter/.cache/fontconfig
+
 # hadolint ignore=DL3008
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg && \

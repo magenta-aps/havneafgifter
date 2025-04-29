@@ -404,6 +404,7 @@ class TestHarborDuesFormCreateView(
         response = self.client.get(reverse("havneafgifter:harbor_dues_form_create"))
         self._assert_response_prevents_caching(response)
 
+    # TODO: Refactor this test together with create_new_cruise_tax_form
     @parametrize(
         "vessel_type,no_port_of_call,model_class",
         [
@@ -541,6 +542,41 @@ class TestHarborDuesFormCreateView(
         self.assertEqual(response.status_code, 302)
         # Assert that now we have correct number of disembarkments after deleting one
         self.assertEqual(len(cruise_tax_form.disembarkment_set.values()), 1)
+
+    def test_create_new_cruise_tax_form(
+        self,
+    ):
+        """Create a new CruiseTaxForm to make sure, that the workflow completes all the
+        way through
+        """
+
+        orig_ctf_amount = len(CruiseTaxForm.objects.all())
+        # Arrange
+        data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
+        data = {
+            "passengers-TOTAL_FORMS": 1,
+            "passengers-INITIAL_FORMS": 0,
+            "passengers-MIN_NUM_FORMS": 0,
+            "passengers-MAX_NUM_FORMS": 1000,
+            "disembarkment-TOTAL_FORMS": 1,
+            "disembarkment-INITIAL_FORMS": 0,
+            "disembarkment-MIN_NUM_FORMS": 0,
+            "disembarkment-MAX_NUM_FORMS": 1000,
+            **data,
+        }
+        data["base-vessel_type"] = "CRUISE"
+        self.client.force_login(self.admin_user)
+
+        # Act
+        response = self.client.post(
+            reverse("havneafgifter:harbor_dues_form_create"),
+            data=data,
+        )
+
+        # Assert that we are redirected
+        self.assertEqual(response.status_code, 302)
+        # Assert that there is now one more CruiseTaxForm than before
+        self.assertEqual(len(CruiseTaxForm.objects.all()), orig_ctf_amount + 1)
 
     def test_delete_passengers_by_country(self):
         self.client.force_login(self.shipping_agent_user)
