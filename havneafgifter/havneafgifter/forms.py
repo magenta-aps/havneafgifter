@@ -409,7 +409,12 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
     def __init__(self, user: User, status: Status | None = None, *args, **kwargs):
         self._user = user
-        self._status = status or Status.DRAFT
+        print(f"CHECKING INIT STATUS: {status}")
+        print(f"CHECK BOOL STATUS: {bool(status)}")
+        if status is None:
+            status = Status.DRAFT
+        self._status = status
+        print(f"CHECKING INIT _STATUS: {self._status}")
         self._shipping_agent = (
             user.shipping_agent
             if user.shipping_agent is not None and user.has_group_name("Shipping")

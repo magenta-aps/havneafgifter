@@ -242,11 +242,10 @@ class HarborDuesFormCreateView(
         passenger_formset = None
         disembarkment_formset = None
         if base_form.is_valid():
-            o = self.base_form_valid(base_form)
+            obj = self.base_form_valid(base_form)
             # TODO: Kast exception i stedet
-            if isinstance(o, HttpResponse):
-                return o
-
+            if isinstance(obj, HttpResponse):
+                return obj
             passenger_total_form = self.get_passenger_total_form(data=self.request.POST)
             passenger_formset = self.get_passenger_formset(data=self.request.POST)
 
@@ -275,7 +274,7 @@ class HarborDuesFormCreateView(
                     passenger_total_form.validate_total(actual_total)
 
                 if passenger_total_form.is_valid():
-                    status = self.object.status
+                    status = base_form.cleaned_data.get("status")
 
                     if status == Status.NEW:
                         self.object.submit_for_review()
@@ -291,6 +290,11 @@ class HarborDuesFormCreateView(
                         # Send notification to agent if saved by a ship user.
                         self.object.save()
                         self.object.calculate_tax(save=True, force_recalculation=True)
+                    else:
+                        return self.get_redirect_for_form(
+                            "havneafgifter:receipt_detail_html",
+                            self.object,
+                        )
 
                     # Save related inline model formsets for
                     # passengers and disembarkments
