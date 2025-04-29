@@ -1048,10 +1048,13 @@ class CruiseTaxForm(HarborDuesForm):
         ],
     )
 
-    def calculate_tax(self, save: bool = True):
+    def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
         super().calculate_tax(save=save)  # calculates harbour tax
         self.calculate_passenger_tax(save=save)
-        self.calculate_disembarkment_tax(save=save)
+        self.calculate_disembarkment_tax(
+            save=save,
+            force_recalculation=force_recalculation,
+        )
 
     def calculate_disembarkment_tax(
         self, save: bool = True, force_recalculation: bool = False

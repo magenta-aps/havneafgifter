@@ -277,13 +277,13 @@ class HarborDuesFormCreateView(
                 if status == Status.NEW:
                     self.object.submit_for_review()
                     self.object.save()
-                    self.object.calculate_tax(save=True)
+                    self.object.calculate_tax(save=True, force_recalculation=True)
                     self.handle_notification_mail(OnSubmitForReviewMail, self.object)
                     self.handle_notification_mail(OnSubmitForReviewReceipt, self.object)
                 elif status == Status.DRAFT:
                     # Send notification to agent if saved by a ship user.
                     self.object.save()
-                    self.object.calculate_tax(save=True)
+                    self.object.calculate_tax(save=True, force_recalculation=True)
 
                 # Save related inline model formsets for passengers and disembarkments
                 passenger_formset.save()
