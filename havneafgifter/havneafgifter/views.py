@@ -278,8 +278,12 @@ class HarborDuesFormCreateView(
 
                     if status == Status.NEW:
                         self.object.submit_for_review()
-                        self.object.save()
-                        self.object.calculate_tax(save=True, force_recalculation=True)
+                        self.save_formsets_and_calculate(
+                            passenger_formset,
+                            disembarkment_formset,
+                        )
+                        # self.object.save()
+                        # self.object.calculate_tax(save=True, force_recalculation=True)
                         self.handle_notification_mail(
                             OnSubmitForReviewMail, self.object
                         )
@@ -288,18 +292,15 @@ class HarborDuesFormCreateView(
                         )
                     elif status == Status.DRAFT:
                         # Send notification to agent if saved by a ship user.
-                        self.object.save()
-                        self.object.calculate_tax(save=True, force_recalculation=True)
-                    else:
-                        return self.get_redirect_for_form(
-                            "havneafgifter:receipt_detail_html",
-                            self.object,
+                        self.save_formsets_and_calculate(
+                            passenger_formset,
+                            disembarkment_formset,
                         )
+                        # self.object.save()
+                        # self.object.calculate_tax(save=True, force_recalculation=True)
 
-                    # Save related inline model formsets for
-                    # passengers and disembarkments
-                    passenger_formset.save()
-                    disembarkment_formset.save()
+                    # passenger_formset.save()
+                    # disembarkment_formset.save()
 
                     if (
                         self.request.user.user_type == UserType.SHIP
@@ -321,6 +322,13 @@ class HarborDuesFormCreateView(
                 or self.get_disembarkment_formset(data=self.request.POST),
             }
         )
+    def save_formsets_and_calculate(self, passenger_formset, disembarkment_formset):
+        # Save object and related inline model formsets for passengers and 
+        # disembarkments, and calculate the taxes based thereon
+        self.object.save()
+        passenger_formset.save()
+        disembarkment_formset.save()
+        self.object.calculate_tax(save=True, force_recalculation=True)
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
