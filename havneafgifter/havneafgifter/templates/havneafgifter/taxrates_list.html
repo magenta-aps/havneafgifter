@@ -4,8 +4,21 @@
 {% load django_bootstrap5 %}
 {% load render_table from django_tables2 %}
 
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">{% translate "Harbor dues" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% blocktrans trimmed with form_id=form.pk %}
+              Rates
+            {% endblocktrans %}
+        </li>
+    </ol>
+</nav>
+{% endblock breadcrumb %}
+
 {% block content %}
-<h1>{% translate "Harbor tax rate list" %}</h1>
+<h1 class="mb-4">{% translate "Harbor tax rate list" %}</h1>
 
 
 {% render_table table %}

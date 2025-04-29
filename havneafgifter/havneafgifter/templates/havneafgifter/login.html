@@ -13,14 +13,16 @@
 {% block card_content %}
 <form method="post" class="form">
     {% csrf_token %}
-    <div class="row">
+    <div class="row align-items-end">
         <div class="col-md-5 mb-3">
+            <label class="form-label" for="id_username">{% translate "Username or IMO number" %}</label>
             {{ form.username }}
             {% if form.username.errors %}
             <div class="invalid-feedback">{{ form.username.errors }}</div>
             {% endif %}
         </div>
         <div class="col-md-5 mb-3">
+            <label class="form-label" for="id_password">{% translate "Password" %}</label>
             {{ form.password }}
             {% if form.password.errors %}
             <div class="invalid-feedback">{{ form.password.errors }}</div>

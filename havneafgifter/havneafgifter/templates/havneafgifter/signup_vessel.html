@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>{% translate "Register vessel to report harbour dues" %}</h1>
+<h1 class="mb-4">{% translate "Register vessel to report harbour dues" %}</h1>
 <form action="{% url 'havneafgifter:signup-vessel' %}" method="post" class="form">
     {% csrf_token %}
     {{ form.media.css }}
@@ -16,12 +16,15 @@
 
     {% bootstrap_form_errors form %}
 
-    <h2>{% translate 'Vessel details' %}</h2>
+    <h2 class="mb-4">{% translate 'Vessel details' %}</h2>
     {% bootstrap_form form exclude='password1,password2,first_name,last_name,email' %}
 
-    <h2>{% translate 'Contact person details' %}</h2>
+    <h2 class="mb-4">{% translate 'Contact person details' %}</h2>
     {% bootstrap_form form exclude='username,type,name,owner,master,gross_tonnage,nationality' %}
 
-    {% bootstrap_button button_type="submit" content=_("Create") %}
+    <button type="submit" name="status" class="btn btn-primary d-flex align-items-center">
+        <span class="material-icons">check</span>
+        <span class="ms-1">{% translate "Opret skib" %}</span>
+    </button>
 </form>
 {% endblock content %}
