@@ -322,8 +322,9 @@ class HarborDuesFormCreateView(
                 or self.get_disembarkment_formset(data=self.request.POST),
             }
         )
+
     def save_formsets_and_calculate(self, passenger_formset, disembarkment_formset):
-        # Save object and related inline model formsets for passengers and 
+        # Save object and related inline model formsets for passengers and
         # disembarkments, and calculate the taxes based thereon
         self.object.save()
         passenger_formset.save()
