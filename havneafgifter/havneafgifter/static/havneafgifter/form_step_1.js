@@ -56,7 +56,6 @@
         }
 
         const updateNoPortOfCallState = function () {
-            console.log("updateNoPortOfCallState")
             const disabled = isNoPortOfCall() ? "disabled" : null;
 
             if (disabled===null) { return }
