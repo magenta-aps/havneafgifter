@@ -205,7 +205,6 @@
                 previous.append(plusButton)
             }
 
-            //subform.remove()
             recountSubforms(parentFormset);
 
         } else {
@@ -252,6 +251,10 @@
     // Initial
     $(document).ready(toggleCruiseFormsets)
     $(document).ready(portOfCallToggle)
+
+    // Go through all formsets that have descendant with the DELETE-checkbox checked,
+    // and add d-none class to keep them out of the GUI
+    $(".formset-item").has('input[type="checkbox"][name*="DELETE"]:checked').addClass("d-none")
 
     // Dynamic
     $("#id_base-vessel_type").on("change", toggleCruiseFormsets)
