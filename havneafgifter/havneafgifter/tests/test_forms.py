@@ -177,7 +177,6 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
             )
 
     def test_clean_port_of_call(self):
-
         form = HarborDuesFormForm(self.ship_user, data=self.harbor_dues_form_data)
         sample_port = Port.objects.get(name="Nordhavn")
         form.is_valid()
@@ -264,8 +263,27 @@ class TestPassengersTotalForm(SimpleTestCase):
     def test_validate_total(self):
         instance = PassengersTotalForm(data={"total_number_of_passengers": "100"})
         instance.validate_total(101)
-        self.assertEqual(len(instance.errors), 1)
-        self.assertIn("total_number_of_passengers", instance.errors)
+        error_list = list(instance.errors.values())[0]  # Dumb type-juggling stuff
+        self.assertEqual(len(error_list), 1)
+        self.assertIn(
+            "The total number of passengers does not match the sum of "
+            "passengers by each nationality",
+            error_list,
+        )
+
+    def test_validate_zero_passengers(self):
+        instance = PassengersTotalForm(data={"total_number_of_passengers": "0"})
+        instance.validate_total(101)
+        error_list = list(instance.errors.values())[0]  # Dumb type-juggling stuff
+        self.assertEqual(len(error_list), 2)
+        self.assertIn(
+            "The total number of passengers should be larger than 0", error_list
+        )
+        self.assertIn(
+            "The total number of passengers does not match the sum of "
+            "passengers by each nationality",
+            error_list,
+        )
 
 
 class TestBasePortTaxRateFormSet(HarborDuesFormTestMixin, TestCase):
