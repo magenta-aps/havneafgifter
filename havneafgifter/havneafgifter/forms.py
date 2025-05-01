@@ -434,15 +434,22 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
     @property
     def has_port_of_call(self):
-        port_of_call = self.data.get("base-port_of_call")
-        return port_of_call != "-1"
+        no_port_of_call = self.data.get("base-no_port_of_call")
+
+        return not no_port_of_call
 
     def clean(self):
         cleaned_data = super().clean()
 
         self._status = cleaned_data.get("status")
         status = self._status
+        vessel_type = cleaned_data.get("vessel_type")
 
+        if vessel_type != ShipType.CRUISE and not self.has_port_of_call:
+            raise ValidationError(
+                _("Only Cruise ships can have No Port of Call"),
+                code="non_cruise_ship_no_port_of_call",
+            )
         if status == Status.DRAFT:
             return cleaned_data
 
@@ -462,7 +469,8 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
-        vessel_type = cleaned_data.get("vessel_type")
+
+
 
         # Handle "port of call" vs. "arrival" and "departure" fields
         # If given a port of call, both arrival and departure dates must be given

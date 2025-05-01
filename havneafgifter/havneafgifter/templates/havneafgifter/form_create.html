@@ -236,10 +236,11 @@
 
         if (noPortOfCall.prop("checked") == true) {
             portOfCall.prop("disabled", true)
+            portOfCall.val("")
             grossTonnage.prop("disabled", true)
             departure.prop("disabled", true)
             departure.val(null)
-            vesselType.prop("disabled", true)
+            //vesselType.prop("disabled", true)
             toggleCruiseFormsets()
         } else {
             portOfCall.prop("disabled", false)
