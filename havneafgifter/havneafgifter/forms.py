@@ -535,8 +535,15 @@ class PassengersTotalForm(CSPFormMixin, Form):
         # Trigger form validation, so `self.cleaned_data` is populated
         self.is_valid()
         # Compare total number of passengers to the sum of passengers by country
-        total_number_of_passengers = self.cleaned_data["total_number_of_passengers"]
-        if (total_number_of_passengers or 0) != (sum_passengers_by_country or 0):
+        total_number_of_passengers = (
+            self.cleaned_data["total_number_of_passengers"] or 0
+        )
+        if total_number_of_passengers < 1:
+            self.add_error(
+                "total_number_of_passengers",
+                _("The total number of passengers should be larger than 0"),
+            )
+        if total_number_of_passengers != (sum_passengers_by_country or 0):
             self.add_error(
                 "total_number_of_passengers",
                 _(

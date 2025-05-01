@@ -552,10 +552,19 @@ class TestHarborDuesFormCreateView(
 
         orig_ctf_amount = len(CruiseTaxForm.objects.all())
         # Arrange
+        pbc = PassengersByCountry.objects.create(
+            cruise_tax_form=self.cruise_tax_form,
+            nationality="CA",
+            number_of_passengers=1,
+        )
         data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
         data = {
+            "passenger_total_form-total_number_of_passengers": 1,
+            "passengers-0-id": pbc.id,
+            "passengers-0-nationality": "CA",
+            "passengers-0-number_of_passengers": 1,
             "passengers-TOTAL_FORMS": 1,
-            "passengers-INITIAL_FORMS": 0,
+            "passengers-INITIAL_FORMS": 1,
             "passengers-MIN_NUM_FORMS": 0,
             "passengers-MAX_NUM_FORMS": 1000,
             "disembarkment-TOTAL_FORMS": 1,
@@ -572,6 +581,8 @@ class TestHarborDuesFormCreateView(
             reverse("havneafgifter:harbor_dues_form_create"),
             data=data,
         )
+
+        print(dir(response))
 
         # Assert that we are redirected
         self.assertEqual(response.status_code, 302)
@@ -1572,6 +1583,11 @@ class TestHarborDuesFormUpdateView(
             CruiseTaxForm.objects.none(),
         )
         # Act
+        pbc = PassengersByCountry.objects.create(
+            cruise_tax_form=self.cruise_tax_form,
+            nationality="CA",
+            number_of_passengers=1,
+        )
         self.client.post(
             self._get_update_view_url(self.harbor_dues_form.pk),
             {
@@ -1580,6 +1596,10 @@ class TestHarborDuesFormUpdateView(
                 "base-port_of_call": -1,
                 "base-vessel_name": "Peder Dingo",
                 "base-vessel_imo": 1234567,
+                "passenger_total_form-total_number_of_passengers": 1,
+                "passengers-0-id": pbc.id,
+                "passengers-0-nationality": "CA",
+                "passengers-0-number_of_passengers": 1,
                 "passengers-TOTAL_FORMS": 1,
                 "passengers-INITIAL_FORMS": 0,
                 "passengers-MIN_NUM_FORMS": 0,

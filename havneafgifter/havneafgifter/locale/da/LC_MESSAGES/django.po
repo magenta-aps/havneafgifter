@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-29 06:19-0100\n"
+"POT-Creation-Date: 2025-04-30 12:00-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,6 +132,10 @@ msgstr "%(field)s må ikke være tom"
 #: havneafgifter/forms.py
 msgid "Total number of passengers"
 msgstr "Samlet antal passagerer"
+
+#: havneafgifter/forms.py
+msgid "The total number of passengers should be larger than 0"
+msgstr ""
 
 #: havneafgifter/forms.py
 msgid ""
