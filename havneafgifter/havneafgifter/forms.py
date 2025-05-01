@@ -543,7 +543,7 @@ class PassengersTotalForm(CSPFormMixin, Form):
                 "total_number_of_passengers",
                 _("The total number of passengers should be larger than 0"),
             )
-        if total_number_of_passengers != sum_passengers_by_country or 0:
+        if total_number_of_passengers != (sum_passengers_by_country or 0):
             self.add_error(
                 "total_number_of_passengers",
                 _(
