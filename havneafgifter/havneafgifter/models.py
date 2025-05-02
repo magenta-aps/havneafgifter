@@ -767,54 +767,67 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def calculate_harbour_tax(
         self, save: bool = True
     ) -> dict[str, Decimal | list[dict] | None]:
-        if self._any_is_none(
-            self.port_of_call,
-            self.datetime_of_arrival,
-            self.datetime_of_departure,
-            self.gross_tonnage,
+        if (
+            self.has_port_of_call
+            and self._any_is_none(
+                self.port_of_call,
+                self.datetime_of_arrival,
+                self.datetime_of_departure,
+                self.gross_tonnage,
+            )
+        ) or (
+            not self.has_port_of_call
+            and self._any_is_none(
+                self.port_of_call,
+                self.datetime_of_arrival,
+                self.gross_tonnage,
+            )
         ):
-            return {"harbour_tax": None, "details": []}
-
-        taxrates = TaxRates.objects.filter(
-            Q(start_datetime__isnull=True)
-            | Q(start_datetime__lte=self.datetime_of_departure),
-            Q(end_datetime__isnull=True)
-            | Q(end_datetime__gte=self.datetime_of_arrival),
-        )
-        harbour_tax = Decimal(0)
-        details = []
-        for taxrate in taxrates:
-            datetime_range = taxrate.get_overlap(
-                self.datetime_of_arrival,  # type: ignore
-                self.datetime_of_departure,  # type: ignore
+            harbour_tax = None
+            details = []
+        else:
+            taxrates = TaxRates.objects.filter(
+                Q(start_datetime__isnull=True)
+                | Q(start_datetime__lte=self.datetime_of_departure),
+                Q(end_datetime__isnull=True)
+                | Q(end_datetime__gte=self.datetime_of_arrival),
             )
-            port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
-                port=self.port_of_call,  # type: ignore
-                vessel_type=self.vessel_type,  # type: ignore
-                gross_ton=self.gross_tonnage,  # type: ignore
-            )
-            range_port_tax = Decimal(0)
-            if port_taxrate is not None:
-                gross_tonnage: int = max(
-                    self.gross_tonnage,  # type: ignore
-                    port_taxrate.round_gross_ton_up_to,
+            harbour_tax = Decimal(0)
+            details = []
+            for taxrate in taxrates:
+                datetime_range = taxrate.get_overlap(
+                    self.datetime_of_arrival,  # type: ignore
+                    self.datetime_of_departure,  # type: ignore
                 )
-                if self.vessel_type in (
-                    ShipType.FREIGHTER,
-                    ShipType.OTHER,
-                ):
-                    payments = datetime_range.started_weeks
-                else:
-                    payments = datetime_range.started_days
-                range_port_tax = payments * port_taxrate.port_tax_rate * gross_tonnage
-                harbour_tax += range_port_tax
-            details.append(
-                {
-                    "port_taxrate": port_taxrate,
-                    "date_range": datetime_range,
-                    "harbour_tax": range_port_tax,
-                }
-            )
+                port_taxrate: PortTaxRate | None = taxrate.get_port_tax_rate(
+                    port=self.port_of_call,  # type: ignore
+                    vessel_type=self.vessel_type,  # type: ignore
+                    gross_ton=self.gross_tonnage,  # type: ignore
+                )
+                range_port_tax = Decimal(0)
+                if port_taxrate is not None:
+                    gross_tonnage: int = max(
+                        self.gross_tonnage,  # type: ignore
+                        port_taxrate.round_gross_ton_up_to,
+                    )
+                    if self.vessel_type in (
+                        ShipType.FREIGHTER,
+                        ShipType.OTHER,
+                    ):
+                        payments = datetime_range.started_weeks
+                    else:
+                        payments = datetime_range.started_days
+                    range_port_tax = (
+                        payments * port_taxrate.port_tax_rate * gross_tonnage
+                    )
+                    harbour_tax += range_port_tax
+                details.append(
+                    {
+                        "port_taxrate": port_taxrate,
+                        "date_range": datetime_range,
+                        "harbour_tax": range_port_tax,
+                    }
+                )
         if save:
             self.harbour_tax = harbour_tax
             self.save(update_fields=("harbour_tax",))
@@ -1084,23 +1097,21 @@ class CruiseTaxForm(HarborDuesForm):
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
     def calculate_passenger_tax(self, save: bool = True) -> dict[str, Decimal | None]:
-        if (self.has_port_of_call and self._any_is_none(
+        if self._any_is_none(
             self.number_of_passengers,
             self.datetime_of_arrival,
             self.datetime_of_departure,
-        )) or (not self.port_of_call and self._any_is_none(
-            self.number_of_passengers,
-            self.datetime_of_arrival,
-        )):
-            return {"passenger_tax": None, "taxrate": Decimal("0")}
-
-        arrival_date = self.datetime_of_arrival
-        taxrate = TaxRates.objects.filter(
-            Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
-            Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
-        ).first()
-        rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
-        pax_tax: Decimal = self.number_of_passengers * rate  # type: ignore
+        ):
+            pax_tax = None
+            rate = Decimal("0")
+        else:
+            arrival_date = self.datetime_of_arrival
+            taxrate = TaxRates.objects.filter(
+                Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
+                Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
+            ).first()
+            rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
+            pax_tax: Decimal = self.number_of_passengers * rate  # type: ignore
         if save:
             self.pax_tax = pax_tax
             self.save(update_fields=("pax_tax",))
