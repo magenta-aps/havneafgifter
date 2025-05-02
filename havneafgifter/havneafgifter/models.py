@@ -1084,11 +1084,14 @@ class CruiseTaxForm(HarborDuesForm):
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
     def calculate_passenger_tax(self, save: bool = True) -> dict[str, Decimal | None]:
-        if self._any_is_none(
+        if (self.has_port_of_call and self._any_is_none(
             self.number_of_passengers,
             self.datetime_of_arrival,
             self.datetime_of_departure,
-        ):
+        )) or (not self.port_of_call and self._any_is_none(
+            self.number_of_passengers,
+            self.datetime_of_arrival,
+        )):
             return {"passenger_tax": None, "taxrate": Decimal("0")}
 
         arrival_date = self.datetime_of_arrival
