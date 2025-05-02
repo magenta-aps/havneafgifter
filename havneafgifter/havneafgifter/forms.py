@@ -470,8 +470,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
 
-
-
         # Handle "port of call" vs. "arrival" and "departure" fields
         # If given a port of call, both arrival and departure dates must be given
         # as well.
