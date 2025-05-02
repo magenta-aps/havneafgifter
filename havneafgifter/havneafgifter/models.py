@@ -784,7 +784,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
         ):
             harbour_tax = None
-            details = []
+            details = []  # type: ignore
         else:
             taxrates = TaxRates.objects.filter(
                 Q(start_datetime__isnull=True)
@@ -1097,6 +1097,7 @@ class CruiseTaxForm(HarborDuesForm):
         return {"disembarkment_tax": disembarkment_tax, "details": details}
 
     def calculate_passenger_tax(self, save: bool = True) -> dict[str, Decimal | None]:
+        rate: Decimal = Decimal("0")
         if self._any_is_none(
             self.number_of_passengers,
             self.datetime_of_arrival,
@@ -1110,7 +1111,7 @@ class CruiseTaxForm(HarborDuesForm):
                 Q(start_datetime__isnull=True) | Q(start_datetime__lte=arrival_date),
                 Q(end_datetime__isnull=True) | Q(end_datetime__gte=arrival_date),
             ).first()
-            rate: Decimal = taxrate and taxrate.pax_tax_rate or Decimal(0)
+            rate = taxrate and taxrate.pax_tax_rate or Decimal(0)
             pax_tax: Decimal = self.number_of_passengers * rate  # type: ignore
         if save:
             self.pax_tax = pax_tax
