@@ -273,8 +273,8 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
     class Meta:
         model = HarborDuesForm
         fields = [
-            "no_port_of_call",
             "port_of_call",
+            "no_port_of_call",
             "nationality",
             "vessel_name",
             "vessel_imo",
