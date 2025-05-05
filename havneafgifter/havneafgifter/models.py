@@ -770,7 +770,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         if (
             self.has_port_of_call
             and self._any_is_none(
-                self.port_of_call,
                 self.datetime_of_arrival,
                 self.datetime_of_departure,
                 self.gross_tonnage,
@@ -778,7 +777,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         ) or (
             not self.has_port_of_call
             and self._any_is_none(
-                self.port_of_call,
                 self.datetime_of_arrival,
                 self.gross_tonnage,
             )
