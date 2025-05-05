@@ -300,3 +300,11 @@ div.receipt table tfoot td p {
   font-style: normal;
   font-size: $font-size-sm;
 }
+
+// Creation form
+div:has(> div> div> #id_base-no_port_of_call) {
+  right: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
