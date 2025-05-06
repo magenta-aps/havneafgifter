@@ -60,17 +60,12 @@
 
             if (disabled===null) { return }
 
-            // portOfCallSelect.attr("disabled", disabled);
             datetimeDepartureInput.attr("disabled", disabled);
             grossTonnageInput.attr("disabled", disabled);
-            //vesselTypeSelect.attr("disabled", disabled);
 
             portOfCallSelect.val(null);
             datetimeDepartureInput.val(null);
             grossTonnageInput.val(null);
-            // TODO: Cleanup
-            // Enforce vessel type CRUISE
-            //vesselTypeSelect.val("CRUISE");
 
             updateButtonState();
         }
@@ -88,7 +83,7 @@
         // Hook form submit
         form.on("submit", function (evt) {
             // Ensure that potentially disabled fields are still POSTed to server
-            // portOfCallSelect.attr("disabled", null);
+            portOfCallSelect.attr("disabled", null);
             imoInput.attr("disabled", null);
             datetimeDepartureInput.attr("disabled", null);
             grossTonnageInput.attr("disabled", null);

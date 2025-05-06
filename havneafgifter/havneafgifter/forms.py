@@ -434,8 +434,9 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
     @property
     def has_port_of_call(self):
-        no_port_of_call = self.data.get("base-no_port_of_call")
-
+        no_port_of_call = self.data.get("base-no_port_of_call") or self.data.get(
+            "no_port_of_call"
+        )
         return not no_port_of_call
 
     def clean(self):
@@ -527,8 +528,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
         if port_of_call > 0:
             return Port.objects.get(pk=port_of_call)
-        elif port_of_call == -1:
-            return Port(name="Blank")
 
     def clean_vessel_imo(self):
         vessel_imo = self.cleaned_data.get("vessel_imo")
