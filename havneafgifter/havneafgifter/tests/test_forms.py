@@ -241,6 +241,7 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
 
     def _assert_form_has_error(self, data, code):
         form = self._get_form_instance(data)
+
         # Trigger form validation
         form.is_valid()
         # Assert that our validation error is raised

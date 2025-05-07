@@ -14,6 +14,7 @@ from django.core.validators import (
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms import (
     BaseInlineFormSet,
+    BooleanField,
     CharField,
     ChoiceField,
     DateInput,
@@ -273,6 +274,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
         model = HarborDuesForm
         fields = [
             "port_of_call",
+            "no_port_of_call",
             "nationality",
             "vessel_name",
             "vessel_imo",
@@ -297,13 +299,17 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
         form._status == Status.NEW and form.has_port_of_call
     )
 
+    no_port_of_call = DynamicField(
+        BooleanField,
+        required=False,
+        label=_("No port of call"),
+    )
+
     port_of_call = DynamicField(
         ChoiceField,
         required=_required_if_status_is_new_and_has_port_of_call,
         choices=lambda form: (
-            BLANK_CHOICE_DASH
-            + [(port.pk, port.name) for port in Port.objects.all()]
-            + [(-1, _("No port of call"))]
+            BLANK_CHOICE_DASH + [(port.pk, port.name) for port in Port.objects.all()]
         ),
         label=_("Port of call"),
     )
@@ -428,15 +434,23 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
     @property
     def has_port_of_call(self):
-        port_of_call = self.data.get("base-port_of_call")
-        return port_of_call != "-1"
+        no_port_of_call = self.data.get("base-no_port_of_call") or self.data.get(
+            "no_port_of_call"
+        )
+        return not no_port_of_call
 
     def clean(self):
         cleaned_data = super().clean()
 
         self._status = cleaned_data.get("status")
         status = self._status
+        vessel_type = cleaned_data.get("vessel_type")
 
+        if vessel_type != ShipType.CRUISE and not self.has_port_of_call:
+            raise ValidationError(
+                _("Only Cruise ships can have No Port of Call"),
+                code="non_cruise_ship_no_port_of_call",
+            )
         if status == Status.DRAFT:
             return cleaned_data
 
@@ -456,7 +470,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
         # Handle "port of call" fields
         port_of_call = cleaned_data.get("port_of_call")
-        vessel_type = cleaned_data.get("vessel_type")
 
         # Handle "port of call" vs. "arrival" and "departure" fields
         # If given a port of call, both arrival and departure dates must be given
@@ -515,8 +528,6 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
 
         if port_of_call > 0:
             return Port.objects.get(pk=port_of_call)
-        elif port_of_call == -1:
-            return Port(name="Blank")
 
     def clean_vessel_imo(self):
         vessel_imo = self.cleaned_data.get("vessel_imo")

@@ -582,8 +582,6 @@ class TestHarborDuesFormCreateView(
             data=data,
         )
 
-        print(dir(response))
-
         # Assert that we are redirected
         self.assertEqual(response.status_code, 302)
         # Assert that there is now one more CruiseTaxForm than before
@@ -725,6 +723,8 @@ class TestHarborDuesFormCreateView(
             **data,
         }
         data["base-status"] = status
+        # If there's port in the post data there is no no_port_of_call in the post data
+        del data["base-no_port_of_call"]
         user = User.objects.get(username=username)
 
         self.client.force_login(user)
@@ -1513,7 +1513,7 @@ class TestHarborDuesFormUpdateView(
             data={
                 "base-status": Status.DRAFT.value,
                 "base-vessel_type": ShipType.CRUISE.value,
-                "base-port_of_call": -1,
+                "base-no_port_of_call": "on",
                 "base-vessel_name": "Peder Dingo",
                 "base-vessel_imo": 1234567,
                 "passengers-TOTAL_FORMS": 2,
@@ -1546,7 +1546,7 @@ class TestHarborDuesFormUpdateView(
             data={
                 "base-status": Status.DRAFT.value,
                 "base-vessel_type": ShipType.CRUISE.value,
-                "base-port_of_call": -1,
+                "base-no_port_of_call": "on",
                 "base-vessel_name": "Peder Dingo",
                 "passengers-TOTAL_FORMS": 2,
                 "passengers-INITIAL_FORMS": 0,
@@ -1593,7 +1593,7 @@ class TestHarborDuesFormUpdateView(
             {
                 "base-status": Status.DRAFT.value,
                 "base-vessel_type": ShipType.CRUISE.value,
-                "base-port_of_call": -1,
+                "base-no_port_of_call": "on",
                 "base-vessel_name": "Peder Dingo",
                 "base-vessel_imo": 1234567,
                 "passenger_total_form-total_number_of_passengers": 1,

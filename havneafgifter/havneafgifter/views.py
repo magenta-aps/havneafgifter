@@ -376,11 +376,6 @@ class HarborDuesFormCreateView(
                 ),
             )
 
-        port_of_call = form.cleaned_data.get("port_of_call")
-
-        if port_of_call is not None and port_of_call.name == "Blank":
-            harbor_dues_form.port_of_call = None
-
         if harbor_dues_form.vessel_type == ShipType.CRUISE:
             # `CruiseTaxForm` inherits from `HarborDuesForm`, so we can create
             # a `CruiseTaxForm` based on the fields on `HarborDuesForm`.
