@@ -46,7 +46,7 @@
 
     <div class="row bg-light rounded-3 m-0 mt-4 p-4">
         <div class="col-6">
-            {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="nationality,vessel_imo,vessel_master,gross_tonnage,datetime_of_departure,no_port_of_call,status,vessel_type" alert_error_type="none" %}
+            {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="nationality,vessel_imo,vessel_master,gross_tonnage,datetime_of_departure,status,vessel_type" alert_error_type="none" %}
         </div>
         <div class="col-6">
             {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="port_of_call,vessel_name,vessel_owner,shipping_agent,datetime_of_arrival,vessel_type,no_port_of_call,status" alert_error_type="none" %}
@@ -227,21 +227,22 @@
     }
 
     function portOfCallToggle() {
-        const portOfCall = $("#id_base-port_of_call")
+        const noPortOfCall = $("#id_base-no_port_of_call")
 
+        const portOfCall = $("#id_base-port_of_call")
         const grossTonnage = $("#id_base-gross_tonnage")
         const departure = $("#id_base-datetime_of_departure")
         const vesselType = $("#id_base-vessel_type")
 
-
-        if (portOfCall.val() == -1) {
+        if (noPortOfCall.prop("checked") == true) {
+            portOfCall.prop("disabled", true)
+            portOfCall.val("")
             grossTonnage.prop("disabled", true)
             departure.prop("disabled", true)
             departure.val(null)
-            vesselType.prop("disabled", true)
-            vesselType.val('CRUISE')
             toggleCruiseFormsets()
         } else {
+            portOfCall.prop("disabled", false)
             grossTonnage.prop("disabled", false)
             departure.prop("disabled", false)
             vesselType.prop("disabled", false)
@@ -259,6 +260,7 @@
     // Dynamic
     $("#id_base-vessel_type").on("change", toggleCruiseFormsets)
     $("#id_base-port_of_call").on("change", portOfCallToggle)
+    $("#id_base-no_port_of_call").on("change", portOfCallToggle)
     $(".plus-button").on("click", addSubform)
     $(".minus-button").on("click", removeSubform)
 

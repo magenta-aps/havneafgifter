@@ -562,6 +562,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("Submitted"),
     )
 
+    no_port_of_call = models.BooleanField(
+        default=False,
+        verbose_name=_("No port of call"),
+    )
+
     port_of_call = models.ForeignKey(
         Port,
         null=True,
@@ -774,16 +779,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 self.datetime_of_departure,
                 self.gross_tonnage,
             )
-        ) or (
-            not self.has_port_of_call
-            and self._any_is_none(
-                self.datetime_of_arrival,
-                self.gross_tonnage,
-            )
-        ):
+        ) or not self.has_port_of_call:
             harbour_tax = None
             details = []  # type: ignore
         else:
+            print(f"end date: {self.datetime_of_departure}")
+
             taxrates = TaxRates.objects.filter(
                 Q(start_datetime__isnull=True)
                 | Q(start_datetime__lte=self.datetime_of_departure),

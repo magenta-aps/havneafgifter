@@ -88,6 +88,7 @@ class HarborDuesFormTestMixin:
         # Valid data for creating a `HarborDuesForm` (or `CruiseTaxForm`) instance
         cls.harbor_dues_form_data = {
             "port_of_call": cls.port,
+            "no_port_of_call": False,
             "nationality": Nationality.DENMARK.value,
             "status": Status.NEW.value,
             "vessel_name": "Mary",
