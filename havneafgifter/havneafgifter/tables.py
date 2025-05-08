@@ -25,6 +25,7 @@ class HarborDuesFormTable(tables.Table):
     class Meta:
         model = HarborDuesForm
         exclude = (
+            "no_port_of_call",
             "vessel_master",
             "vessel_owner",
             "vessel_type",
