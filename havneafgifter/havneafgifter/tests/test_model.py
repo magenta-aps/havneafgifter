@@ -610,6 +610,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             harbour_tax,
         )
 
+
 class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
     def test_has_port_of_call(self):
         self.assertTrue(self.cruise_tax_form.has_port_of_call)
