@@ -21,7 +21,6 @@ class HarborDuesFormTable(tables.Table):
     )
 
     status = tables.Column()
-    total_tax = tables.Column()
 
     class Meta:
         model = HarborDuesForm
