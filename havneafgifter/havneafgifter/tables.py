@@ -14,13 +14,13 @@ class HarborDuesFormFilter(django_filters.FilterSet):
 
 
 class HarborDuesFormTable(tables.Table):
+    total_tax = tables.Column()
     operation = tables.TemplateColumn(
         template_name="havneafgifter/bootstrap/open_details.html",
         verbose_name=_("Operation"),
     )
 
     status = tables.Column()
-    total_tax = tables.Column()
 
     class Meta:
         model = HarborDuesForm
