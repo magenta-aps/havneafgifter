@@ -599,6 +599,17 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         # A form whose status is not REJECTED returns None in `latest_rejection`
         self.assertIsNone(self.harbor_dues_form.latest_rejection)
 
+    def test_total_tax(self):
+        self.assertEqual(self.harbor_dues_form.total_tax, 0)
+        # Calculate the three different sub-totals, and compare their sum to `total_tax`
+        harbour_tax = self.harbor_dues_form.calculate_harbour_tax(save=False)[
+            "harbour_tax"
+        ]
+        self.assertEqual(
+            self.cruise_tax_form.total_tax,
+            harbour_tax,
+        )
+
 
 class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
     def test_has_port_of_call(self):
@@ -612,7 +623,8 @@ class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
         self.assertIsNotNone(self.cruise_tax_form.disembarkment_tax)
 
     def test_total_tax(self):
-        self.assertEqual(self.cruise_tax_form.total_tax, 0)
+        # We go through the HDF pointer to verify the longer chain of logic
+        self.assertEqual(self.cruise_tax_form.harborduesform_ptr.total_tax, 0)
         # Calculate the three different sub-totals, and compare their sum to `total_tax`
         harbour_tax = self.cruise_tax_form.calculate_harbour_tax(save=False)[
             "harbour_tax"
@@ -622,7 +634,7 @@ class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
             save=False
         )["disembarkment_tax"]
         self.assertEqual(
-            self.cruise_tax_form.total_tax,
+            self.cruise_tax_form.harborduesform_ptr.total_tax,
             harbour_tax + passenger_tax + disembarkment_tax,
         )
 
