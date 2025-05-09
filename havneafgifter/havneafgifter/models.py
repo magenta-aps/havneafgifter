@@ -760,6 +760,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         # Non-cruise ships *must* have a port of call.
         return self.vessel_type != ShipType.CRUISE or self.port_of_call is not None
 
+    @property
+    def total_tax(self) -> Decimal:
+        if self.vessel_type == ShipType.CRUISE:
+            return self.cruisetaxform.total_tax
+        else:
+            return self.harbour_tax or Decimal("0")
+
     def get_pdf_filename(self) -> str:
         if self.pdf and self.pdf.name:
             return self.pdf.name
@@ -783,8 +790,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             harbour_tax = None
             details = []  # type: ignore
         else:
-            print(f"end date: {self.datetime_of_departure}")
-
             taxrates = TaxRates.objects.filter(
                 Q(start_datetime__isnull=True)
                 | Q(start_datetime__lte=self.datetime_of_departure),
