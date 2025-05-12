@@ -16,7 +16,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    F,
+    IntegerField,
+    OuterRef,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce
 from django.forms import inlineformset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -940,7 +950,7 @@ class PassengerStatisticsView(StatisticsView):
                 )
             else:
                 return []
-            
+
             qs = qs.annotate(
                 passenger_disembarkments=Count("cruise_tax_form__disembarkment")
                 * F("number_of_passengers")
