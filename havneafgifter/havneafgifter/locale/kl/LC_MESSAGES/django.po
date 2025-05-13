@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 07:09-0100\n"
+"POT-Creation-Date: 2025-05-12 12:10-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -741,6 +741,10 @@ msgid "ethvert ilandsætningssted"
 msgstr ""
 
 #: havneafgifter/tables.py
+msgid "Total"
+msgstr ""
+
+#: havneafgifter/tables.py
 msgid "Operation"
 msgstr ""
 
@@ -789,7 +793,7 @@ msgid "Måned"
 msgstr ""
 
 #: havneafgifter/tables.py
-msgid "Antal passagerer"
+msgid "Antal afstigninger"
 msgstr ""
 
 #: havneafgifter/templates/400.html

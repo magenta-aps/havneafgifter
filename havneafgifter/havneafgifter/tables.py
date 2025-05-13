@@ -73,7 +73,7 @@ class PassengerStatisticsTable(tables.Table):
     orderable = True
     nationality = tables.Column(verbose_name=_("Nationalitet"))
     month = tables.Column(verbose_name=_("Måned"))
-    count = tables.Column(verbose_name=_("Antal passagerer"))
+    count = tables.Column(verbose_name=_("Antal afstigninger"))
 
 
 class TaxRateTableButtonColumn(tables.Column):

@@ -16,7 +16,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.exceptions import PermissionDenied
-from django.db.models import Case, F, IntegerField, OuterRef, Subquery, Sum, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    F,
+    IntegerField,
+    OuterRef,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce
 from django.forms import inlineformset_factory, model_to_dict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -902,7 +912,10 @@ class PassengerStatisticsView(StatisticsView):
             )
 
     def get_table_data(self):
-        # Return list of items w. nationality, month and count
+        """Returns a QS of passenger disembarkments, divided into nationalities and
+        month of arrival, regardless of disembarkment lokation or whether they are on
+        the same ship
+        """
         form = self.get_form()
         if form.is_valid():
             qs = PassengersByCountry.objects.filter(
@@ -941,6 +954,10 @@ class PassengerStatisticsView(StatisticsView):
             else:
                 return []
 
+            qs = qs.annotate(
+                passenger_disembarkments=Count("cruise_tax_form__disembarkment")
+                * F("number_of_passengers")
+            )
             months = self.month_list(first_month, last_month)
 
             items = []
@@ -950,11 +967,11 @@ class PassengerStatisticsView(StatisticsView):
                     "cruise_tax_form__datetime_of_arrival__year": month.year,
                 }
                 month_qs = qs.filter(**month_filter)
-                for (nation,) in set(month_qs.values_list("nationality")):
+                for (nation,) in sorted(set(month_qs.values_list("nationality"))):
                     item = {"month": month.strftime("%B, %Y")}
                     item["count"] = month_qs.filter(nationality=nation).aggregate(
-                        Sum("number_of_passengers")
-                    )["number_of_passengers__sum"]
+                        Sum("passenger_disembarkments")
+                    )["passenger_disembarkments__sum"]
                     item["nationality"] = self.nationality_dict[nation]
                     items.append(item)
             return items

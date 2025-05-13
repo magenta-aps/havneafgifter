@@ -99,7 +99,7 @@
     "model": "havneafgifter.cruisetaxform",
     "pk": 3,
     "fields": {
-        "number_of_passengers": 0,
+        "number_of_passengers": 250,
         "pax_tax": null,
         "disembarkment_tax": "100.00"
     }
@@ -108,7 +108,7 @@
     "model": "havneafgifter.cruisetaxform",
     "pk": 4,
     "fields": {
-        "number_of_passengers": 0,
+        "number_of_passengers": 1400,
         "pax_tax": null,
         "disembarkment_tax": "200.00"
     }
@@ -119,7 +119,7 @@
     "fields": {
         "cruise_tax_form": 3,
         "nationality": "AU",
-        "number_of_passengers": 147
+        "number_of_passengers": 140
     }
 },
 {
@@ -128,7 +128,7 @@
     "fields": {
         "cruise_tax_form": 3,
         "nationality": "CA",
-        "number_of_passengers": 321
+        "number_of_passengers": 70
     }
 },
 {
@@ -137,7 +137,7 @@
     "fields": {
         "cruise_tax_form": 3,
         "nationality": "DK",
-        "number_of_passengers": 4
+        "number_of_passengers": 40
     }
 },
 {
@@ -181,7 +181,7 @@
     "pk": 1,
     "fields": {
         "cruise_tax_form": 3,
-        "number_of_passengers": 125,
+        "number_of_passengers": 250,
         "disembarkment_site": 171
     }
 },
@@ -199,7 +199,7 @@
     "pk": 3,
     "fields": {
         "cruise_tax_form": 4,
-        "number_of_passengers": 1200,
+        "number_of_passengers": 1400,
         "disembarkment_site": 172
     }
 },
@@ -208,7 +208,7 @@
     "pk": 4,
     "fields": {
         "cruise_tax_form": 4,
-        "number_of_passengers": 1000,
+        "number_of_passengers": 1400,
         "disembarkment_site": 118
     }
 },
