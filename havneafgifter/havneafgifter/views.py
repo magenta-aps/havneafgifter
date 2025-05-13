@@ -912,7 +912,10 @@ class PassengerStatisticsView(StatisticsView):
             )
 
     def get_table_data(self):
-        # Return list of items w. nationality, month and count
+        """Returns a QS of passenger disembarkments, divided into nationalities and
+        month of arrival, regardless of disembarkment lokation or whether they are on
+        the same ship
+        """
         form = self.get_form()
         if form.is_valid():
             qs = PassengersByCountry.objects.filter(
