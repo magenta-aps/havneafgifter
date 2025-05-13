@@ -2816,6 +2816,7 @@ class PassengerStatisticsTest(TestCase):
             harbour_tax=Decimal("40000.00"),
             pax_tax=Decimal("3000.00"),
             disembarkment_tax=Decimal("20000.00"),
+            number_of_passengers=1000,
         )
         cls.form2 = CruiseTaxForm.objects.create(
             status=Status.APPROVED,
@@ -2829,11 +2830,22 @@ class PassengerStatisticsTest(TestCase):
             harbour_tax=Decimal("40000.00"),
             pax_tax=Decimal("3000.00"),
             disembarkment_tax=Decimal("20000.00"),
+            number_of_passengers=111,
         )
         Disembarkment.objects.create(
             cruise_tax_form=cls.form2,
-            number_of_passengers=1,
+            number_of_passengers=111,
             disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form2,
+            number_of_passengers=111,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qeqertat"),
+        )
+        Disembarkment.objects.create(
+            cruise_tax_form=cls.form1,
+            number_of_passengers=1000,
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qeqertat"),
         )
         cls.form3 = CruiseTaxForm.objects.create(
             status=Status.REJECTED,
@@ -2847,26 +2859,32 @@ class PassengerStatisticsTest(TestCase):
             harbour_tax=Decimal("50000.00"),
             pax_tax=Decimal("8000.00"),
             disembarkment_tax=Decimal("25000.00"),
+            number_of_passengers=1200,
         )
         Disembarkment.objects.create(
             cruise_tax_form=cls.form3,
-            number_of_passengers=2,
+            number_of_passengers=1200,
             disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
+        )
+        cls.pbc4 = PassengersByCountry.objects.create(
+            cruise_tax_form=cls.form2,
+            nationality=Nationality.AUSTRALIA,
+            number_of_passengers=11,
         )
         cls.pbc3 = PassengersByCountry.objects.create(
             cruise_tax_form=cls.form3,
             nationality=Nationality.SWEDEN,
-            number_of_passengers=7000,
+            number_of_passengers=1200,
         )
         cls.pbc2 = PassengersByCountry.objects.create(
             cruise_tax_form=cls.form2,
             nationality=Nationality.NORWAY,
-            number_of_passengers=5000,
+            number_of_passengers=100,
         )
         cls.pbc1 = PassengersByCountry.objects.create(
             cruise_tax_form=cls.form1,
             nationality=Nationality.DENMARK,
-            number_of_passengers=6000,
+            number_of_passengers=1000,
         )
 
     def setUp(self):
@@ -2890,21 +2908,32 @@ class PassengerStatisticsTest(TestCase):
 
     def test_no_filter(self):
         rows = self.get_rows(dummy="GREAT BIG FISH")
-        self.assertEqual(len(rows), 2)
+        self.assertEqual(len(rows), 3)
         self.assertDictEqual(
             rows[0].record,
             {
-                "nationality": self.nationality_dict[self.pbc2.nationality],
+                "nationality": self.nationality_dict[self.pbc4.nationality],
                 "month": "July, 2024",
-                "count": self.pbc2.number_of_passengers,
+                "count": self.pbc4.number_of_passengers
+                * len(self.form2.disembarkment_set.all()),
             },
         )
         self.assertDictEqual(
             rows[1].record,
             {
+                "nationality": self.nationality_dict[self.pbc2.nationality],
+                "month": "July, 2024",
+                "count": self.pbc2.number_of_passengers
+                * len(self.form2.disembarkment_set.all()),
+            },
+        )
+        self.assertDictEqual(
+            rows[2].record,
+            {
                 "nationality": self.nationality_dict[self.pbc1.nationality],
                 "month": "June, 2025",
-                "count": self.pbc1.number_of_passengers,
+                "count": self.pbc1.number_of_passengers
+                * len(self.form1.disembarkment_set.all()),
             },
         )
 
@@ -2917,17 +2946,31 @@ class PassengerStatisticsTest(TestCase):
         )
 
         rows = self.get_rows(last_month="2026-06")
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0].record["count"], self.pbc2.number_of_passengers)
-        self.assertEqual(rows[1].record["count"], self.pbc1.number_of_passengers)
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(
+            rows[0].record["count"],
+            self.pbc4.number_of_passengers * len(self.form2.disembarkment_set.all()),
+        )
+        self.assertEqual(
+            rows[1].record["count"],
+            self.pbc2.number_of_passengers * len(self.form2.disembarkment_set.all()),
+        )
+        self.assertEqual(
+            rows[2].record["count"],
+            self.pbc1.number_of_passengers * len(self.form1.disembarkment_set.all()),
+        )
 
         rows = self.get_rows(
             first_month="2024-06",
             last_month="2024-07",
         )
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 2)
         self.assertEqual(
             rows[0].record["nationality"],
+            self.nationality_dict[self.pbc4.nationality],
+        )
+        self.assertEqual(
+            rows[1].record["nationality"],
             self.nationality_dict[self.pbc2.nationality],
         )
 
@@ -2943,5 +2986,11 @@ class PassengerStatisticsTest(TestCase):
 
         rows = self.get_rows(nationality=["DK", "NO"])
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0].record["count"], self.pbc2.number_of_passengers)
-        self.assertEqual(rows[1].record["count"], self.pbc1.number_of_passengers)
+        self.assertEqual(
+            rows[0].record["count"],
+            self.pbc2.number_of_passengers * len(self.form2.disembarkment_set.all()),
+        )
+        self.assertEqual(
+            rows[1].record["count"],
+            self.pbc1.number_of_passengers * len(self.form1.disembarkment_set.all()),
+        )
