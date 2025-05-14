@@ -209,17 +209,115 @@ class Command(BaseCommand):
             *self.get_permissions(
                 # Tax officers have access to the following actions
                 # on all model instances of these classes
-                (CruiseTaxForm, ("add", "view", "change", "delete", "withdraw_from_review", "approve", "reject", "invoice", "submit_for_review",)),
-                (Disembarkment, ("add", "view", "change", "delete",)),
-                (DisembarkmentSite, ("add", "view", "change", "delete",)),
-                (DisembarkmentTaxRate, ("add", "view", "change", "delete",)),
-                (HarborDuesForm, ("add", "view", "change", "delete", "withdraw_from_review", "approve", "reject", "invoice", "submit_for_review",)),
-                (PassengersByCountry, ("add", "view", "change", "delete",)),
-                (Port, ("add", "view", "change", "delete",)),
-                (PortAuthority, ("add", "view", "change", "delete",)),
-                (PortTaxRate, ("add", "view", "change", "delete",)),
-                (ShippingAgent, ("add", "view", "change", "delete",)),
-                (TaxRates, ("add", "view", "change", "delete",)),
+                (
+                    CruiseTaxForm,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                        "withdraw_from_review",
+                        "approve",
+                        "reject",
+                        "invoice",
+                        "submit_for_review",
+                    ),
+                ),
+                (
+                    Disembarkment,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    DisembarkmentSite,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    DisembarkmentTaxRate,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    HarborDuesForm,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                        "withdraw_from_review",
+                        "approve",
+                        "reject",
+                        "invoice",
+                        "submit_for_review",
+                    ),
+                ),
+                (
+                    PassengersByCountry,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    Port,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    PortAuthority,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    PortTaxRate,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    ShippingAgent,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
+                (
+                    TaxRates,
+                    (
+                        "add",
+                        "view",
+                        "change",
+                        "delete",
+                    ),
+                ),
                 (User, ("view",)),
             ),
         )
