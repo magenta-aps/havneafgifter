@@ -64,6 +64,13 @@ class Command(BaseCommand):
         )
         Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
+            codename="submit_for_review_harborduesform",
+            defaults={
+                "name": "Can submit cruise tax forms for review",
+            },
+        )
+        Permission.objects.update_or_create(
+            content_type=harborduesform_contenttype,
             codename="approve_harborduesform",
             defaults={
                 "name": "Can approve harborduesforms",
@@ -88,6 +95,13 @@ class Command(BaseCommand):
             codename="withdraw_from_review_cruisetaxform",
             defaults={
                 "name": "Can withdraw cruise tax forms from review",
+            },
+        )
+        Permission.objects.update_or_create(
+            content_type=cruisetaxform_contenttype,
+            codename="submit_for_review_cruisetaxform",
+            defaults={
+                "name": "Can submit cruise tax forms for review",
             },
         )
         Permission.objects.update_or_create(
@@ -195,17 +209,17 @@ class Command(BaseCommand):
             *self.get_permissions(
                 # Tax officers have access to the following actions
                 # on all model instances of these classes
-                (CruiseTaxForm, ("view", "withdraw_from_review")),
+                (CruiseTaxForm, ("view", "add", "change", "withdraw_from_review", "approve", "reject", "invoice", "submit_for_review",)),
                 (Disembarkment, ("view",)),
-                (DisembarkmentSite, ("view", "add", "change")),
-                (DisembarkmentTaxRate, ("add", "view", "change")),
-                (HarborDuesForm, ("view", "withdraw_from_review")),
-                (PassengersByCountry, ("view",)),
+                (DisembarkmentSite, ("view", "add", "change",)),
+                (DisembarkmentTaxRate, ("add", "view", "change",)),
+                (HarborDuesForm, ("view", "add", "change", "withdraw_from_review", "approve", "reject", "invoice", "submit_for_review",)),
+                (PassengersByCountry, ("view", "add", "change",)),
                 (Port, ("view",)),
                 (PortAuthority, ("view",)),
-                (PortTaxRate, ("add", "view", "change")),
+                (PortTaxRate, ("add", "view", "change",)),
                 (ShippingAgent, ("view",)),
-                (TaxRates, ("add", "view", "change")),
+                (TaxRates, ("add", "view", "change",)),
                 (User, ("view",)),
             ),
         )
