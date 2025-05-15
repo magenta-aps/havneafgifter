@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-12 12:10-0100\n"
+"POT-Creation-Date: 2025-05-15 07:24-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -364,7 +364,7 @@ msgstr "Udenlandsk fiskerbåd"
 msgid "Passenger ship"
 msgstr "Passagerskib"
 
-#: havneafgifter/models.py
+#: havneafgifter/models.py havneafgifter/templates/havneafgifter/login.html
 msgid "Cruise ship"
 msgstr "Krydstogtskib"
 
@@ -1151,6 +1151,16 @@ msgid "Log in"
 msgstr "Log ind"
 
 #: havneafgifter/templates/havneafgifter/login.html
+msgid "Welcome to Talippoq"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid ""
+"This is where you can submit harbor dues forms to the government of "
+"Greenland."
+msgstr "Her kan du indberette havneafgifter til de grønlandske myndigheder."
+
+#: havneafgifter/templates/havneafgifter/login.html
 msgid "Log in using MitID"
 msgstr "Log ind med MitID"
 
@@ -1162,6 +1172,30 @@ msgstr "Glemt dit kodeord?"
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 msgid "Register vessel to report harbour dues"
 msgstr "Opret skib for at rapportere havneafgifter"
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "If in doubt, you may consult the userguides below."
+msgstr "Er du i tvivl om, hvad du skal gøre, kan du finde hjælp i disse user-guides."
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Note: Userguides depend on the type of ship."
+msgstr "Bemærk: Userguides er inddelt efter skibstype."
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Find the userguide corresponding to your shiptype"
+msgstr "Find din skibstype herunder"
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Freighter ship"
+msgstr "Fragskib"
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Foreign fishing vessel"
+msgstr "Udenlandsk fiskerbåd"
+
+#: havneafgifter/templates/havneafgifter/login.html
+msgid "Other ships (e.g. yachts)"
+msgstr "Andet fartøj"
 
 #: havneafgifter/templates/havneafgifter/passengerstatistics.html
 msgid ""
