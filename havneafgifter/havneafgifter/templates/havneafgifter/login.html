@@ -1,6 +1,7 @@
 {% extends "havneafgifter/card.html" %}
 
 {% load i18n %}
+{% load static %}
 
 {% block title %}
 {% translate "Log in" %}
@@ -13,6 +14,8 @@
 {% block card_content %}
 <form method="post" class="form">
     {% csrf_token %}
+    {% translate 'Welcome to Talippoq' %}</br>
+    {% translate 'This is where you can submit harbor dues forms to the government of Greenland.' %}
     <div class="row align-items-end">
         <div class="col-md-5 mb-3">
             <label class="form-label" for="id_username">{% translate "Username or IMO number" %}</label>
@@ -38,14 +41,33 @@
     <input type="hidden" name="next" value="{{ next }}">
 </form>
 <div class="row">
-    <div class="col-12 my-2">
-        <a href="{% url 'mitid:login' %}{% if back %}?back={{ back|urlencode }}{% endif %}">{% translate "Log in using MitID" %}</a>
+    <div class="col-md-5 align-self-start">
+        <div class="my-2">
+            <a href="{% url 'mitid:login' %}{% if back %}?back={{ back|urlencode }}{% endif %}">{% translate "Log in using MitID" %}</a>
+        </div>
+        <div class="my-2">
+            <a href="{% url 'password_reset' %}">{% translate 'Forgot your password?' %}</a>
+        </div>
+        <div class="my-2">
+            <a href="{% url 'havneafgifter:signup-vessel' %}">{% translate 'Register vessel to report harbour dues' %}</a>
+        </div>
     </div>
-    <div class="col-12 my-2">
-        <a href="{% url 'password_reset' %}">{% translate 'Forgot your password?' %}</a>
-    </div>
-    <div class="col-12 my-2">
-        <a href="{% url 'havneafgifter:signup-vessel' %}">{% translate 'Register vessel to report harbour dues' %}</a>
-    </div>
+    <div class="col-md-7 align-self-end">
+        {% translate 'If in doubt, you may consult the userguides below.' %}</br>
+        {% translate 'Note: Userguides depend on the type of ship.' %}<br>
+        {% translate 'Find the userguide corresponding to your shiptype' %}
+        <div class="col-md-5">
+            <a class="my-2" href="{% static 'userguides/CruiseShip.pdf' %}">{% translate 'Cruise ship' %}</a>
+        </div>
+        <div class="col-md-5">
+            <a class="my-2" href="{% static 'userguides/FreighterShip.pdf' %}">{% translate 'Freighter ship' %}</a>
+        </div>
+        <div class="col-md-5">
+            <a class="my-2" href="{% static 'userguides/ForeignFishing.pdf' %}">{% translate 'Foreign fishing vessel' %}</a>
+        </div>
+        <div class="col-md-5">
+            <a class="my-2" href="{% static 'userguides/OtherShip.pdf' %}">{% translate 'Other ships (e.g. yachts)' %}</a>
+        </div>
+    </div> 
 </div>
 {% endblock %}
