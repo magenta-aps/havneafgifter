@@ -14,10 +14,8 @@
 {% block card_content %}
 <form method="post" class="form">
     {% csrf_token %}
-    {% blocktranslate %}
-    Velkommen til Talippoq.
-    Her kan du indberette havneafgifter til de grønlandske myndigheder
-    {% endblocktranslate %}
+    {% translate 'Welcome to Talippoq' %}</br>
+    {% translate 'This is where you can submit harbor dues forms to the government of Greenland.' %}
     <div class="row align-items-end">
         <div class="col-md-5 mb-3">
             <label class="form-label" for="id_username">{% translate "Username or IMO number" %}</label>
@@ -55,11 +53,9 @@
         </div>
     </div>
     <div class="col-md-7 align-self-end">
-        {% blocktranslate %}
-        Er du i tvivl om, hvad du skal gøre, kan du finde hjælp i disse user-guides.<br>
-        Bemærk: Userguides er inddelt efter skibstype.<br>
-        Find din skibstype herunder
-        {% endblocktranslate %}
+        {% translate 'If in doubt, you may consult the userguides below.' %}</br>
+        {% translate 'Note: Userguides depend on the type of ship.' %}<br>
+        {% translate 'Find the userguide corresponding to your shiptype' %}
         <div class="col-md-5">
             <a class="my-2" href="{% static 'userguides/CruiseShip.pdf' %}">{% translate 'Cruise ship' %}</a>
         </div>
