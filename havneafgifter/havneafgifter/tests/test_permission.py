@@ -253,11 +253,11 @@ class ShippingAgentPermissionTest(PermissionTest):
     def test_tax(self):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
-        self._test_access(user, self.item, "change", False)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.other_item, "view", True)
-        self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -327,11 +327,11 @@ class PortAuthorityPermissionTest(PermissionTest):
     def test_tax(self):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
-        self._test_access(user, self.item, "change", False)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.other_item, "view", True)
-        self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -400,11 +400,11 @@ class PortPermissionTest(PermissionTest):
     def test_tax(self):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
-        self._test_access(user, self.item, "change", False)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.other_item, "view", True)
-        self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -520,19 +520,19 @@ class CruiseTaxFormPermissionTest(PermissionTest):
     def test_tax(self):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
-        self._test_access(user, self.item, "change", False)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.item, "withdraw_from_review", True)
-        self._test_access(user, self.item, "approve", False)
-        self._test_access(user, self.item, "reject", False)
-        self._test_access(user, self.item, "invoice", False)
+        self._test_access(user, self.item, "approve", True)
+        self._test_access(user, self.item, "reject", True)
+        self._test_access(user, self.item, "invoice", True)
         self._test_access(user, self.other_item, "view", True)
-        self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
         self._test_access(user, self.other_item, "withdraw_from_review", True)
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
-        self._test_access(user, self.other_item, "invoice", False)
+        self._test_access(user, self.other_item, "approve", True)
+        self._test_access(user, self.other_item, "reject", True)
+        self._test_access(user, self.other_item, "invoice", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -689,11 +689,11 @@ class PassengersByCountryPermissionTest(PermissionTest):
     def test_tax(self):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
-        self._test_access(user, self.item, "change", False)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.other_item, "view", True)
-        self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -749,7 +749,7 @@ class DisembarkmentSitePermissionTest(PermissionTest):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -810,11 +810,11 @@ class DisembarkmentPermissionTest(PermissionTest):
     def test_tax(self):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
-        self._test_access(user, self.item, "change", False)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "change", True)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.other_item, "view", True)
-        self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "change", True)
+        self._test_access(user, self.other_item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -870,7 +870,7 @@ class TaxRatesPermissionTest(PermissionTest):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -916,7 +916,7 @@ class PortTaxRatesPermissionTest(PermissionTest):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -962,7 +962,7 @@ class DisembarkmentTaxRatesPermissionTest(PermissionTest):
         user = self.tax_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
