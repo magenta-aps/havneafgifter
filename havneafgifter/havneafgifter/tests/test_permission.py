@@ -603,9 +603,12 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         draft = CruiseTaxForm(status=Status.DRAFT, port_of_call=self.port)
         self.assertFalse(draft._has_port_authority_permission(self.port_manager_user))
 
-    def test_get_ship_user_filter_returns_empty_filter(self):
-        filter = CruiseTaxForm._get_ship_user_filter(self.admin_user)
-        self.assertListEqual(filter.children, [])
+    def test_get_ship_user_filter_uses_vessel_imo(self):
+        # `_get_ship_user_filter` always returns a filter which filters on
+        # `HarborDuesForm.vessel_imo == User.username` - in other words, ship users can
+        # see all forms whose IMO match their own username.
+        filter = CruiseTaxForm._get_ship_user_filter(self.ship_user)
+        self.assertListEqual(filter.children, [("vessel_imo", self.ship_user.username)])
 
 
 class CruiseTaxFormPortUserPermissionTest(PermissionTest):

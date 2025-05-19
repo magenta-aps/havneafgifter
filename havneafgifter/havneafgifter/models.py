@@ -870,10 +870,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @classmethod
     def _get_ship_user_filter(cls, user: User) -> Q:
-        if imo_validator_bool(user.username):
-            return Q(vessel_imo=user.username)
-        else:
-            return Q()
+        return Q(vessel_imo=user.username)
 
     @classmethod
     def _get_shipping_agent_user_filter(cls, user: User) -> Q:
@@ -941,9 +938,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     def _has_withdraw_from_review_permission(self, user: User) -> bool:
         if user.has_group_name("Ship"):
-            return (
-                imo_validator_bool(user.username) and user.username == self.vessel_imo
-            )
+            return user.username == self.vessel_imo
         if user.has_group_name("Shipping"):
             return (
                 self.shipping_agent is not None
@@ -996,9 +991,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                         and user.shipping_agent == self.shipping_agent
                     )
                     or (
-                        user.has_group_name("Ship")
-                        and imo_validator_bool(user.username)
-                        and user.username == self.vessel_imo
+                        user.has_group_name("Ship") and user.username == self.vessel_imo
                     )
                 )
             )
