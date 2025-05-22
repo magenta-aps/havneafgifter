@@ -179,6 +179,7 @@ class LoginView(HavneafgiftView, DjangoLoginView):
             **{
                 **context,
                 "back": self.back,
+                "environment": settings.ENVIRONMENT,  # Remove once 64952 is set to Done
             }
         )
 
