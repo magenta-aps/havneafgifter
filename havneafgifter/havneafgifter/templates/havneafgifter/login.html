@@ -14,8 +14,11 @@
 {% block card_content %}
 <form method="post" class="form">
     {% csrf_token %}
+    {# Remove if-clause once 64952 is set to Done #}
+    {% if environment != 'prod' %}
     {% translate 'Welcome to Talippoq' %}</br>
     {% translate 'This is where you can submit harbor dues forms to the government of Greenland.' %}
+    {% endif %}
     <div class="row align-items-end">
         <div class="col-md-5 mb-3">
             <label class="form-label" for="id_username">{% translate "Username or IMO number" %}</label>
@@ -52,6 +55,8 @@
             <a href="{% url 'havneafgifter:signup-vessel' %}">{% translate 'Register vessel to report harbour dues' %}</a>
         </div>
     </div>
+    {# Remove if-clause once 64952 is set to Done #}
+    {% if environment != 'prod' %}
     <div class="col-md-7 align-self-end">
         {% translate 'If in doubt, you may consult the userguides below.' %}</br>
         {% translate 'Note: Userguides depend on the type of ship.' %}<br>
@@ -68,6 +73,7 @@
         <div class="col-md-5">
             <a class="my-2" href="{% static 'userguides/OtherShip.pdf' %}">{% translate 'Other ships (e.g. yachts)' %}</a>
         </div>
-    </div> 
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
