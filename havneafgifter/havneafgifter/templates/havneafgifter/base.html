@@ -70,6 +70,32 @@ SPDX-License-Identifier: MPL-2.0
                 {% endif %}{# user.is_authenticated #}
             </ul>
             <ul class="navbar-nav d-flex align-items-center ms-auto">
+                <li class="nav-item dropdown">
+                    <a href="#" id="userguidesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span>
+                            {% translate 'In need of help?' %}
+                        </span>
+                    </a>
+                    <div id="userguides" class="dropdown-menu dropdown-menu-end" aria-labelledby="userguidesDropdown">
+                        <a class="d-flex align-items-center" href="{% static 'userguides/CruiseShip.pdf' %}">
+                            <span class="material-icons">description</span>
+                            <span class="ms-1">{% translate 'Userguide - Cruise ship' %}</span>
+                        </a>
+                        <a class="d-flex align-items-center" href="{% static 'userguides/FreighterShip.pdf' %}">
+                            <span class="material-icons">description</span>
+                            <span class="ms-1">{% translate 'Userguide - Freighter ship' %}</span>
+                        </a>
+                        <a class="d-flex align-items-center" href="{% static 'userguides/ForeignFishing.pdf' %}">
+                            <span class="material-icons">description</span>
+                            <span class="ms-1">{% translate 'Userguide - Foreign fishing vessel' %}</span>
+                        </a>
+                        <a class="d-flex align-items-center" href="{% static 'userguides/OtherShip.pdf' %}">
+                            <span class="material-icons">description</span>
+                            <span class="ms-1">{% translate 'Userguide - Other ships' %}</span>
+                        </a>
+                    </div>
+                </li>
+
                 {% if user.can_create %}
                 <li class="nav-item ms-4">
                     <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary d-flex align-items-center">
@@ -78,6 +104,7 @@ SPDX-License-Identifier: MPL-2.0
                     </a>
                 </li>
                 {% endif %}
+
                 <div class="d-flex align-items-center ms-4">
                     <span class="material-icons dark-icon">language</span>
                     <form action="{% url 'set_language' %}" method="post" class="navbar-form navbar-right mx-1 my-2">
