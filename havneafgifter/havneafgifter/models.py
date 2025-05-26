@@ -773,6 +773,21 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         else:
             return f"{self.form_id}.pdf"
 
+    def get_invoice_contact_email(self) -> str:
+        # First, check for the ship itself
+        try:
+            email = User.objects.get(username=self.vessel_imo).email
+        except ObjectDoesNotExist:
+            email = ""
+        # Then check for the shipping agent
+        if not email:
+            agent = self.shipping_agent
+            if agent:
+                email = agent.email or "No contact email available"
+            else:
+                email = "No contact email available"
+        return email
+
     def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
         self.calculate_harbour_tax(save=save)
 

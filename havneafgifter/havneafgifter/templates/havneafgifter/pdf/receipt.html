@@ -186,8 +186,6 @@ table tfoot td p {
 
 {% block content %}
 <div class="row receipt">
-    {{ form }}
-    {{ form.vessel }}
     <div class="col-12">
         <section>
             {% block headline %}{% endblock %}
@@ -241,8 +239,8 @@ table tfoot td p {
                             {{ form.vessel_owner|default_if_none:"" }}
                         </td>
                         <td colspan="e">
-                            <i>Contact email / <span class="secondary">INSERT TRANSLATION</span></i>
-                            <div>INSERT CONTACT EMAIL</div>
+                            <i>Contact e-mail / <span class="secondary">E-mail attavissaq</span></i>
+                            <div>{{ form.get_invoice_contact_email }}</div>
                     </tr>
 
                     <tr>
