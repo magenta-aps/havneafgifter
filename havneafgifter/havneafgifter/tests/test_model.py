@@ -454,20 +454,20 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
                 "ship@ship.net",
                 True,
                 "agent@agent.net",
+                "agent@agent.net",
+            ),
+            (
+                True,
+                "ship@ship.net",
+                False,
+                "",
                 "ship@ship.net",
             ),
             (
-                True,
-                "",
-                True,
-                "agent@agent.net",
-                "agent@agent.net",
-            ),
-            (
                 False,
                 "",
                 False,
-                "agent@agent.net",
+                "",
                 "No contact email available",
             ),
             (
@@ -476,6 +476,13 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
                 True,
                 "",
                 "No contact email available",
+            ),
+            (
+                False,
+                "",
+                True,
+                "agent@agent.net",
+                "agent@agent.net",
             ),
         ],
     )
@@ -491,8 +498,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
 
         if ship:
             user = User.objects.create(username=imo, email=ship_email)
-            if agent:
-                user.shipping_agent = shipping_agent
+            user.groups.add(Group.objects.get(name="Ship"))
 
         instance = HarborDuesForm(
             vessel_imo=imo,

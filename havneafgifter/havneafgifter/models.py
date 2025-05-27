@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
@@ -774,18 +774,21 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             return f"{self.form_id}.pdf"
 
     def get_invoice_contact_email(self) -> str:
-        # First, check for the ship itself
-        try:
-            email = User.objects.get(username=self.vessel_imo).email
-        except ObjectDoesNotExist:
-            email = ""
-        # Then check for the shipping agent
-        if not email:
-            agent = self.shipping_agent
-            if agent:
-                email = agent.email or "No contact email available"
-            else:
-                email = "No contact email available"
+        no_email = "No contact email available"
+        # First, check for an agent
+        agent = self.shipping_agent
+        if agent:
+            email = agent.email or no_email
+        # Second, check for a ship user, whose username matches the IMO-number
+        else:
+            try:
+                email = User.objects.get(
+                    username=self.vessel_imo,
+                    groups=Group.objects.get(name="Ship"),
+                ).email
+            except ObjectDoesNotExist:
+                email = no_email
+
         return email
 
     def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
