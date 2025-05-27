@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-15 07:24-0100\n"
+"POT-Creation-Date: 2025-05-27 08:31-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -352,7 +352,7 @@ msgstr ""
 msgid "Passenger ship"
 msgstr ""
 
-#: havneafgifter/models.py havneafgifter/templates/havneafgifter/login.html
+#: havneafgifter/models.py
 msgid "Cruise ship"
 msgstr ""
 
@@ -848,6 +848,26 @@ msgid "Edit master data"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+msgid "In need of help?"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "User guide - Cruise ship"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "User guide - Freighter ship"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "User guide - Foreign fishing vessel"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
+msgid "User guide - Other ships"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "Create new"
 msgstr ""
@@ -1120,13 +1140,9 @@ msgid "Log in"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/login.html
-msgid "Welcome to Talippoq"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
 msgid ""
-"This is where you can submit harbor dues forms to the government of "
-"Greenland."
+"\n"
+"Unsure what to do? Click \"In need of help?\" at the top right\n"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/login.html
@@ -1140,30 +1156,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/login.html
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 msgid "Register vessel to report harbour dues"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
-msgid "If in doubt, you may consult the userguides below."
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
-msgid "Note: Userguides depend on the type of ship."
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
-msgid "Find the userguide corresponding to your shiptype"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
-msgid "Freighter ship"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
-msgid "Foreign fishing vessel"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
-msgid "Other ships (e.g. yachts)"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/passengerstatistics.html
