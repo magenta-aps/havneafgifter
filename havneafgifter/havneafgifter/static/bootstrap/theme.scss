@@ -165,6 +165,19 @@ header nav .navbar-nav a {
   border: none;
 }
 
+// Userguide dropdown menu
+#userguides {
+  padding: $spacer;
+  min-width: 15vw;
+  border-color: transparent;
+  border-radius: 0.5 * $spacer;
+  box-shadow: 0 0 0.5 * $spacer $light-grey;
+}
+#userguides a {
+  width:300px;
+  padding: 0.625 * $spacer;
+}
+
 // No underlines for links
 a {
   text-decoration: none;

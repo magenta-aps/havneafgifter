@@ -14,11 +14,6 @@
 {% block card_content %}
 <form method="post" class="form">
     {% csrf_token %}
-    {# Remove if-clause once 64952 is set to Done #}
-    {% if environment != 'prod' %}
-    {% translate 'Welcome to Talippoq' %}</br>
-    {% translate 'This is where you can submit harbor dues forms to the government of Greenland.' %}
-    {% endif %}
     <div class="row align-items-end">
         <div class="col-md-5 mb-3">
             <label class="form-label" for="id_username">{% translate "Username or IMO number" %}</label>
@@ -43,6 +38,9 @@
     </div>
     <input type="hidden" name="next" value="{{ next }}">
 </form>
+{% blocktranslate %}
+Unsure what to do? Click "In need of help?" at the top right
+{% endblocktranslate %}
 <div class="row">
     <div class="col-md-5 align-self-start">
         <div class="my-2">
@@ -55,25 +53,5 @@
             <a href="{% url 'havneafgifter:signup-vessel' %}">{% translate 'Register vessel to report harbour dues' %}</a>
         </div>
     </div>
-    {# Remove if-clause once 64952 is set to Done #}
-    {% if environment != 'prod' %}
-    <div class="col-md-7 align-self-end">
-        {% translate 'If in doubt, you may consult the userguides below.' %}</br>
-        {% translate 'Note: Userguides depend on the type of ship.' %}<br>
-        {% translate 'Find the userguide corresponding to your shiptype' %}
-        <div class="col-md-5">
-            <a class="my-2" href="{% static 'userguides/CruiseShip.pdf' %}">{% translate 'Cruise ship' %}</a>
-        </div>
-        <div class="col-md-5">
-            <a class="my-2" href="{% static 'userguides/FreighterShip.pdf' %}">{% translate 'Freighter ship' %}</a>
-        </div>
-        <div class="col-md-5">
-            <a class="my-2" href="{% static 'userguides/ForeignFishing.pdf' %}">{% translate 'Foreign fishing vessel' %}</a>
-        </div>
-        <div class="col-md-5">
-            <a class="my-2" href="{% static 'userguides/OtherShip.pdf' %}">{% translate 'Other ships (e.g. yachts)' %}</a>
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
