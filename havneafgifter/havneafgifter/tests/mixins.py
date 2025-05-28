@@ -40,6 +40,7 @@ class HarborDuesFormTestMixin:
             username="admin",
             is_staff=True,
             is_superuser=True,
+            email="admin@administration.gl",
         )
         cls.tax_authority_user = User.objects.create(
             username="tax", email="tax@example.org"
