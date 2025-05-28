@@ -413,6 +413,13 @@ class PortAuthority(PermissionsMixin, models.Model):
         verbose_name=_("Port authority contact email"),
         validators=[EmailValidator(message=_("Ugyldig email adresse"))],
     )
+    admin_user = models.OneToOneField(
+        User,
+        null=True,
+        blank=True,
+        verbose_name=_("Port authority admin user"),
+        on_delete=models.SET_NULL,
+    )
 
     def __str__(self) -> str:
         return self.name
