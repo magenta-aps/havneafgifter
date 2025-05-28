@@ -52,7 +52,10 @@ class HarborDuesFormTestMixin:
             username="port_user",
             port_authority=cls.port_authority,
             port=cls.port,
+            email="port-admin@example.com",
         )
+        cls.port_authority.admin_user = cls.port_user
+        cls.port_authority.save()
         for user in (cls.port_authority_user, cls.port_user):
             user.groups.add(Group.objects.get(name="PortAuthority"))
 

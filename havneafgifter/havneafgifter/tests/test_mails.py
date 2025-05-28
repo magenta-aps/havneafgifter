@@ -11,6 +11,7 @@ from havneafgifter.mails import (
     EmailMessage,
     NotificationMail,
     OnApproveMail,
+    OnApproveReceipt,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
 )
@@ -23,6 +24,16 @@ class TestNotificationMail(TestCase):
         mail = NotificationMail(HarborDuesForm())
         with self.assertRaises(NotImplementedError):
             mail.mail_body
+
+
+class TestOnApproveReceipt(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase): 
+    def test_mail_recipients(self):
+
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        form.save()
+        instance = OnApproveReceipt(form)
+        self.assertIn(self.port_user.email, instance.mail_recipients)
+        self.assertIn(self.port_authority.email, instance.mail_recipients)
 
 
 class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
