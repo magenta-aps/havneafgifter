@@ -238,9 +238,10 @@ table tfoot td p {
                         <td class="col-3">
                             {{ form.vessel_owner|default_if_none:"" }}
                         </td>
-                        <td colspan="e">
+                        <td colspan="3">
                             <i>Contact e-mail / <span class="secondary">E-mail attavissaq</span></i>
-                            <div>{{ form.get_invoice_contact_email }}</div>
+                            <div>{{ form.get_invoice_contact_email|default_if_none:"No contact e-mail available" }}</div>
+                        </td>
                     </tr>
 
                     <tr>

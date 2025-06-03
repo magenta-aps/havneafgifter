@@ -468,14 +468,14 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
                 "",
                 False,
                 "",
-                "No contact email available",
+                None,
             ),
             (
                 False,
                 "",
                 True,
                 "",
-                "No contact email available",
+                None,
             ),
             (
                 False,

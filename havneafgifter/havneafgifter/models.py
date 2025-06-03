@@ -780,12 +780,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         else:
             return f"{self.form_id}.pdf"
 
-    def get_invoice_contact_email(self) -> str:
-        no_email = "No contact email available"
+    def get_invoice_contact_email(self) -> str | None:
         # First, check for an agent
         agent = self.shipping_agent
         if agent:
-            email = agent.email or no_email
+            email = agent.email or None
         # Second, check for a ship user, whose username matches the IMO-number
         else:
             try:
@@ -794,8 +793,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     groups=Group.objects.get(name="Ship"),
                 ).email
             except ObjectDoesNotExist:
-                email = no_email
-
+                email = None
         return email
 
     def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
