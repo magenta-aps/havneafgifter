@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from io import BytesIO
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.core.mail import EmailMessage
 from django.db.models import Model
@@ -102,29 +101,30 @@ class NotificationMail:
             )
         elif not self.form.has_port_of_call and settings.APPROVER_NO_PORT_OF_CALL:
             try:
-                admin = PortAuthority.objects.get(
+                port_authority = PortAuthority.objects.get(
                     name=settings.APPROVER_NO_PORT_OF_CALL,
-                ).admin_user
-                if admin and admin.email:
+                )
+            except PortAuthority.DoesNotExist:
+                logger.warning(
+                    "%s does not match any registered port authorities",
+                    settings.APPROVER_NO_PORT_OF_CALL,
+                )
+                return None
+            else:
+                admin_user = port_authority.admin_user
+                if admin_user is not None and admin_user.email is not None:
                     return MailRecipient(
                         name=gettext(
                             "Admin for port authority for vessels without port of call"
                         ),
-                        email=admin.email,
-                        object=admin,
+                        email=admin_user.email,
+                        object=port_authority,
                     )
                 else:
                     logger.warning(
-                        f"{settings.APPROVER_NO_PORT_OF_CALL} has no registered admin "
-                        "user"
+                        "%r has no registered admin user email", port_authority
                     )
                     return None
-            except ObjectDoesNotExist:
-                logger.warning(
-                    f"{settings.APPROVER_NO_PORT_OF_CALL} does not match any registered"
-                    " port authorities"
-                )
-                return None
         else:
             logger.info(
                 "%r is not linked to a port authority, excluding from mail recipients",
