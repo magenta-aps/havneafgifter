@@ -60,6 +60,8 @@ if [ "${CREATE_DUMMY_USERS}" = true ]; then
   ./manage.py createuser shipping shipping -g Shipping --shipping-agent Agenten
   echo 'creating ship user'
   ./manage.py createuser 9074729 ship -g Ship --email ship@ship.com
+  echo 'creating portauthority admin user'
+  ./manage.py createuser ral_admin ral_admin -g PortAuthority --port-authority Royal Arctic Line A/S --port-authority-admin --email ral-dummy-admin@test.ral
   echo 'creating portauthority user'
   ./manage.py createuser portauthority portauthority -g PortAuthority --port-authority Royal Arctic Line A/S
 fi

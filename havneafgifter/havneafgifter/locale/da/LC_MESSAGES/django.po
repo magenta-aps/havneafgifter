@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-27 08:31-0100\n"
+"POT-Creation-Date: 2025-05-28 11:45-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -221,6 +221,10 @@ msgstr ""
 #: havneafgifter/mails.py
 msgid "Authority for vessels without port of call"
 msgstr "Havnemyndighed for skibe uden ankomsthavn"
+
+#: havneafgifter/mails.py
+msgid "Admin for port authority for vessels without port of call"
+msgstr ""
 
 #: havneafgifter/mails.py
 msgid "Tax Authority"
@@ -585,6 +589,10 @@ msgstr "Havnemyndighedens kontakt-email"
 #| msgid "Email address"
 msgid "Ugyldig email adresse"
 msgstr "Email-adresse"
+
+#: havneafgifter/models.py
+msgid "Port authority admin user"
+msgstr ""
 
 #: havneafgifter/models.py
 msgid "Port name"
