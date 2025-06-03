@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
@@ -413,6 +413,13 @@ class PortAuthority(PermissionsMixin, models.Model):
         verbose_name=_("Port authority contact email"),
         validators=[EmailValidator(message=_("Ugyldig email adresse"))],
     )
+    admin_user = models.OneToOneField(
+        User,
+        null=True,
+        blank=True,
+        verbose_name=_("Port authority admin user"),
+        on_delete=models.SET_NULL,
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -772,6 +779,22 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             return self.pdf.name
         else:
             return f"{self.form_id}.pdf"
+
+    def get_invoice_contact_email(self) -> str | None:
+        # First, check for an agent
+        agent = self.shipping_agent
+        if agent:
+            email = agent.email or None
+        # Second, check for a ship user, whose username matches the IMO-number
+        else:
+            try:
+                email = User.objects.get(
+                    username=self.vessel_imo,
+                    groups=Group.objects.get(name="Ship"),
+                ).email
+            except ObjectDoesNotExist:
+                email = None
+        return email
 
     def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
         self.calculate_harbour_tax(save=save)

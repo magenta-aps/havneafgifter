@@ -10,7 +10,14 @@ from django.templatetags.l10n import localize
 from django.utils import translation
 from django.utils.translation import gettext
 
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, User, UserType
+from havneafgifter.models import (
+    CruiseTaxForm,
+    HarborDuesForm,
+    PortAuthority,
+    ShipType,
+    User,
+    UserType,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +80,51 @@ class NotificationMail:
                 email=settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
                 object=None,
             )
+        else:
+            logger.info(
+                "%r is not linked to a port authority, excluding from mail recipients",
+                self,
+            )
+            return None
+
+    def get_port_authority_admin_recipient(self) -> MailRecipient | None:
+        if (
+            self.form.port_of_call
+            and self.form.port_of_call.portauthority
+            and self.form.port_of_call.portauthority.admin_user
+            and self.form.port_of_call.portauthority.admin_user.email
+        ):
+            return MailRecipient(
+                name=self.form.port_of_call.portauthority.admin_user.username,
+                email=self.form.port_of_call.portauthority.admin_user.email,
+                object=self.form.port_of_call.portauthority.admin_user,
+            )
+        elif not self.form.has_port_of_call and settings.APPROVER_NO_PORT_OF_CALL:
+            try:
+                port_authority = PortAuthority.objects.get(
+                    name=settings.APPROVER_NO_PORT_OF_CALL,
+                )
+            except PortAuthority.DoesNotExist:
+                logger.warning(
+                    "%s does not match any registered port authorities",
+                    settings.APPROVER_NO_PORT_OF_CALL,
+                )
+                return None
+            else:
+                admin_user = port_authority.admin_user
+                if admin_user is not None and admin_user.email is not None:
+                    return MailRecipient(
+                        name=gettext(
+                            "Admin for port authority for vessels without port of call"
+                        ),
+                        email=admin_user.email,
+                        object=port_authority,
+                    )
+                else:
+                    logger.warning(
+                        "%r has no registered admin user email", port_authority
+                    )
+                    return None
         else:
             logger.info(
                 "%r is not linked to a port authority, excluding from mail recipients",
@@ -305,6 +357,7 @@ class OnApproveReceipt(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         super().__init__(form, user)
         self.add_recipient(self.get_port_authority_recipient())
+        self.add_recipient(self.get_port_authority_admin_recipient())
 
     @property
     def mail_subject(self):

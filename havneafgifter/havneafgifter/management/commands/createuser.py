@@ -12,6 +12,7 @@ class Command(BaseCommand):
         parser.add_argument("-S", "--is_superuser", action="store_true")
         parser.add_argument("-g", "--groups", type=str, nargs="+")
         parser.add_argument("--port-authority", type=str, nargs="+")
+        parser.add_argument("--port-authority-admin", action="store_true")
         parser.add_argument("--shipping-agent", type=str, nargs="+")
         parser.add_argument("--email", type=str)
 
@@ -48,6 +49,9 @@ class Command(BaseCommand):
                 )
                 user.port_authority = port_authority_object
                 user.save(update_fields=["port_authority"])
+                if options["port_authority_admin"]:
+                    port_authority_object.admin_user = user
+                    port_authority_object.save()
             except PortAuthority.DoesNotExist:
                 self.stdout.write(
                     f"Port Authority '{port_authority_name}' does not exist"

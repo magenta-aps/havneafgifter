@@ -433,11 +433,6 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
     def test_datetime_of_arrival_and_departure_constraints(
         self, arrival, departure, port_of_call, should_fail
     ):
-        print(list(Port.objects.all()))
-        for q in Port.objects.all():
-            print(f"PORT: {q.name} pk={q.pk}")
-        qs = Port.objects.filter(pk=1)
-        print(f"FILTER QS: {qs.query}")
         instance = HarborDuesForm(
             vessel_type=ShipType.CRUISE,
             datetime_of_arrival=arrival,
@@ -450,6 +445,67 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
                 instance.save()
         else:
             instance.save()
+
+    @parametrize(
+        "ship,ship_email,agent,agent_email,expected",
+        [
+            (
+                True,
+                "ship@ship.net",
+                True,
+                "agent@agent.net",
+                "agent@agent.net",
+            ),
+            (
+                True,
+                "ship@ship.net",
+                False,
+                "",
+                "ship@ship.net",
+            ),
+            (
+                False,
+                "",
+                False,
+                "",
+                None,
+            ),
+            (
+                False,
+                "",
+                True,
+                "",
+                None,
+            ),
+            (
+                False,
+                "",
+                True,
+                "agent@agent.net",
+                "agent@agent.net",
+            ),
+        ],
+    )
+    def test_get_invoice_contact_email(
+        self, ship, ship_email, agent, agent_email, expected
+    ):
+        imo = "0202610"
+        if agent:
+            shipping_agent = ShippingAgent.objects.create(
+                name="Ågent",
+                email=agent_email,
+            )
+
+        if ship:
+            user = User.objects.create(username=imo, email=ship_email)
+            user.groups.add(Group.objects.get(name="Ship"))
+
+        instance = HarborDuesForm(
+            vessel_imo=imo,
+            shipping_agent=shipping_agent if agent else None,
+        )
+
+        self.assertEqual(instance.get_invoice_contact_email(), expected)
 
     @parametrize(
         "port_of_call,expected_str",
