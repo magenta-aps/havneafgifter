@@ -559,7 +559,7 @@ class TestHarborDuesFormCreateView(
         )
         data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
         data = {
-            "passenger_total_form-total_number_of_passengers": 1,
+            "passenger_total_form-total_number_of_passengers": pbc.number_of_passengers,
             "passengers-0-id": pbc.id,
             "passengers-0-nationality": "CA",
             "passengers-0-number_of_passengers": 1,
@@ -567,10 +567,16 @@ class TestHarborDuesFormCreateView(
             "passengers-INITIAL_FORMS": 1,
             "passengers-MIN_NUM_FORMS": 0,
             "passengers-MAX_NUM_FORMS": 1000,
-            "disembarkment-TOTAL_FORMS": 1,
+            "disembarkment-TOTAL_FORMS": 2,
             "disembarkment-INITIAL_FORMS": 0,
             "disembarkment-MIN_NUM_FORMS": 0,
             "disembarkment-MAX_NUM_FORMS": 1000,
+            "disembarkment-0-id": "",
+            "disembarkment-0-disembarkment_site": "139",
+            "disembarkment-0-number_of_passengers": pbc.number_of_passengers,
+            "disembarkment-1-id": "",
+            "disembarkment-1-disembarkment_site": "139",
+            "disembarkment-1-number_of_passengers": pbc.number_of_passengers,
             **data,
         }
         data["base-vessel_type"] = "CRUISE"
@@ -2840,7 +2846,7 @@ class PassengerStatisticsTest(TestCase):
         Disembarkment.objects.create(
             cruise_tax_form=cls.form2,
             number_of_passengers=111,
-            disembarkment_site=DisembarkmentSite.objects.get(name="Qeqertat"),
+            disembarkment_site=DisembarkmentSite.objects.get(name="Qaanaaq"),
         )
         Disembarkment.objects.create(
             cruise_tax_form=cls.form1,
