@@ -1242,10 +1242,6 @@ class Disembarkment(PermissionsMixin, models.Model):
             "disembarkment_site__municipality",
             "disembarkment_site__name",
         ]
-        unique_together = [
-            "cruise_tax_form",
-            "disembarkment_site",
-        ]
 
     cruise_tax_form = models.ForeignKey(
         CruiseTaxForm, null=False, blank=False, on_delete=models.CASCADE
