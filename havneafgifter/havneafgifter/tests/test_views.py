@@ -557,6 +557,7 @@ class TestHarborDuesFormCreateView(
             nationality="CA",
             number_of_passengers=1,
         )
+        disembarkment_site = DisembarkmentSite.objects.first()
         data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
         data = {
             "passenger_total_form-total_number_of_passengers": pbc.number_of_passengers,
@@ -572,10 +573,10 @@ class TestHarborDuesFormCreateView(
             "disembarkment-MIN_NUM_FORMS": 0,
             "disembarkment-MAX_NUM_FORMS": 1000,
             "disembarkment-0-id": "",
-            "disembarkment-0-disembarkment_site": "139",
+            "disembarkment-0-disembarkment_site": disembarkment_site.pk,
             "disembarkment-0-number_of_passengers": pbc.number_of_passengers,
             "disembarkment-1-id": "",
-            "disembarkment-1-disembarkment_site": "139",
+            "disembarkment-1-disembarkment_site": disembarkment_site.pk,
             "disembarkment-1-number_of_passengers": pbc.number_of_passengers,
             **data,
         }
