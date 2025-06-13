@@ -365,7 +365,7 @@ class HarborDuesFormCreateView(
         if isinstance(self.object, CruiseTaxForm):
             total_num = self.object.number_of_passengers
         else:
-            total_num = 0
+            total_num = None
 
         context["passenger_total_form"] = self.get_passenger_total_form(
             initial={"total_number_of_passengers": total_num}

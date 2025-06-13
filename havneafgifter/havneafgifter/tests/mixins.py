@@ -130,7 +130,10 @@ class HarborDuesFormTestMixin:
         # Valid data for creating a `CruiseTaxForm` instance
         cls.cruise_tax_form_data = {
             **cls.harbor_dues_form_data,
-            **{"vessel_type": ShipType.CRUISE.value},
+            **{
+                "vessel_type": ShipType.CRUISE.value,
+                "number_of_passengers": 0,
+            },
         }
         # Cruise tax form objects (NEW and DRAFT, and NEW without port of call)
         cls.cruise_tax_form = CruiseTaxForm.objects.create(**cls.cruise_tax_form_data)

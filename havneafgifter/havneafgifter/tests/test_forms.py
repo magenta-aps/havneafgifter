@@ -1,12 +1,13 @@
 import copy
 from datetime import datetime, timedelta, timezone
+from itertools import chain
 from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
 from django.contrib.auth.hashers import is_password_usable
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.utils import ErrorList
-from django.test import SimpleTestCase, TestCase
+from django.test import TestCase
 from django.urls import reverse
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
@@ -260,31 +261,55 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
         self.assertTrue(form.fields[field].disabled)
 
 
-class TestPassengersTotalForm(SimpleTestCase):
-    def test_validate_total(self):
-        instance = PassengersTotalForm(data={"total_number_of_passengers": "100"})
-        instance.validate_total(101)
-        error_list = list(instance.errors.values())[0]  # Dumb type-juggling stuff
-        self.assertEqual(len(error_list), 1)
-        self.assertIn(
-            "The total number of passengers does not match the sum of "
-            "passengers by each nationality",
-            error_list,
-        )
-
-    def test_validate_zero_passengers(self):
-        instance = PassengersTotalForm(data={"total_number_of_passengers": "0"})
-        instance.validate_total(101)
-        error_list = list(instance.errors.values())[0]  # Dumb type-juggling stuff
-        self.assertEqual(len(error_list), 2)
-        self.assertIn(
-            "The total number of passengers should be larger than 0", error_list
-        )
-        self.assertIn(
-            "The total number of passengers does not match the sum of "
-            "passengers by each nationality",
-            error_list,
-        )
+class TestPassengersTotalForm(ParametrizedTestCase):
+    @parametrize(
+        "pax_user,pax_actual,error_match,error_none",
+        [
+            (
+                "100",
+                100,
+                False,
+                False,
+            ),
+            (
+                "100",
+                101,
+                True,
+                False,
+            ),
+            (
+                "0",
+                0,
+                False,
+                False,
+            ),
+            (
+                "0",
+                100,
+                True,
+                False,
+            ),
+            (
+                "",
+                0,
+                True,
+                True,
+            ),
+        ],
+    )
+    def test_validate_total(self, pax_user, pax_actual, error_match, error_none):
+        instance = PassengersTotalForm(data={"total_number_of_passengers": pax_user})
+        instance.validate_total(pax_actual)
+        error_list = list(chain.from_iterable(instance.errors.values()))
+        self.assertEqual(len(error_list), error_match + error_none)
+        if error_none:
+            self.assertIn("The total number of passengers must be provided", error_list)
+        if error_match:
+            self.assertIn(
+                "The total number of passengers does not match the sum of "
+                "passengers by each nationality",
+                error_list,
+            )
 
 
 class TestBasePortTaxRateFormSet(HarborDuesFormTestMixin, TestCase):
