@@ -543,43 +543,63 @@ class TestHarborDuesFormCreateView(
         # Assert that now we have correct number of disembarkments after deleting one
         self.assertEqual(len(cruise_tax_form.disembarkment_set.values()), 1)
 
+    @parametrize(
+        "pax",
+        [
+            (0,),
+            (1,),
+        ],
+    )
     def test_create_new_cruise_tax_form(
         self,
+        pax,
     ):
         """Create a new CruiseTaxForm to make sure, that the workflow completes all the
         way through
         """
 
         orig_ctf_amount = len(CruiseTaxForm.objects.all())
-        # Arrange
-        pbc = PassengersByCountry.objects.create(
-            cruise_tax_form=self.cruise_tax_form,
-            nationality="CA",
-            number_of_passengers=1,
-        )
-        disembarkment_site = DisembarkmentSite.objects.first()
         data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
         data = {
-            "passenger_total_form-total_number_of_passengers": pbc.number_of_passengers,
-            "passengers-0-id": pbc.id,
-            "passengers-0-nationality": "CA",
-            "passengers-0-number_of_passengers": 1,
+            "passenger_total_form-total_number_of_passengers": pax,
+            "passengers-0-id": "",
+            "passengers-0-nationality": "",
+            "passengers-0-number_of_passengers": "",
             "passengers-TOTAL_FORMS": 1,
-            "passengers-INITIAL_FORMS": 1,
+            "passengers-INITIAL_FORMS": 0,
             "passengers-MIN_NUM_FORMS": 0,
             "passengers-MAX_NUM_FORMS": 1000,
-            "disembarkment-TOTAL_FORMS": 2,
+            "disembarkment-TOTAL_FORMS": 1,
             "disembarkment-INITIAL_FORMS": 0,
             "disembarkment-MIN_NUM_FORMS": 0,
             "disembarkment-MAX_NUM_FORMS": 1000,
             "disembarkment-0-id": "",
-            "disembarkment-0-disembarkment_site": disembarkment_site.pk,
-            "disembarkment-0-number_of_passengers": pbc.number_of_passengers,
-            "disembarkment-1-id": "",
-            "disembarkment-1-disembarkment_site": disembarkment_site.pk,
-            "disembarkment-1-number_of_passengers": pbc.number_of_passengers,
+            "disembarkment-0-disembarkment_site": "",
+            "disembarkment-0-number_of_passengers": "",
             **data,
         }
+        # Update data
+        if pax:
+            pbc = PassengersByCountry.objects.create(
+                cruise_tax_form=self.cruise_tax_form,
+                nationality="CA",
+                number_of_passengers=pax,
+            )
+            disembarkment_site = DisembarkmentSite.objects.first()
+            data.update(
+                {
+                    "passengers-0-id": pbc.id,
+                    "passengers-0-nationality": "CA",
+                    "passengers-0-number_of_passengers": 1,
+                    "disembarkment-TOTAL_FORMS": 2,
+                    "disembarkment-0-id": "",
+                    "disembarkment-0-disembarkment_site": disembarkment_site.pk,
+                    "disembarkment-0-number_of_passengers": pbc.number_of_passengers,
+                    "disembarkment-1-id": "",
+                    "disembarkment-1-disembarkment_site": disembarkment_site.pk,
+                    "disembarkment-1-number_of_passengers": pbc.number_of_passengers,
+                },
+            )
         data["base-vessel_type"] = "CRUISE"
         self.client.force_login(self.admin_user)
 
