@@ -1048,7 +1048,7 @@ class CruiseTaxForm(HarborDuesForm):
     number_of_passengers = models.PositiveIntegerField(
         null=True,
         blank=True,
-        default=None,
+        default=0,
         verbose_name=_("Number of passengers"),
     )
 
