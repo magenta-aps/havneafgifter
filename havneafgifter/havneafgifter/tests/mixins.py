@@ -6,7 +6,6 @@ from django.core.management import call_command
 
 from havneafgifter.models import (
     CruiseTaxForm,
-    DisembarkmentSite,
     HarborDuesForm,
     Nationality,
     Port,
@@ -32,10 +31,6 @@ class HarborDuesFormTestMixin:
         )
         cls.port = Port.objects.create(
             name="Nordhavn", portauthority=cls.port_authority
-        )
-        cls.port_disembarkment_site = DisembarkmentSite.objects.create(
-            name=cls.port.name,
-            municipality=955,
         )
         cls.shipping_agent = ShippingAgent.objects.create(
             name="Agent", email="shipping@example.org"

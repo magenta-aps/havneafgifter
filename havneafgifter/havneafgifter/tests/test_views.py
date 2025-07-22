@@ -611,11 +611,13 @@ class TestHarborDuesFormCreateView(
         if port_of_call_disembarkment:
             response_code = 302
             ctf_number = orig_ctf_number + 1
+            port_disembarkment_site = DisembarkmentSite.objects.create(
+                name=self.port.name,
+                municipality=955,
+            )
             data.update(
                 {
-                    "disembarkment-1-disembarkment_site": (
-                        self.port_disembarkment_site.pk
-                    ),
+                    "disembarkment-1-disembarkment_site": (port_disembarkment_site.pk),
                 },
             )
         else:
