@@ -263,11 +263,9 @@ class HarborDuesFormCreateView(
             disembarkment_formset = self.get_disembarkment_formset(
                 data=self.request.POST
             )
-            if (
-                passenger_formset.is_valid()
-                and passenger_total_form.is_valid()
-                and disembarkment_formset.is_valid()
-            ):
+            if passenger_formset.is_valid() and passenger_total_form.is_valid():
+                status = base_form.cleaned_data.get("status")
+
                 if isinstance(self.object, CruiseTaxForm):
                     user_total = passenger_total_form.cleaned_data[
                         "total_number_of_passengers"
@@ -283,17 +281,29 @@ class HarborDuesFormCreateView(
                     # nationalities.
                     # TODO: læg denne validering ind så den kaldes under full_clean
                     passenger_total_form.validate_total(actual_total)
-                if passenger_total_form.is_valid():
-                    status = base_form.cleaned_data.get("status")
 
+                    if base_form.cleaned_data["port_of_call"] and status == Status.NEW:
+                        disembarkment_names = [
+                            disembarkment["disembarkment_site"].name
+                            for disembarkment in disembarkment_formset.cleaned_data
+                            if disembarkment and not disembarkment["DELETE"]
+                        ]
+                        portname = base_form.cleaned_data["port_of_call"].name
+                        if portname not in disembarkment_names:
+                            disembarkment_formset.non_form_errors().append(
+                                _(
+                                    "When there is a port of call, it must be "
+                                    "included in the list of disembarkments"
+                                ),
+                            )
+
+                if passenger_total_form.is_valid() and disembarkment_formset.is_valid():
                     if status == Status.NEW:
                         self.object.submit_for_review()
                         self.save_formsets_and_calculate(
                             passenger_formset,
                             disembarkment_formset,
                         )
-                        # self.object.save()
-                        # self.object.calculate_tax(save=True, force_recalculation=True)
                         self.handle_notification_mail(
                             OnSubmitForReviewMail, self.object
                         )
@@ -306,11 +316,6 @@ class HarborDuesFormCreateView(
                             passenger_formset,
                             disembarkment_formset,
                         )
-                        # self.object.save()
-                        # self.object.calculate_tax(save=True, force_recalculation=True)
-
-                    # passenger_formset.save()
-                    # disembarkment_formset.save()
 
                     if (
                         self.request.user.user_type == UserType.SHIP
