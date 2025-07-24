@@ -608,6 +608,8 @@ class TestHarborDuesFormCreateView(
                 },
             )
 
+        # If the DisembarkmentSite corresponding to the Port of Call is in the form data
+        # we expect to be able to submit the form without issues, tus creating a new CTF
         if port_of_call_disembarkment:
             response_code = 302
             ctf_number = orig_ctf_number + 1
@@ -620,6 +622,9 @@ class TestHarborDuesFormCreateView(
                     "disembarkment-1-disembarkment_site": (port_disembarkment_site.pk),
                 },
             )
+        # If the DisembarkmentSite corresponding to the Port of Call is absent from the
+        # form data we expect an error, hindering the creation af a new CTF, instead
+        # redirecting to the same form, where the error will be displayed
         else:
             response_code = 200
             ctf_number = orig_ctf_number
