@@ -565,7 +565,7 @@ class TestHarborDuesFormCreateView(
         way through
         """
 
-        orig_ctf_number = len(CruiseTaxForm.objects.all())
+        orig_ctf_number = CruiseTaxForm.objects.count()
         data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
         data = {
             "passenger_total_form-total_number_of_passengers": pax,
@@ -636,7 +636,7 @@ class TestHarborDuesFormCreateView(
         # Assert that we are redirected
         self.assertEqual(response.status_code, response_code)
         # Assert that there is now one more CruiseTaxForm than before
-        self.assertEqual(len(CruiseTaxForm.objects.all()), ctf_number)
+        self.assertEqual(CruiseTaxForm.objects.count(), ctf_number)
 
     def test_delete_passengers_by_country(self):
         self.client.force_login(self.shipping_agent_user)
