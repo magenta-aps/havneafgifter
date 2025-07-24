@@ -92,9 +92,9 @@
     {% bootstrap_form disembarkment_formset.management_form %}
     <div class="formset bg-light rounded-3 mt-4 p-4">
         <h2 class="pb-4">{% translate 'Cruise Ships: Environmental and Maintenance Fee' %}</h2>
-        {% if disembarkment_formset.errors %}
+        {% if disembarkment_formset.non_form_errors %}
         <ul class="list-unstyled text-danger">
-            {% for error in disembarkment_formset.errors %}
+            {% for error in disembarkment_formset.non_form_errors %}
             <li>{{ error }}</li>
             {% endfor %}
         </ul>

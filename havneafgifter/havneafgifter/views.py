@@ -290,14 +290,12 @@ class HarborDuesFormCreateView(
                         ]
                         portname = base_form.cleaned_data["port_of_call"].name
                         if portname not in disembarkment_names:
-                            for form in disembarkment_formset.forms:
-                                form.add_error(
-                                    None,
-                                    _(
-                                        "When there is a port of call, it must be "
-                                        "included in the list of disembarkments"
-                                    ),
-                                )
+                            disembarkment_formset.non_form_errors().append(
+                                _(
+                                    "When there is a port of call, it must be "
+                                    "included in the list of disembarkments"
+                                ),
+                            )
 
                 if passenger_total_form.is_valid() and disembarkment_formset.is_valid():
                     if status == Status.NEW:
