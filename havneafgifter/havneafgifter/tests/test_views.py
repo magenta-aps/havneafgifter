@@ -544,21 +544,28 @@ class TestHarborDuesFormCreateView(
         self.assertEqual(len(cruise_tax_form.disembarkment_set.values()), 1)
 
     @parametrize(
-        "pax",
+        "pax,port_of_call_disembarkment",
         [
-            (0,),
-            (1,),
+            (
+                0,
+                False,
+            ),
+            (
+                1,
+                True,
+            ),
         ],
     )
     def test_create_new_cruise_tax_form(
         self,
         pax,
+        port_of_call_disembarkment,
     ):
         """Create a new CruiseTaxForm to make sure, that the workflow completes all the
         way through
         """
 
-        orig_ctf_amount = len(CruiseTaxForm.objects.all())
+        orig_ctf_number = CruiseTaxForm.objects.count()
         data = {f"base-{k}": v for k, v in self.harbor_dues_form_data_pk.items()}
         data = {
             "passenger_total_form-total_number_of_passengers": pax,
@@ -600,6 +607,28 @@ class TestHarborDuesFormCreateView(
                     "disembarkment-1-number_of_passengers": pbc.number_of_passengers,
                 },
             )
+
+        # If the DisembarkmentSite corresponding to the Port of Call is in the form data
+        # we expect to be able to submit the form without issues, tus creating a new CTF
+        if port_of_call_disembarkment:
+            response_code = 302
+            ctf_number = orig_ctf_number + 1
+            port_disembarkment_site = DisembarkmentSite.objects.create(
+                name=self.port.name,
+                municipality=955,
+            )
+            data.update(
+                {
+                    "disembarkment-1-disembarkment_site": (port_disembarkment_site.pk),
+                },
+            )
+        # If the DisembarkmentSite corresponding to the Port of Call is absent from the
+        # form data we expect an error, hindering the creation af a new CTF, instead
+        # redirecting to the same form, where the error will be displayed
+        else:
+            response_code = 200
+            ctf_number = orig_ctf_number
+
         data["base-vessel_type"] = "CRUISE"
         self.client.force_login(self.admin_user)
 
@@ -610,9 +639,9 @@ class TestHarborDuesFormCreateView(
         )
 
         # Assert that we are redirected
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, response_code)
         # Assert that there is now one more CruiseTaxForm than before
-        self.assertEqual(len(CruiseTaxForm.objects.all()), orig_ctf_amount + 1)
+        self.assertEqual(CruiseTaxForm.objects.count(), ctf_number)
 
     def test_delete_passengers_by_country(self):
         self.client.force_login(self.shipping_agent_user)
