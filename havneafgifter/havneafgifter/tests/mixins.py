@@ -99,6 +99,7 @@ class HarborDuesFormTestMixin:
             "vessel_owner": "Ejer",
             "vessel_master": "Mester",
             "shipping_agent": cls.shipping_agent,
+            "agent_reference": "47",
             "gross_tonnage": 0,
             "vessel_type": ShipType.FREIGHTER.value,
             "vessel_imo": "9074729",
