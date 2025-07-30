@@ -229,6 +229,20 @@ class TestHarborDuesFormForm(ParametrizedTestCase, HarborDuesFormTestMixin, Test
         )
         self.assertTrue(form.fields["shipping_agent"].disabled)
 
+    def test_agent_reference_field_is_available_for_shipping_agents(self):
+        # If form is instantiated with a `User` that is a "shipping agent user", the
+        # field `agent_reference` is available.
+        form = HarborDuesFormForm(
+            self.shipping_agent_user, data=self.harbor_dues_form_data
+        )
+        self.assertFalse(form.fields["agent_reference"].disabled)
+
+    def test_agent_reference_field_is_locked_for_non_shipping_agents(self):
+        # If form is instantiated with a `User` that is not "shipping agent user", the
+        # field `agent_reference` is diseabled.
+        form = HarborDuesFormForm(self.admin_user, data=self.harbor_dues_form_data)
+        self.assertTrue(form.fields["agent_reference"].disabled)
+
     def _get_form_instance(self, data, status=Status.NEW):
         # We use `self.shipping_agent_user` here to get a "normal" user
         # (i.e., not a "ship user".)
