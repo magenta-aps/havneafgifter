@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-29 12:14-0100\n"
+"POT-Creation-Date: 2025-07-31 06:44-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -118,7 +118,7 @@ msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Agent reference"
-msgstr ""
+msgstr "Sullissisoq Pineqartoq"
 
 #: havneafgifter/forms.py
 msgid "Only Cruise ships can have No Port of Call"
@@ -936,6 +936,26 @@ msgid ""
 "This will notify the submitter of the form that the form has been accepted."
 msgstr ""
 
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "Reject"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+msgid "Do you want to delete this form?"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+msgid ""
+"This will notify the submitter of the form that the form has been deleted."
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "Delete"
+msgstr ""
+
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_vessel_change.html
@@ -1012,11 +1032,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
 msgid "Show"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Reject"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
@@ -1370,10 +1385,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Clone"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/taxrates_detail.html
-msgid "Delete"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
