@@ -285,6 +285,7 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
             "datetime_of_arrival",
             "datetime_of_departure",
             "vessel_type",
+            "agent_reference",
         ]
         localized_fields = [
             "datetime_of_arrival",
@@ -412,6 +413,13 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
         required=True,
         choices=Status.choices,
     )
+    agent_reference = DynamicField(
+        CharField,
+        required=False,
+        disabled=lambda form: not form.user_is_agent,
+        max_length=60,
+        label=_("Agent reference"),
+    )
 
     def __init__(self, user: User, status: Status | None = None, *args, **kwargs):
         self._user = user
@@ -431,6 +439,13 @@ class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, Model
     @property
     def user_is_ship(self) -> bool:
         return self._user.is_authenticated and self._user.user_type == UserType.SHIP
+
+    @property
+    def user_is_agent(self) -> bool:
+        return (
+            self._user.is_authenticated
+            and self._user.user_type == UserType.SHIPPING_AGENT
+        )
 
     @property
     def has_port_of_call(self):

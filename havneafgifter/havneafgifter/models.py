@@ -664,6 +664,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("PDF file"),
     )
 
+    agent_reference = models.CharField(
+        null=True,
+        blank=True,
+        max_length=60,
+        verbose_name=_("Agent reference"),
+    )
+
     @transition(
         field=status,
         source=[Status.DRAFT, Status.REJECTED],

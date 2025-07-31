@@ -259,8 +259,12 @@ table tfoot td p {
                             <div>Shipping agent/company</div>
                             <div class="secondary">Umiarsuaatileqatigiiffik</div>
                         </td>
-                        <td colspan="3">
+                        <td class="col-3">
                             {{ form.shipping_agent|default_if_none:"" }}
+                        </td>
+                        <td colspan="3">
+                            <i>Agent reference / <span class="secondary">Sullissisoq Pineqartoq</span></i>
+                            <div>{{ form.agent_reference|default_if_none:"" }}</div>
                         </td>
                     </tr>
 
