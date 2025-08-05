@@ -55,6 +55,7 @@ from havneafgifter.views import (
     ApproveView,
     HandleNotificationMailMixin,
     HarborDuesFormCreateView,
+    HarborDuesFormDeleteView,
     HarborDuesFormListView,
     PreviewPDFView,
     ReceiptDetailView,
@@ -1795,7 +1796,7 @@ class TestActionViewMixin(HarborDuesFormTestMixin, RequestMixin):
         self,
         user: User,
         status: Status,
-        filter: Q,
+        filter: Q = (~Q(pk__in=[])),  # Fallback filter which matches all entries
     ):
         self._setup({}, user)
         self.assertQuerySetEqual(
@@ -1894,6 +1895,76 @@ class TestRejectView(TestActionViewMixin, TestCase):
         self._assert_redirects_to_list_view(response)
 
     def test_post_not_permitted(self):
+        # Arrange
+        request = self._setup({}, self.shipping_agent_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)
+
+
+class TestDeleteView(TestActionViewMixin, TestCase, ParametrizedTestCase):
+    view_class = HarborDuesFormDeleteView
+
+    def test_get_queryset(self):
+        # When no filter is specified, _assert_get_queryset_result returns all objects
+        self._assert_get_queryset_result(
+            self.tax_authority_user,
+            Status.DRAFT,
+        )
+        self._assert_get_queryset_result(
+            self.shipping_agent_user,
+            Status.DRAFT,
+            Q(shipping_agent=self.shipping_agent),
+        )
+
+    @parametrize(
+        "user",
+        [("tax_authority",), ("shipping_agent",)],
+    )
+    def test_post(self, user):
+        if user == "shipping_agent":
+            user = self.shipping_agent_user
+        elif user == "tax_authority":
+            user = self.tax_authority_user
+
+        # Create new HDF draft for test
+        self.harbor_dues_form = self.harbor_dues_draft_form
+        self.harbor_dues_form.pk = None
+        self.harbor_dues_form.save()
+        pk = self.harbor_dues_form.pk
+        print(self.harbor_dues_form.shipping_agent)
+        print(user)
+        # Arrange
+        request = self._setup({}, user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        with self.assertRaises(HarborDuesForm.DoesNotExist):
+            HarborDuesForm.objects.get(pk=pk)
+        self._assert_redirects_to_list_view(response)
+
+    def test_post_not_permitted(self):
+        self.harbor_dues_form = self.harbor_dues_draft_form
+        # Arrange
+        request = self._setup({}, self.port_authority_user)
+        # Act
+        response = self.instance.post(request)
+        # Assert
+        self.assertIsInstance(response, HttpResponseForbidden)
+        self.assertEqual(
+            HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk),
+            self.harbor_dues_form,
+        )
+
+    def test_post_wrong_agent(self):
+        self.new_shipping_agent = self.shipping_agent
+        self.new_shipping_agent.pk = None
+        self.new_shipping_agent.save()
+
+        self.shipping_agent_user.shipping_agent = self.new_shipping_agent
+        self.shipping_agent_user.save()
+
         # Arrange
         request = self._setup({}, self.shipping_agent_user)
         # Act

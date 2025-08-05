@@ -482,44 +482,25 @@ class HarborDuesFormCreateView(
         return factory(prefix="disembarkment", instance=self.object, **form_kwargs)
 
 
-class SingleFormEditMixin(View):
-    def get_object(self, queryset=None):
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        try:
-            return CruiseTaxForm.objects.get(pk=pk)
-        except CruiseTaxForm.DoesNotExist:
-            try:
-                return HarborDuesForm.objects.get(pk=pk)
-            except HarborDuesForm.DoesNotExist:
-                return None
-
-
 class HarborDuesFormDeleteView(
-    SingleFormEditMixin,
     DeleteView,
     LoginRequiredMixin,
     HavneafgiftView,
 ):
+    object = HarborDuesForm
     model = HarborDuesForm
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.filter(status=Status.DRAFT),
+            self.request.user,
+            "delete",
+        )
 
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_list")
 
     allowed_statuses_delete = [Status.DRAFT]
-
-    def get(self, request, *args, **kwargs):
-        form = self.get_object()
-        if form is None:
-            return HavneafgifterResponseNotFound(
-                request, f"No form found for ID {self.kwargs.get(self.pk_url_kwarg)}"
-            )
-        elif not (
-            form.status in self.allowed_statuses_delete
-            and form._has_delete_permission(request.user)
-        ):
-            raise PermissionDenied
-        else:
-            return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # If we cannot get the specified `HarborDuesForm` object, it is probably
@@ -537,9 +518,17 @@ class HarborDuesFormDeleteView(
         return super().post(request, *args, **kwargs)
 
 
-class ReceiptDetailView(
-    LoginRequiredMixin, HavneafgiftView, SingleFormEditMixin, DetailView
-):
+class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            return CruiseTaxForm.objects.get(pk=pk)
+        except CruiseTaxForm.DoesNotExist:
+            try:
+                return HarborDuesForm.objects.get(pk=pk)
+            except HarborDuesForm.DoesNotExist:
+                return None
+
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
