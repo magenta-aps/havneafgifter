@@ -483,7 +483,7 @@ class HarborDuesFormCreateView(
 
 
 class SingleFormEditMixin(View):
-    def get_object(self):
+    def get_object(self, queryset=None):
         pk = self.kwargs.get(self.pk_url_kwarg)
         try:
             return CruiseTaxForm.objects.get(pk=pk)
@@ -495,7 +495,10 @@ class SingleFormEditMixin(View):
 
 
 class HarborDuesFormDeleteView(
-    LoginRequiredMixin, HavneafgiftView, DeleteView, SingleFormEditMixin
+    LoginRequiredMixin,
+    HavneafgiftView,
+    SingleFormEditMixin,
+    DeleteView,
 ):
     model = HarborDuesForm
 
