@@ -58,6 +58,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                     "can_withdraw": False,
                     "can_approve": False,
                     "can_reject": False,
+                    "can_delete": False,
                     "landing_modal": False,
                 }
             ),
@@ -85,6 +86,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                 "can_withdraw": False,
                 "can_approve": False,
                 "can_reject": False,
+                "can_delete": False,
             },
         )
 
@@ -111,6 +113,7 @@ class TestHarborDuesFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "can_withdraw": True,
                 "can_approve": True,
                 "can_reject": True,
+                "can_delete": False,
             },
         )
 
@@ -134,6 +137,7 @@ class TestCruiseTaxFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "can_withdraw",
                 "can_approve",
                 "can_reject",
+                "can_delete",
             ],
         )
         self.assertListEqual(

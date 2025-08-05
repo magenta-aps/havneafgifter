@@ -245,7 +245,7 @@ class ShippingAgentPermissionTest(PermissionTest):
         user = self.agent_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True)
         self._test_access(user, self.other_item, "view", True)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
@@ -502,14 +502,14 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "withdraw_from_review", True, specific=True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True, specific=True)
         self._test_access(user, self.item, "approve", False)
         self._test_access(user, self.item, "reject", False)
         self._test_access(user, self.item, "invoice", False)
         # Shipping agent may not see or change form for another port
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "delete", True, specific=True)
         self._test_access(
             user, self.other_item, "withdraw_from_review", False, specific=True
         )
@@ -680,11 +680,11 @@ class PassengersByCountryPermissionTest(PermissionTest):
         user = self.agent_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True, specific=True)
         # Shipping agent may not see or change form for another port
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "delete", True, specific=True)
 
     def test_tax(self):
         user = self.tax_user
@@ -801,11 +801,11 @@ class DisembarkmentPermissionTest(PermissionTest):
         user = self.agent_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "delete", False)
+        self._test_access(user, self.item, "delete", True, specific=True)
         # Shipping agent may not see or change form for another port
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
-        self._test_access(user, self.other_item, "delete", False)
+        self._test_access(user, self.other_item, "delete", True, specific=True)
 
     def test_tax(self):
         user = self.tax_user

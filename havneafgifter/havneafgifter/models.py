@@ -986,8 +986,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
         else:
             return user.has_group_name("TaxAuthority")
-        
-
 
     @classmethod
     def _filter_user_permissions(
