@@ -495,10 +495,10 @@ class SingleFormEditMixin(View):
 
 
 class HarborDuesFormDeleteView(
-    LoginRequiredMixin,
-    HavneafgiftView,
     SingleFormEditMixin,
     DeleteView,
+    LoginRequiredMixin,
+    HavneafgiftView,
 ):
     model = HarborDuesForm
 
@@ -520,6 +520,21 @@ class HarborDuesFormDeleteView(
             raise PermissionDenied
         else:
             return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # If we cannot get the specified `HarborDuesForm` object, it is probably
+        # because we don't have the required `delete` permission.
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return HavneafgifterResponseForbidden(
+                self.request,
+                _(
+                    "You do not have the required permissions to delete "
+                    "this harbor dues form"
+                ),
+            )
+        return super().post(request, *args, **kwargs)
 
 
 class ReceiptDetailView(
