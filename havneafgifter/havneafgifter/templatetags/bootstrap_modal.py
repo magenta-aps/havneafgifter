@@ -38,7 +38,7 @@ def reject_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
 @register.inclusion_tag(
     "havneafgifter/bootstrap/delete_form.html",
 )
-def delete_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
+def delete_form_modal(form: HarborDuesForm | CruiseTaxForm) -> dict:
     return {"form": form}
 
 
