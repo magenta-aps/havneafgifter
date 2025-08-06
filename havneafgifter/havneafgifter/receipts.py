@@ -98,7 +98,7 @@ class Receipt:
         return self._is_permitted_for_user(self.form.reject)
 
     def _get_can_delete(self) -> bool:
-        return self.form.status == Status.DRAFT and self.form._has_delete_permission(
+        return self.form._has_delete_permission(
             self._user
         )
 

@@ -977,7 +977,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return False
 
     def _has_delete_permission(self, user: User) -> bool:
-        if user is None:
+        if user is None or self.status != Status.DRAFT:
             return False
         elif user.has_group_name("Shipping"):
             return (
