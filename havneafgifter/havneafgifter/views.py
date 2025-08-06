@@ -263,7 +263,11 @@ class HarborDuesFormCreateView(
             disembarkment_formset = self.get_disembarkment_formset(
                 data=self.request.POST
             )
-            if passenger_formset.is_valid() and passenger_total_form.is_valid():
+            if (
+                passenger_formset.is_valid()
+                and passenger_total_form.is_valid()
+                and disembarkment_formset.is_valid()
+            ):
                 status = base_form.cleaned_data.get("status")
 
                 if isinstance(self.object, CruiseTaxForm):
