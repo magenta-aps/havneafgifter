@@ -1933,8 +1933,6 @@ class TestDeleteView(TestActionViewMixin, TestCase, ParametrizedTestCase):
         self.harbor_dues_form.pk = None
         self.harbor_dues_form.save()
         pk = self.harbor_dues_form.pk
-        print(self.harbor_dues_form.shipping_agent)
-        print(user)
         # Arrange
         request = self._setup({}, user)
         # Act
