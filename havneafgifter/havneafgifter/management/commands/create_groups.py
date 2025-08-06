@@ -169,21 +169,21 @@ class Command(BaseCommand):
                     CruiseTaxForm,
                     (
                         "add",
-                        "delete",
+                        "delete"
                     ),
                 ),
                 (
                     Disembarkment,
                     (
                         "add",
-                        "delete",
+                        "delete"
                     ),
                 ),
                 (
                     DisembarkmentSite,
                     (
                         "view",
-                        "delete",
+                        "delete"
                     ),
                 ),
                 (DisembarkmentTaxRate, ("view",)),
@@ -191,14 +191,14 @@ class Command(BaseCommand):
                     HarborDuesForm,
                     (
                         "add",
-                        "delete",
+                        "delete"
                     ),
                 ),
                 (
                     PassengersByCountry,
                     (
                         "add",
-                        "delete",
+                        "delete"
                     ),
                 ),
                 (Port, ("view",)),
