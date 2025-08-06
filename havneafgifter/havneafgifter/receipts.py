@@ -98,9 +98,7 @@ class Receipt:
         return self._is_permitted_for_user(self.form.reject)
 
     def _get_can_delete(self) -> bool:
-        return self.form._has_delete_permission(
-            self._user
-        )
+        return self.form._has_delete_permission(self._user)
 
     def _is_permitted_for_user(self, method: Callable) -> bool:
         if self._user is not None:

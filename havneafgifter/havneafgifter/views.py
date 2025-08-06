@@ -517,16 +517,6 @@ class HarborDuesFormDeleteView(
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
-    def get_object(self, queryset=None):
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        try:
-            return CruiseTaxForm.objects.get(pk=pk)
-        except CruiseTaxForm.DoesNotExist:
-            try:
-                return HarborDuesForm.objects.get(pk=pk)
-            except HarborDuesForm.DoesNotExist:
-                return None
-
     def get(self, request, *args, **kwargs):
         form = self.get_object()
         if form is None:
@@ -542,6 +532,16 @@ class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):
             base="havneafgifter/base_default.html", request=request
         )
         return HttpResponse(receipt.html)
+
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            return CruiseTaxForm.objects.get(pk=pk)
+        except CruiseTaxForm.DoesNotExist:
+            try:
+                return HarborDuesForm.objects.get(pk=pk)
+            except HarborDuesForm.DoesNotExist:
+                return None
 
 
 class PreviewPDFView(ReceiptDetailView):
