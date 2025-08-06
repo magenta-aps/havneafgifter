@@ -45,6 +45,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
     def test_html(self, mock_get_template):
         mock_form: Mock = Mock()
         mock_template: Mock = Mock()
+        mock_form._has_delete_permission.return_value = False
         mock_get_template.return_value = mock_template
         instance: Receipt = Receipt(mock_form)
         result = instance.html
@@ -77,7 +78,9 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
 
     @patch.object(Engine, "get_template")
     def test_get_context_data(self, mock_get_template):
-        instance: Receipt = Receipt(Mock())
+        mock_form: Mock = Mock()
+        mock_form._has_delete_permission.return_value = False
+        instance: Receipt = Receipt(mock_form)
         self.assertDictEqual(
             instance.get_context_data(),
             {
