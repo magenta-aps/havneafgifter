@@ -500,8 +500,6 @@ class HarborDuesFormDeleteView(
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_list")
 
-    allowed_statuses_delete = [Status.DRAFT]
-
     def post(self, request, *args, **kwargs):
         # If we cannot get the specified `HarborDuesForm` object, it is probably
         # because we don't have the required `delete` permission.
