@@ -985,7 +985,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 and self.shipping_agent == user.shipping_agent
             )
         else:
-            return user.has_group_name("TaxAuthority")
+            return user.has_group_name("TaxAuthority") or user.is_superuser
 
     @classmethod
     def _filter_user_permissions(
