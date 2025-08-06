@@ -167,39 +167,24 @@ class Command(BaseCommand):
                 # on all model instances of these classes
                 (
                     CruiseTaxForm,
-                    (
-                        "add",
-                        "delete"
-                    ),
+                    ("add", "delete"),
                 ),
                 (
                     Disembarkment,
-                    (
-                        "add",
-                        "delete"
-                    ),
+                    ("add", "delete"),
                 ),
                 (
                     DisembarkmentSite,
-                    (
-                        "view",
-                        "delete"
-                    ),
+                    ("view", "delete"),
                 ),
                 (DisembarkmentTaxRate, ("view",)),
                 (
                     HarborDuesForm,
-                    (
-                        "add",
-                        "delete"
-                    ),
+                    ("add", "delete"),
                 ),
                 (
                     PassengersByCountry,
-                    (
-                        "add",
-                        "delete"
-                    ),
+                    ("add", "delete"),
                 ),
                 (Port, ("view",)),
                 (PortAuthority, ("view",)),
