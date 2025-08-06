@@ -1550,7 +1550,8 @@ msgstr "Du har ikke de fornødne rettigheder til at indsende en blanket"
 #: havneafgifter/views.py
 msgid ""
 "You do not have the required permissions to delete this harbor dues form"
-msgstr "Du har ikke de fornødne rettigheder for at slette denne havneafgiftsblanket"
+msgstr ""
+"Du har ikke de fornødne rettigheder for at slette denne havneafgiftsblanket"
 
 #: havneafgifter/views.py
 msgid ""
