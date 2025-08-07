@@ -976,6 +976,17 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
         return False
 
+    def _has_delete_permission(self, user: User) -> bool:
+        if user is None or self.status != Status.DRAFT:
+            return False
+        elif user.has_group_name("Shipping"):
+            return (
+                self.shipping_agent is not None
+                and self.shipping_agent == user.shipping_agent
+            )
+        else:
+            return user.has_group_name("TaxAuthority") or user.is_superuser
+
     @classmethod
     def _filter_user_permissions(
         cls, qs: QuerySet, user: User, action: str

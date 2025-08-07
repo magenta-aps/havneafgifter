@@ -165,12 +165,12 @@ class Command(BaseCommand):
             *self.get_permissions(
                 # Shipping agents have access to the following actions
                 # on all model instances of these classes
-                (CruiseTaxForm, ("add",)),
-                (Disembarkment, ("add",)),
-                (DisembarkmentSite, ("view",)),
+                (CruiseTaxForm, ("add", "delete")),
+                (Disembarkment, ("add", "delete")),
+                (DisembarkmentSite, ("view", "delete")),
                 (DisembarkmentTaxRate, ("view",)),
-                (HarborDuesForm, ("add",)),
-                (PassengersByCountry, ("add",)),
+                (HarborDuesForm, ("add", "delete")),
+                (PassengersByCountry, ("add", "delete")),
                 (Port, ("view",)),
                 (PortAuthority, ("view",)),
                 (PortTaxRate, ("view",)),

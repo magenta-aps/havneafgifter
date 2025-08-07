@@ -7,6 +7,7 @@ from django_mitid_auth.saml.views import AccessDeniedView
 from havneafgifter.views import (
     ApproveView,
     HarborDuesFormCreateView,
+    HarborDuesFormDeleteView,
     HarborDuesFormListView,
     LandingModalOkView,
     LoginView,
@@ -123,6 +124,11 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/<int:pk>/afvis/",
         RejectView.as_view(),
         name="reject",
+    ),
+    path(
+        "blanket/<int:pk>/slet/",
+        HarborDuesFormDeleteView.as_view(),
+        name="delete",
     ),
     path(
         "blanket/pdf/<int:pk>/",

@@ -365,6 +365,19 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         else:
             instance.save()
 
+    def test_has_delete_permission(self):
+        # Check Tax Authority
+        instance = self.harbor_dues_draft_form
+        self.assertTrue(instance._has_delete_permission(self.tax_authority_user))
+        self.assertTrue(instance._has_delete_permission(self.shipping_agent_user))
+        # Assert othershipping agent cant
+        other_shipping_agent = self.shipping_agent_user
+        other_shipping_agent.username = "SomeoneElse"
+        other_shipping_agent.pk = None
+        other_shipping_agent.save()
+        self.assertFalse(instance._has_delete_permission(other_shipping_agent))
+        self.assertFalse(instance._has_delete_permission(None))
+
     @parametrize(
         "vessel_type,field,required",
         [

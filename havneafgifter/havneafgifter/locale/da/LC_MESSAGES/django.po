@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-29 12:14-0100\n"
+"POT-Creation-Date: 2025-08-05 11:39-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -948,6 +948,20 @@ msgstr ""
 "Dette vil informere indsenderen af blanketten om at blanketten er blevet "
 "accepteret."
 
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+msgid "Delete form"
+msgstr "Slet blanket"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+msgid "Do you want to delete this form?"
+msgstr "Ønsker du at slette denne blanket?"
+
+#: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+#: havneafgifter/templates/havneafgifter/taxrates_detail.html
+msgid "Delete"
+msgstr "Slet"
+
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_no_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_shipping_agent.html
 #: havneafgifter/templates/havneafgifter/bootstrap/inform_ship_user_on_save_vessel_change.html
@@ -1407,10 +1421,6 @@ msgstr "Passagerafgift"
 msgid "Clone"
 msgstr "Kopiér"
 
-#: havneafgifter/templates/havneafgifter/taxrates_detail.html
-msgid "Delete"
-msgstr "Slet"
-
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Harbor tax rate list"
 msgstr "Havneafgiftsliste"
@@ -1536,6 +1546,12 @@ msgid ""
 "You do not have the required permissions to submit harbor dues forms for "
 "review"
 msgstr "Du har ikke de fornødne rettigheder til at indsende en blanket"
+
+#: havneafgifter/views.py
+msgid ""
+"You do not have the required permissions to delete this harbor dues form"
+msgstr ""
+"Du har ikke de fornødne rettigheder for at slette denne havneafgiftsblanket"
 
 #: havneafgifter/views.py
 msgid ""
