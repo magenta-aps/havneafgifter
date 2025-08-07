@@ -67,6 +67,7 @@ class Receipt:
             "can_withdraw": self._get_can_withdraw(),
             "can_approve": self._get_can_approve(),
             "can_reject": self._get_can_reject(),
+            "can_delete": self._get_can_delete(),
         }
 
     def _get_template_context(
@@ -95,6 +96,9 @@ class Receipt:
 
     def _get_can_reject(self) -> bool:
         return self._is_permitted_for_user(self.form.reject)
+
+    def _get_can_delete(self) -> bool:
+        return self.form._has_delete_permission(self._user)
 
     def _is_permitted_for_user(self, method: Callable) -> bool:
         if self._user is not None:

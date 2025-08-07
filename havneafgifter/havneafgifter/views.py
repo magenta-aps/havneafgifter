@@ -35,7 +35,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, RedirectView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_fsm import can_proceed, has_transition_perm
 from django_tables2 import SingleTableMixin, SingleTableView
 from django_tables2.export.views import ExportMixin
@@ -480,6 +480,40 @@ class HarborDuesFormCreateView(
             ["id", "disembarkment_site", "number_of_passengers"],
         )
         return factory(prefix="disembarkment", instance=self.object, **form_kwargs)
+
+
+class HarborDuesFormDeleteView(
+    DeleteView,
+    LoginRequiredMixin,
+    HavneafgiftView,
+):
+    object = HarborDuesForm
+    model = HarborDuesForm
+
+    def get_queryset(self):
+        return HarborDuesForm.filter_user_permissions(
+            HarborDuesForm.objects.filter(status=Status.DRAFT),
+            self.request.user,
+            "delete",
+        )
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
+
+    def post(self, request, *args, **kwargs):
+        # If we cannot get the specified `HarborDuesForm` object, it is probably
+        # because we don't have the required `delete` permission.
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return HavneafgifterResponseForbidden(
+                self.request,
+                _(
+                    "You do not have the required permissions to delete "
+                    "this harbor dues form"
+                ),
+            )
+        return super().post(request, *args, **kwargs)
 
 
 class ReceiptDetailView(LoginRequiredMixin, HavneafgiftView, DetailView):

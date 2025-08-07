@@ -45,6 +45,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
     def test_html(self, mock_get_template):
         mock_form: Mock = Mock()
         mock_template: Mock = Mock()
+        mock_form._has_delete_permission.return_value = False
         mock_get_template.return_value = mock_template
         instance: Receipt = Receipt(mock_form)
         result = instance.html
@@ -58,6 +59,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                     "can_withdraw": False,
                     "can_approve": False,
                     "can_reject": False,
+                    "can_delete": False,
                     "landing_modal": False,
                 }
             ),
@@ -76,7 +78,9 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
 
     @patch.object(Engine, "get_template")
     def test_get_context_data(self, mock_get_template):
-        instance: Receipt = Receipt(Mock())
+        mock_form: Mock = Mock()
+        mock_form._has_delete_permission.return_value = False
+        instance: Receipt = Receipt(mock_form)
         self.assertDictEqual(
             instance.get_context_data(),
             {
@@ -85,6 +89,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                 "can_withdraw": False,
                 "can_approve": False,
                 "can_reject": False,
+                "can_delete": False,
             },
         )
 
@@ -111,6 +116,7 @@ class TestHarborDuesFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "can_withdraw": True,
                 "can_approve": True,
                 "can_reject": True,
+                "can_delete": False,
             },
         )
 
@@ -134,6 +140,7 @@ class TestCruiseTaxFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "can_withdraw",
                 "can_approve",
                 "can_reject",
+                "can_delete",
             ],
         )
         self.assertListEqual(
