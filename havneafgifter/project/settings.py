@@ -135,7 +135,7 @@ DATABASES = {
         "USER": os.environ["POSTGRES_USER"],
         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
         "HOST": os.environ["POSTGRES_HOST"],
-        "TIME_ZONE": os.environ.get("DJANGO_TIMEZONE", "America/Godthab"),
+        "TIME_ZONE": os.environ.get("DJANGO_TIMEZONE", "America/Nuuk"),
     },
 }
 
