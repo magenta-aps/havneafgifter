@@ -52,7 +52,7 @@
             {% bootstrap_form base_form layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" exclude="port_of_call,vessel_name,vessel_owner,shipping_agent,agent_reference,vessel_type,no_port_of_call,status" alert_error_type="none" %}
         </div>
         <div class="col-6">
-            {% bootstrap_field base_form.vessel_type wrapper_class="pt-3 " layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
+            {% bootstrap_field base_form.vessel_type wrapper_class="pt-3" layout="horizontal" horizontal_label_class="col-6" horizontal_field_class="col-6" %}
         </div>
     </div>
 
@@ -239,7 +239,6 @@
         const portOfCall = $("#id_base-port_of_call")
         const grossTonnage = $("#id_base-gross_tonnage")
         const departure = $("#id_base-datetime_of_departure")
-        const vesselType = $("#id_base-vessel_type")
 
         if (noPortOfCall.prop("checked") == true) {
             portOfCall.prop("disabled", true)
@@ -252,7 +251,6 @@
             portOfCall.prop("disabled", false)
             grossTonnage.prop("disabled", false)
             departure.prop("disabled", false)
-            vesselType.prop("disabled", false)
         }
     }
 
