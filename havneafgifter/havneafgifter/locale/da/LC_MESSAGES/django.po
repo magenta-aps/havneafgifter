@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 11:39-0100\n"
+"POT-Creation-Date: 2025-08-26 07:40-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -816,6 +816,11 @@ msgstr ""
 msgid "Antal afstigninger"
 msgstr ""
 
+#: havneafgifter/tables.py
+#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
+msgid "Show"
+msgstr "Vis"
+
 #: havneafgifter/templates/400.html
 msgid "Bad request (400)"
 msgstr "Ugyldig forespørgsel (400)"
@@ -1051,10 +1056,6 @@ msgstr "Luk"
 msgid "Save"
 msgstr "Gem"
 
-#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
-msgid "Show"
-msgstr "Vis"
-
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Reject"
@@ -1201,6 +1202,8 @@ msgid ""
 "\n"
 "Unsure what to do? Click \"In need of help?\" at the top right\n"
 msgstr ""
+"\n"
+"Usikker på, hvad du skal gøre? Klik på \"Brug for hjælp?\" øverst til højre\n"
 
 #: havneafgifter/templates/havneafgifter/login.html
 msgid "Log in using MitID"

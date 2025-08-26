@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-06 10:35-0100\n"
+"POT-Creation-Date: 2025-08-26 07:31-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -808,6 +808,11 @@ msgstr ""
 msgid "Antal afstigninger"
 msgstr ""
 
+#: havneafgifter/tables.py
+#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
+msgid "Show"
+msgstr ""
+
 #: havneafgifter/templates/400.html
 msgid "Bad request (400)"
 msgstr ""
@@ -1022,10 +1027,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
 #: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Save"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
-msgid "Show"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
