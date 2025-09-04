@@ -15,6 +15,7 @@ class HarborDuesFormFilter(django_filters.FilterSet):
 
 class HarborDuesFormTable(tables.Table):
     total_tax = tables.Column(verbose_name=_("Total"))
+
     operation = tables.TemplateColumn(
         template_name="havneafgifter/bootstrap/open_details.html",
         verbose_name=_("Operation"),
@@ -33,6 +34,7 @@ class HarborDuesFormTable(tables.Table):
             "harbour_tax",
             "pdf",
         )
+        attrs = {"class": "table table-light"}
 
     def render_status(self, record):
         cls_map = {

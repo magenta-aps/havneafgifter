@@ -150,34 +150,40 @@ table tfoot td p {
 {# This block is only rendered when outputting HTML (not PDF) #}
 <nav class="object-actions navbar navbar-expand-lg d-flex justify-content-end">
     {% bootstrap_status_badge form %}
-    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-primary">
-        {% translate 'View PDF' %}
-    </a>
     {% if can_edit %}
-    <a href="{% url 'havneafgifter:harbor_dues_form_edit' pk=form.pk %}" class="btn btn-primary ms-2">
-        {% translate 'Edit' %}
+    <a href="{% url 'havneafgifter:harbor_dues_form_edit' pk=form.pk %}" class="btn btn-primary ms-2 d-flex align-items-center">
+        <span class="material-icons me-2">edit</span>
+        <span>{% translate 'Edit' %}</span>
     </a>
     {% endif %}
     {% if can_withdraw %}
-    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-        {% translate 'Withdraw forwarded form' %}
+    <button type="button" class="btn btn-warning ms-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+        <span class="material-icons me-2">cancel</span>
+        <span>{% translate 'Withdraw forwarded form' %}</span>
     </button>
     {% endif %}
     {% if can_approve %}
-    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#approveModal">
-        {% translate 'Approve' %}
+    <button type="button" class="btn btn-success ms-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#approveModal">
+        <span class="material-icons me-2">check</span>
+        <span>{% translate 'Approve' %}</span>
     </button>
     {% endif %}
     {% if can_reject %}
-    <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
-        {% translate 'Reject' %}
+    <button type="button" class="btn btn-danger ms-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#rejectModal">
+        <span class="material-icons me-2">close</span>
+        <span>{% translate 'Reject' %}</span>
     </button>
     {% endif %}
     {% if can_delete %}
-    <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
-        {% translate 'Delete' %}
+    <button type="button" class="btn btn-danger ms-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#deleteModal">
+        <span class="material-icons me-2">close</span>
+        <span>{% translate 'Delete' %}</span>
     </button>
     {% endif %}
+    <a href="{% url 'havneafgifter:receipt_detail_pdf' pk=form.pk %}" class="btn btn-secondary ms-2 d-flex align-items-center">
+        <span class="material-icons me-2">open_in_new</span>
+        <span>{% translate 'View PDF' %}</span>
+    </a>
 </nav>
 {% endblock %}
 

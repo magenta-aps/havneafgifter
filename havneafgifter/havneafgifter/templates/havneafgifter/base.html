@@ -25,43 +25,43 @@ SPDX-License-Identifier: MPL-2.0
 <body>
     {% block nav %}
     <header>
-        <nav class="nav navbar navbar-expand py-3 my-3">
+        <nav class="nav navbar navbar-expand px-5 py-0 mb-3">
             <h1 class="navbar-brand py-0 my-0"><a href="{% url 'havneafgifter:harbor_dues_form_list' %}">Talippoq.gl</a></h1>
-            <ul class="navbar-nav d-flex align-items-center">
+            <ul class="navbar-nav">
                 {% if user.is_authenticated %}
                 {% if user.can_view_list %}
-                <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:harbor_dues_form_list' %}" class="d-flex align-items-center">
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:harbor_dues_form_list' or current_view == 'havneafgifter:harbor_dues_form_create' or current_view == 'havneafgifter:harbor_dues_form_edit' or current_view == 'havneafgifter:receipt_detail_html' %}active{% endif %}">
+                    <a href="{% url 'havneafgifter:harbor_dues_form_list' %}" class="nav-link d-flex align-items-center">
                         <span class="material-icons">description</span>
                         <span class="ms-1">{% translate 'My forms' %}</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if user.can_view_statistics %}
-                <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:statistik' %}" class="d-flex align-items-center">
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:statistik' %}active{% endif %}">
+                    <a href="{% url 'havneafgifter:statistik' %}" class="nav-link d-flex align-items-center">
                         <span class="material-icons">bar_chart</span>
                         <span class="ms-1">{% translate 'Statistics' %}</span>
                     </a>
                 </li>
-                <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:passenger_statistics' %}" class="d-flex align-items-center">
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:passenger_statistics' %}active{% endif %}">
+                    <a href="{% url 'havneafgifter:passenger_statistics' %}" class="nav-link d-flex align-items-center">
                         <span class="material-icons">groups</span>
                         <span class="ms-1">{% translate 'Passengerdata' %}</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if user.can_view_taxratelist %}
-                <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:tax_rate_list' %}" class="d-flex align-items-center">
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:tax_rate_list' %}active{% endif %}">
+                    <a href="{% url 'havneafgifter:tax_rate_list' %}" class="nav-link d-flex align-items-center">
                         <span class="material-icons">assignment</span>
                         <span class="ms-1">{% translate 'Rates' %}</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if user.can_view_edit_master_data %}
-                <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:update_vessel' %}" class="d-flex align-items-center">
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:update_vessel' %}active{% endif %}">">
+                    <a href="{% url 'havneafgifter:update_vessel' %}" class="nav-link d-flex align-items-center">
                         <span class="material-icons">edit</span>
                         <span class="ms-1">{% translate 'Edit master data' %}</span>
                     </a>
@@ -71,10 +71,9 @@ SPDX-License-Identifier: MPL-2.0
             </ul>
             <ul class="navbar-nav d-flex align-items-center ms-auto">
                 <li class="nav-item dropdown">
-                    <a href="#" id="userguidesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span>
-                            {% translate 'In need of help?' %}
-                        </span>
+                    <a href="#" id="userguidesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" class="d-flex align-items-center">
+                        <span>{% translate 'In need of help?' %}</span>
+                        <span class="material-icons ms-1">keyboard_arrow_down</span>
                     </a>
                     <div id="userguides" class="dropdown-menu dropdown-menu-end" aria-labelledby="userguidesDropdown">
                         <a class="d-flex align-items-center" target="_blank" href="{% static 'userguides/CruiseShip.pdf' %}">
@@ -98,7 +97,7 @@ SPDX-License-Identifier: MPL-2.0
 
                 {% if user.can_create %}
                 <li class="nav-item ms-4">
-                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-primary d-flex align-items-center">
+                    <a href="{% url 'havneafgifter:harbor_dues_form_create' %}" class="btn btn-secondary d-flex align-items-center">
                         <span class="material-icons">add</span>
                         <span class="ms-1">{% translate 'Create new' %}</span>
                     </a>
@@ -127,28 +126,35 @@ SPDX-License-Identifier: MPL-2.0
                 <li class="nav-item dropdown">
                     <a href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {% if user.is_authenticated %}
-                            <span class="material-icons dark-icon fs-3 d-flex">account_circle</span>
+                        <span class="material-icons dark-icon fs-3 d-flex">account_circle</span>
                         {% else %}
-                            <span class="material-icons dark-icon fs-3 d-flex">help</span>
+                        <span class="material-icons dark-icon fs-3 d-flex">help</span>
                         {% endif %}
                     </a>
                     <div id="settings" class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <h4>{{ user.display_name }}</h4>
-                        <h5>{% translate "About Talippoq" %}</h5>
+                        <div class="d-flex align-items-center">
+                            {% if user.is_authenticated %}
+                            <span class="material-icons dark-icon fs-1 me-3">account_circle</span>
+                            <h4 class="fw-bold">{{ user.display_name }}</h4>
+                            {% endif %}
+                        </div>
+                        <h5 class="fw-bold">{% translate "About Talippoq" %}</h5>
                         <p>{% translate 'Version' %}: {{ version }}</p>
                         <p>
                             {% translate 'Source code' %}:
                             <a href="https://github.com/magenta-aps/havneafgifter">{% translate "Github - Havneafgifter" %}</a>
                         </p>
-                        <p>{% translate 'Contact' %}: {{ contact_email }}</p>
+                        <p>
+                            {% translate 'Contact' %}:
+                            <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+                        </p>
                         {% if user.is_authenticated %}
-
-                            <div class="d-flex">
-                                <a href="{% url 'havneafgifter:logout' %}" class="btn btn-primary d-flex align-items-center" id="logout-link">
-                                    <span class="material-icons me-1">login</span>
-                                    {% translate "Log out" %}
-                                </a>
-                            </div>
+                        <div class="d-flex">
+                            <a href="{% url 'havneafgifter:logout' %}" class="btn btn-primary d-flex align-items-center" id="logout-link">
+                                <span class="material-icons me-1">login</span>
+                                <span>{% translate "Log out" %}</span>
+                            </a>
+                        </div>
                         {% endif %}
                     </div>
                 </li>
@@ -158,6 +164,16 @@ SPDX-License-Identifier: MPL-2.0
     {% endblock nav %}
     {% block body %}
     {% endblock body %}
+    {% block footer %}
+    <footer>
+        <div class="d-flex flex-wrap">
+            <a href="https://www.aka.gl" target="_blank" class="d-inline-flex align-items-center">
+                <span class="material-icons me-1">open_in_new</span>
+                <span>https://www.aka.gl</span>
+            </a>
+        </div>
+    </footer>
+    {% endblock %}
     {% block modals %}
     {% if landing_modal %}
     <div id="landing_modal" class="modal" data-bs-backdrop="static">
