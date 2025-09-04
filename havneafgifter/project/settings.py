@@ -103,6 +103,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.i18n",
                 "django.contrib.messages.context_processors.messages",
+                "havneafgifter.context_processors.nav_context",
             ],
             "loaders": default_loaders if DEBUG else cached_loaders,
             "libraries": {
