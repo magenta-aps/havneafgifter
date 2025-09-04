@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 07:40-0100\n"
+"POT-Creation-Date: 2025-09-04 11:58-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -816,11 +816,6 @@ msgstr ""
 msgid "Antal afstigninger"
 msgstr ""
 
-#: havneafgifter/tables.py
-#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
-msgid "Show"
-msgstr "Vis"
-
 #: havneafgifter/templates/400.html
 msgid "Bad request (400)"
 msgstr "Ugyldig forespørgsel (400)"
@@ -1056,6 +1051,10 @@ msgstr "Luk"
 msgid "Save"
 msgstr "Gem"
 
+#: havneafgifter/templates/havneafgifter/bootstrap/open_details.html
+msgid "Show"
+msgstr "Vis"
+
 #: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
 msgid "Reject"
@@ -1261,13 +1260,13 @@ msgid "Message"
 msgstr "Besked"
 
 #: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "View PDF"
-msgstr "Vis PDF"
-
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
 #: havneafgifter/templates/havneafgifter/taxrates_detail.html
 msgid "Edit"
 msgstr "Rediger"
+
+#: havneafgifter/templates/havneafgifter/pdf/receipt.html
+msgid "View PDF"
+msgstr "Vis PDF"
 
 #: havneafgifter/templates/havneafgifter/signup_vessel.html
 #: havneafgifter/templates/havneafgifter/update_vessel.html
