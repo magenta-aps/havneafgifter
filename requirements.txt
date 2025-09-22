@@ -30,7 +30,7 @@ django_csp==3.8
 django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@a7b2832256b492db035d1d88ea2304f627fb33e4
 django_compressor==4.5.1
 django-libsass==0.9
-elementpath==4.6.0
+elementpath==4.8.0
 fonttools==4.54.1
 gunicorn==22.0.0
 html5lib==1.1
