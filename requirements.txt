@@ -9,7 +9,7 @@ cryptography==43.0.3
 cssselect2==0.8.0
 defusedxml==0.7.1
 Django==5.2.6
-django-appconf==1.0.6
+django-appconf==1.1.0
 django-bootstrap5==24.1
 django-countries==7.6.1
 django-csp-helpers==0.7.1
