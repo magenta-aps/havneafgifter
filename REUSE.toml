@@ -20,6 +20,7 @@ path = ["havneafgifter/**",
     "dev-idp/**",
     ".eslint/**",
     "package**.json",
+    ".renovaterc",
     "REUSE.toml"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2024 Magenta ApS <info@magenta.dk>"
