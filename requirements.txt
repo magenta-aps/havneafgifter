@@ -25,7 +25,7 @@ django-stubs==4.2.7
 django-stubs-ext==5.1.1
 django-tables2==2.7.5
 django-tempus-dominus==5.1.2.17
-django-weasyprint==2.3.0
+django-weasyprint==2.4.0
 django_csp==3.8
 django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@a7b2832256b492db035d1d88ea2304f627fb33e4
 django_compressor==4.5.1
