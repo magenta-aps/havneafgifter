@@ -42,7 +42,7 @@ mypy==1.7.0
 mypy-extensions==1.0.0
 openpyxl==3.1.5
 packaging==24.2
-pillow==11.0.0
+pillow==11.3.0
 psycopg2-binary==2.9.10
 pycparser==2.22
 pydot==3.0.4
