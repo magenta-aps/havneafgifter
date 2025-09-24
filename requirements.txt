@@ -10,27 +10,27 @@ cssselect2==0.8.0
 defusedxml==0.7.1
 Django==5.2.6
 django-appconf==1.1.0
-django-bootstrap5==24.1
+django-bootstrap5==24.3
 django-countries==7.6.1
 django-csp-helpers==0.7.1
 django-extensions==3.2.3
 django-filter==24.3
 django-forms-dynamic==1.0.0
 django-fsm-2==4.0.0
-django-select2==8.1.2
+django-select2==8.4.1
 django-session-timeout @ git+https://github.com/Lapeth/django-session-timeout@8e50dc6223164368be8c8e1754a90a2c6dca2dc2
-django-simple-history==3.7.0
+django-simple-history==3.10.1
 django-sql-utils==0.7.0
 django-stubs==4.2.7
-django-stubs-ext==5.1.1
+django-stubs-ext==5.2.5
 django-tables2==2.7.5
 django-tempus-dominus==5.1.2.17
-django-weasyprint==2.3.0
+django-weasyprint==2.4.0
 django_csp==3.8
 django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@a7b2832256b492db035d1d88ea2304f627fb33e4
 django_compressor==4.5.1
 django-libsass==0.9
-elementpath==4.6.0
+elementpath==4.8.0
 fonttools==4.54.1
 gunicorn==22.0.0
 html5lib==1.1
