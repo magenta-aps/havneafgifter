@@ -47,10 +47,10 @@ psycopg2-binary==2.9.10
 pycparser==2.23
 pydot==3.0.4
 pydyf==0.11.0
-pyOpenSSL==24.2.1
+pyOpenSSL==24.3.0
 pyparsing==3.2.5
 pyphen==0.17.2
-pysaml2==7.5.2
+pysaml2==7.5.0
 python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.32.5
