@@ -1173,10 +1173,6 @@ msgid ""
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/login.html
-msgid "Log in using MitID"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/login.html
 msgid "Forgot your password?"
 msgstr ""
 

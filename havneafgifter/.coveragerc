@@ -1,7 +1,7 @@
 [run]
 relative_files = True
 source = .
-omit = 
+omit =
     */manage.py
     */project/*
     */admin.py
@@ -12,6 +12,5 @@ omit =
     */migrations/*
     */management/*
     */tests/*
-    */mitid_test/*
 parallel = true
 concurrency = multiprocessing

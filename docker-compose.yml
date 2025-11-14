@@ -61,30 +61,6 @@ services:
     networks:
       - mail
 
-  havneafgifter-idp:
-    user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
-    image: kenchan0130/simplesamlphp
-    container_name: havneafgifter-idp
-    environment:
-      HTTP_PORT: 8051
-      SIMPLESAMLPHP_SP_ENTITY_ID: http://havneafgifter-web:8050/saml/saml/metadata/
-      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: http://havneafgifter-web:8050/saml/login/callback/
-      SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE: http://havneafgifter-web:8050/saml/logout/callback/
-      SIMPLESAMLPHP_IDP_CERTIFICATE: /var/www/simplesamlphp/cert/selfsigned.crt
-      SIMPLESAMLPHP_IDP_PRIVATEKEY: /var/www/simplesamlphp/cert/selfsigned.key
-    volumes:
-      - ./dev-environment/cert/idp/selfsigned.crt:/var/www/simplesamlphp/cert/server.crt:ro
-      - ./dev-environment/cert/idp/selfsigned.key:/var/www/simplesamlphp/cert/server.pem:ro
-      - ./dev-environment/idp/authsources.php:/var/www/simplesamlphp/config/authsources.php:ro
-      - ./dev-environment/idp/saml20-sp-remote.php:/var/www/simplesamlphp/metadata/saml20-sp-remote.php:ro
-      - ./dev-environment/idp/ports.conf:/etc/apache2/ports.conf:ro
-      - ./dev-environment/idp/site.conf:/etc/apache2/sites-available/simplesamlphp.conf:ro
-
-    ports:
-      - "8051:8051"
-    networks:
-      - default
-
   havneafgifter-hosts-updater:
     container_name: havneafgifter-hosts-updater
     image: bash
