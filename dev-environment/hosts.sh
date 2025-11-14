@@ -3,7 +3,7 @@
 hosts_file="/hosts"
 
 add_hosts=""
-for hostname in havneafgifter-web havneafgifter-idp havneafgifter-mailhog; do
+for hostname in havneafgifter-web havneafgifter-mailhog; do
   if ! grep $hostname $hosts_file; then
     add_hosts+=" $hostname"
   fi

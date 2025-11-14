@@ -18,7 +18,6 @@ django-filter==24.3
 django-forms-dynamic==1.0.0
 django-fsm-2==4.1.0
 django-select2==8.4.1
-django-session-timeout @ git+https://github.com/Lapeth/django-session-timeout@8e50dc6223164368be8c8e1754a90a2c6dca2dc2
 django-simple-history==3.10.1
 django-sql-utils==0.7.0
 django-stubs==4.2.7
@@ -27,7 +26,6 @@ django-tables2==2.7.5
 django-tempus-dominus==5.1.2.17
 django-weasyprint==2.4.0
 django_csp==3.8
-django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@a7b2832256b492db035d1d88ea2304f627fb33e4
 django_compressor==4.5.1
 django-libsass==0.9
 elementpath==4.8.0
@@ -50,7 +48,6 @@ pydyf==0.11.0
 pyOpenSSL==24.3.0
 pyparsing==3.2.5
 pyphen==0.17.2
-pysaml2==7.5.0
 python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.32.5
