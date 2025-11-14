@@ -235,29 +235,6 @@ class TestRootView(TestCase):
             reverse("havneafgifter:harbor_dues_form_list"),
         )
 
-    def test_saml(self):
-        session = self.client.session
-        session.update(
-            {
-                "saml": {
-                    "ava": {
-                        "cpr": ["1234567890"],
-                        "cvr": ["12345678"],
-                        "firstname": ["Test"],
-                        "lastname": ["Testersen"],
-                        "email": ["test@example.com"],
-                    }
-                }
-            }
-        )
-        session.save()
-        response = self.client.get(reverse("havneafgifter:root"))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            response.headers["Location"],
-            reverse("havneafgifter:harbor_dues_form_list"),
-        )
-
 
 class TestPostLoginView(TestCase):
     @classmethod

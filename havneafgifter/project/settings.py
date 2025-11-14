@@ -52,8 +52,6 @@ INSTALLED_APPS = [
     "havneafgifter",
     "django_select2",
     "django_filters",
-    "django_mitid_auth",
-    "mitid_test",
     "csp_helpers",
     "metrics",
     "tempus_dominus",
@@ -71,16 +69,13 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django_mitid_auth.middleware.LoginManager",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
-    "django_session_timeout.middleware.SessionTimeoutMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = [
     "havneafgifter.permissions.HavneafgiftPermissionBackend",
-    "django_mitid_auth.saml.backend.Saml2Backend",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -150,11 +145,6 @@ CACHES = {
     "select2": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "TIMEOUT": None,
-    },
-    "saml": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "saml_cache",
-        "TIMEOUT": 7200,
     },
 }
 
