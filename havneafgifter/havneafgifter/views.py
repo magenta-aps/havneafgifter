@@ -29,7 +29,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.forms import inlineformset_factory, model_to_dict
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -554,45 +554,6 @@ class PreviewPDFView(ReceiptDetailView):
             receipt.pdf,
             content_type="application/pdf",
         )
-
-
-class WithdrawView(
-    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
-):
-    http_method_names = ["post"]
-
-    def get_queryset(self):
-        return HarborDuesForm.filter_user_permissions(
-            HarborDuesForm.objects.filter(status=Status.NEW),
-            self.request.user,
-            "withdraw_from_review",
-        )
-
-    def post(self, request, *args, **kwargs):
-        # If we cannot get the specified `HarborDuesForm` object, it is probably
-        # because we don't have the required `withdraw` permission.
-        try:
-            harbor_dues_form = self.get_object()
-        except Http404:
-            return HavneafgifterResponseForbidden(
-                self.request,
-                _(
-                    "You do not have the required permissions to withdraw "
-                    "harbor dues forms from review"
-                ),
-            )
-        # There is no form to fill for "withdraw" actions, so it does not make sense to
-        # implement `form_valid`. Instead, we just perform the object update here.
-        harbor_dues_form.withdraw_from_review()
-        harbor_dues_form.save()
-        # The `OnWithdrawMail` does not exist and has not been requested by the customer
-        # But if desired, it could be implemented and coupled to the "withdraw" action
-        # like this:
-        # self.handle_notification_mail(OnWithdrawMail, harbor_dues_form)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse("havneafgifter:harbor_dues_form_list")
 
 
 class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableView):

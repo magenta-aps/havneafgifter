@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 09:49-0200\n"
+"POT-Creation-Date: 2025-11-19 11:07-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -264,32 +264,6 @@ msgstr ""
 
 #: havneafgifter/mails.py
 msgid "An email receipt was successfully sent."
-msgstr ""
-
-#: havneafgifter/mails.py
-#, python-format
-msgid ""
-"The port authority in %(town)s has rejected your harbor dues form %(id)s.\n"
-"Log on to Talippoq and edit your form as directed by the port authority. If "
-"you have any questions concerning the rejection you should contact the local "
-"port authority or the Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
-msgstr ""
-
-#: havneafgifter/mails.py
-msgid "A rejection notification has been sent to the form submitter"
-msgstr ""
-
-#: havneafgifter/mails.py
-msgid "Rejected harbor dues form in Talippoq"
-msgstr ""
-
-#: havneafgifter/mails.py
-#, python-format
-msgid "Harbour dues form %(id)s has been rejected"
-msgstr ""
-
-#: havneafgifter/mails.py
-msgid "A rejection receipt was sent to the port authority"
 msgstr ""
 
 #: havneafgifter/mails.py
@@ -579,10 +553,6 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "PDF file"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Withdrawn from review"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -968,34 +938,6 @@ msgstr ""
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
 #: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Save"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Reject"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-msgid "Do you want to reject this form?"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-msgid ""
-"This will notify the submitter of the form that the form has been rejected. "
-"The rejection reason will be shared with the submitter."
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Withdraw forwarded form"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
-msgid "Do you want to withdraw this form?"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
-msgid "Withdraw"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/error/error.html
@@ -1445,16 +1387,6 @@ msgstr ""
 #: havneafgifter/views.py
 msgid ""
 "You do not have the required permissions to delete this harbor dues form"
-msgstr ""
-
-#: havneafgifter/views.py
-msgid ""
-"You do not have the required permissions to withdraw harbor dues forms from "
-"review"
-msgstr ""
-
-#: havneafgifter/views.py
-msgid "You do not have the required permissions to reject harbor dues forms"
 msgstr ""
 
 #: havneafgifter/views.py

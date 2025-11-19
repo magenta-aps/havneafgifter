@@ -63,7 +63,6 @@ from havneafgifter.views import (
     TaxRateFormView,
     TaxRateListView,
     UpdateVesselView,
-    WithdrawView,
 )
 
 
@@ -1818,35 +1817,6 @@ class TestActionViewMixin(HarborDuesFormTestMixin, RequestMixin):
             HarborDuesForm.objects.filter(filter, status=status),
             ordered=False,
         )
-
-
-class TestWithdrawView(TestActionViewMixin, TestCase):
-    view_class = WithdrawView
-
-    def test_get_queryset(self):
-        self._assert_get_queryset_result(
-            self.shipping_agent_user,
-            Status.NEW,
-            Q(shipping_agent=self.shipping_agent_user.shipping_agent),
-        )
-
-    def test_post(self):
-        # Arrange
-        request = self._setup({}, self.shipping_agent_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
-        self.assertEqual(harbor_dues_form.status, Status.DRAFT.value)
-        self._assert_redirects_to_list_view(response)
-
-    def test_post_not_permitted(self):
-        # Arrange
-        request = self._setup({}, self.port_authority_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        self.assertIsInstance(response, HttpResponseForbidden)
 
 
 class TestDeleteView(TestActionViewMixin, TestCase, ParametrizedTestCase):

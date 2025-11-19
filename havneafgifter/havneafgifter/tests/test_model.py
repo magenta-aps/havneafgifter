@@ -596,20 +596,6 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             (Status.DRAFT, "submit_for_review", "shipping_agent", True),
             #   Port authority users cannot submit drafts for review
             (Status.DRAFT, "submit_for_review", "port_auth", False),
-            # 2. "approve"
-            #   Ship users cannot approve forms submitted for review
-            (Status.NEW, "approve", "9074729", False),
-            #   Shipping agents cannot approve forms submitted for review
-            (Status.NEW, "approve", "shipping_agent", False),
-            #   Port authority users can approve forms submitted for review
-            (Status.NEW, "approve", "port_auth", True),
-            # 3. "reject"
-            #   Ship users cannot reject forms submitted for review
-            (Status.NEW, "reject", "9074729", False),
-            #   Shipping agents cannot reject forms submitted for review
-            (Status.NEW, "reject", "shipping_agent", False),
-            #   Port authority users can reject forms submitted for review
-            (Status.NEW, "reject", "port_auth", True),
         ],
     )
     def test_transition_permissions(

@@ -282,36 +282,6 @@ msgstr "Der er sendt en kvittering på email."
 
 #: havneafgifter/mails.py
 #, python-format
-msgid ""
-"The port authority in %(town)s has rejected your harbor dues form %(id)s.\n"
-"Log on to Talippoq and edit your form as directed by the port authority. If "
-"you have any questions concerning the rejection you should contact the local "
-"port authority or the Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
-msgstr ""
-"Havnemyndigheden i %(town)s har afvist din indberetning %(id)s i Talippoq.\n"
-"Log ind på Talippoq og ret din indberetning efter havnemyndighedens "
-"anvisninger. Har du spørgsmål angående afvisningen bør du kontakte den "
-"lokale havnemyndighed eller Skattestyrelsen på aka-talippoq@nanoq.gl"
-
-#: havneafgifter/mails.py
-msgid "A rejection notification has been sent to the form submitter"
-msgstr "En afvisningsmeddelelse er blevet sendt til formularens afsender"
-
-#: havneafgifter/mails.py
-msgid "Rejected harbor dues form in Talippoq"
-msgstr "Afvist indberetning i Talippoq"
-
-#: havneafgifter/mails.py
-#, python-format
-msgid "Harbour dues form %(id)s has been rejected"
-msgstr "Indberetning %(id)s er afvist"
-
-#: havneafgifter/mails.py
-msgid "A rejection receipt was sent to the port authority"
-msgstr "Der er sendt en kvittering til havnemyndigheden"
-
-#: havneafgifter/mails.py
-#, python-format
 msgid "%(submitter)s has %(date)s created a port tax form for you to complete"
 msgstr ""
 "%(submitter)s har %(date)s oprettet en havneafgiftsblanket, som du skal "
@@ -1009,36 +979,6 @@ msgstr "Luk"
 msgid "Save"
 msgstr "Gem"
 
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Reject"
-msgstr "Afvis"
-
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-msgid "Do you want to reject this form?"
-msgstr "Ønsker du at afvise denne blanket?"
-
-#: havneafgifter/templates/havneafgifter/bootstrap/reject_form.html
-msgid ""
-"This will notify the submitter of the form that the form has been rejected. "
-"The rejection reason will be shared with the submitter."
-msgstr ""
-"Dette vil informere indsenderen af blanketten om at blanketten er blevet "
-"afvist. Begrundelsen vil blive delt med indsenderen."
-
-#: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Withdraw forwarded form"
-msgstr "Træk indsendt indberetning tilbage"
-
-#: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
-msgid "Do you want to withdraw this form?"
-msgstr "Ønsker du at trække denne indberetning tilbage?"
-
-#: havneafgifter/templates/havneafgifter/bootstrap/withdraw_form.html
-msgid "Withdraw"
-msgstr "Træk tilbage"
-
 #: havneafgifter/templates/havneafgifter/error/error.html
 msgid "Log ud"
 msgstr ""
@@ -1508,17 +1448,6 @@ msgid ""
 "You do not have the required permissions to delete this harbor dues form"
 msgstr ""
 "Du har ikke de fornødne rettigheder for at slette denne havneafgiftsblanket"
-
-#: havneafgifter/views.py
-msgid ""
-"You do not have the required permissions to withdraw harbor dues forms from "
-"review"
-msgstr ""
-"Du har ikke de fornødne rettigheder til at trække en indberetning tilbage"
-
-#: havneafgifter/views.py
-msgid "You do not have the required permissions to reject harbor dues forms"
-msgstr "Du har ikke de fornødne rettigheder til at afvise blanketter"
 
 #: havneafgifter/views.py
 #, fuzzy
