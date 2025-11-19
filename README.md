@@ -14,7 +14,7 @@ freighter, etc.).
 
 ## Running the app
 
-You can run the app by running `docker-compose up`
+You can run the app by running `docker compose up`
 
 ## Interacting with the app
 
