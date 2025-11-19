@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 09:49-0200\n"
+"POT-Creation-Date: 2025-11-20 09:59-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -572,10 +572,6 @@ msgstr "Beregnet havneafgift"
 #: havneafgifter/models.py
 msgid "PDF file"
 msgstr "PDF-fil"
-
-#: havneafgifter/models.py
-msgid "Withdrawn from review"
-msgstr "Indberetning trukket tilbage"
 
 #: havneafgifter/models.py
 msgid "no port of call"
