@@ -21,3 +21,4 @@ data/er/*
 
 dev-environment/cache/*
 !dev-environment/cache/.gitkeep
+staticfiles/
