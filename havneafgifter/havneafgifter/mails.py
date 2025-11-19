@@ -266,68 +266,6 @@ class OnSubmitForReviewReceipt(NotificationMail):
         return gettext("An email receipt was successfully sent.")
 
 
-class OnRejectMail(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
-        super().__init__(form, user)
-        self.add_recipient(self.get_shipping_agent_recipient())
-        self.add_recipient(self.get_ship_recipient())
-        self.add_recipient(self.get_port_authority_recipient())
-
-    @property
-    def mail_subject(self):
-        return "Harbor dues form rejected in Talippoq"
-
-    @property
-    def mail_body(self):
-        town = (
-            self.form.port_of_call.portauthority.name
-            if self.form.port_of_call
-            else settings.APPROVER_NO_PORT_OF_CALL
-        )
-        context = {
-            "town": town,
-            "id": str(self.form.id),
-        }
-        return (
-            gettext(
-                "The port authority in %(town)s has rejected your harbor"
-                + " dues form %(id)s."
-                + "\n"
-                + "Log on to Talippoq and edit your form as directed by the"
-                + " port authority. If you have any questions concerning the"
-                + " rejection you should contact the local port authority or the"
-                + " Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
-            )
-            % context
-        )
-
-    @property
-    def success_message(self) -> str:
-        return gettext("A rejection notification has been sent to the form submitter")
-
-
-class OnRejectReceipt(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
-        super().__init__(form, user)
-        self.add_recipient(self.get_port_authority_recipient())
-
-    @property
-    def mail_subject(self):
-        return gettext("Rejected harbor dues form in Talippoq")
-
-    @property
-    def mail_body(self):
-        context = {
-            "id": str(self.form.id),
-        }
-
-        return gettext("Harbour dues form %(id)s has been rejected") % context
-
-    @property
-    def success_message(self) -> str:
-        return gettext("A rejection receipt was sent to the port authority")
-
-
 class OnSendToAgentMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         super().__init__(form, user)

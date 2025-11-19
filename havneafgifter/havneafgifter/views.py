@@ -48,15 +48,12 @@ from havneafgifter.forms import (
     PassengerStatisticsForm,
     PassengersTotalForm,
     PortTaxRateFormSet,
-    ReasonForm,
     SignupVesselForm,
     StatisticsForm,
     TaxRateForm,
     UpdateVesselForm,
 )
 from havneafgifter.mails import (
-    OnRejectMail,
-    OnRejectReceipt,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
     OnSubmitForReviewReceipt,
@@ -593,48 +590,6 @@ class WithdrawView(
         # like this:
         # self.handle_notification_mail(OnWithdrawMail, harbor_dues_form)
         return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse("havneafgifter:harbor_dues_form_list")
-
-
-class RejectView(
-    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
-):
-    form_class = ReasonForm
-    http_method_names = ["post"]
-
-    def get_queryset(self):
-        return HarborDuesForm.filter_user_permissions(
-            HarborDuesForm.objects.filter(status=Status.NEW),
-            self.request.user,
-            "reject",
-        )
-
-    def post(self, request, *args, **kwargs):
-        # If we cannot get the specified `HarborDuesForm` object, it is probably
-        # because we don't have the required `approve` permission.
-        try:
-            self.object = self.get_object()
-        except Http404:
-            return HavneafgifterResponseForbidden(
-                self.request,
-                _(
-                    "You do not have the required permissions to reject "
-                    "harbor dues forms"
-                ),
-            )
-        # Call `form_valid` if `ReasonForm` is indeed valid
-        return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        harbor_dues_form = self.object
-        harbor_dues_form.reject(reason=form.cleaned_data["reason"])
-        harbor_dues_form.save()
-        self.handle_notification_mail(OnRejectMail, harbor_dues_form)
-        self.handle_notification_mail(OnRejectReceipt, harbor_dues_form)
-        return response
 
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_list")

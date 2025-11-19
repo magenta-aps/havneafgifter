@@ -57,7 +57,6 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                     "can_create": False,
                     "can_edit": False,
                     "can_withdraw": False,
-                    "can_reject": False,
                     "can_delete": False,
                     "landing_modal": False,
                 }
@@ -86,7 +85,6 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                 "can_create": False,
                 "can_edit": False,
                 "can_withdraw": False,
-                "can_reject": False,
                 "can_delete": False,
             },
         )
@@ -112,7 +110,6 @@ class TestHarborDuesFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "can_create": False,
                 "can_edit": True,
                 "can_withdraw": True,
-                "can_reject": True,
                 "can_delete": False,
             },
         )
@@ -135,7 +132,6 @@ class TestCruiseTaxFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "can_create",
                 "can_edit",
                 "can_withdraw",
-                "can_reject",
                 "can_delete",
             ],
         )

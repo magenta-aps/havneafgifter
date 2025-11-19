@@ -15,7 +15,6 @@ from havneafgifter.views import (
     PostLoginView,
     PreviewPDFView,
     ReceiptDetailView,
-    RejectView,
     RootView,
     SignupVesselView,
     StatisticsView,
@@ -113,11 +112,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/<int:pk>/tilbagetraek/",
         WithdrawView.as_view(),
         name="withdraw",
-    ),
-    path(
-        "blanket/<int:pk>/afvis/",
-        RejectView.as_view(),
-        name="reject",
     ),
     path(
         "blanket/<int:pk>/slet/",

@@ -58,7 +58,6 @@ from havneafgifter.views import (
     HarborDuesFormListView,
     PreviewPDFView,
     ReceiptDetailView,
-    RejectView,
     SignupVesselView,
     TaxRateDetailView,
     TaxRateFormView,
@@ -1844,41 +1843,6 @@ class TestWithdrawView(TestActionViewMixin, TestCase):
     def test_post_not_permitted(self):
         # Arrange
         request = self._setup({}, self.port_authority_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        self.assertIsInstance(response, HttpResponseForbidden)
-
-
-class TestRejectView(TestActionViewMixin, TestCase):
-    view_class = RejectView
-
-    def test_get_queryset(self):
-        self._assert_get_queryset_result(
-            self.port_authority_user,
-            Status.NEW,
-            Q(port_of_call__portauthority=self.port_authority_user.port_authority),
-        )
-
-    def test_post(self):
-        # Arrange
-        request = self._setup(
-            {"reason": "There is no reason"}, self.port_authority_user
-        )
-        # Act
-        with patch(
-            "havneafgifter.view_mixins.messages.add_message"
-        ) as mock_add_message:
-            response = self.instance.post(request)
-        # Assert
-        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
-        self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
-        self.assertEqual(mock_add_message.call_count, 2)
-        self._assert_redirects_to_list_view(response)
-
-    def test_post_not_permitted(self):
-        # Arrange
-        request = self._setup({}, self.shipping_agent_user)
         # Act
         response = self.instance.post(request)
         # Assert

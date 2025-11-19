@@ -20,7 +20,6 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.template.defaultfilters import date
 from django.utils import translation
 from django.utils.functional import cached_property
@@ -694,13 +693,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def withdraw_from_review(self):
         self._change_reason = _("Withdrawn from review")
 
+    # This only exists so we can set the state in tests
+    # without being blocked by FSM
     @transition(
         field=status,
         source=Status.NEW,
         target=Status.REJECTED,
-        permission=lambda instance, user: instance.has_permission(
-            user, "reject", False
-        ),
     )
     def reject(self, reason: str):
         self._rejection_reason = reason
@@ -872,13 +870,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
         return HarborDuesFormReceipt(self, **kwargs)
 
-    @cached_property
+    @property
     def latest_rejection(self):
         if self.status == Status.REJECTED:
-            if isinstance(self, CruiseTaxForm):
-                history = self.harborduesform_ptr.history
-            else:
-                history = self.history
+            history = self.history
             try:
                 return history.filter(
                     status=Status.REJECTED,
@@ -1638,7 +1633,6 @@ class Vessel(models.Model):
         return self.imo
 
 
-@receiver(pre_create_historical_record, sender=HarborDuesForm.history.model)
 def pre_create_historical_record_callback(
     sender, signal, instance, history_instance, **kwargs
 ):
@@ -1646,3 +1640,11 @@ def pre_create_historical_record_callback(
     reason = getattr(instance, "_rejection_reason", None)
     if reason is not None:
         history_instance.reason_text = reason
+
+
+pre_create_historical_record.connect(
+    pre_create_historical_record_callback, HarborDuesForm.history.model
+)
+pre_create_historical_record.connect(
+    pre_create_historical_record_callback, CruiseTaxForm.history.model
+)
