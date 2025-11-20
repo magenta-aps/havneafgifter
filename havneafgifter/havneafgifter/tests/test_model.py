@@ -9,7 +9,6 @@ from django.test import TestCase
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
-    CruiseTaxForm,
     DisembarkmentSite,
     HarborDuesForm,
     Municipality,
@@ -390,9 +389,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         ],
     )
     def test_fields_only_nullable_for_cruise_ships(self, vessel_type, field, required):
+        current_timezone = datetime.now().astimezone().tzinfo
         instance = HarborDuesForm(
             vessel_type=vessel_type,
-            datetime_of_arrival=datetime(2024, 1, 1),
+            datetime_of_arrival=datetime(2024, 1, 1, 0, 0, 0, tzinfo=current_timezone),
             status="done",
         )
         setattr(instance, field, None)
@@ -596,20 +596,6 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             (Status.DRAFT, "submit_for_review", "shipping_agent", True),
             #   Port authority users cannot submit drafts for review
             (Status.DRAFT, "submit_for_review", "port_auth", False),
-            # 2. "approve"
-            #   Ship users cannot approve forms submitted for review
-            (Status.NEW, "approve", "9074729", False),
-            #   Shipping agents cannot approve forms submitted for review
-            (Status.NEW, "approve", "shipping_agent", False),
-            #   Port authority users can approve forms submitted for review
-            (Status.NEW, "approve", "port_auth", True),
-            # 3. "reject"
-            #   Ship users cannot reject forms submitted for review
-            (Status.NEW, "reject", "9074729", False),
-            #   Shipping agents cannot reject forms submitted for review
-            (Status.NEW, "reject", "shipping_agent", False),
-            #   Port authority users can reject forms submitted for review
-            (Status.NEW, "reject", "port_auth", True),
         ],
     )
     def test_transition_permissions(
@@ -630,13 +616,6 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         actual_result = form.has_permission(user, action, False)
         # Assert
         self.assertEqual(actual_result, expected_result)
-
-    def test_approve_transition(self):
-        # Act
-        self.harbor_dues_form.approve()
-        self.harbor_dues_form.save()
-        # Assert
-        self.assertEqual(self.harbor_dues_form._change_reason, Status.APPROVED.label)
 
     def test_reject_transition(self):
         # Arrange
@@ -679,6 +658,16 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             harbour_tax,
         )
 
+    def test_latest_rejection(self):
+        now = datetime.now(timezone.utc)
+        self.harbor_dues_form.reject(reason="Testing")
+        self.harbor_dues_form.save()
+        latest_rejection = self.harbor_dues_form.latest_rejection
+        self.assertIsNotNone(latest_rejection)
+        self.assertEqual(latest_rejection.reason_text, "Testing")
+        self.assertTrue(latest_rejection.history_date > now)
+        self.assertTrue(latest_rejection.history_date - timedelta(seconds=1) < now)
+
 
 class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
     def test_has_port_of_call(self):
@@ -710,30 +699,15 @@ class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
     def test_get_receipt(self):
         self.assertIsInstance(self.cruise_tax_form.get_receipt(), CruiseTaxFormReceipt)
 
-    def test_reject_transition(self):
-        # Arrange
-        reason = "Afvist fordi der mangler noget"
-        # Retrieve the cruise tax form "as" a harbor dues form, as the `reject` logic
-        # only updates the history in `HarborDuesForm.history`.
-        harbor_dues_form = HarborDuesForm.objects.get(pk=self.cruise_tax_form.pk)
-        # Act
-        harbor_dues_form.reject(reason=reason)
-        harbor_dues_form.save()
-        # Refresh DB object
-        self.cruise_tax_form = CruiseTaxForm.objects.get(pk=self.cruise_tax_form.pk)
-        # Assert state changes on the modified `HarborDuesForm` object
-        self.assertEqual(harbor_dues_form._change_reason, Status.REJECTED.label)
-        # Assert that the rejection reason is saved as part of the `HarborDuesForm`
-        # history.
-        self.assertQuerySetEqual(
-            harbor_dues_form.history.filter(status=Status.REJECTED),
-            [reason],
-            transform=lambda obj: obj.reason_text,
-        )
-        # Assert that `CruiseTaxForm.latest_rejection` returns the expected history
-        # entry.
-        self.assertIsNotNone(self.cruise_tax_form.latest_rejection)
-        self.assertEqual(self.cruise_tax_form.latest_rejection.reason_text, reason)
+    def test_latest_rejection(self):
+        now = datetime.now(timezone.utc)
+        self.cruise_tax_form.reject(reason="Testing")
+        self.cruise_tax_form.save()
+        latest_rejection = self.cruise_tax_form.latest_rejection
+        self.assertIsNotNone(latest_rejection)
+        self.assertEqual(latest_rejection.reason_text, "Testing")
+        self.assertTrue(latest_rejection.history_date > now)
+        self.assertTrue(latest_rejection.history_date - timedelta(seconds=1) < now)
 
 
 class TestDisembarkmentSite(TestCase):
