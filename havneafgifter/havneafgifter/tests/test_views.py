@@ -52,20 +52,17 @@ from havneafgifter.models import (
 )
 from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 from havneafgifter.views import (
-    ApproveView,
     HandleNotificationMailMixin,
     HarborDuesFormCreateView,
     HarborDuesFormDeleteView,
     HarborDuesFormListView,
     PreviewPDFView,
     ReceiptDetailView,
-    RejectView,
     SignupVesselView,
     TaxRateDetailView,
     TaxRateFormView,
     TaxRateListView,
     UpdateVesselView,
-    WithdrawView,
 )
 
 
@@ -971,6 +968,7 @@ class StatisticsTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        current_timezone = datetime.now().astimezone().tzinfo
         cls.user = User.objects.create(username="admin", is_superuser=True)
         call_command("load_fixtures", verbosity=1)
         ports = Port.objects.all().order_by("name")
@@ -979,8 +977,10 @@ class StatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.DENMARK,
             vessel_name="Testbåd 1",
-            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0),
-            datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
+            datetime_of_arrival=datetime(2024, 7, 1, 0, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2024, 7, 15, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=1000,
             vessel_type=ShipType.FREIGHTER,
             harbour_tax=Decimal("40000.00"),
@@ -990,8 +990,12 @@ class StatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 2",
-            datetime_of_arrival=datetime(2024, 7, 2, 15, 15, 15),
-            datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
+            datetime_of_arrival=datetime(
+                2024, 7, 2, 15, 15, 15, tzinfo=current_timezone
+            ),
+            datetime_of_departure=datetime(
+                2024, 7, 15, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("40000.00"),
@@ -1014,8 +1018,10 @@ class StatisticsTest(TestCase):
             port_of_call=ports[1],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 3",
-            datetime_of_arrival=datetime(2025, 7, 1, 0, 0, 0),
-            datetime_of_departure=datetime(2025, 7, 15, 0, 0, 0),
+            datetime_of_arrival=datetime(2025, 7, 1, 0, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2025, 7, 15, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("50000.00"),
@@ -1033,8 +1039,10 @@ class StatisticsTest(TestCase):
             port_of_call=None,
             nationality=Nationality.JAPAN,
             vessel_name="Testbåd 4",
-            datetime_of_arrival=datetime(2026, 8, 1, 0, 0, 0),
-            datetime_of_departure=datetime(2026, 9, 1, 0, 0, 0),
+            datetime_of_arrival=datetime(2026, 8, 1, 0, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2026, 9, 1, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=10,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("500.00"),
@@ -1196,11 +1204,16 @@ class StatisticsTest(TestCase):
         self.assertEqual(len(rows), 0)
 
     def test_filter_arrival(self):
-        rows = self.get_rows(arrival_gt=datetime(2025, 1, 1, 0, 0, 0))
+        current_timezone = datetime.now().astimezone().tzinfo
+        rows = self.get_rows(
+            arrival_gt=datetime(2025, 1, 1, 0, 0, 0, tzinfo=current_timezone)
+        )
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0].record["id"], self.form3.id)
 
-        rows = self.get_rows(arrival_gt=datetime(2024, 6, 1, 0, 0, 0))
+        rows = self.get_rows(
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0, tzinfo=current_timezone)
+        )
         self.assertEqual(len(rows), 5)
         self.assertEqual(rows[0].record["id"], self.form1.id)
         self.assertEqual(rows[1].record["id"], self.form2.id)
@@ -1208,8 +1221,8 @@ class StatisticsTest(TestCase):
         self.assertEqual(rows[3].record["id"], self.form3.id)
 
         rows = self.get_rows(
-            arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
-            arrival_lt=datetime(2024, 7, 5, 0, 0, 0),
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0, tzinfo=current_timezone),
+            arrival_lt=datetime(2024, 7, 5, 0, 0, 0, tzinfo=current_timezone),
         )
         self.assertEqual(len(rows), 3)
         self.assertEqual(rows[0].record["id"], self.form1.id)
@@ -1217,15 +1230,15 @@ class StatisticsTest(TestCase):
         self.assertEqual(rows[2].record["id"], self.form2.id)
 
         rows = self.get_rows(
-            arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
-            arrival_lt=datetime(2024, 7, 1, 0, 0, 0),
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0, tzinfo=current_timezone),
+            arrival_lt=datetime(2024, 7, 1, 0, 0, 0, tzinfo=current_timezone),
         )
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].record["id"], self.form1.id)
 
         rows = self.get_rows(
-            arrival_gt=datetime(2024, 6, 1, 0, 0, 0),
-            arrival_lt=datetime(2024, 6, 15, 0, 0, 0),
+            arrival_gt=datetime(2024, 6, 1, 0, 0, 0, tzinfo=current_timezone),
+            arrival_lt=datetime(2024, 6, 15, 0, 0, 0, tzinfo=current_timezone),
         )
         self.assertEqual(len(rows), 0)
 
@@ -1804,103 +1817,6 @@ class TestActionViewMixin(HarborDuesFormTestMixin, RequestMixin):
             HarborDuesForm.objects.filter(filter, status=status),
             ordered=False,
         )
-
-
-class TestWithdrawView(TestActionViewMixin, TestCase):
-    view_class = WithdrawView
-
-    def test_get_queryset(self):
-        self._assert_get_queryset_result(
-            self.shipping_agent_user,
-            Status.NEW,
-            Q(shipping_agent=self.shipping_agent_user.shipping_agent),
-        )
-
-    def test_post(self):
-        # Arrange
-        request = self._setup({}, self.shipping_agent_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
-        self.assertEqual(harbor_dues_form.status, Status.DRAFT.value)
-        self._assert_redirects_to_list_view(response)
-
-    def test_post_not_permitted(self):
-        # Arrange
-        request = self._setup({}, self.port_authority_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        self.assertIsInstance(response, HttpResponseForbidden)
-
-
-class TestApproveView(TestActionViewMixin, TestCase):
-    view_class = ApproveView
-
-    def test_get_queryset(self):
-        self._assert_get_queryset_result(
-            self.port_authority_user,
-            Status.NEW,
-            Q(port_of_call__portauthority=self.port_authority_user.port_authority),
-        )
-
-    def test_post(self):
-        # Arrange
-        request = self._setup({}, self.port_authority_user)
-        # Act
-        with patch(
-            "havneafgifter.view_mixins.messages.add_message"
-        ) as mock_add_message:
-            response = self.instance.post(request)
-        # Assert
-        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
-        self.assertEqual(harbor_dues_form.status, Status.APPROVED.value)
-        self.assertEqual(mock_add_message.call_count, 2)
-        self._assert_redirects_to_list_view(response)
-
-    def test_post_not_permitted(self):
-        # Arrange
-        request = self._setup({}, self.shipping_agent_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        self.assertIsInstance(response, HttpResponseForbidden)
-
-
-class TestRejectView(TestActionViewMixin, TestCase):
-    view_class = RejectView
-
-    def test_get_queryset(self):
-        self._assert_get_queryset_result(
-            self.port_authority_user,
-            Status.NEW,
-            Q(port_of_call__portauthority=self.port_authority_user.port_authority),
-        )
-
-    def test_post(self):
-        # Arrange
-        request = self._setup(
-            {"reason": "There is no reason"}, self.port_authority_user
-        )
-        # Act
-        with patch(
-            "havneafgifter.view_mixins.messages.add_message"
-        ) as mock_add_message:
-            response = self.instance.post(request)
-        # Assert
-        harbor_dues_form = HarborDuesForm.objects.get(pk=self.harbor_dues_form.pk)
-        self.assertEqual(harbor_dues_form.status, Status.REJECTED.value)
-        self.assertEqual(mock_add_message.call_count, 2)
-        self._assert_redirects_to_list_view(response)
-
-    def test_post_not_permitted(self):
-        # Arrange
-        request = self._setup({}, self.shipping_agent_user)
-        # Act
-        response = self.instance.post(request)
-        # Assert
-        self.assertIsInstance(response, HttpResponseForbidden)
 
 
 class TestDeleteView(TestActionViewMixin, TestCase, ParametrizedTestCase):
@@ -2924,6 +2840,7 @@ class PassengerStatisticsTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        current_timezone = datetime.now().astimezone().tzinfo
         cls.user = User.objects.create(
             username="admin", is_superuser=True, is_staff=True
         )
@@ -2934,8 +2851,10 @@ class PassengerStatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.DENMARK,
             vessel_name="Testbåd 1",
-            datetime_of_arrival=datetime(2025, 6, 18, 0, 0, 0),
-            datetime_of_departure=datetime(2025, 7, 12, 0, 0, 0),
+            datetime_of_arrival=datetime(2025, 6, 18, 0, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2025, 7, 12, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("40000.00"),
@@ -2948,8 +2867,10 @@ class PassengerStatisticsTest(TestCase):
             port_of_call=ports[0],
             nationality=Nationality.NORWAY,
             vessel_name="Testbåd 2",
-            datetime_of_arrival=datetime(2024, 7, 5, 0, 0, 0),
-            datetime_of_departure=datetime(2024, 7, 15, 0, 0, 0),
+            datetime_of_arrival=datetime(2024, 7, 5, 0, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2024, 7, 15, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("40000.00"),
@@ -2977,8 +2898,10 @@ class PassengerStatisticsTest(TestCase):
             port_of_call=ports[1],
             nationality=Nationality.SWEDEN,
             vessel_name="Testbåd 3",
-            datetime_of_arrival=datetime(2025, 7, 2, 0, 0, 0),
-            datetime_of_departure=datetime(2025, 7, 15, 0, 0, 0),
+            datetime_of_arrival=datetime(2025, 7, 2, 0, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2025, 7, 15, 0, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=1000,
             vessel_type=ShipType.CRUISE,
             harbour_tax=Decimal("50000.00"),
@@ -3028,7 +2951,10 @@ class PassengerStatisticsTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_filter_invalid(self):
-        rows = self.get_rows(first_month=datetime(2024, 1, 1, 0, 0))
+        current_timezone = datetime.now().astimezone().tzinfo
+        rows = self.get_rows(
+            first_month=datetime(2024, 1, 1, 0, 0, tzinfo=current_timezone)
+        )
         self.assertEqual(len(rows), 0)
 
     def test_no_filter(self):
