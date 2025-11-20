@@ -29,6 +29,7 @@ from havneafgifter.permissions import HavneafgiftPermissionBackend
 class PermissionTest(TestCase):
     @classmethod
     def setUpTestData(cls):
+        current_timezone = datetime.now().astimezone().tzinfo
         call_command("create_groups", verbosity=1)
 
         cls.shipping_agent = ShippingAgent.objects.create(
@@ -51,8 +52,8 @@ class PermissionTest(TestCase):
         )
         cls.taxrates = TaxRates.objects.create(
             pax_tax_rate=Decimal(1.0),
-            start_datetime=datetime(2024, 1, 1, 0, 0, 0),
-            end_datetime=datetime(2025, 1, 1, 0, 0, 0),
+            start_datetime=datetime(2024, 1, 1, 0, 0, 0, tzinfo=current_timezone),
+            end_datetime=datetime(2025, 1, 1, 0, 0, 0, tzinfo=current_timezone),
         )
         cls.port_taxrate = PortTaxRate.objects.create(
             tax_rates=cls.taxrates, gt_start=0, port_tax_rate=Decimal(1.0)
@@ -107,8 +108,10 @@ class PermissionTest(TestCase):
             vessel_owner="Magenta ApS",
             vessel_master="Bent Handberg",
             shipping_agent=cls.shipping_agent,
-            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0),
-            datetime_of_departure=datetime(2024, 6, 1, 12, 0, 0),
+            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2024, 6, 1, 12, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=50000,
             vessel_type=ShipType.CRUISE,
             number_of_passengers=5000,
@@ -122,8 +125,10 @@ class PermissionTest(TestCase):
             vessel_owner="Magenta ApS",
             vessel_master="Bent Handberg",
             shipping_agent=cls.shipping_agent_other,
-            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0),
-            datetime_of_departure=datetime(2024, 6, 1, 12, 0, 0),
+            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2024, 6, 1, 12, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=50000,
             vessel_type=ShipType.CRUISE,
             number_of_passengers=5000,
@@ -448,16 +453,10 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", True)
-        self._test_access(user, self.item, "withdraw_from_review", True)
-        self._test_access(user, self.item, "approve", True)
-        self._test_access(user, self.item, "reject", True)
         self._test_access(user, self.item, "invoice", True)
         self._test_access(user, self.other_item, "view", True)
         self._test_access(user, self.other_item, "change", True)
         self._test_access(user, self.other_item, "delete", True)
-        self._test_access(user, self.other_item, "withdraw_from_review", True)
-        self._test_access(user, self.other_item, "approve", True)
-        self._test_access(user, self.other_item, "reject", True)
         self._test_access(user, self.other_item, "invoice", True)
 
     def test_portmanager(self):
@@ -465,17 +464,11 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "withdraw_from_review", False)
-        self._test_access(user, self.item, "approve", True)
-        self._test_access(user, self.item, "reject", True)
         self._test_access(user, self.item, "invoice", True)
         # Portmanager may not see or change form from another port authority
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
-        self._test_access(user, self.other_item, "withdraw_from_review", False)
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
         self._test_access(user, self.other_item, "invoice", False)
 
     def test_ship(self):
@@ -483,38 +476,22 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "withdraw_from_review", True, specific=True)
-        self._test_access(user, self.item, "approve", False)
-        self._test_access(user, self.item, "reject", False)
         self._test_access(user, self.item, "invoice", False)
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
-        self._test_access(
-            user, self.other_item, "withdraw_from_review", False, specific=True
-        )
         self._test_access(user, self.other_item, "delete", False)
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
         self._test_access(user, self.other_item, "invoice", False)
 
     def test_agent(self):
         user = self.agent_user
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
-        self._test_access(user, self.item, "withdraw_from_review", True, specific=True)
         self._test_access(user, self.item, "delete", True, specific=True)
-        self._test_access(user, self.item, "approve", False)
-        self._test_access(user, self.item, "reject", False)
         self._test_access(user, self.item, "invoice", False)
         # Shipping agent may not see or change form for another port
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", True, specific=True)
-        self._test_access(
-            user, self.other_item, "withdraw_from_review", False, specific=True
-        )
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
         self._test_access(user, self.other_item, "invoice", False)
 
     def test_tax(self):
@@ -522,16 +499,10 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", True)
-        self._test_access(user, self.item, "withdraw_from_review", True)
-        self._test_access(user, self.item, "approve", True)
-        self._test_access(user, self.item, "reject", True)
         self._test_access(user, self.item, "invoice", True)
         self._test_access(user, self.other_item, "view", True)
         self._test_access(user, self.other_item, "change", True)
         self._test_access(user, self.other_item, "delete", True)
-        self._test_access(user, self.other_item, "withdraw_from_review", True)
-        self._test_access(user, self.other_item, "approve", True)
-        self._test_access(user, self.other_item, "reject", True)
         self._test_access(user, self.other_item, "invoice", True)
 
     def test_unprivileged(self):
@@ -539,16 +510,10 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", False)
         self._test_access(user, self.item, "change", False)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "withdraw_from_review", False)
-        self._test_access(user, self.item, "approve", False)
-        self._test_access(user, self.item, "reject", False)
         self._test_access(user, self.item, "invoice", False)
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
-        self._test_access(user, self.other_item, "withdraw_from_review", False)
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
         self._test_access(user, self.other_item, "invoice", False)
 
     def test_inactive(self):
@@ -556,16 +521,10 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", False)
         self._test_access(user, self.item, "change", False)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "withdraw_from_review", False)
-        self._test_access(user, self.item, "approve", False)
-        self._test_access(user, self.item, "reject", False)
         self._test_access(user, self.item, "invoice", False)
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
-        self._test_access(user, self.other_item, "withdraw_from_review", False)
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
         self._test_access(user, self.other_item, "invoice", False)
         self.assertEqual(
             self.backend.get_group_permissions(user, self.item),
@@ -632,18 +591,12 @@ class CruiseTaxFormPortUserPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "withdraw_from_review", False)
-        self._test_access(user, self.item, "approve", True)
-        self._test_access(user, self.item, "reject", True)
         self._test_access(user, self.item, "invoice", True)
         # Port user may not see or change form from another port within the same
         # port authority.
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
         self._test_access(user, self.other_item, "delete", False)
-        self._test_access(user, self.item, "withdraw_from_review", False)
-        self._test_access(user, self.other_item, "approve", False)
-        self._test_access(user, self.other_item, "reject", False)
         self._test_access(user, self.other_item, "invoice", False)
 
 

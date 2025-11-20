@@ -9,13 +9,12 @@ from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.mails import (
     EmailMessage,
+    MailRecipient,
     NotificationMail,
-    OnApproveMail,
-    OnApproveReceipt,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
 )
-from havneafgifter.models import HarborDuesForm, PortAuthority, ShipType, User
+from havneafgifter.models import HarborDuesForm, ShipType, User
 from havneafgifter.tests.mixins import HarborDuesFormTestMixin
 
 
@@ -24,88 +23,6 @@ class TestNotificationMail(TestCase):
         mail = NotificationMail(HarborDuesForm())
         with self.assertRaises(NotImplementedError):
             mail.mail_body
-
-
-class TestOnApproveReceipt(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
-    def test_mail_recipients_port_of_call(self):
-        form = HarborDuesForm(**self.harbor_dues_form_data)
-        form.save()
-        instance = OnApproveReceipt(form)
-        self.assertIn(self.port_user.email, instance.mail_recipients)
-        self.assertIn(self.port_authority.email, instance.mail_recipients)
-
-    @parametrize(
-        "admin,port_authority",
-        [(True, True), (False, True), (False, False)],
-    )
-    def test_mail_recipients_no_port_of_call(self, admin, port_authority):
-        form = self.cruise_tax_form_without_port_of_call
-        if port_authority:
-            PortAuthority.objects.update_or_create(
-                name=settings.APPROVER_NO_PORT_OF_CALL,
-                admin_user=self.admin_user if admin else None,
-            )
-        instance = OnApproveReceipt(form)
-        self.assertIn(
-            settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
-            instance.mail_recipients,
-        )
-        if admin and port_authority:
-            self.assertIn(
-                self.admin_user.email,
-                instance.mail_recipients,
-            )
-
-    @override_settings(APPROVER_NO_PORT_OF_CALL=None)
-    def test_mail_recipients_no_port_of_call_no_approver(self):
-        form = self.cruise_tax_form_without_port_of_call
-        instance = OnApproveReceipt(form)
-        self.assertEqual(
-            [settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL],
-            instance.mail_recipients,
-        )
-
-    def test_mail_recipients_no_port_of_call_with_admin(self):
-        form = self.cruise_tax_form_without_port_of_call
-        PortAuthority.objects.update_or_create(
-            name=settings.APPROVER_NO_PORT_OF_CALL,
-            admin_user=self.admin_user,
-        )
-        instance = OnApproveReceipt(form)
-        self.assertIn(
-            settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
-            instance.mail_recipients,
-        )
-        self.assertIn(
-            self.admin_user.email,
-            instance.mail_recipients,
-        )
-
-
-class TestOnApproveMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
-    def test_missing_agent(self):
-        form = HarborDuesForm(**self.harbor_dues_form_data)
-        form.shipping_agent = None
-        form.save()
-        instance = OnApproveMail(form)
-        # There should be one recipient, namely for the ship
-        self.assertEqual(len(instance.mail_recipients), 1)
-
-    def test_ship_user(self):
-        form = HarborDuesForm(**self.harbor_dues_form_data)
-        instance = OnApproveMail(form, self.ship_user)
-        # There should be two recipients.
-        self.assertEqual(len(instance.mail_recipients), 2)
-
-    def test_no_ship_user(self):
-        form = HarborDuesForm(**self.harbor_dues_form_data)
-        form.vessel_imo = "no such"
-        form.save()
-
-        instance = OnApproveMail(form)
-
-        # There should be one recipient only - no ship user.
-        self.assertEqual(len(instance.mail_recipients), 1)
 
 
 class TestOnSendToAgentMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
@@ -132,6 +49,42 @@ class TestOnSendToAgentMail(ParametrizedTestCase, HarborDuesFormTestMixin, TestC
         self.assertTrue(
             instance.success_message == "This form was successfully sent to your agent"
         )
+
+    def test_get_shipping_agent_recipient(self):
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        instance = OnSendToAgentMail(form)
+        recipient: MailRecipient | None = instance.get_shipping_agent_recipient()
+        self.assertIsNotNone(recipient)
+        self.assertEqual(recipient.email, form.shipping_agent.email)
+        self.assertEqual(recipient.name, form.shipping_agent.name)
+        self.assertEqual(recipient.object, form.shipping_agent)
+
+        form.shipping_agent = None
+        recipient = instance.get_shipping_agent_recipient()
+        self.assertIsNone(recipient)
+
+    def test_get_ship_recipient(self):
+        form = HarborDuesForm(**self.harbor_dues_form_data)
+        instance = OnSendToAgentMail(form, None)
+        self.assertIsNone(instance.user)
+        recipient: MailRecipient | None = instance.get_ship_recipient()
+        self.assertIsNotNone(recipient)
+        self.assertEqual(recipient.email, self.ship_user.email)
+        self.assertEqual(recipient.name, self.ship_user.display_name)
+        self.assertEqual(recipient.object, self.ship_user)
+
+        instance = OnSendToAgentMail(form, self.ship_user)
+        self.assertEqual(instance.user, self.ship_user)
+        recipient: MailRecipient | None = instance.get_ship_recipient()
+        self.assertIsNotNone(recipient)
+        self.assertEqual(recipient.email, self.ship_user.email)
+        self.assertEqual(recipient.name, self.ship_user.display_name)
+        self.assertEqual(recipient.object, self.ship_user)
+
+        form.vessel_imo = "non_existing"
+        instance.user = None
+        recipient = instance.get_ship_recipient()
+        self.assertIsNone(recipient)
 
 
 class TestOnSubmitForReviewMail(
