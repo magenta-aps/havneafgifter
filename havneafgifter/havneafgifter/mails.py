@@ -10,14 +10,7 @@ from django.templatetags.l10n import localize
 from django.utils import translation
 from django.utils.translation import gettext
 
-from havneafgifter.models import (
-    CruiseTaxForm,
-    HarborDuesForm,
-    PortAuthority,
-    ShipType,
-    User,
-    UserType,
-)
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, User, UserType
 
 logger = logging.getLogger(__name__)
 
@@ -87,51 +80,6 @@ class NotificationMail:
             )
             return None
 
-    def get_port_authority_admin_recipient(self) -> MailRecipient | None:
-        if (
-            self.form.port_of_call
-            and self.form.port_of_call.portauthority
-            and self.form.port_of_call.portauthority.admin_user
-            and self.form.port_of_call.portauthority.admin_user.email
-        ):
-            return MailRecipient(
-                name=self.form.port_of_call.portauthority.admin_user.username,
-                email=self.form.port_of_call.portauthority.admin_user.email,
-                object=self.form.port_of_call.portauthority.admin_user,
-            )
-        elif not self.form.has_port_of_call and settings.APPROVER_NO_PORT_OF_CALL:
-            try:
-                port_authority = PortAuthority.objects.get(
-                    name=settings.APPROVER_NO_PORT_OF_CALL,
-                )
-            except PortAuthority.DoesNotExist:
-                logger.warning(
-                    "%s does not match any registered port authorities",
-                    settings.APPROVER_NO_PORT_OF_CALL,
-                )
-                return None
-            else:
-                admin_user = port_authority.admin_user
-                if admin_user is not None and admin_user.email is not None:
-                    return MailRecipient(
-                        name=gettext(
-                            "Admin for port authority for vessels without port of call"
-                        ),
-                        email=admin_user.email,
-                        object=port_authority,
-                    )
-                else:
-                    logger.warning(
-                        "%r has no registered admin user email", port_authority
-                    )
-                    return None
-        else:
-            logger.info(
-                "%r is not linked to a port authority, excluding from mail recipients",
-                self,
-            )
-            return None
-
     def get_shipping_agent_recipient(self) -> MailRecipient | None:
         if self.form.shipping_agent and self.form.shipping_agent.email:
             return MailRecipient(
@@ -139,10 +87,10 @@ class NotificationMail:
                 email=self.form.shipping_agent.email,
                 object=self.form.shipping_agent,
             )
-            logger.info(
-                "%r is not linked to a shipping agent, excluding from mail recipients",
-                self,
-            )
+        logger.info(
+            "%r is not linked to a shipping agent, excluding from mail recipients",
+            self,
+        )
         return None
 
     def get_ship_recipient(self) -> MailRecipient | None:
@@ -316,126 +264,6 @@ class OnSubmitForReviewReceipt(NotificationMail):
     @property
     def success_message(self) -> str:
         return gettext("An email receipt was successfully sent.")
-
-
-class OnApproveMail(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
-        super().__init__(form, user)
-        self.add_recipient(self.get_shipping_agent_recipient())
-        self.add_recipient(self.get_ship_recipient())
-
-    @property
-    def mail_subject(self):
-        return "Harbor dues form approved in Talippoq"
-
-    @property
-    def mail_body(self):
-        town = (
-            self.form.port_of_call.portauthority.name
-            if self.form.port_of_call
-            else settings.APPROVER_NO_PORT_OF_CALL
-        )
-        context = {
-            "town": town,
-            "id": str(self.form.id),
-        }
-        return (
-            gettext(
-                "The port authority in %(town)s has approved your harbor"
-                + " dues form %(id)s.\n"
-                + "You should expect to receive an invoice from the port authority."
-            )
-            % context
-        )
-
-    @property
-    def success_message(self) -> str:
-        return gettext("An approval notification has been sent to the form submitter")
-
-
-class OnApproveReceipt(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
-        super().__init__(form, user)
-        self.add_recipient(self.get_port_authority_recipient())
-        self.add_recipient(self.get_port_authority_admin_recipient())
-
-    @property
-    def mail_subject(self):
-        return gettext("Approved harbor dues form in Talippoq")
-
-    @property
-    def mail_body(self):
-        context = {
-            "id": str(self.form.id),
-        }
-
-        return gettext("Harbour dues form %(id)s has been approved") % context
-
-    @property
-    def success_message(self) -> str:
-        return gettext("An approval receipt was sent to the port authority")
-
-
-class OnRejectMail(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
-        super().__init__(form, user)
-        self.add_recipient(self.get_shipping_agent_recipient())
-        self.add_recipient(self.get_ship_recipient())
-        self.add_recipient(self.get_port_authority_recipient())
-
-    @property
-    def mail_subject(self):
-        return "Harbor dues form rejected in Talippoq"
-
-    @property
-    def mail_body(self):
-        town = (
-            self.form.port_of_call.portauthority.name
-            if self.form.port_of_call
-            else settings.APPROVER_NO_PORT_OF_CALL
-        )
-        context = {
-            "town": town,
-            "id": str(self.form.id),
-        }
-        return (
-            gettext(
-                "The port authority in %(town)s has rejected your harbor"
-                + " dues form %(id)s."
-                + "\n"
-                + "Log on to Talippoq and edit your form as directed by the"
-                + " port authority. If you have any questions concerning the"
-                + " rejection you should contact the local port authority or the"
-                + " Greenlandic Tax Authority at aka-talippoq@nanoq.gl."
-            )
-            % context
-        )
-
-    @property
-    def success_message(self) -> str:
-        return gettext("A rejection notification has been sent to the form submitter")
-
-
-class OnRejectReceipt(NotificationMail):
-    def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
-        super().__init__(form, user)
-        self.add_recipient(self.get_port_authority_recipient())
-
-    @property
-    def mail_subject(self):
-        return gettext("Rejected harbor dues form in Talippoq")
-
-    @property
-    def mail_body(self):
-        context = {
-            "id": str(self.form.id),
-        }
-
-        return gettext("Harbour dues form %(id)s has been rejected") % context
-
-    @property
-    def success_message(self) -> str:
-        return gettext("A rejection receipt was sent to the port authority")
 
 
 class OnSendToAgentMail(NotificationMail):

@@ -5,7 +5,6 @@ from django.views.generic import TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from havneafgifter.views import (
-    ApproveView,
     HarborDuesFormCreateView,
     HarborDuesFormDeleteView,
     HarborDuesFormListView,
@@ -16,7 +15,6 @@ from havneafgifter.views import (
     PostLoginView,
     PreviewPDFView,
     ReceiptDetailView,
-    RejectView,
     RootView,
     SignupVesselView,
     StatisticsView,
@@ -24,7 +22,6 @@ from havneafgifter.views import (
     TaxRateFormView,
     TaxRateListView,
     UpdateVesselView,
-    WithdrawView,
 )
 
 app_name = "havneafgifter"
@@ -109,21 +106,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/<int:pk>/",
         ReceiptDetailView.as_view(),
         name="receipt_detail_html",
-    ),
-    path(
-        "blanket/<int:pk>/tilbagetraek/",
-        WithdrawView.as_view(),
-        name="withdraw",
-    ),
-    path(
-        "blanket/<int:pk>/godkend/",
-        ApproveView.as_view(),
-        name="approve",
-    ),
-    path(
-        "blanket/<int:pk>/afvis/",
-        RejectView.as_view(),
-        name="reject",
     ),
     path(
         "blanket/<int:pk>/slet/",
