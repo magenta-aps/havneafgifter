@@ -20,7 +20,6 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.template.defaultfilters import date
 from django.utils import translation
 from django.utils.functional import cached_property
@@ -313,6 +312,7 @@ class Status(models.TextChoices):
     # TODO: DONE or something similar will be introduced when the system
     # handles invoicing. For now, we won't be needing it.
     # DONE = ("DONE", _("Done"))
+    SUBMITTED = ("SUBMITTED", _("Submitted"))
 
 
 class Municipality(models.IntegerChoices):
@@ -682,35 +682,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def submit_for_review(self):
         self._change_reason = Status.NEW.label
 
-    @transition(
-        field=status,
-        source=[Status.NEW],
-        target=Status.DRAFT,
-        permission=lambda instance, user: instance.has_permission(
-            user, "withdraw_from_review", False
-        ),
-    )
-    def withdraw_from_review(self):
-        self._change_reason = _("Withdrawn from review")
-
-    @transition(
-        field=status,
-        source=Status.NEW,
-        target=Status.APPROVED,
-        permission=lambda instance, user: instance.has_permission(
-            user, "approve", False
-        ),
-    )
-    def approve(self):
-        self._change_reason = Status.APPROVED.label
-
+    # This only exists so we can set the state in tests
+    # without being blocked by FSM
     @transition(
         field=status,
         source=Status.NEW,
         target=Status.REJECTED,
-        permission=lambda instance, user: instance.has_permission(
-            user, "reject", False
-        ),
     )
     def reject(self, reason: str):
         self._rejection_reason = reason
@@ -882,13 +859,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
         return HarborDuesFormReceipt(self, **kwargs)
 
-    @cached_property
+    @property
     def latest_rejection(self):
         if self.status == Status.REJECTED:
-            if isinstance(self, CruiseTaxForm):
-                history = self.harborduesform_ptr.history
-            else:
-                history = self.history
+            history = self.history
             try:
                 return history.filter(
                     status=Status.REJECTED,
@@ -966,16 +940,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 user.port == self.port_of_call
             )
 
-    def _has_withdraw_from_review_permission(self, user: User) -> bool:
-        if user.has_group_name("Ship"):
-            return user.username == self.vessel_imo
-        if user.has_group_name("Shipping"):
-            return (
-                self.shipping_agent is not None
-                and self.shipping_agent == user.shipping_agent
-            )
-        return False
-
     def _has_delete_permission(self, user: User) -> bool:
         if user is None or self.status != Status.DRAFT:
             return False
@@ -1001,12 +965,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 filter |= cls._get_shipping_agent_user_filter(user)
             if user.has_group_name("PortAuthority"):
                 filter |= cls._get_port_authority_filter(user)
-
-        if action == "withdraw_from_review":
-            if user.has_group_name("Ship"):
-                filter |= cls._get_ship_user_filter(user)
-            if user.has_group_name("Shipping"):
-                filter |= cls._get_shipping_agent_user_filter(user)
 
         if filter.children:
             return qs.filter(filter)
@@ -1041,11 +999,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 and (user.has_group_name("Ship") or user.has_group_name("Shipping"))
             )
             or (
-                action == "withdraw_from_review"
-                and self._has_withdraw_from_review_permission(user)
-            )
-            or (
-                action in ("approve", "reject", "invoice")
+                action in ("invoice",)
                 and (
                     (
                         self.port_of_call is None
@@ -1648,7 +1602,6 @@ class Vessel(models.Model):
         return self.imo
 
 
-@receiver(pre_create_historical_record, sender=HarborDuesForm.history.model)
 def pre_create_historical_record_callback(
     sender, signal, instance, history_instance, **kwargs
 ):
@@ -1656,3 +1609,11 @@ def pre_create_historical_record_callback(
     reason = getattr(instance, "_rejection_reason", None)
     if reason is not None:
         history_instance.reason_text = reason
+
+
+pre_create_historical_record.connect(
+    pre_create_historical_record_callback, HarborDuesForm.history.model
+)
+pre_create_historical_record.connect(
+    pre_create_historical_record_callback, CruiseTaxForm.history.model
+)
