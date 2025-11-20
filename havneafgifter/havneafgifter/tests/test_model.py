@@ -589,13 +589,13 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
     @parametrize(
         "status,action,username,expected_result",
         [
-            # 1. "submit_for_review"
+            # 1. "submit"
             #   Ship users can submit drafts for review
-            (Status.DRAFT, "submit_for_review", "9074729", True),
+            (Status.DRAFT, "submit", "9074729", True),
             #   Shipping agents can submit drafts for review
-            (Status.DRAFT, "submit_for_review", "shipping_agent", True),
+            (Status.DRAFT, "submit", "shipping_agent", True),
             #   Port authority users cannot submit drafts for review
-            (Status.DRAFT, "submit_for_review", "port_auth", False),
+            (Status.DRAFT, "submit", "port_auth", False),
         ],
     )
     def test_transition_permissions(
