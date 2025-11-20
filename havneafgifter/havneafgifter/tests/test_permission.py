@@ -29,6 +29,7 @@ from havneafgifter.permissions import HavneafgiftPermissionBackend
 class PermissionTest(TestCase):
     @classmethod
     def setUpTestData(cls):
+        current_timezone = datetime.now().astimezone().tzinfo
         call_command("create_groups", verbosity=1)
 
         cls.shipping_agent = ShippingAgent.objects.create(
@@ -51,8 +52,8 @@ class PermissionTest(TestCase):
         )
         cls.taxrates = TaxRates.objects.create(
             pax_tax_rate=Decimal(1.0),
-            start_datetime=datetime(2024, 1, 1, 0, 0, 0),
-            end_datetime=datetime(2025, 1, 1, 0, 0, 0),
+            start_datetime=datetime(2024, 1, 1, 0, 0, 0, tzinfo=current_timezone),
+            end_datetime=datetime(2025, 1, 1, 0, 0, 0, tzinfo=current_timezone),
         )
         cls.port_taxrate = PortTaxRate.objects.create(
             tax_rates=cls.taxrates, gt_start=0, port_tax_rate=Decimal(1.0)
@@ -107,8 +108,10 @@ class PermissionTest(TestCase):
             vessel_owner="Magenta ApS",
             vessel_master="Bent Handberg",
             shipping_agent=cls.shipping_agent,
-            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0),
-            datetime_of_departure=datetime(2024, 6, 1, 12, 0, 0),
+            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2024, 6, 1, 12, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=50000,
             vessel_type=ShipType.CRUISE,
             number_of_passengers=5000,
@@ -122,8 +125,10 @@ class PermissionTest(TestCase):
             vessel_owner="Magenta ApS",
             vessel_master="Bent Handberg",
             shipping_agent=cls.shipping_agent_other,
-            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0),
-            datetime_of_departure=datetime(2024, 6, 1, 12, 0, 0),
+            datetime_of_arrival=datetime(2024, 5, 1, 12, 0, 0, tzinfo=current_timezone),
+            datetime_of_departure=datetime(
+                2024, 6, 1, 12, 0, 0, tzinfo=current_timezone
+            ),
             gross_tonnage=50000,
             vessel_type=ShipType.CRUISE,
             number_of_passengers=5000,

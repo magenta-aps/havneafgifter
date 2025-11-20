@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-19 11:01-0200\n"
+"POT-Creation-Date: 2025-11-20 09:49-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -225,10 +225,6 @@ msgid "Authority for vessels without port of call"
 msgstr ""
 
 #: havneafgifter/mails.py
-msgid "Admin for port authority for vessels without port of call"
-msgstr ""
-
-#: havneafgifter/mails.py
 msgid "Tax Authority"
 msgstr ""
 
@@ -279,30 +275,6 @@ msgstr ""
 
 #: havneafgifter/mails.py
 msgid "An email receipt was successfully sent."
-msgstr ""
-
-#: havneafgifter/mails.py
-#, python-format
-msgid ""
-"The port authority in %(town)s has approved your harbor dues form %(id)s.\n"
-"You should expect to receive an invoice from the port authority."
-msgstr ""
-
-#: havneafgifter/mails.py
-msgid "An approval notification has been sent to the form submitter"
-msgstr ""
-
-#: havneafgifter/mails.py
-msgid "Approved harbor dues form in Talippoq"
-msgstr ""
-
-#: havneafgifter/mails.py
-#, python-format
-msgid "Harbour dues form %(id)s has been approved"
-msgstr "Nalunaarsorneqarneq %(id)s akuerineqarpoq"
-
-#: havneafgifter/mails.py
-msgid "An approval receipt was sent to the port authority"
 msgstr ""
 
 #: havneafgifter/mails.py
@@ -521,6 +493,10 @@ msgid "Rejected"
 msgstr ""
 
 #: havneafgifter/models.py
+msgid "Submitted"
+msgstr ""
+
+#: havneafgifter/models.py
 msgid "Northeast Greenland National Park"
 msgstr ""
 
@@ -592,10 +568,6 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Reason text"
-msgstr ""
-
-#: havneafgifter/models.py
-msgid "Submitted"
 msgstr ""
 
 #: havneafgifter/models.py
@@ -925,20 +897,6 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Forstået"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
-#: havneafgifter/templates/havneafgifter/pdf/receipt.html
-msgid "Approve"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
-msgid "Do you want to approve this form?"
-msgstr ""
-
-#: havneafgifter/templates/havneafgifter/bootstrap/approve_form.html
-msgid ""
-"This will notify the submitter of the form that the form has been accepted."
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
@@ -1512,10 +1470,6 @@ msgstr ""
 msgid ""
 "You do not have the required permissions to withdraw harbor dues forms from "
 "review"
-msgstr ""
-
-#: havneafgifter/views.py
-msgid "You do not have the required permissions to approve harbor dues forms"
 msgstr ""
 
 #: havneafgifter/views.py

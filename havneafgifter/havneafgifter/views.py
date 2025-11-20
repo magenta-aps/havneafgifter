@@ -55,8 +55,6 @@ from havneafgifter.forms import (
     UpdateVesselForm,
 )
 from havneafgifter.mails import (
-    OnApproveMail,
-    OnApproveReceipt,
     OnRejectMail,
     OnRejectReceipt,
     OnSendToAgentMail,
@@ -209,11 +207,9 @@ class PostLoginView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
-            print(f"saml data: {self.request.session.get('saml')}")
             user = authenticate(
                 request=self.request, saml_data=self.request.session.get("saml")
             )
-            print(f"user: {user}")
             if user and user.is_authenticated:
                 login(
                     request=self.request,
@@ -596,43 +592,6 @@ class WithdrawView(
         # But if desired, it could be implemented and coupled to the "withdraw" action
         # like this:
         # self.handle_notification_mail(OnWithdrawMail, harbor_dues_form)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse("havneafgifter:harbor_dues_form_list")
-
-
-class ApproveView(
-    LoginRequiredMixin, HavneafgiftView, HandleNotificationMailMixin, UpdateView
-):
-    http_method_names = ["post"]
-
-    def get_queryset(self):
-        return HarborDuesForm.filter_user_permissions(
-            HarborDuesForm.objects.filter(status=Status.NEW),
-            self.request.user,
-            "approve",
-        )
-
-    def post(self, request, *args, **kwargs):
-        # If we cannot get the specified `HarborDuesForm` object, it is probably
-        # because we don't have the required `approve` permission.
-        try:
-            harbor_dues_form = self.get_object()
-        except Http404:
-            return HavneafgifterResponseForbidden(
-                self.request,
-                _(
-                    "You do not have the required permissions to approve "
-                    "harbor dues forms"
-                ),
-            )
-        # There is no form to fill for "approve" actions, so it does not make sense to
-        # implement `form_valid`. Instead, we just perform the object update here.
-        harbor_dues_form.approve()
-        harbor_dues_form.save()
-        self.handle_notification_mail(OnApproveMail, harbor_dues_form)
-        self.handle_notification_mail(OnApproveReceipt, harbor_dues_form)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

@@ -5,7 +5,6 @@ from django.views.generic import TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from havneafgifter.views import (
-    ApproveView,
     HarborDuesFormCreateView,
     HarborDuesFormDeleteView,
     HarborDuesFormListView,
@@ -114,11 +113,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         "blanket/<int:pk>/tilbagetraek/",
         WithdrawView.as_view(),
         name="withdraw",
-    ),
-    path(
-        "blanket/<int:pk>/godkend/",
-        ApproveView.as_view(),
-        name="approve",
     ),
     path(
         "blanket/<int:pk>/afvis/",

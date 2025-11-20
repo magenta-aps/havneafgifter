@@ -313,6 +313,7 @@ class Status(models.TextChoices):
     # TODO: DONE or something similar will be introduced when the system
     # handles invoicing. For now, we won't be needing it.
     # DONE = ("DONE", _("Done"))
+    SUBMITTED = ("SUBMITTED", _("Submitted"))
 
 
 class Municipality(models.IntegerChoices):
@@ -692,17 +693,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     )
     def withdraw_from_review(self):
         self._change_reason = _("Withdrawn from review")
-
-    @transition(
-        field=status,
-        source=Status.NEW,
-        target=Status.APPROVED,
-        permission=lambda instance, user: instance.has_permission(
-            user, "approve", False
-        ),
-    )
-    def approve(self):
-        self._change_reason = Status.APPROVED.label
 
     @transition(
         field=status,

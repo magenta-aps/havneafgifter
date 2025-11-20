@@ -15,14 +15,6 @@ def withdraw_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
 
 
 @register.inclusion_tag(
-    "havneafgifter/bootstrap/approve_form.html",
-    takes_context=True,
-)
-def approve_form_modal(context, form: HarborDuesForm | CruiseTaxForm) -> dict:
-    return {"form": form}
-
-
-@register.inclusion_tag(
     "havneafgifter/bootstrap/reject_form.html",
     takes_context=True,
 )

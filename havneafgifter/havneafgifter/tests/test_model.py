@@ -390,9 +390,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         ],
     )
     def test_fields_only_nullable_for_cruise_ships(self, vessel_type, field, required):
+        current_timezone = datetime.now().astimezone().tzinfo
         instance = HarborDuesForm(
             vessel_type=vessel_type,
-            datetime_of_arrival=datetime(2024, 1, 1),
+            datetime_of_arrival=datetime(2024, 1, 1, 0, 0, 0, tzinfo=current_timezone),
             status="done",
         )
         setattr(instance, field, None)
@@ -630,13 +631,6 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         actual_result = form.has_permission(user, action, False)
         # Assert
         self.assertEqual(actual_result, expected_result)
-
-    def test_approve_transition(self):
-        # Act
-        self.harbor_dues_form.approve()
-        self.harbor_dues_form.save()
-        # Assert
-        self.assertEqual(self.harbor_dues_form._change_reason, Status.APPROVED.label)
 
     def test_reject_transition(self):
         # Arrange

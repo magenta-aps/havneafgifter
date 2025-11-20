@@ -162,12 +162,6 @@ table tfoot td p {
         <span>{% translate 'Withdraw forwarded form' %}</span>
     </button>
     {% endif %}
-    {% if can_approve %}
-    <button type="button" class="btn btn-success ms-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#approveModal">
-        <span class="material-icons me-2">check</span>
-        <span>{% translate 'Approve' %}</span>
-    </button>
-    {% endif %}
     {% if can_reject %}
     <button type="button" class="btn btn-danger ms-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#rejectModal">
         <span class="material-icons me-2">close</span>
@@ -191,7 +185,6 @@ table tfoot td p {
 {# This block is only rendered when outputting HTML (not PDF) #}
 {{ block.super }}
 {% withdraw_form_modal form %}
-{% approve_form_modal form %}
 {% reject_form_modal form %}
 {% delete_form_modal form %}
 {% endblock %}
