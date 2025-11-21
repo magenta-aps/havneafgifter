@@ -50,7 +50,7 @@ pydyf==0.11.0
 pyOpenSSL==24.3.0
 pyparsing==3.2.5
 pyphen==0.17.2
-pysaml2==7.5.0
+pysaml2==7.5.4
 python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.32.5
