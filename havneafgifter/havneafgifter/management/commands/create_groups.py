@@ -81,13 +81,10 @@ class Command(BaseCommand):
                 "name": "Can invoice harborduesforms",
             },
         )
-        Permission.objects.update_or_create(
+        Permission.objects.filter(
             content_type=cruisetaxform_contenttype,
             codename="withdraw_from_review_cruisetaxform",
-            defaults={
-                "name": "Can withdraw cruise tax forms from review",
-            },
-        )
+        ).delete()
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="submit_for_review_cruisetaxform",
@@ -95,20 +92,14 @@ class Command(BaseCommand):
                 "name": "Can submit cruise tax forms for review",
             },
         )
-        Permission.objects.update_or_create(
+        Permission.objects.filter(
             content_type=cruisetaxform_contenttype,
             codename="approve_cruisetaxform",
-            defaults={
-                "name": "Can approve cruisetaxforms",
-            },
-        )
-        Permission.objects.update_or_create(
+        ).delete()
+        Permission.objects.filter(
             content_type=cruisetaxform_contenttype,
             codename="reject_cruisetaxform",
-            defaults={
-                "name": "Can reject cruisetaxforms",
-            },
-        )
+        ).delete()
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="invoice_cruisetaxform",
@@ -207,8 +198,6 @@ class Command(BaseCommand):
                         "view",
                         "change",
                         "delete",
-                        "invoice",
-                        "submit_for_review",
                     ),
                 ),
                 (
@@ -245,8 +234,6 @@ class Command(BaseCommand):
                         "view",
                         "change",
                         "delete",
-                        "invoice",
-                        "submit_for_review",
                     ),
                 ),
                 (

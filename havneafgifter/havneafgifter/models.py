@@ -312,7 +312,7 @@ class Status(models.TextChoices):
     # TODO: DONE or something similar will be introduced when the system
     # handles invoicing. For now, we won't be needing it.
     # DONE = ("DONE", _("Done"))
-    SUBMITTED = ("SUBMITTED", _("Submitted"))
+    INVOICED = ("INVOICED", _("Invoiced"))
 
 
 class Municipality(models.IntegerChoices):
@@ -676,11 +676,23 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         source=[Status.DRAFT, Status.REJECTED],
         target=Status.NEW,
         permission=lambda instance, user: instance.has_permission(
-            user, "submit_for_review", False
+            user, "change", False
         ),
     )
-    def submit_for_review(self):
+    def submit(self):
         self._change_reason = Status.NEW.label
+
+    @transition(
+        field=status,
+        source=[Status.NEW],
+        target=Status.INVOICED,
+        permission=lambda instance, user: instance.has_permission(
+            user, "invoice", False
+        ),
+    )
+    def invoice(self):
+        # To be run automatically on a cronjob
+        self._change_reason = Status.INVOICED.label
 
     # This only exists so we can set the state in tests
     # without being blocked by FSM
@@ -969,10 +981,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         if filter.children:
             return qs.filter(filter)
 
-        if action in ("approve", "reject", "invoice"):
-            if user.has_group_name("PortAuthority"):
-                return qs.filter(cls._get_port_authority_filter(user))
-
         return qs.none()
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
@@ -995,25 +1003,23 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 )
             )
             or (
-                action == "submit_for_review"
+                action == "submit"
                 and (user.has_group_name("Ship") or user.has_group_name("Shipping"))
             )
-            or (
-                action in ("invoice",)
-                and (
-                    (
-                        self.port_of_call is None
-                        and user.port_authority
-                        and user.port_authority.name
-                        == settings.APPROVER_NO_PORT_OF_CALL
-                    )
-                    or (
-                        user.has_group_name("PortAuthority")
-                        and self._has_port_authority_permission(user)
-                    )
-                )
-            )
         )
+
+    def send_invoice(self):
+        if self.status == Status.NEW:
+            try:
+                # TODO: Send til prisme
+                # Når dette udfyldes, fjern pragma: no cover nedenfor
+                pass
+            except Exception:  # pragma: no cover
+                # Couldn't send right now, keep in queue
+                pass
+            else:
+                self.invoice()
+                self.save(update_fields=("status",))
 
 
 class CruiseTaxForm(HarborDuesForm):
