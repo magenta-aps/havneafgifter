@@ -261,7 +261,7 @@ class HarborDuesFormCreateView(
 
                 if passenger_total_form.is_valid() and disembarkment_formset.is_valid():
                     if status == Status.NEW:
-                        self.object.submit_for_review()
+                        self.object.submit()
                         self.save_formsets_and_calculate(
                             passenger_formset,
                             disembarkment_formset,
@@ -342,8 +342,8 @@ class HarborDuesFormCreateView(
 
     def base_form_valid(self, form):
         harbor_dues_form = form.save(commit=False)
-        if can_proceed(harbor_dues_form.submit_for_review) and not has_transition_perm(
-            harbor_dues_form.submit_for_review,
+        if can_proceed(harbor_dues_form.submit) and not has_transition_perm(
+            harbor_dues_form.submit,
             self.request.user,
         ):
             return HavneafgifterResponseForbidden(
