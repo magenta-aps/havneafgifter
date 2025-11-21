@@ -83,7 +83,7 @@ class Receipt:
         return getattr(self._user, "can_create", False)
 
     def _get_can_edit(self) -> bool:
-        return self._is_permitted_for_user(self.form.submit_for_review)
+        return self._is_permitted_for_user(self.form.submit)
 
     def _get_can_delete(self) -> bool:
         return self.form._has_delete_permission(self._user)

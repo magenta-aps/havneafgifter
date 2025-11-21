@@ -464,7 +464,7 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "invoice", True)
+        self._test_access(user, self.item, "invoice", False)
         # Portmanager may not see or change form from another port authority
         self._test_access(user, self.other_item, "view", False)
         self._test_access(user, self.other_item, "change", False)
@@ -499,11 +499,11 @@ class CruiseTaxFormPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", True)
-        self._test_access(user, self.item, "invoice", True)
+        self._test_access(user, self.item, "invoice", False)
         self._test_access(user, self.other_item, "view", True)
         self._test_access(user, self.other_item, "change", True)
         self._test_access(user, self.other_item, "delete", True)
-        self._test_access(user, self.other_item, "invoice", True)
+        self._test_access(user, self.other_item, "invoice", False)
 
     def test_unprivileged(self):
         user = self.unprivileged_user
@@ -591,7 +591,7 @@ class CruiseTaxFormPortUserPermissionTest(PermissionTest):
         self._test_access(user, self.item, "view", True)
         self._test_access(user, self.item, "change", True)
         self._test_access(user, self.item, "delete", False)
-        self._test_access(user, self.item, "invoice", True)
+        self._test_access(user, self.item, "invoice", False)
         # Port user may not see or change form from another port within the same
         # port authority.
         self._test_access(user, self.other_item, "view", False)

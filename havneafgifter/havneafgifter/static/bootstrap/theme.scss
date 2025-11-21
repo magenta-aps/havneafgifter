@@ -20,6 +20,8 @@ $waiting: #083d44;
 $waiting-light: #80d5df;
 $rejected: darken($tertiary, 30); //#4d2111;
 $rejected-light: #eea78e;
+$invoiced: #233915;
+$invoiced-light: #b9dfa3;
 
 // Alert levels
 $success: $approved-light;
@@ -236,6 +238,10 @@ footer a .material-icons {
 .badge-rejected {
   background-color: $rejected-light;
   color: $rejected;
+}
+.badge-invoiced {
+  background-color: $invoiced-light;
+  color: $invoiced;
 }
 
 // Tables
