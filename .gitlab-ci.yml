@@ -101,7 +101,7 @@ variables:
 Lint Commits:
   extends: .lint:commits
   variables:
-    CONFIG: '{ extends: [''@commitlint/config-conventional''], ignores: [(message) => message.includes(''suggestion(s)'')], }'
+    CONFIG: '{ extends: [''@commitlint/config-conventional''], ignores: [(message) => message.includes(''suggestion(s)'',''Merge branch'')], }'
 
 
 Lint Python:
