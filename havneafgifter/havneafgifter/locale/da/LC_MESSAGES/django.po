@@ -472,8 +472,8 @@ msgid "Rejected"
 msgstr "Afvist"
 
 #: havneafgifter/models.py
-msgid "Submitted"
-msgstr "Indsendt"
+msgid "Invoiced"
+msgstr "Faktureret"
 
 #: havneafgifter/models.py
 msgid "Northeast Greenland National Park"
@@ -548,6 +548,10 @@ msgstr "Havnens navn"
 #: havneafgifter/models.py
 msgid "Reason text"
 msgstr "Begrundelse (tekst)"
+
+#: havneafgifter/models.py
+msgid "Submitted"
+msgstr "Indsendt"
 
 #: havneafgifter/models.py
 msgid "Vessel nationality"
