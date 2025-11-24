@@ -13,6 +13,7 @@ def is_imo_valid(imo):
         sum_ += (int(a[i])) * (len(a) - i)
     return sum_ % 10 == int(a[6])
 
+
 def main():
     a = 0  # 1
     b = 0
@@ -48,6 +49,6 @@ def main():
                                 if a == 9:
                                     break
 
+
 if __name__ == "__main__":
     main()
-

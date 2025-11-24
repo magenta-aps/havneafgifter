@@ -313,6 +313,7 @@ class Status(models.TextChoices):
     # handles invoicing. For now, we won't be needing it.
     # DONE = ("DONE", _("Done"))
     INVOICED = ("INVOICED", _("Invoiced"))
+    PAID = ("PAID", _("Paid"))
 
 
 class Municipality(models.IntegerChoices):
@@ -548,6 +549,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             ),
         ]
 
+    invoice_prefix = "TAL-"
+
     history = HistoricalRecords(
         bases=[Reason],
         history_change_reason_field=models.TextField(null=True),
@@ -693,6 +696,16 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def invoice(self):
         # To be run automatically on a cronjob
         self._change_reason = Status.INVOICED.label
+
+    @transition(
+        field=status,
+        source=[Status.INVOICED],
+        target=Status.PAID,
+        permission=lambda instance, user: instance.has_permission(user, "pay", False),
+    )
+    def pay(self):
+        # To be run automatically on a cronjob
+        self._change_reason = Status.PAID.label
 
     # This only exists so we can set the state in tests
     # without being blocked by FSM
@@ -1018,6 +1031,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 # Couldn't send right now, keep in queue
                 pass
             else:
+                # Apparently, when running from a management command,
+                # we automatically have permission to call `invoice()`
                 self.invoice()
                 self.save(update_fields=("status",))
 
