@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from time import strptime
 from typing import Any, Dict
 
 # Copied from core python because its containing module `distutils` is deprecated.
@@ -117,3 +118,7 @@ def new_taxrate_start_datetime(datetime_in: datetime) -> datetime:
         raise TypeError("Input must be a datetime object.")
 
     return get_midnight(get_next_week(datetime_in)) + timedelta(days=1)
+
+
+def parse_isodate(input: str) -> date:
+    return date(*(strptime(input, "%Y-%m-%d")[0:3]))

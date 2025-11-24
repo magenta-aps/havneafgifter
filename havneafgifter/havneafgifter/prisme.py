@@ -1,35 +1,39 @@
 import logging
-from datetime import date, datetime, time
-from typing import List
+from datetime import date, datetime
+from typing import Dict, List, TypeVar
 
-import zeep
 from dict2xml import dict2xml as dict_to_xml
 from django.conf import settings
+from project.util import parse_isodate
 from requests import Session
 from xmltodict import parse as xml_to_dict
+from zeep import Client
 from zeep.transports import Transport
 
 prisme_settings = settings.PRISME
 logger = logging.getLogger(__name__)
 
 
-class PrismeRequest:
+class PrismeResponse:
+    pass
+
+
+ResponseType = TypeVar("ResponseType", bound=PrismeResponse)
+
+
+class PrismeRequest[ResponseType]:
 
     @property
     def method(self):
-        raise NotImplementedError("Must be implemented in subclass")
+        raise NotImplementedError("Must be implemented in subclass")  # pragma: no cover
 
     @property
     def xml(self):
-        raise NotImplementedError("Must be implemented in subclass")
+        raise NotImplementedError("Must be implemented in subclass")  # pragma: no cover
 
     @property
-    def reply_class(self) -> type["PrismeResponse"]:
-        raise NotImplementedError("Must be implemented in subclass")
-
-
-class PrismeResponse:
-    pass
+    def reply_class(self) -> type[ResponseType]:
+        raise NotImplementedError("Must be implemented in subclass")  # pragma: no cover
 
 
 class PrismeException(Exception):
@@ -43,8 +47,10 @@ class PrismeException(Exception):
         return f"Error in response from Prisme. Code: {self.code}, Text: {self.text}"
 
 
-class PrismeSELAccountRequest(PrismeRequest):
-    def __init__(self, customer_id_number, from_date, to_date, open_closed=2):
+class PrismeSELAccountRequest(PrismeRequest["PrismeSELAccountResponse"]):
+    def __init__(
+        self, customer_id_number, from_date: date, to_date: date, open_closed: int = 2
+    ):
         super().__init__()
         self.customer_id_number = customer_id_number
         self.from_date = from_date
@@ -52,31 +58,25 @@ class PrismeSELAccountRequest(PrismeRequest):
         self.open_closed = open_closed
 
     @staticmethod
-    def prepare(value, is_amount=False):
+    def prepare(value: str | datetime | date | None) -> str:
         if value is None:
             return ""
-        if is_amount:
-            value = f"{value:.2f}"
         if isinstance(value, datetime):
             value = f"{value:%Y-%m-%dT%H:%M:%S}"
         if isinstance(value, date):
             value = f"{value:%Y-%m-%d}"
-        return value
-
-    @staticmethod
-    def to_datetime(date):
-        return datetime.combine(date, time.min)
+        return str(value)
 
     wrap = "CustTable"
 
     open_closed_map = {0: "Åbne", 1: "Lukkede", 2: "Åbne og Lukkede"}
 
     @property
-    def method(self):
+    def method(self) -> str:
         return "getAccountStatementSEL"
 
     @property
-    def xml(self):
+    def xml(self) -> str:
         return dict_to_xml(
             {
                 "CustIdentificationNumber": self.prepare(self.customer_id_number),
@@ -88,7 +88,7 @@ class PrismeSELAccountRequest(PrismeRequest):
         )
 
     @property
-    def reply_class(self) -> type[PrismeResponse]:
+    def reply_class(self) -> type["PrismeSELAccountResponse"]:
         return PrismeSELAccountResponse
 
 
@@ -96,8 +96,8 @@ class PrismeSELAccountResponseTransaction(object):
     def __init__(self, data):
         self.data = data
         self.account_number = data["AccountNum"]
-        self.transaction_date = data["TransDate"]
-        self.accounting_date = data["AccountingDate"]
+        self.transaction_date = parse_isodate(data["TransDate"])
+        self.accounting_date = parse_isodate(data["AccountingDate"])
         self.debitor_group_id = data["CustGroup"]
         self.debitor_group_name = data["CustGroupName"]
         self.voucher = data["Voucher"]
@@ -125,12 +125,12 @@ class PrismeSELAccountResponseTransaction(object):
 class PrismeSELAccountResponse(PrismeResponse):
     itemclass = PrismeSELAccountResponseTransaction
 
-    def __init__(self, request, xml):
+    def __init__(self, request: PrismeSELAccountRequest, xml: str):
         self.request = request
-        self.xml = xml
-        self.transactions = []
+        self.xml: str = xml
+        self.transactions: List[PrismeSELAccountResponseTransaction] = []
         if xml is not None:
-            self.data = xml_to_dict(xml)
+            self.data: Dict = xml_to_dict(xml)
             transactions = self.data["CustTable"]["CustTrans"]
             if type(transactions) is not list:
                 transactions = [transactions]
@@ -139,15 +139,18 @@ class PrismeSELAccountResponse(PrismeResponse):
     def __iter__(self):
         yield from self.transactions
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.transactions)
+
+    def __getitem__(self, item) -> PrismeSELAccountResponseTransaction:
+        return self.transactions[item]
 
 
 class Prisme(object):
     _client = None
 
     @property
-    def client(self):
+    def client(self) -> Client:
         if self._client is None:
             wsdl = prisme_settings["wsdl_file"]
             session = Session()
@@ -166,7 +169,7 @@ class Prisme(object):
                         basic_settings["password"],
                     )
             try:
-                self._client = zeep.Client(
+                self._client = Client(
                     wsdl=wsdl,
                     transport=Transport(
                         session=session, timeout=3600, operation_timeout=3600
@@ -180,13 +183,15 @@ class Prisme(object):
             )
         return self._client
 
-    def create_request_header(self, method, area="SULLISSIVIK", client_version=1):
+    def create_request_header(
+        self, method: str, area: str = "SULLISSIVIK", client_version: int = 1
+    ):
         request_header_class = self.client.get_type("tns:GWSRequestHeaderDCFUJ")
         return request_header_class(
             clientVersion=client_version, area=area, method=method
         )
 
-    def create_request_body(self, xml):
+    def create_request_body(self, xml: str | List[str]):
         if type(xml) is not list:
             xml = [xml]
         item_class = self.client.get_type("tns:GWSRequestXMLDCFUJ")
@@ -203,8 +208,8 @@ class Prisme(object):
         }
 
     def process_service(
-        self, request_object: PrismeRequest, context, cvr
-    ) -> PrismeResponse:
+        self, request_object: PrismeRequest[ResponseType], context, cvr
+    ) -> List[ResponseType]:
         try:
             request_class = self.client.get_type("tns:GWSRequestDCFUJ")
             request = request_class(

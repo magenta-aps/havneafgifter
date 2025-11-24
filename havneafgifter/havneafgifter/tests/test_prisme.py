@@ -2,9 +2,12 @@ from datetime import date, timedelta
 from unittest.mock import patch
 
 from django.test import TestCase
-from prisme import Prisme, PrismeSELAccountResponse
 
-from havneafgifter.prisme import PrismeSELAccountResponseTransaction
+from havneafgifter.prisme import (
+    Prisme,
+    PrismeSELAccountResponse,
+    PrismeSELAccountResponseTransaction,
+)
 
 
 def prisme_sel_mock(invoice_number: str, accounting_date: date):
@@ -61,6 +64,6 @@ class PrismeTestCase(TestCase):
         )
         self.assertEqual(len(responses), 1)
         self.assertEqual(len(responses[0].transactions), 1)
-        transaction: PrismeSELAccountResponseTransaction = responses[0].transactions[0]
-        self.assertEqual(transaction.invoice_number, invoice_number)
+        transaction: PrismeSELAccountResponseTransaction = responses[0][0]
+        self.assertEqual(transaction.extern_invoice_number, invoice_number)
         self.assertEqual(transaction.accounting_date, accounting_date)

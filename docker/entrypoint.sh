@@ -82,9 +82,11 @@ if [ "${COMPILEMESSAGES,,}" = true ]; then
 fi
 if [ "${TEST,,}" = true ]; then
   echo 'running tests'
+  coverage erase
   coverage run manage.py test --noinput
   coverage combine
   coverage report --show-missing
+  coverage erase
 fi
 
 exec "$@"

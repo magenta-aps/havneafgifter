@@ -346,3 +346,15 @@ STATICFILES_FINDERS = [
 ]
 
 from .login_settings import *  # noqa
+
+PRISME = {
+    "wsdl_file": os.environ.get("PRISME_PULL_WSDL", ""),
+    "auth": {
+        "basic": {
+            "username": os.environ.get("PRISME_PULL_USERNAME", ""),
+            "domain": os.environ.get("PRISME_PULL_DOMAIN", ""),
+            "password": os.environ.get("PRISME_PULL_PASSWORD", ""),
+        }
+    },
+    "proxy": {"socks": os.environ.get("PRISME_SOCKS_PROXY")},
+}
