@@ -1,6 +1,6 @@
 import logging
 from datetime import date, datetime
-from typing import Dict, List, TypeVar
+from typing import Any, Dict, List, TypeVar
 
 from dict2xml import dict2xml as dict_to_xml
 from django.conf import settings
@@ -23,17 +23,27 @@ ResponseType = TypeVar("ResponseType", bound=PrismeResponse)
 
 class PrismeRequest[ResponseType]:
 
-    @property
-    def method(self):
+    @classmethod
+    def method(cls) -> str:
         raise NotImplementedError("Must be implemented in subclass")  # pragma: no cover
 
     @property
     def xml(self):
         raise NotImplementedError("Must be implemented in subclass")  # pragma: no cover
 
-    @property
-    def reply_class(self) -> type[ResponseType]:
+    @classmethod
+    def response_class(cls) -> type[ResponseType]:
         raise NotImplementedError("Must be implemented in subclass")  # pragma: no cover
+
+    @staticmethod
+    def prepare(value: str | datetime | date | None) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, datetime):
+            value = f"{value:%Y-%m-%dT%H:%M:%S}"
+        if isinstance(value, date):
+            value = f"{value:%Y-%m-%d}"
+        return str(value)
 
 
 class PrismeException(Exception):
@@ -49,30 +59,24 @@ class PrismeException(Exception):
 
 class PrismeSELAccountRequest(PrismeRequest["PrismeSELAccountResponse"]):
     def __init__(
-        self, customer_id_number, from_date: date, to_date: date, open_closed: int = 2
+        self,
+        customer_id_number: int | str,
+        from_date: date,
+        to_date: date,
+        open_closed: int = 2,
     ):
         super().__init__()
-        self.customer_id_number = customer_id_number
+        self.customer_id_number = str(customer_id_number)
         self.from_date = from_date
         self.to_date = to_date
         self.open_closed = open_closed
-
-    @staticmethod
-    def prepare(value: str | datetime | date | None) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, datetime):
-            value = f"{value:%Y-%m-%dT%H:%M:%S}"
-        if isinstance(value, date):
-            value = f"{value:%Y-%m-%d}"
-        return str(value)
 
     wrap = "CustTable"
 
     open_closed_map = {0: "Åbne", 1: "Lukkede", 2: "Åbne og Lukkede"}
 
-    @property
-    def method(self) -> str:
+    @classmethod
+    def method(cls) -> str:
         return "getAccountStatementSEL"
 
     @property
@@ -87,8 +91,8 @@ class PrismeSELAccountRequest(PrismeRequest["PrismeSELAccountResponse"]):
             wrap=self.wrap,
         )
 
-    @property
-    def reply_class(self) -> type["PrismeSELAccountResponse"]:
+    @classmethod
+    def response_class(cls) -> type["PrismeSELAccountResponse"]:
         return PrismeSELAccountResponse
 
 
@@ -147,7 +151,9 @@ class PrismeSELAccountResponse(PrismeResponse):
 
 
 class Prisme(object):
-    _client = None
+
+    def __init__(self):
+        self._client = None
 
     @property
     def client(self) -> Client:
@@ -176,7 +182,7 @@ class Prisme(object):
                     ),
                 )
             except Exception as e:
-                print("Failed connecting to prisme: %s" % str(e))
+                logger.error("Failed connecting to prisme: %s" % str(e))
                 raise e
             self._client.set_ns_prefix(
                 "tns", "http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"
@@ -208,53 +214,71 @@ class Prisme(object):
         }
 
     def process_service(
-        self, request_object: PrismeRequest[ResponseType], context, cvr
+        self, request_object: PrismeRequest[ResponseType], debug_context: Any = None
     ) -> List[ResponseType]:
+        if debug_context is not None:
+            log_context = str(debug_context) + " "
+        else:
+            log_context = ""
         try:
-            request_class = self.client.get_type("tns:GWSRequestDCFUJ")
-            request = request_class(
-                requestHeader=self.create_request_header(request_object.method),
+            soap_request_class = self.client.get_type("tns:GWSRequestDCFUJ")
+            response_class: type[ResponseType] = request_object.response_class()
+            request = soap_request_class(
+                requestHeader=self.create_request_header(request_object.method()),
                 xmlCollection=self.create_request_body(request_object.xml),
             )
-            logger.info(
-                "CVR=%s Sending to %s:\n%s"
-                % (cvr, request_object.method, request_object.xml)
+            logger.debug(
+                "%sSending to %s:\n%s"
+                % (log_context, request_object.method(), request_object.xml)
             )
-            # reply is of type GWSReplyDCFUJ
-            reply = self.client.service.processService(request)
+            # soap_response is of type GWSReplyDCFUJ,
+            # a dynamically specified class from the WDSL
+            soap_response = self.client.service.processService(request)
 
-            # reply.status is of type GWSReplyStatusDCFUJ
-            if reply.status.replyCode != 0:
+            # soap_response.status is of type GWSReplyStatusDCFUJ
+            if soap_response.status.replyCode != 0:
                 raise PrismeException(
-                    reply.status.replyCode, reply.status.replyText, context
+                    soap_response.status.replyCode,
+                    soap_response.status.replyText,
+                    debug_context,
                 )
 
             outputs = []
-            # reply_item is of type GWSReplyInstanceDCFUJ
-            for reply_item in reply.instanceCollection.GWSReplyInstanceDCFUJ:
-                if reply_item.replyCode == 0:
-                    logger.info(
-                        "CVR=%s Receiving from %s:\n%s"
-                        % (cvr, request_object.method, reply_item.xml)
+            # soap_response_item is of type GWSReplyInstanceDCFUJ
+            for (
+                soap_response_item
+            ) in soap_response.instanceCollection.GWSReplyInstanceDCFUJ:
+                if soap_response_item.replyCode == 0:
+                    logger.debug(
+                        "%sReceiving from %s:\n%s"
+                        % (log_context, request_object.method(), soap_response_item.xml)
                     )
                     outputs.append(
-                        request_object.reply_class(request_object, reply_item.xml)
+                        response_class(request_object, soap_response_item.xml)
                     )
                 else:
                     raise PrismeException(
-                        reply_item.replyCode, reply_item.replyText, context
+                        soap_response_item.replyCode,
+                        soap_response_item.replyText,
+                        debug_context,
                     )
             return outputs
         except Exception as e:
-            logger.info(
-                "CVR=%s Error in process_service for %s: %s"
-                % (cvr, request_object.method, str(e))
+            logger.error(
+                "%sError in process_service for %s: %s"
+                % (log_context, request_object.method(), str(e))
             )
             raise e
 
     def get_account_data(
-        self, cvr, date_from, date_to
+        self,
+        cvr: str | int,
+        date_from: date,
+        date_to: date,
+        debug_context: str | None = None,
     ) -> List[PrismeSELAccountResponse]:
+        if debug_context is None:
+            debug_context = {"method": "get_account_data", "cvr": cvr}
         return self.process_service(
-            PrismeSELAccountRequest(cvr, date_from, date_to), "account", cvr
+            PrismeSELAccountRequest(cvr, date_from, date_to), debug_context
         )
