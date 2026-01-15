@@ -7,7 +7,6 @@ from havneafgifter.views import (
     HarborDuesFormCreateView,
     HarborDuesFormDeleteView,
     HarborDuesFormListView,
-    LandingModalOkView,
     LoginView,
     LogoutView,
     PassengerStatisticsView,
@@ -101,7 +100,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         TaxRateFormView.as_view(clone=True),
         name="tax_rate_clone",
     ),
-    path("modal/ok", LandingModalOkView.as_view(), name="landing_modal_ok"),
     path(
         "statistik/passagerer/",
         PassengerStatisticsView.as_view(),

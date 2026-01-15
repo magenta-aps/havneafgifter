@@ -175,37 +175,6 @@ SPDX-License-Identifier: MPL-2.0
     </footer>
     {% endblock %}
     {% block modals %}
-    {% if landing_modal %}
-    <div id="landing_modal" class="modal" data-bs-backdrop="static">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{% translate "Bemærk" %}</h5>
-                </div>
-                <div class="modal-body">
-                    {% translate 'Du må først fakturere et anløb, når dette beløb har status "Godkendt" i Talippoq.' %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% translate "Forstået" %}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script nonce="{{ request.csp_nonce }}">
-        $(function() {
-            const csrftoken = "{{ csrf_token }}";
-            const landing_modal = $('#landing_modal');
-            landing_modal.modal('show');
-            landing_modal.on("hide.bs.modal", function (){
-                $.ajax({
-                    method: "post",
-                    url: "{% url 'havneafgifter:landing_modal_ok' %}",
-                    headers: {"X-CSRFToken": csrftoken}
-                });
-            });
-        });
-    </script>
-    {% endif %}
-    {% endblock modals %}
+    {% endblock %}
 </body>
 </html>

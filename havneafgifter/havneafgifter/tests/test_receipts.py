@@ -57,7 +57,6 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                     "can_create": False,
                     "can_edit": False,
                     "can_delete": False,
-                    "landing_modal": False,
                 }
             ),
         )
