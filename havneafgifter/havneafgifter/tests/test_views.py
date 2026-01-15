@@ -2826,14 +2826,6 @@ class TestTaxRateFormView(HarborDuesFormTestMixin, TestCase):
         self.assertIn("Du har ikke rettighed til at se denne side.", soup.get_text())
 
 
-class TestLandingModalOkView(HarborDuesFormTestMixin, TestCase):
-    def test_post(self):
-        self.client.force_login(self.port_user)
-        response = self.client.post(reverse("havneafgifter:landing_modal_ok"))
-        self.assertEqual(response.status_code, 204)
-        self.assertTrue(self.client.session.get("harbor_user_modal"))
-
-
 class PassengerStatisticsTest(TestCase):
     url = reverse("havneafgifter:passenger_statistics")
     nationality_dict = dict(Nationality.choices)

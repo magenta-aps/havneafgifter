@@ -860,22 +860,6 @@ msgstr "Kontakt"
 msgid "Log out"
 msgstr "Log ud"
 
-#: havneafgifter/templates/havneafgifter/base.html
-msgid "Bemærk"
-msgstr "Bemærk"
-
-#: havneafgifter/templates/havneafgifter/base.html
-msgid ""
-"Du må først fakturere et anløb, når dette beløb har status \"Godkendt\" i "
-"Talippoq."
-msgstr ""
-"Du må først fakturere et anløb, når dette beløb har status \"Godkendt\" i "
-"Talippoq."
-
-#: havneafgifter/templates/havneafgifter/base.html
-msgid "Forstået"
-msgstr "Forstået"
-
 #: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
 msgid "Delete form"
 msgstr "Slet blanket"

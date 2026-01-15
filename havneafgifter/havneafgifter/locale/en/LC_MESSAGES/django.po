@@ -840,22 +840,6 @@ msgstr "Contact"
 msgid "Log out"
 msgstr ""
 
-#: havneafgifter/templates/havneafgifter/base.html
-msgid "Bemærk"
-msgstr "Please notice"
-
-#: havneafgifter/templates/havneafgifter/base.html
-msgid ""
-"Du må først fakturere et anløb, når dette beløb har status \"Godkendt\" i "
-"Talippoq."
-msgstr ""
-"You may only send an invoice to the shipping agent on the forms with an "
-"\"Approved\" status in Talippoq."
-
-#: havneafgifter/templates/havneafgifter/base.html
-msgid "Forstået"
-msgstr "Understood"
-
 #: havneafgifter/templates/havneafgifter/bootstrap/delete_form.html
 msgid "Delete form"
 msgstr ""
