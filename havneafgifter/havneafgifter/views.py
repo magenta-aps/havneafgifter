@@ -27,7 +27,6 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views import View
 from django.views.generic import DetailView, RedirectView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_fsm import can_proceed, has_transition_perm
@@ -1017,9 +1016,3 @@ class TaxRateFormView(LoginRequiredMixin, UpdateView):
             return self.form_valid(form, formset1, formset2)
         else:
             return self.form_invalid(form, formset1, formset2)
-
-
-class LandingModalOkView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        request.session["harbor_user_modal"] = True
-        return HttpResponse(status=204)

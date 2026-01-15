@@ -9,7 +9,6 @@ from django_fsm import has_transition_perm
 from django_weasyprint.utils import django_url_fetcher
 
 from havneafgifter.models import CruiseTaxForm, HarborDuesForm, ShipType, Status, User
-from havneafgifter.view_mixins import HavneafgiftView
 
 _PDF_BASE_TEMPLATE: str = "havneafgifter/pdf/base.html"
 
@@ -41,9 +40,6 @@ class Receipt:
 
         # Dynamic base template
         self._context["base"] = base
-        self._context["landing_modal"] = (
-            HavneafgiftView.landing_modal(request) if request else False
-        )
 
     @property
     def html(self) -> SafeString:
