@@ -261,10 +261,10 @@ class PermissionsMixin(models.Model):
 
 
 class ShipType(models.TextChoices):
+    CRUISE = "CRUISE", _("Cruise ship")
     FREIGHTER = "FREIGHTER", _("Freighter")
     FISHER = "FISHER", _("Foreign fishing ship")
     PASSENGER = "PASSENGER", _("Passenger ship")
-    CRUISE = "CRUISE", _("Cruise ship")
     OTHER = "OTHER", _("Other vessel")
 
 
