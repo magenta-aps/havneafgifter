@@ -53,6 +53,10 @@ class HarborDuesFormAdmin(SimpleHistoryAdmin):
         "send_email",
     ]
 
+    readonly_fields = [
+        "status",
+    ]
+
     @admin.display(description=_("Port authority"))
     def port_authority(self, obj):
         if obj.port_of_call is None or obj.port_of_call.portauthority is None:
