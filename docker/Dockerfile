@@ -65,4 +65,15 @@ ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
 RUN django-admin compilemessages --locale=kl --locale=da --locale=en
 
+# Compress css & js in the image. Needs DJANGO_DEBUG=False
+COPY --chown=havneafgifter:havneafgifter ./dev-environment/havneafgifter.env havneafgifter.env
+# hadolint ignore=SC1091
+RUN set -a && \
+    source havneafgifter.env && \
+    export DJANGO_DEBUG=False && \
+    set +a && \
+    python manage.py collectstatic --verbosity=0 --no-input --clear && \
+    python manage.py compress --verbosity=0 --force && \
+    rm havneafgifter.env
+
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
