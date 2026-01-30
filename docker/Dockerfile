@@ -67,6 +67,7 @@ RUN django-admin compilemessages --locale=kl --locale=da --locale=en
 
 # Compress css & js in the image. Needs DJANGO_DEBUG=False
 COPY --chown=havneafgifter:havneafgifter ./dev-environment/havneafgifter.env havneafgifter.env
+# hadolint ignore=SC1091
 RUN set -a && \
     source havneafgifter.env && \
     export DJANGO_DEBUG=False && \
