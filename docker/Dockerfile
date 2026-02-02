@@ -10,7 +10,6 @@ ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
-    mkdir -p /var/cache/idp && \
     mkdir /static && \
     mkdir -p /storage/pdf && \
     #gid/uid from salt
@@ -20,8 +19,6 @@ RUN mkdir /app && \
     chown -R havneafgifter:havneafgifter /app && \
     chown -R havneafgifter:havneafgifter /static && \
     chmod a+w /static && \
-    chown -R havneafgifter:havneafgifter /var/cache/idp && \
-    chmod a+w /var/cache/idp && \
     chown -R havneafgifter:havneafgifter /storage/pdf && \
     chmod a+w /storage/pdf
 

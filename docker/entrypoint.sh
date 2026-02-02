@@ -16,7 +16,6 @@ LOAD_DEMODATA=${LOAD_DEMODATA:=false}
 CREATE_GROUPS=${CREATE_GROUPS:=true}
 CREATE_DUMMY_ADMIN=${CREATE_DUMMY_ADMIN:=false}
 CREATE_DUMMY_USERS=${CREATE_DUMMY_USERS:=false}
-SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
 
 python manage.py wait_for_db
 python manage.py createcachetable
@@ -64,9 +63,6 @@ if [ "${CREATE_DUMMY_USERS}" = true ]; then
 fi
 
 python manage.py createcachetable
-if [ "${SKIP_IDP_METADATA,,}" = false ]; then
-  python manage.py update_mitid_idp_metadata
-fi
 
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
