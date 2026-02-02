@@ -5,13 +5,7 @@ from csp_helpers.mixins import CSPViewMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import (
-    BACKEND_SESSION_KEY,
-    REDIRECT_FIELD_NAME,
-    authenticate,
-    login,
-    logout,
-)
+from django.contrib.auth import REDIRECT_FIELD_NAME, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView as DjangoLoginView
@@ -103,19 +97,7 @@ from havneafgifter.view_mixins import (
 class RootView(RedirectView):
     def get_redirect_url(self):
         if not self.request.user.is_authenticated:
-            user = authenticate(
-                request=self.request, saml_data=self.request.session.get("saml")
-            )
-            if user and user.is_authenticated:
-                login(
-                    request=self.request,
-                    user=user,
-                    backend="project.auth_backend.Saml2Backend",
-                )
-            if not self.request.user.is_authenticated:
-                return reverse("havneafgifter:login")
-        if "Ship" in self.request.user.group_names:
-            return reverse("havneafgifter:harbor_dues_form_list")
+            return reverse("havneafgifter:login")
         return reverse("havneafgifter:harbor_dues_form_list")
 
 
@@ -190,15 +172,8 @@ class LoginView(HavneafgiftView, DjangoLoginView):
 
 class LogoutView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        if (
-            self.request.session.get(BACKEND_SESSION_KEY)
-            == "project.auth_backend.Saml2Backend"
-            or "saml" in self.request.session
-        ):
-            return reverse("mitid:logout")
-        else:
-            logout(self.request)
-            return settings.LOGOUT_REDIRECT_URL
+        logout(self.request)
+        return settings.LOGOUT_REDIRECT_URL
 
 
 class PostLoginView(RedirectView):
@@ -208,18 +183,6 @@ class PostLoginView(RedirectView):
         return response
 
     def get_redirect_url(self, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            print(f"saml data: {self.request.session.get('saml')}")
-            user = authenticate(
-                request=self.request, saml_data=self.request.session.get("saml")
-            )
-            print(f"user: {user}")
-            if user and user.is_authenticated:
-                login(
-                    request=self.request,
-                    user=user,
-                    backend="django_mitid_auth.saml.backend.Saml2Backend",
-                )
         if not self.request.user.is_authenticated:
             return reverse("havneafgifter:login-failed")
         backpage = self.request.COOKIES.get("back")
