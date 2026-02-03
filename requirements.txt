@@ -35,7 +35,7 @@ html5lib==1.1
 idna==3.10
 Jinja2==3.1.6
 lxml==5.4.0
-MarkupSafe==3.0.2
+MarkupSafe==3.0.3
 mypy==1.18.2
 mypy-extensions==1.1.0
 openpyxl==3.1.5
