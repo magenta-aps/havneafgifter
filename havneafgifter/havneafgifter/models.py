@@ -30,6 +30,11 @@ from simple_history.models import HistoricalRecords
 from simple_history.signals import pre_create_historical_record
 from simple_history.utils import update_change_reason
 
+from havneafgifter.clients.prisme import (
+    HavneafgiftInvoiceLine,
+    HavneafgiftInvoiceRequest,
+    PrismeClient,
+)
 from havneafgifter.data import DateTimeRange
 
 logger = logging.getLogger(__name__)
@@ -1019,9 +1024,26 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def send_invoice(self):
         if self.status == Status.NEW:
             try:
-                # TODO: Send til prisme
-                # Når dette udfyldes, fjern pragma: no cover nedenfor
-                pass
+                prisme_request = HavneafgiftInvoiceRequest(
+                    afgift_id=self.pk,
+                    invoice_date=self.date,
+                    due_date=self.date,
+                    accounting_date=self.date,
+                    text="Havneafgift",
+                    files=[self.pdf],
+                    lines=[
+                        HavneafgiftInvoiceLine(
+                            description="Havneafgift",
+                            quantity=1,
+                            unit_price=self.harbour_tax,
+                            text=str(self),
+                            ledger_dimension={},
+                        )
+                    ],
+                )
+                prisme = PrismeClient.from_settings()
+                prisme.process_service(prisme_request)
+
             except Exception:  # pragma: no cover
                 # Couldn't send right now, keep in queue
                 pass
