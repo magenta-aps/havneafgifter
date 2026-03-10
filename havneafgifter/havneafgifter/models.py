@@ -4,10 +4,12 @@ import logging
 import re
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from io import BytesIO
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
     EmailValidator,
@@ -1023,6 +1025,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     def send_invoice(self):
         if self.status == Status.NEW:
+
+            receipt = self.get_receipt()
+            self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
+            self.save(update_fields=["pdf"])
+
             try:
                 prisme_request = HavneafgiftInvoiceRequest(
                     afgift_id=self.pk,
@@ -1044,9 +1051,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 prisme = PrismeClient.from_settings()
                 prisme.process_service(prisme_request)
 
-            except Exception:  # pragma: no cover
+            except Exception as e:  # pragma: no cover
+                logger.exception(e)
                 # Couldn't send right now, keep in queue
-                pass
             else:
                 self.invoice()
                 self.save(update_fields=("status",))

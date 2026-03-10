@@ -69,5 +69,5 @@ weasyprint==62.3
 webencodings==0.5.1
 whitenoise==6.11.0
 xmlschema==2.5.1
-xmltodict==0.15.1
+xmltodict==1.0.4
 zopfli==0.2.3.post1
