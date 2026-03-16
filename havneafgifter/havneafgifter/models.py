@@ -1044,7 +1044,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                             quantity=1,
                             unit_price=self.harbour_tax,
                             text=str(self),
-                            ledger_dimension={},
+                            locality_code=self.port_of_call,
                         )
                     ],
                 )

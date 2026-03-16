@@ -17,7 +17,7 @@ class HavneafgiftInvoiceLine(InvoiceLine):
         quantity: int,
         unit_price: int | Decimal,
         text: str,
-        ledger_dimension: Dict[str, str | int],
+        locality_code: int | str,
     ):
         prisme_settings = settings.PRISME  # type: ignore[misc]
         super().__init__(
@@ -25,7 +25,13 @@ class HavneafgiftInvoiceLine(InvoiceLine):
             quantity=quantity,
             unit_price=unit_price,
             text=text,
-            ledger_dimension=ledger_dimension,
+            ledger_dimension={
+                "Afdeling": prisme_settings["department_recid"],
+                "Finanslov": prisme_settings["finance_law_id"],
+                "Formaal": str(prisme_settings["purpose_id"]).zfill(10),
+                "ArtsKontoplan": prisme_settings["type_account_plan_id"],
+                "Sted": str(locality_code).zfill(6),
+            },
             beneficiary=prisme_settings["beneficiary"],
             project=prisme_settings["project_name"],
             project_category=prisme_settings["project_category_id"],
@@ -43,9 +49,6 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
         files: List[File],
         lines: List[HavneafgiftInvoiceLine],
     ):
-        print(files)
-        for f in files:
-            print(f.name)
         prisme_settings = settings.PRISME  # type: ignore[misc]
         super().__init__(
             order_account_number=prisme_settings["order_account"],
@@ -74,7 +77,7 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
     @property
     def dict(self) -> Dict[str, str | int | datetime | Dict[str, List[dict]]]:
         d = super().dict
-        d["HavneafgiftsafgiftIDFUJ"] = self.afgift_id
+        d["HarborTaxIdFUJ"] = self.afgift_id
         return d
 
     def create_custom_table_request(self) -> "InvoiceCustomTableRequest":
