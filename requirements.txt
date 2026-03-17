@@ -21,7 +21,7 @@ django-select2==8.4.1
 django-simple-history==3.10.1
 django-sql-utils==0.7.0
 django-stubs==4.2.7
-django-stubs-ext==5.2.5
+django-stubs-ext==5.2.9
 django-tables2==2.7.5
 django-tempus-dominus==5.1.2.17
 django-weasyprint==2.4.0
