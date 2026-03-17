@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO
+from typing import List
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group
@@ -1023,6 +1024,30 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             )
         )
 
+    @property
+    def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
+        tax: dict = self.calculate_harbour_tax(False)
+        lines: List[HavneafgiftInvoiceLine] = []
+        date_format = "%Y.%m.%d %H:%M"
+        for item in tax["details"]:
+            port_taxrate: PortTaxRate = item["port_taxrate"]
+            port: Port = (
+                port_taxrate.port or self.port_of_call
+            )  # TODO: Er det den rigtige havn?
+            start_date: datetime = item["date_range"].start_datetime
+            end_date: datetime = item["date_range"].end_datetime
+            lines.append(
+                HavneafgiftInvoiceLine(
+                    description="Harbour tax",
+                    quantity=1,
+                    unit_price=item["harbour_tax"],
+                    text=f"{port.name}, {start_date.strftime(date_format)} - "
+                    f"{end_date.strftime(date_format)}",
+                    locality_code=port.prisme_code_str,
+                )
+            )
+        return lines
+
     def send_invoice(self):
         if self.status == Status.NEW:
 
@@ -1036,17 +1061,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     invoice_date=self.date,
                     due_date=self.date,
                     accounting_date=self.date,
-                    text="Havneafgift",
+                    text="Harbour taxes",
                     files=[self.pdf],
-                    lines=[
-                        HavneafgiftInvoiceLine(
-                            description="Havneafgift",
-                            quantity=1,
-                            unit_price=self.harbour_tax,
-                            text=str(self),
-                            locality_code=self.port_of_call,
-                        )
-                    ],
+                    lines=self.invoice_lines,
                 )
                 prisme = PrismeClient.from_settings()
                 prisme.process_service(prisme_request)
@@ -1163,6 +1180,42 @@ class CruiseTaxForm(HarborDuesForm):
             + value_or_zero(self.pax_tax)
             + value_or_zero(self.disembarkment_tax)
         )
+
+    @property
+    def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
+        lines: List[HavneafgiftInvoiceLine] = []
+        date_format = "%Y.%m.%d %H:%M"
+
+        lines += super().invoice_lines
+
+        passenger_tax = self.calculate_passenger_tax(False)
+        lines.append(
+            HavneafgiftInvoiceLine(
+                description="Passenger tax",
+                quantity=self.number_of_passengers,
+                unit_price=passenger_tax["taxrate"],
+                text=f"{self.number_of_passengers} passengers",
+                # TODO: Hvad skal stedkoden være for passagerafgift?
+                locality_code=self.port_of_call.prisme_code_str,
+            )
+        )
+
+        disembarkment_tax = self.calculate_disembarkment_tax(False)
+        for disembarkment_details in disembarkment_tax["details"]:
+            disembarkment: Disembarkment = disembarkment_details["disembarkment"]
+            lines.append(
+                HavneafgiftInvoiceLine(
+                    description="Disembarkment tax",
+                    quantity=disembarkment.number_of_passengers,
+                    unit_price=disembarkment_details["taxrate"],
+                    text=f"{disembarkment.disembarkment_site.name}, "
+                    f"{disembarkment_details['date'].strftime(date_format)}, "
+                    f"{disembarkment.number_of_passengers} passengers",
+                    locality_code=disembarkment.prisme_code_str,
+                )
+            )
+
+        return lines
 
     def get_receipt(self, **kwargs):
         from havneafgifter.receipts import CruiseTaxFormReceipt
