@@ -458,6 +458,14 @@ class Port(PermissionsMixin, models.Model):
     portauthority = models.ForeignKey(
         PortAuthority, null=True, blank=True, on_delete=models.SET_NULL
     )
+    prisme_code = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+    )
+
+    @property
+    def prisme_code_str(self) -> str:
+        return str(self.prisme_code).zfill(6)
 
     def __str__(self) -> str:
         if self.portauthority:
@@ -1248,6 +1256,15 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         blank=True,
         verbose_name=_("Other disembarkation outside of populated areas"),
     )
+
+    prisme_code = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+    )
+
+    @property
+    def prisme_code_str(self) -> str:
+        return str(self.prisme_code).zfill(6)
 
     def __str__(self) -> str:
         return f"{self.name} ({self.get_municipality_display()})"
