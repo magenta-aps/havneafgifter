@@ -339,6 +339,10 @@ class TestPort(TestCase):
         )
         self.assertEqual(str(instance), f"{port_name} ({authority_name})")
 
+    def test_prisme_str(self):
+        port = Port(name="TestPort", prisme_code=10767)
+        self.assertEqual(port.prisme_code_str, "010767")
+
 
 class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase):
     maxDiff = None
@@ -717,6 +721,10 @@ class TestDisembarkmentSite(TestCase):
             municipality=Municipality.AVANNAATA,
         )
         self.assertEqual(str(instance), "Naturen (Avannaata)")
+
+    def test_prisme_str(self):
+        port = DisembarkmentSite(name="Naturen", prisme_code=10767)
+        self.assertEqual(port.prisme_code_str, "010767")
 
 
 class TestVessel(HarborDuesFormTestMixin, TestCase):
