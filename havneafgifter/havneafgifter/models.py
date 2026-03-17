@@ -1043,7 +1043,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     unit_price=item["harbour_tax"],
                     text=f"{port.name}, {start_date.strftime(date_format)} - "
                     f"{end_date.strftime(date_format)}",
-                    locality_code="020000",  # port.prisme_code_str,
+                    locality_code=port.prisme_code_str,
                 )
             )
         return lines
@@ -1196,7 +1196,7 @@ class CruiseTaxForm(HarborDuesForm):
                 unit_price=passenger_tax["taxrate"],
                 text=f"{self.number_of_passengers} passengers",
                 # TODO: Hvad skal stedkoden være for passagerafgift?
-                locality_code="030000",  # self.port_of_call.prisme_code_str,
+                locality_code=self.port_of_call.prisme_code_str,
             )
         )
 
@@ -1211,7 +1211,7 @@ class CruiseTaxForm(HarborDuesForm):
                     text=f"{disembarkment.disembarkment_site.name}, "
                     f"{disembarkment_details['date'].strftime(date_format)}, "
                     f"{disembarkment.number_of_passengers} passengers",
-                    locality_code="010000",  # disembarkment.prisme_code_str,
+                    locality_code=disembarkment.disembarkment_site.prisme_code_str,
                 )
             )
 
