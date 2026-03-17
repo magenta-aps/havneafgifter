@@ -153,6 +153,7 @@ class PrismeClient(Prisme):
     def process_service(
         self, request_object: HavneafgiftInvoiceRequest, debug_context: Any = None
     ):
+        print(f"mock: {self.mock}")
         if self.mock:
             return self.mock_service(request_object, debug_context)
         else:

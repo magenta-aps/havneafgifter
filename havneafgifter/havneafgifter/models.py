@@ -1026,7 +1026,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
-        tax: dict = self.calculate_harbour_tax(False)
+        tax: dict = self.calculate_harbour_tax(True)
         lines: List[HavneafgiftInvoiceLine] = []
         date_format = "%Y.%m.%d %H:%M"
         for item in tax["details"]:
@@ -1043,7 +1043,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     unit_price=item["harbour_tax"],
                     text=f"{port.name}, {start_date.strftime(date_format)} - "
                     f"{end_date.strftime(date_format)}",
-                    locality_code=port.prisme_code_str,
+                    locality_code="020000",  # port.prisme_code_str,
                 )
             )
         return lines
@@ -1188,7 +1188,7 @@ class CruiseTaxForm(HarborDuesForm):
 
         lines += super().invoice_lines
 
-        passenger_tax = self.calculate_passenger_tax(False)
+        passenger_tax = self.calculate_passenger_tax(True)
         lines.append(
             HavneafgiftInvoiceLine(
                 description="Passenger tax",
@@ -1196,11 +1196,11 @@ class CruiseTaxForm(HarborDuesForm):
                 unit_price=passenger_tax["taxrate"],
                 text=f"{self.number_of_passengers} passengers",
                 # TODO: Hvad skal stedkoden være for passagerafgift?
-                locality_code=self.port_of_call.prisme_code_str,
+                locality_code="030000",  # self.port_of_call.prisme_code_str,
             )
         )
 
-        disembarkment_tax = self.calculate_disembarkment_tax(False)
+        disembarkment_tax = self.calculate_disembarkment_tax(True)
         for disembarkment_details in disembarkment_tax["details"]:
             disembarkment: Disembarkment = disembarkment_details["disembarkment"]
             lines.append(
@@ -1211,7 +1211,7 @@ class CruiseTaxForm(HarborDuesForm):
                     text=f"{disembarkment.disembarkment_site.name}, "
                     f"{disembarkment_details['date'].strftime(date_format)}, "
                     f"{disembarkment.number_of_passengers} passengers",
-                    locality_code=disembarkment.prisme_code_str,
+                    locality_code="010000",  # disembarkment.prisme_code_str,
                 )
             )
 
