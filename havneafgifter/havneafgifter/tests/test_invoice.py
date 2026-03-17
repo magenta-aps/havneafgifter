@@ -83,12 +83,14 @@ class InvoiceTest(TestCase):
             disembarkment_site=cls.site,
         )
 
+    @override_settings(PRISME={**settings.PRISME, "mock": True})
     def test_invoice(self):
         self.form.submit()
         self.form.invoice()
         self.assertEqual(self.form.status, Status.INVOICED)
 
-    @override_settings(PRISME={**settings.PRISME, "mock": True})
+    @override_settings(PRISME={**settings.PRISME, "mock": False})
+    @patch.object(Prisme, "process_service")
     def test_submit(self):
         PrismeClient.instance = None
         self.form.submit()
