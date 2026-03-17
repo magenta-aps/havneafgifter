@@ -1,16 +1,26 @@
 from datetime import datetime
+from decimal import Decimal
+from unittest.mock import patch
 
+from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from prisme.client import Prisme
 
+from havneafgifter.clients.prisme import HavneafgiftInvoiceRequest, PrismeClient
 from havneafgifter.models import (
     CruiseTaxForm,
+    Disembarkment,
+    DisembarkmentSite,
+    DisembarkmentTaxRate,
     Nationality,
     Port,
     PortAuthority,
+    PortTaxRate,
     ShippingAgent,
     ShipType,
     Status,
+    TaxRates,
 )
 
 
@@ -27,7 +37,28 @@ class InvoiceTest(TestCase):
             name="Royal Arctic Line A/S", email="ral@ral.dk"
         )
         cls.port = Port.objects.create(
-            name="Upernavik", portauthority=cls.port_authority
+            name="Upernavik", portauthority=cls.port_authority, prisme_code=1234
+        )
+        cls.site = DisembarkmentSite.objects.create(
+            name="Hans Ø",
+            municipality=960,
+            prisme_code=10500,
+        )
+        cls.taxrates = TaxRates.objects.create(
+            start_datetime=None, end_datetime=None, pax_tax_rate=10
+        )
+        cls.port_tax_rate = PortTaxRate.objects.create(
+            tax_rates=cls.taxrates,
+            port=cls.port,
+            gt_start=0,
+            gt_end=2000000,
+            port_tax_rate=10,
+        )
+        cls.disembarkment_tax_rate = DisembarkmentTaxRate.objects.create(
+            tax_rates=cls.taxrates,
+            disembarkment_site=cls.site,
+            municipality=960,
+            disembarkment_tax_rate=20,
         )
         cls.form = CruiseTaxForm.objects.create(
             status=Status.DRAFT,
@@ -46,16 +77,94 @@ class InvoiceTest(TestCase):
             vessel_type=ShipType.CRUISE,
             number_of_passengers=5000,
         )
+        cls.disembarkment = Disembarkment.objects.create(
+            cruise_tax_form=cls.form,
+            number_of_passengers=1000,
+            disembarkment_site=cls.site,
+        )
 
     def test_invoice(self):
         self.form.submit()
         self.form.invoice()
         self.assertEqual(self.form.status, Status.INVOICED)
 
+    @override_settings(PRISME={**settings.PRISME, "mock": True})
     def test_submit(self):
+        PrismeClient.instance = None
         self.form.submit()
         self.form.save()
         self.assertEqual(self.form.status, Status.NEW)
         call_command("send_invoices")
         form = CruiseTaxForm.objects.get(pk=self.form.pk)
         self.assertEqual(form.status, Status.INVOICED)
+
+    def test_invoice_lines(self):
+        lines = self.form.invoice_lines
+        self.assertEqual(len(lines), 3)
+
+        harbor_tax_line = lines[0].dict
+        self.assertEqual(harbor_tax_line["Description"], "Harbour tax")
+        self.assertEqual(harbor_tax_line["Quantity"], 1)
+        self.assertEqual(harbor_tax_line["UnitPrice"], "15500000.00")
+        self.assertEqual(harbor_tax_line["AmountCur"], "15500000.00")
+        self.assertEqual(
+            harbor_tax_line["InvoiceTxt"],
+            "Upernavik, 2024.05.01 12:00 - 2024.06.01 12:00",
+        )
+        self.assertEqual(
+            harbor_tax_line["ledgerDimensionSegments"],
+            {
+                "ledgerDimensionSegment": [
+                    {"Name": "Afdeling", "Value": settings.PRISME["department_recid"]},
+                    {"Name": "Finanslov", "Value": 0},
+                    {"Name": "Formaal", "Value": "0000000000"},
+                    {"Name": "ArtsKontoplan", "Value": 0},
+                    {"Name": "Sted", "Value": "001234"},
+                ]
+            },
+        )
+
+        passenger_tax_line = lines[1].dict
+        self.assertEqual(passenger_tax_line["Description"], "Passenger tax")
+        self.assertEqual(passenger_tax_line["Quantity"], 5000)
+        self.assertEqual(passenger_tax_line["UnitPrice"], "10.00")
+        self.assertEqual(passenger_tax_line["AmountCur"], "50000.00")
+        self.assertEqual(passenger_tax_line["InvoiceTxt"], "5000 passengers")
+
+        disembarkment_tax_line = lines[2].dict
+        self.assertEqual(disembarkment_tax_line["Description"], "Disembarkment tax")
+        self.assertEqual(disembarkment_tax_line["Quantity"], 1000)
+        self.assertEqual(disembarkment_tax_line["UnitPrice"], "20.00")
+        self.assertEqual(disembarkment_tax_line["AmountCur"], "20000.00")
+        self.assertEqual(
+            disembarkment_tax_line["InvoiceTxt"],
+            "Hans Ø, 2024.05.01 12:00, 1000 passengers",
+        )
+        self.assertEqual(
+            disembarkment_tax_line["ledgerDimensionSegments"],
+            {
+                "ledgerDimensionSegment": [
+                    {"Name": "Afdeling", "Value": settings.PRISME["department_recid"]},
+                    {"Name": "Finanslov", "Value": 0},
+                    {"Name": "Formaal", "Value": "0000000000"},
+                    {"Name": "ArtsKontoplan", "Value": 0},
+                    {"Name": "Sted", "Value": "010500"},
+                ]
+            },
+        )
+
+    @override_settings(PRISME={**settings.PRISME, "mock": False})
+    @patch.object(Prisme, "process_service")
+    def test_send_invoice(self, mock_process_service):
+        self.form.submit()
+        self.form.send_invoice()
+        mock_process_service.assert_called()
+        invoice_request = mock_process_service.call_args[0][0]
+        self.assertIsInstance(invoice_request, HavneafgiftInvoiceRequest)
+        data = invoice_request.dict
+        self.assertEqual(data["HarborTaxIdFUJ"], self.form.pk)
+        self.assertEqual(len(invoice_request.lines), 3)
+        self.assertEqual(
+            sum([line.quantity * line.unit_price for line in invoice_request.lines]),
+            Decimal("15570000.00"),
+        )

@@ -1056,7 +1056,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             self.save(update_fields=["pdf"])
 
             try:
-                prisme_request = HavneafgiftInvoiceRequest(
+                prisme_request_1 = HavneafgiftInvoiceRequest(
                     afgift_id=self.pk,
                     invoice_date=self.date,
                     due_date=self.date,
@@ -1065,10 +1065,14 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     files=[self.pdf],
                     lines=self.invoice_lines,
                 )
+                prisme_request_2 = prisme_request_1.create_custom_table_request()
+
                 prisme = PrismeClient.from_settings()
-                prisme.process_service(prisme_request)
+                prisme.process_service(prisme_request_1)
+                prisme.process_service(prisme_request_2)
 
             except Exception as e:  # pragma: no cover
+                print(e)
                 logger.exception(e)
                 # Couldn't send right now, keep in queue
             else:
@@ -1183,10 +1187,8 @@ class CruiseTaxForm(HarborDuesForm):
 
     @property
     def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
-        lines: List[HavneafgiftInvoiceLine] = []
+        lines: List[HavneafgiftInvoiceLine] = super().invoice_lines
         date_format = "%Y.%m.%d %H:%M"
-
-        lines += super().invoice_lines
 
         passenger_tax = self.calculate_passenger_tax(True)
         lines.append(
