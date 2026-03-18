@@ -79,5 +79,7 @@ if [ "${TEST,,}" = true ]; then
   coverage combine
   coverage report --show-missing
 fi
-
+if [ $ECHO_INTERFACE ]; then
+    echo "Interface: $ECHO_INTERFACE"
+fi
 exec "$@"

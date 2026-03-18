@@ -30,6 +30,7 @@ django_compressor==4.6.0
 django-libsass==0.9
 elementpath==4.8.0
 fonttools==4.60.0
+gl-prisme==0.2.2
 gunicorn==22.0.0
 html5lib==1.1
 idna==3.10
@@ -68,5 +69,5 @@ weasyprint==62.3
 webencodings==0.5.1
 whitenoise==6.11.0
 xmlschema==2.5.1
-xmltodict==0.15.1
+xmltodict==1.0.4
 zopfli==0.2.3.post1
