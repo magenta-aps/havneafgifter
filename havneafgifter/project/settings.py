@@ -336,3 +336,4 @@ STATICFILES_FINDERS = [
 ]
 
 from .login_settings import *  # noqa
+from .prisme_settings import *  # noqa

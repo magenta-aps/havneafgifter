@@ -501,7 +501,7 @@
     "model": "havneafgifter.disembarkmentsite",
     "pk": 162,
     "fields": {
-        "name": "Ikerasssuaq (Prins Christians Sund)",
+        "name": "Ikerassuaq (Prins Christians Sund)",
         "municipality": 955
     }
 },
