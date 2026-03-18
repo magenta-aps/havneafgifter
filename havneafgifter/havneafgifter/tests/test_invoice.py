@@ -99,6 +99,17 @@ class InvoiceTest(TestCase):
         form = CruiseTaxForm.objects.get(pk=self.form.pk)
         self.assertEqual(form.status, Status.INVOICED)
 
+    @override_settings(
+        PRISME={
+            **settings.PRISME,
+            "department_recid": "1000",
+            "type_account": {
+                "cruise_gte_30k": "1111",
+                "landing_tax": "2222",
+                "passenger_tax": "3333",
+            },
+        }
+    )
     def test_invoice_lines(self):
         lines = self.form.invoice_lines
         self.assertEqual(len(lines), 3)
@@ -116,12 +127,12 @@ class InvoiceTest(TestCase):
             harbor_tax_line["ledgerDimensionSegments"],
             {
                 "ledgerDimensionSegment": [
-                    {"Name": "Afdeling", "Value": settings.PRISME["department_recid"]},
+                    {"Name": "Afdeling", "Value": "1000"},
                     {"Name": "Finanslov", "Value": 0},
                     {"Name": "Formaal", "Value": "0000000000"},
                     {
                         "Name": "ArtsKontoplan",
-                        "Value": settings.PRISME["type_account"]["cruise_gte_30k"],
+                        "Value": "000001111",
                     },
                     {"Name": "Sted", "Value": "001234"},
                 ]
@@ -148,12 +159,12 @@ class InvoiceTest(TestCase):
             disembarkment_tax_line["ledgerDimensionSegments"],
             {
                 "ledgerDimensionSegment": [
-                    {"Name": "Afdeling", "Value": settings.PRISME["department_recid"]},
+                    {"Name": "Afdeling", "Value": "1000"},
                     {"Name": "Finanslov", "Value": 0},
                     {"Name": "Formaal", "Value": "0000000000"},
                     {
                         "Name": "ArtsKontoplan",
-                        "Value": settings.PRISME["type_account"]["landing_tax"],
+                        "Value": "000002222",
                     },
                     {"Name": "Sted", "Value": "010500"},
                 ]
