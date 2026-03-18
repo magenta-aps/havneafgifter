@@ -856,9 +856,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                         payments = datetime_range.started_weeks
                     else:
                         payments = datetime_range.started_days
-                    range_port_tax = (
-                        payments * port_taxrate.port_tax_rate * gross_tonnage
-                    )
+                    payment_price = port_taxrate.port_tax_rate * gross_tonnage
+                    range_port_tax = payments * payment_price
+
                     harbour_tax += range_port_tax
                 details.append(
                     {
