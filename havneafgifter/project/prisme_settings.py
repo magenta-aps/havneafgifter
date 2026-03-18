@@ -24,4 +24,11 @@ PRISME = {
     },
     "proxy": {"socks": os.environ.get("PRISME_SOCKS", None)},
     "mock": os.environ.get("PRISME_MOCK", False),
+    "type_account": {
+        "other": os.environ.get("PRISME_TYPE_ACCOUNT_OTHER", 0),
+        "cruise_lt_30k": os.environ.get("PRISME_TYPE_ACCOUNT_CRUISE_LT_30K", 0),
+        "cruise_gte_30k": os.environ.get("PRISME_TYPE_ACCOUNT_CRUISE_GTE_30K", 0),
+        "passenger_tax": os.environ.get("PRISME_TYPE_ACCOUNT_PASSENGER_TAX", 0),
+        "landing_tax": os.environ.get("PRISME_TYPE_ACCOUNT_LANDING_TAX", 0),
+    },
 }

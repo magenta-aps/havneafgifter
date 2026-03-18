@@ -18,6 +18,7 @@ class HavneafgiftInvoiceLine(InvoiceLine):
         unit_price: int | Decimal,
         text: str,
         locality_code: int | str,
+        type_account: int | str,
     ):
         prisme_settings = settings.PRISME  # type: ignore[misc]
         super().__init__(
@@ -29,7 +30,7 @@ class HavneafgiftInvoiceLine(InvoiceLine):
                 "Afdeling": prisme_settings["department_recid"],
                 "Finanslov": prisme_settings["finance_law_id"],
                 "Formaal": str(prisme_settings["purpose_id"]).zfill(10),
-                "ArtsKontoplan": prisme_settings["type_account_plan_id"],
+                "ArtsKontoplan": str(type_account).zfill(9),
                 "Sted": str(locality_code).zfill(6),
             },
             beneficiary=prisme_settings["beneficiary"],
@@ -65,7 +66,9 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
             files=[
                 InvoiceFile(
                     name=os.path.basename(file.name),
-                    path=os.path.join(settings.STORAGE_PDF, file.name),
+                    path=os.path.join(
+                        settings.STORAGE_PDF, file.name  # type: ignore[misc]
+                    ),
                 )
                 for file in files
                 if file.name
@@ -112,14 +115,18 @@ class PrismeClient(Prisme):
     instance = None
 
     def __init__(
-        self, wsdl_file: str, auth: dict, proxy: dict | None = None, mock=False
+        self,
+        wsdl_file: str,
+        auth: Dict[str, str],
+        proxy: Dict[str, str] | None = None,
+        mock=False,
     ):
         super().__init__(wsdl_file, auth, proxy)
         self.mock = mock
 
     @staticmethod
     def from_settings() -> "PrismeClient":
-        prisme_settings = settings.PRISME  # type: ignore[misc]
+        prisme_settings: Dict[str, Any] = settings.PRISME  # type: ignore[misc]
         if not PrismeClient.instance:
             if prisme_settings.get("mock", False):
                 PrismeClient.instance = PrismeClient("", auth={}, proxy=None, mock=True)

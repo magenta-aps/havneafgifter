@@ -119,7 +119,10 @@ class InvoiceTest(TestCase):
                     {"Name": "Afdeling", "Value": settings.PRISME["department_recid"]},
                     {"Name": "Finanslov", "Value": 0},
                     {"Name": "Formaal", "Value": "0000000000"},
-                    {"Name": "ArtsKontoplan", "Value": 0},
+                    {
+                        "Name": "ArtsKontoplan",
+                        "Value": settings.PRISME["type_account"]["cruise_gte_30k"],
+                    },
                     {"Name": "Sted", "Value": "001234"},
                 ]
             },
@@ -148,7 +151,10 @@ class InvoiceTest(TestCase):
                     {"Name": "Afdeling", "Value": settings.PRISME["department_recid"]},
                     {"Name": "Finanslov", "Value": 0},
                     {"Name": "Formaal", "Value": "0000000000"},
-                    {"Name": "ArtsKontoplan", "Value": 0},
+                    {
+                        "Name": "ArtsKontoplan",
+                        "Value": settings.PRISME["type_account"]["landing_tax"],
+                    },
                     {"Name": "Sted", "Value": "010500"},
                 ]
             },

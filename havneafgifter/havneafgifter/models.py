@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO
-from typing import List
+from typing import Dict, List
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group
@@ -1025,27 +1025,37 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         )
 
     @property
+    def harbor_tax_type_account(self):
+        # TODO: hent fra ejer (RAL, Pilersuisoq)
+        if self.vessel_type in (
+            ShipType.FREIGHTER,
+            ShipType.FISHER,
+            ShipType.PASSENGER,
+            ShipType.OTHER,
+        ):
+            return settings.PRISME["type_account"]["other"]
+
+    @property
     def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
         tax: dict = self.calculate_harbour_tax(True)
         lines: List[HavneafgiftInvoiceLine] = []
-        date_format = "%Y.%m.%d %H:%M"
-        for item in tax["details"]:
-            port_taxrate: PortTaxRate = item["port_taxrate"]
-            port: Port = (
-                port_taxrate.port or self.port_of_call
-            )  # TODO: Er det den rigtige havn?
-            start_date: datetime = item["date_range"].start_datetime
-            end_date: datetime = item["date_range"].end_datetime
-            lines.append(
-                HavneafgiftInvoiceLine(
-                    description="Harbour tax",
-                    quantity=1,
-                    unit_price=item["harbour_tax"],
-                    text=f"{port.name}, {start_date.strftime(date_format)} - "
-                    f"{end_date.strftime(date_format)}",
-                    locality_code=port.prisme_code_str,
+        if self.port_of_call is not None:
+            date_format = "%Y.%m.%d %H:%M"
+            for item in tax["details"]:
+                start_date: datetime = item["date_range"].start_datetime
+                end_date: datetime = item["date_range"].end_datetime
+                lines.append(
+                    HavneafgiftInvoiceLine(
+                        description="Harbour tax",
+                        quantity=1,
+                        unit_price=item["harbour_tax"],
+                        text=f"{self.port_of_call.name}, "
+                        f"{start_date.strftime(date_format)} - "
+                        f"{end_date.strftime(date_format)}",
+                        locality_code=self.port_of_call.prisme_code_str,
+                        type_account=self.harbor_tax_type_account,
+                    )
                 )
-            )
         return lines
 
     def send_invoice(self):
@@ -1186,21 +1196,35 @@ class CruiseTaxForm(HarborDuesForm):
         )
 
     @property
+    def harbor_tax_type_account(self):
+        type_account: Dict[str, str | int] = settings.PRISME["type_account"]  # type: ignore[assignment, annotation-unchecked]  # noqa: E501
+        if self.vessel_type == ShipType.CRUISE:
+            if self.gross_tonnage < 30000:
+                return type_account["cruise_lt_30k"]
+            else:
+                return type_account["cruise_gte_30k"]
+        return super().harbor_tax_type_account  # pragma: no cover
+
+    @property
     def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
         lines: List[HavneafgiftInvoiceLine] = super().invoice_lines
         date_format = "%Y.%m.%d %H:%M"
+        type_account: Dict[str, str | int] = settings.PRISME[
+            "type_account"
+        ]  # type: ignore[assignment]
 
         passenger_tax = self.calculate_passenger_tax(True)
-        lines.append(
-            HavneafgiftInvoiceLine(
-                description="Passenger tax",
-                quantity=self.number_of_passengers,
-                unit_price=passenger_tax["taxrate"],
-                text=f"{self.number_of_passengers} passengers",
-                # TODO: Hvad skal stedkoden være for passagerafgift?
-                locality_code=self.port_of_call.prisme_code_str,
+        if passenger_tax["passenger_tax"] is not None and self.port_of_call is not None:
+            lines.append(
+                HavneafgiftInvoiceLine(
+                    description="Passenger tax",
+                    quantity=self.number_of_passengers or 0,
+                    unit_price=passenger_tax["taxrate"] or 0,
+                    text=f"{self.number_of_passengers} passengers",
+                    locality_code=self.port_of_call.prisme_code_str,
+                    type_account=type_account["passenger_tax"],
+                )
             )
-        )
 
         disembarkment_tax = self.calculate_disembarkment_tax(True)
         for disembarkment_details in disembarkment_tax["details"]:
@@ -1214,6 +1238,7 @@ class CruiseTaxForm(HarborDuesForm):
                     f"{disembarkment_details['date'].strftime(date_format)}, "
                     f"{disembarkment.number_of_passengers} passengers",
                     locality_code=disembarkment.disembarkment_site.prisme_code_str,
+                    type_account=type_account["landing_tax"],
                 )
             )
 

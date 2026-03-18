@@ -5,10 +5,11 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.models import (
+    CruiseTaxForm,
     DisembarkmentSite,
     HarborDuesForm,
     Municipality,
@@ -672,6 +673,21 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
         self.assertTrue(latest_rejection.history_date > now)
         self.assertTrue(latest_rejection.history_date - timedelta(seconds=1) < now)
 
+    @override_settings(
+        PRISME={
+            "type_account": {
+                "other": "0001",
+                "cruise_lt_30k": "0002",
+                "cruise_gte_30k": "0003",
+            }
+        }
+    )
+    def test_harbor_tax_type_account(self):
+        harbor_tax_form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.assertEqual(harbor_tax_form.harbor_tax_type_account, "0001")
+
 
 class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
     def test_has_port_of_call(self):
@@ -712,6 +728,29 @@ class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
         self.assertEqual(latest_rejection.reason_text, "Testing")
         self.assertTrue(latest_rejection.history_date > now)
         self.assertTrue(latest_rejection.history_date - timedelta(seconds=1) < now)
+
+    @override_settings(
+        PRISME={
+            "type_account": {
+                "other": "0001",
+                "cruise_lt_30k": "0002",
+                "cruise_gte_30k": "0003",
+            }
+        }
+    )
+    def test_harbor_tax_type_account(self):
+        cruise_tax_form = CruiseTaxForm.objects.create(
+            **{**self.cruise_tax_form_data, "gross_tonnage": 20000}
+        )
+        self.assertEqual(cruise_tax_form.harbor_tax_type_account, "0002")
+        cruise_tax_form = CruiseTaxForm.objects.create(
+            **{**self.cruise_tax_form_data, "gross_tonnage": 40000}
+        )
+        self.assertEqual(cruise_tax_form.harbor_tax_type_account, "0003")
+        harbor_tax_form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.assertEqual(harbor_tax_form.harbor_tax_type_account, "0001")
 
 
 class TestDisembarkmentSite(TestCase):
