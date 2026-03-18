@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-
 BOOTSTRAP5 = {
     "css_url": "/static/bootstrap/bootstrap.min.css",
     "javascript_url": "/static/bootstrap/bootstrap.bundle.min.js",
