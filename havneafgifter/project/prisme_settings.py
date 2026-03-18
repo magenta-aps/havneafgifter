@@ -25,6 +25,11 @@ PRISME = {
     "proxy": {"socks": os.environ.get("PRISME_SOCKS", None)},
     "mock": os.environ.get("PRISME_MOCK", False),
     "type_account": {
+        "by_owner": {
+            # Ship owners are compared to the keys here.
+            # If a key is contained in the form's ship owner, we use the value
+            "Royal Arctic Line A/S": os.environ.get("PRISME_TYPE_ACCOUNT_RAL", 0),
+        },
         "other": os.environ.get("PRISME_TYPE_ACCOUNT_OTHER", 0),
         "cruise_lt_30k": os.environ.get("PRISME_TYPE_ACCOUNT_CRUISE_LT_30K", 0),
         "cruise_gte_30k": os.environ.get("PRISME_TYPE_ACCOUNT_CRUISE_GTE_30K", 0),

@@ -679,6 +679,10 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
                 "other": "0001",
                 "cruise_lt_30k": "0002",
                 "cruise_gte_30k": "0003",
+                "by_owner": {
+                    "TestCompany1": "0004",
+                    "TestCompany2": "0004",
+                },
             }
         }
     )
@@ -687,6 +691,14 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
         )
         self.assertEqual(harbor_tax_form.harbor_tax_type_account, "0001")
+        harbor_tax_form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "vessel_owner": "TestCompany1"}
+        )
+        self.assertEqual(harbor_tax_form.harbor_tax_type_account, "0004")
+        harbor_tax_form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "vessel_owner": "testcompany1"}
+        )
+        self.assertEqual(harbor_tax_form.harbor_tax_type_account, "0004")
 
 
 class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):

@@ -1026,7 +1026,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def harbor_tax_type_account(self):
-        # TODO: hent fra ejer (RAL, Pilersuisoq)
+        owner = self.vessel_owner.strip().lower()
+        for owner_key, owner_account in (
+            settings.PRISME["type_account"].get("by_owner", {}).items()
+        ):
+            if owner_key.strip().lower() == owner:
+                return owner_account
+
         if self.vessel_type in (
             ShipType.FREIGHTER,
             ShipType.FISHER,
