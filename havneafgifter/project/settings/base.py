@@ -17,8 +17,9 @@ from pathlib import Path
 
 from project.util import strtobool
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Should resolve to the /app dir
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 VERSION = os.environ["COMMIT_TAG"]
 
 # Quick-start development settings - unsuitable for production
