@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
+from import_export import resources
+from import_export.admin import ExportActionModelAdmin
 from simple_history.admin import SimpleHistoryAdmin
 
 from havneafgifter.models import (
@@ -22,8 +24,14 @@ from havneafgifter.models import (
 )
 
 
+class HarborDuesFormResource(resources.ModelResource):
+
+    class Meta:
+        model = HarborDuesForm
+
+
 @admin.register(HarborDuesForm)
-class HarborDuesFormAdmin(SimpleHistoryAdmin):
+class HarborDuesFormAdmin(SimpleHistoryAdmin, ExportActionModelAdmin):
     list_filter = [
         "port_of_call",
         "nationality",

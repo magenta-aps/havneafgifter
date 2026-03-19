@@ -20,4 +20,5 @@ INSTALLED_APPS = [
     "simple_history",
     "django_extensions",
     "compressor",
+    "import_export",
 ]

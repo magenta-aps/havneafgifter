@@ -72,3 +72,4 @@ whitenoise==6.11.0
 xmlschema==2.5.1
 xmltodict==1.0.4
 zopfli==0.2.3.post1
+django-import-export==4.4.0
