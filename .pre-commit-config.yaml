@@ -7,7 +7,7 @@ repos:
         - flake8-absolute-import
         args:
         - "--max-line-length=88"
-        - "--exclude=**/migrations/*.py,settings.py"
+        - "--exclude=**/migrations/*.py"
         - "--extend-ignore=E226,E203"
 
   - repo: https://github.com/psf/black
