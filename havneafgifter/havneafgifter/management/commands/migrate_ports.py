@@ -101,7 +101,7 @@ class Command(BaseCommand):
             "qernertuarsuit": 10488,
             "ikkatteq": 10489,
             "ittoqqortoormiit": 10490,
-            "uunartoq": 10491,  # rename i db
+            "uunartoq": 10491,
             "ittaajimmiit": 10492,
             "nerlerit inaat": 10496,
         },
