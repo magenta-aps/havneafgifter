@@ -101,7 +101,7 @@ class Command(BaseCommand):
             "qernertuarsuit": 10488,
             "ikkatteq": 10489,
             "ittoqqortoormiit": 10490,
-            "uunartoq": 10491,
+            "uunartoq": 10491,  # rename i db
             "ittaajimmiit": 10492,
             "nerlerit inaat": 10496,
         },
@@ -114,7 +114,8 @@ class Command(BaseCommand):
             "sisimiut": 10580,
             "itilleq": 10581,
             "kangerlussuaq": 10582,
-            "sarfannguaq / sarfannguit": 10583,
+            "sarfannguaq": 10583,
+            "sarfannguit": 10583,
         },
         959: {
             "kommune qeqertalik fælles": 10600,
@@ -129,7 +130,8 @@ class Command(BaseCommand):
             "attu": 10692,
             "iginniarfik": 10695,
             "niaqornaarsuk": 10696,
-            "ikerasarrsuk / ikerasaarsuk": 10698,
+            "ikerasarrsuk": 10698,
+            "ikerasaarsuk": 10698,
         },
     }
 
