@@ -8,6 +8,7 @@ from django.core.files import File
 from prisme.client import Prisme
 from prisme.file import File as InvoiceFile
 from prisme.invoice import InvoiceLine, InvoiceRequest, InvoiceResponse
+from prisme.request import ResponseType
 
 
 class HavneafgiftInvoiceLine(InvoiceLine):
@@ -96,6 +97,10 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
         request.files = self.files
         return request
 
+    @classmethod
+    def response_class(cls) -> type[ResponseType]:
+        return HavneafgiftInvoiceResponse  # pragma: no cover
+
 
 class InvoiceCustomTableRequest(HavneafgiftInvoiceRequest):
     method = "CreateCustTable"
@@ -164,3 +169,10 @@ class PrismeClient(Prisme):
             return self.mock_service(request_object, debug_context)
         else:
             return super().process_service(request_object, debug_context)
+
+    def create_request_header(
+        self, method: str, area: str = "HAVNEAFGIFT", client_version: int = 1
+    ) -> Any:
+        return super().create_request_header(
+            method, area, client_version
+        )  # pragma: no cover
