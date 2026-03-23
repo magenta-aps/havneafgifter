@@ -56,11 +56,7 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
                     "base": _PDF_BASE_TEMPLATE,
                     "can_create": False,
                     "can_edit": False,
-                    "can_withdraw": False,
-                    "can_approve": False,
-                    "can_reject": False,
                     "can_delete": False,
-                    "landing_modal": False,
                 }
             ),
         )
@@ -86,9 +82,6 @@ class TestReceipt(ParametrizedTestCase, _PDFMixin, SimpleTestCase):
             {
                 "can_create": False,
                 "can_edit": False,
-                "can_withdraw": False,
-                "can_approve": False,
-                "can_reject": False,
                 "can_delete": False,
             },
         )
@@ -113,9 +106,6 @@ class TestHarborDuesFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "FREIGHTER_OR_OTHER": (ShipType.FREIGHTER, ShipType.OTHER),
                 "can_create": False,
                 "can_edit": True,
-                "can_withdraw": True,
-                "can_approve": True,
-                "can_reject": True,
                 "can_delete": False,
             },
         )
@@ -137,9 +127,6 @@ class TestCruiseTaxFormReceipt(HarborDuesFormTestMixin, _PDFMixin, TestCase):
                 "disembarkment_tax_items",
                 "can_create",
                 "can_edit",
-                "can_withdraw",
-                "can_approve",
-                "can_reject",
                 "can_delete",
             ],
         )

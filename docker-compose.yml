@@ -29,13 +29,13 @@ services:
       - LOAD_FIXTURES=true
       - LOAD_DEMODATA=true
       - HOME=/tmp/
+      - ECHO_INTERFACE=http://localhost:8050
     ports:
       - "8050:8000"
     networks:
       - default
       - database
       - mail
-    restart: unless-stopped
     command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   havneafgifter-db:

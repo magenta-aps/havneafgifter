@@ -4,10 +4,13 @@ import logging
 import re
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from io import BytesIO
+from typing import Dict, List
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import (
     EmailValidator,
@@ -20,7 +23,6 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.template.defaultfilters import date
 from django.utils import translation
 from django.utils.functional import cached_property
@@ -31,6 +33,11 @@ from simple_history.models import HistoricalRecords
 from simple_history.signals import pre_create_historical_record
 from simple_history.utils import update_change_reason
 
+from havneafgifter.clients.prisme import (
+    HavneafgiftInvoiceLine,
+    HavneafgiftInvoiceRequest,
+    PrismeClient,
+)
 from havneafgifter.data import DateTimeRange
 
 logger = logging.getLogger(__name__)
@@ -313,6 +320,7 @@ class Status(models.TextChoices):
     # TODO: DONE or something similar will be introduced when the system
     # handles invoicing. For now, we won't be needing it.
     # DONE = ("DONE", _("Done"))
+    INVOICED = ("INVOICED", _("Invoiced"))
 
 
 class Municipality(models.IntegerChoices):
@@ -684,41 +692,30 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         source=[Status.DRAFT, Status.REJECTED],
         target=Status.NEW,
         permission=lambda instance, user: instance.has_permission(
-            user, "submit_for_review", False
+            user, "change", False
         ),
     )
-    def submit_for_review(self):
+    def submit(self):
         self._change_reason = Status.NEW.label
 
     @transition(
         field=status,
         source=[Status.NEW],
-        target=Status.DRAFT,
+        target=Status.INVOICED,
         permission=lambda instance, user: instance.has_permission(
-            user, "withdraw_from_review", False
+            user, "invoice", False
         ),
     )
-    def withdraw_from_review(self):
-        self._change_reason = _("Withdrawn from review")
+    def invoice(self):
+        # To be run automatically on a cronjob
+        self._change_reason = Status.INVOICED.label
 
-    @transition(
-        field=status,
-        source=Status.NEW,
-        target=Status.APPROVED,
-        permission=lambda instance, user: instance.has_permission(
-            user, "approve", False
-        ),
-    )
-    def approve(self):
-        self._change_reason = Status.APPROVED.label
-
+    # This only exists so we can set the state in tests
+    # without being blocked by FSM
     @transition(
         field=status,
         source=Status.NEW,
         target=Status.REJECTED,
-        permission=lambda instance, user: instance.has_permission(
-            user, "reject", False
-        ),
     )
     def reject(self, reason: str):
         self._rejection_reason = reason
@@ -859,9 +856,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                         payments = datetime_range.started_weeks
                     else:
                         payments = datetime_range.started_days
-                    range_port_tax = (
-                        payments * port_taxrate.port_tax_rate * gross_tonnage
-                    )
+                    payment_price = port_taxrate.port_tax_rate * gross_tonnage
+                    range_port_tax = payments * payment_price
+
                     harbour_tax += range_port_tax
                 details.append(
                     {
@@ -890,13 +887,10 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
         return HarborDuesFormReceipt(self, **kwargs)
 
-    @cached_property
+    @property
     def latest_rejection(self):
         if self.status == Status.REJECTED:
-            if isinstance(self, CruiseTaxForm):
-                history = self.harborduesform_ptr.history
-            else:
-                history = self.history
+            history = self.history
             try:
                 return history.filter(
                     status=Status.REJECTED,
@@ -974,16 +968,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 user.port == self.port_of_call
             )
 
-    def _has_withdraw_from_review_permission(self, user: User) -> bool:
-        if user.has_group_name("Ship"):
-            return user.username == self.vessel_imo
-        if user.has_group_name("Shipping"):
-            return (
-                self.shipping_agent is not None
-                and self.shipping_agent == user.shipping_agent
-            )
-        return False
-
     def _has_delete_permission(self, user: User) -> bool:
         if user is None or self.status != Status.DRAFT:
             return False
@@ -1010,18 +994,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             if user.has_group_name("PortAuthority"):
                 filter |= cls._get_port_authority_filter(user)
 
-        if action == "withdraw_from_review":
-            if user.has_group_name("Ship"):
-                filter |= cls._get_ship_user_filter(user)
-            if user.has_group_name("Shipping"):
-                filter |= cls._get_shipping_agent_user_filter(user)
-
         if filter.children:
             return qs.filter(filter)
-
-        if action in ("approve", "reject", "invoice"):
-            if user.has_group_name("PortAuthority"):
-                return qs.filter(cls._get_port_authority_filter(user))
 
         return qs.none()
 
@@ -1045,29 +1019,81 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 )
             )
             or (
-                action == "submit_for_review"
+                action == "submit"
                 and (user.has_group_name("Ship") or user.has_group_name("Shipping"))
             )
-            or (
-                action == "withdraw_from_review"
-                and self._has_withdraw_from_review_permission(user)
-            )
-            or (
-                action in ("approve", "reject", "invoice")
-                and (
-                    (
-                        self.port_of_call is None
-                        and user.port_authority
-                        and user.port_authority.name
-                        == settings.APPROVER_NO_PORT_OF_CALL
-                    )
-                    or (
-                        user.has_group_name("PortAuthority")
-                        and self._has_port_authority_permission(user)
+        )
+
+    @property
+    def harbor_tax_type_account(self):
+        owner = self.vessel_owner.strip().lower()
+        for owner_key, owner_account in (
+            settings.PRISME["type_account"].get("by_owner", {}).items()
+        ):
+            if owner_key.strip().lower() == owner:
+                return owner_account
+
+        if self.vessel_type in (
+            ShipType.FREIGHTER,
+            ShipType.FISHER,
+            ShipType.PASSENGER,
+            ShipType.OTHER,
+        ):
+            return settings.PRISME["type_account"]["other"]
+
+    @property
+    def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
+        tax: dict = self.calculate_harbour_tax(True)
+        lines: List[HavneafgiftInvoiceLine] = []
+        if self.port_of_call is not None:
+            date_format = "%Y.%m.%d %H:%M"
+            for item in tax["details"]:
+                start_date: datetime = item["date_range"].start_datetime
+                end_date: datetime = item["date_range"].end_datetime
+                lines.append(
+                    HavneafgiftInvoiceLine(
+                        description="Harbour tax",
+                        quantity=1,
+                        unit_price=item["harbour_tax"],
+                        text=f"{self.port_of_call.name}, "
+                        f"{start_date.strftime(date_format)} - "
+                        f"{end_date.strftime(date_format)}",
+                        locality_code=self.port_of_call.prisme_code_str,
+                        type_account=self.harbor_tax_type_account,
                     )
                 )
-            )
-        )
+        return lines
+
+    def send_invoice(self):
+        if self.status == Status.NEW:
+
+            receipt = self.get_receipt()
+            self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
+            self.save(update_fields=["pdf"])
+
+            try:
+                prisme_request_1 = HavneafgiftInvoiceRequest(
+                    afgift_id=self.pk,
+                    invoice_date=self.date,
+                    due_date=self.date,
+                    accounting_date=self.date,
+                    text="Harbour taxes",
+                    files=[self.pdf],
+                    lines=self.invoice_lines,
+                )
+                prisme_request_2 = prisme_request_1.create_custom_table_request()
+
+                prisme = PrismeClient.from_settings()
+                prisme.process_service(prisme_request_1)
+                prisme.process_service(prisme_request_2)
+
+            except Exception as e:  # pragma: no cover
+                print(e)
+                logger.exception(e)
+                # Couldn't send right now, keep in queue
+            else:
+                self.invoice()
+                self.save(update_fields=("status",))
 
 
 class CruiseTaxForm(HarborDuesForm):
@@ -1174,6 +1200,55 @@ class CruiseTaxForm(HarborDuesForm):
             + value_or_zero(self.pax_tax)
             + value_or_zero(self.disembarkment_tax)
         )
+
+    @property
+    def harbor_tax_type_account(self):
+        type_account: Dict[str, str | int] = settings.PRISME["type_account"]  # type: ignore[assignment, annotation-unchecked]  # noqa: E501
+        if self.vessel_type == ShipType.CRUISE:
+            if self.gross_tonnage < 30000:
+                return type_account["cruise_lt_30k"]
+            else:
+                return type_account["cruise_gte_30k"]
+        return super().harbor_tax_type_account  # pragma: no cover
+
+    @property
+    def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
+        lines: List[HavneafgiftInvoiceLine] = super().invoice_lines
+        date_format = "%Y.%m.%d %H:%M"
+        type_account: Dict[str, str | int] = settings.PRISME[
+            "type_account"
+        ]  # type: ignore[assignment]
+
+        passenger_tax = self.calculate_passenger_tax(True)
+        if passenger_tax["passenger_tax"] is not None and self.port_of_call is not None:
+            lines.append(
+                HavneafgiftInvoiceLine(
+                    description="Passenger tax",
+                    quantity=self.number_of_passengers or 0,
+                    unit_price=passenger_tax["taxrate"] or 0,
+                    text=f"{self.number_of_passengers} passengers",
+                    locality_code=self.port_of_call.prisme_code_str,
+                    type_account=type_account["passenger_tax"],
+                )
+            )
+
+        disembarkment_tax = self.calculate_disembarkment_tax(True)
+        for disembarkment_details in disembarkment_tax["details"]:
+            disembarkment: Disembarkment = disembarkment_details["disembarkment"]
+            lines.append(
+                HavneafgiftInvoiceLine(
+                    description="Disembarkment tax",
+                    quantity=disembarkment.number_of_passengers,
+                    unit_price=disembarkment_details["taxrate"],
+                    text=f"{disembarkment.disembarkment_site.name}, "
+                    f"{disembarkment_details['date'].strftime(date_format)}, "
+                    f"{disembarkment.number_of_passengers} passengers",
+                    locality_code=disembarkment.disembarkment_site.prisme_code_str,
+                    type_account=type_account["landing_tax"],
+                )
+            )
+
+        return lines
 
     def get_receipt(self, **kwargs):
         from havneafgifter.receipts import CruiseTaxFormReceipt
@@ -1665,7 +1740,6 @@ class Vessel(models.Model):
         return self.imo
 
 
-@receiver(pre_create_historical_record, sender=HarborDuesForm.history.model)
 def pre_create_historical_record_callback(
     sender, signal, instance, history_instance, **kwargs
 ):
@@ -1673,3 +1747,11 @@ def pre_create_historical_record_callback(
     reason = getattr(instance, "_rejection_reason", None)
     if reason is not None:
         history_instance.reason_text = reason
+
+
+pre_create_historical_record.connect(
+    pre_create_historical_record_callback, HarborDuesForm.history.model
+)
+pre_create_historical_record.connect(
+    pre_create_historical_record_callback, CruiseTaxForm.history.model
+)

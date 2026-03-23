@@ -4,18 +4,15 @@ from django.urls import URLPattern, URLResolver, path
 from django.views.generic import TemplateView
 
 from havneafgifter.views import (
-    ApproveView,
     HarborDuesFormCreateView,
     HarborDuesFormDeleteView,
     HarborDuesFormListView,
-    LandingModalOkView,
     LoginView,
     LogoutView,
     PassengerStatisticsView,
     PostLoginView,
     PreviewPDFView,
     ReceiptDetailView,
-    RejectView,
     RootView,
     SignupVesselView,
     StatisticsView,
@@ -23,7 +20,6 @@ from havneafgifter.views import (
     TaxRateFormView,
     TaxRateListView,
     UpdateVesselView,
-    WithdrawView,
 )
 
 app_name = "havneafgifter"
@@ -86,21 +82,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="receipt_detail_html",
     ),
     path(
-        "blanket/<int:pk>/tilbagetraek/",
-        WithdrawView.as_view(),
-        name="withdraw",
-    ),
-    path(
-        "blanket/<int:pk>/godkend/",
-        ApproveView.as_view(),
-        name="approve",
-    ),
-    path(
-        "blanket/<int:pk>/afvis/",
-        RejectView.as_view(),
-        name="reject",
-    ),
-    path(
         "blanket/<int:pk>/slet/",
         HarborDuesFormDeleteView.as_view(),
         name="delete",
@@ -119,7 +100,6 @@ urlpatterns: List[URLResolver | URLPattern] = [
         TaxRateFormView.as_view(clone=True),
         name="tax_rate_clone",
     ),
-    path("modal/ok", LandingModalOkView.as_view(), name="landing_modal_ok"),
     path(
         "statistik/passagerer/",
         PassengerStatisticsView.as_view(),

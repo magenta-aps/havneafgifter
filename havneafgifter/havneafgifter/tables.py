@@ -42,6 +42,7 @@ class HarborDuesFormTable(tables.Table):
             Status.NEW: "badge-waiting",
             Status.APPROVED: "badge-approved",
             Status.REJECTED: "badge-rejected",
+            Status.INVOICED: "badge-invoiced",
         }
         cls = cls_map[record.status]
         return format_html(

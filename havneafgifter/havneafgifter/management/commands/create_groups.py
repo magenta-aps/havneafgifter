@@ -55,13 +55,10 @@ class Command(BaseCommand):
         cruisetaxform_contenttype = ContentType.objects.get_for_model(
             CruiseTaxForm, for_concrete_model=False
         )
-        Permission.objects.update_or_create(
+        Permission.objects.filter(
             content_type=harborduesform_contenttype,
             codename="withdraw_from_review_harborduesform",
-            defaults={
-                "name": "Can withdraw harbor dues forms from review",
-            },
-        )
+        ).delete()
         Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="submit_for_review_harborduesform",
@@ -69,20 +66,14 @@ class Command(BaseCommand):
                 "name": "Can submit cruise tax forms for review",
             },
         )
-        Permission.objects.update_or_create(
+        Permission.objects.filter(
             content_type=harborduesform_contenttype,
             codename="approve_harborduesform",
-            defaults={
-                "name": "Can approve harborduesforms",
-            },
-        )
-        Permission.objects.update_or_create(
+        ).delete()
+        Permission.objects.filter(
             content_type=harborduesform_contenttype,
             codename="reject_harborduesform",
-            defaults={
-                "name": "Can reject harborduesforms",
-            },
-        )
+        ).delete()
         Permission.objects.update_or_create(
             content_type=harborduesform_contenttype,
             codename="invoice_harborduesform",
@@ -90,13 +81,10 @@ class Command(BaseCommand):
                 "name": "Can invoice harborduesforms",
             },
         )
-        Permission.objects.update_or_create(
+        Permission.objects.filter(
             content_type=cruisetaxform_contenttype,
             codename="withdraw_from_review_cruisetaxform",
-            defaults={
-                "name": "Can withdraw cruise tax forms from review",
-            },
-        )
+        ).delete()
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="submit_for_review_cruisetaxform",
@@ -104,20 +92,14 @@ class Command(BaseCommand):
                 "name": "Can submit cruise tax forms for review",
             },
         )
-        Permission.objects.update_or_create(
+        Permission.objects.filter(
             content_type=cruisetaxform_contenttype,
             codename="approve_cruisetaxform",
-            defaults={
-                "name": "Can approve cruisetaxforms",
-            },
-        )
-        Permission.objects.update_or_create(
+        ).delete()
+        Permission.objects.filter(
             content_type=cruisetaxform_contenttype,
             codename="reject_cruisetaxform",
-            defaults={
-                "name": "Can reject cruisetaxforms",
-            },
-        )
+        ).delete()
         Permission.objects.update_or_create(
             content_type=cruisetaxform_contenttype,
             codename="invoice_cruisetaxform",
@@ -216,11 +198,6 @@ class Command(BaseCommand):
                         "view",
                         "change",
                         "delete",
-                        "withdraw_from_review",
-                        "approve",
-                        "reject",
-                        "invoice",
-                        "submit_for_review",
                     ),
                 ),
                 (
@@ -257,11 +234,6 @@ class Command(BaseCommand):
                         "view",
                         "change",
                         "delete",
-                        "withdraw_from_review",
-                        "approve",
-                        "reject",
-                        "invoice",
-                        "submit_for_review",
                     ),
                 ),
                 (
