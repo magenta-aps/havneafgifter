@@ -1071,8 +1071,6 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return lines
 
     def send_invoice(self):
-        if self.shipping_agent.cvr is None:
-            print("CVR IS NONE")
         if self.status == Status.NEW and self.shipping_agent.cvr is not None:
 
             receipt = self.get_receipt()
