@@ -176,7 +176,6 @@ class InvoiceTest(TestCase):
     @override_settings(PRISME={**settings.PRISME, "mock": False})
     @patch.object(Prisme, "process_service")
     def test_send_invoice(self, mock_process_service):
-        print("test_send_invoice")
         self.form.submit()
         self.form.send_invoice()
         mock_process_service.assert_called()
