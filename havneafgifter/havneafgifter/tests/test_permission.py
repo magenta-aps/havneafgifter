@@ -33,10 +33,10 @@ class PermissionTest(TestCase):
         call_command("create_groups", verbosity=1)
 
         cls.shipping_agent = ShippingAgent.objects.create(
-            name="Smith", email="smith@matrix.net"
+            name="Smith", email="smith@matrix.net", cvr=10000000
         )
         cls.shipping_agent_other = ShippingAgent.objects.create(
-            name="Jones", email="jones@matrix.net"
+            name="Jones", email="jones@matrix.net", cvr=20000000
         )
         cls.port_authority = PortAuthority.objects.create(
             name="Royal Arctic Line A/S", email="ral@ral.dk"

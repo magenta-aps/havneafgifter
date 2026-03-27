@@ -921,7 +921,7 @@ class TestHarborDuesFormListView(HarborDuesFormTestMixin, TestCase):
         request = self.request_factory.get("")
         request.user = User.objects.create(
             username="other_shipping_agent",
-            shipping_agent=ShippingAgent.objects.create(name="Impostor"),
+            shipping_agent=ShippingAgent.objects.create(name="Impostor", cvr=30000000),
         )
         request.user.groups.add(Group.objects.get(name="Shipping"))
         self.view.setup(request)

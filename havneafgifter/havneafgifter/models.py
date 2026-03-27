@@ -358,6 +358,12 @@ class ShippingAgent(PermissionsMixin, models.Model):
         verbose_name=_("Email address"),
     )
 
+    cvr = models.IntegerField(
+        validators=[MinValueValidator(10000000), MaxValueValidator(99999999)],
+        null=True,
+        blank=False,
+    )
+
     def __str__(self) -> str:
         return self.name
 
@@ -1065,7 +1071,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return lines
 
     def send_invoice(self):
-        if self.status == Status.NEW:
+        if self.status == Status.NEW and self.shipping_agent.cvr is not None:
 
             receipt = self.get_receipt()
             self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
@@ -1080,6 +1086,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     text="Harbour taxes",
                     files=[self.pdf],
                     lines=self.invoice_lines,
+                    cvr=self.shipping_agent.cvr,
                 )
                 prisme_request_2 = prisme_request_1.create_custom_table_request()
 
