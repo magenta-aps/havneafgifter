@@ -30,7 +30,9 @@ class InvoiceTest(TestCase):
         current_timezone = datetime.now().astimezone().tzinfo
 
         cls.shipping_agent = ShippingAgent.objects.create(
-            name="Smith", email="smith@matrix.net"
+            name="Smith",
+            email="smith@matrix.net",
+            cvr=12345678,
         )
 
         cls.port_authority = PortAuthority.objects.create(
@@ -174,6 +176,7 @@ class InvoiceTest(TestCase):
     @override_settings(PRISME={**settings.PRISME, "mock": False})
     @patch.object(Prisme, "process_service")
     def test_send_invoice(self, mock_process_service):
+        print("test_send_invoice")
         self.form.submit()
         self.form.send_invoice()
         mock_process_service.assert_called()
