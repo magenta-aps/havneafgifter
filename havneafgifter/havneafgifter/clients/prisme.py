@@ -50,11 +50,10 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
         text: str,
         files: List[File],
         lines: List[HavneafgiftInvoiceLine],
+        cvr: str | int,
     ):
         prisme_settings = settings.PRISME  # type: ignore[misc]
         super().__init__(
-            order_account_number=prisme_settings["order_account"],
-            invoice_account_number=prisme_settings["invoice_account"],
             currency_code=prisme_settings["currency_code"],
             department_recid=prisme_settings["department_recid"],
             invoice_ean=prisme_settings["invoice_ean"],
@@ -77,11 +76,17 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
             lines=lines,
         )
         self.afgift_id = afgift_id
+        self.cvr = cvr
+        self.customer_group = str(prisme_settings["customer_group"]).zfill(6)
 
     @property
     def dict(self) -> Dict[str, str | int | datetime | Dict[str, List[dict]]]:
         d = super().dict
         d["HarborTaxIdFUJ"] = self.afgift_id
+        d["custTable"] = {
+            "IdentificationNumber": self.cvr,
+            "CustGroup": self.customer_group,
+        }
         return d
 
     def create_custom_table_request(self) -> "InvoiceCustomTableRequest":
@@ -93,6 +98,7 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
             text=self.text,
             lines=self.lines,
             files=[],
+            cvr=self.cvr,
         )
         request.files = self.files
         return request

@@ -260,7 +260,7 @@ class TestUserType(TestCase):
         call_command("create_groups", verbosity=1)
 
         cls.shipping_agent = ShippingAgent.objects.create(
-            name="Smith", email="smith@matrix.net"
+            name="Smith", email="smith@matrix.net", cvr=10000000
         )
         cls.port_authority = PortAuthority.objects.create(
             name="Royal Arctic Line A/S", email="ral@ral.dk"
@@ -512,6 +512,7 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             shipping_agent = ShippingAgent.objects.create(
                 name="Ågent",
                 email=agent_email,
+                cvr=10000000,
             )
 
         if ship:
