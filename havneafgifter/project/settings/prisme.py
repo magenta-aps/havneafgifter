@@ -1,8 +1,7 @@
 import os
 
 PRISME = {
-    "order_account": os.environ.get("PRISME_ORDER_ACCOUNT"),
-    "invoice_account": os.environ.get("PRISME_INVOICE_ACCOUNT"),
+    "customer_group": os.environ.get("PRISME_CUSTOMER_GROUP", "000000"),
     "currency_code": os.environ.get("PRISME_CURRENCY_CODE", "DKK"),
     "department_recid": os.environ.get("PRISME_DEPARTMENT_RECID"),
     "invoice_ean": os.environ.get("PRISME_INVOICE_EAN"),

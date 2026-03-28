@@ -30,7 +30,9 @@ class InvoiceTest(TestCase):
         current_timezone = datetime.now().astimezone().tzinfo
 
         cls.shipping_agent = ShippingAgent.objects.create(
-            name="Smith", email="smith@matrix.net"
+            name="Smith",
+            email="smith@matrix.net",
+            cvr=12345678,
         )
 
         cls.port_authority = PortAuthority.objects.create(

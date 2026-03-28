@@ -143,6 +143,7 @@ class ShippingAgentAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "email",
+        "cvr",
     ]
 
 
