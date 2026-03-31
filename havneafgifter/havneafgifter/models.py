@@ -335,6 +335,16 @@ class Municipality(models.IntegerChoices):
     NATIONAL_PARK = 961, _("Northeast Greenland National Park")
 
 
+municipality_prismecodes = {
+    Municipality.KUJALLEQ: 10300,
+    Municipality.QEQQATA: 10500,
+    Municipality.SERMERSOOQ: 10400,
+    Municipality.QEQERTALIK: 10600,
+    Municipality.AVANNAATA: 10700,
+    Municipality.NATIONAL_PARK: 19000,
+}
+
+
 class UserType(models.TextChoices):
     ADMIN = "admin", _("administrator")
     SUPERUSER = "superuser", _("superuser")
@@ -1365,7 +1375,11 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
 
     @property
     def prisme_code_str(self) -> str:
-        return str(self.prisme_code).zfill(6)
+        if self.prisme_code is not None:
+            prisme_code = self.prisme_code
+        else:
+            prisme_code = municipality_prismecodes[self.municipality]
+        return str(prisme_code).zfill(6)
 
     def __str__(self) -> str:
         return f"{self.name} ({self.get_municipality_display()})"
