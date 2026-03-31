@@ -1378,7 +1378,7 @@ class DisembarkmentSite(PermissionsMixin, models.Model):
         if self.prisme_code is not None:
             prisme_code = self.prisme_code
         else:
-            prisme_code = municipality_prismecodes[self.municipality]
+            prisme_code = municipality_prismecodes[Municipality(self.municipality)]
         return str(prisme_code).zfill(6)
 
     def __str__(self) -> str:
