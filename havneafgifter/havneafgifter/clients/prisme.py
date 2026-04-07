@@ -117,7 +117,9 @@ class HavneafgiftInvoiceResponse(InvoiceResponse):
     def __init__(self, request: HavneafgiftInvoiceRequest, xml: str):
         super().__init__(request, xml)
         if self.data is not None:
-            self.afgift_id = self.data["CustInvoiceTable"]["HavneafgiftsafgiftIDFUJ"]
+            self.afgift_id = self.data["CustInvoiceTable"]["HarborTaxIdFUJ"]
+            self.rec_id = self.data["CustInvoiceTable"]["RecId"]
+            self.invoice_id = self.data["CustInvoiceTable"]["InvoiceId"]
 
 
 class PrismeClient(Prisme):
@@ -163,7 +165,8 @@ class PrismeClient(Prisme):
             f"""
                 <CustInvoiceTable>
                 <RecId>{PrismeClient.mock_recid_counter}</RecId>
-                <HavneafgiftsafgiftIDFUJ>{request_object.afgift_id}</HavneafgiftsafgiftIDFUJ>
+                <HarborTaxIdFUJ>{request_object.afgift_id}</HarborTaxIdFUJ>
+                <InvoiceId>{PrismeClient.mock_recid_counter}</InvoiceId>
                 </CustInvoiceTable>
                 """,
         )
