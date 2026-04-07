@@ -778,6 +778,9 @@ class TestDisembarkmentSite(TestCase):
         port = DisembarkmentSite(name="Naturen", prisme_code=10767)
         self.assertEqual(port.prisme_code_str, "010767")
 
+        port = DisembarkmentSite(name="Klippen", municipality=Municipality.QEQQATA)
+        self.assertEqual(port.prisme_code_str, "010500")
+
 
 class TestVessel(HarborDuesFormTestMixin, TestCase):
     def test_str(self):
