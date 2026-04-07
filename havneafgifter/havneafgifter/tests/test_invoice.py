@@ -1,11 +1,12 @@
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from prisme.client import Prisme
+from prisme.exceptions import PrismeException
 
 from havneafgifter.clients.prisme import HavneafgiftInvoiceRequest, PrismeClient
 from havneafgifter.models import (
@@ -176,6 +177,15 @@ class InvoiceTest(TestCase):
     @override_settings(PRISME={**settings.PRISME, "mock": False})
     @patch.object(Prisme, "process_service")
     def test_send_invoice(self, mock_process_service):
+        mock_return = MagicMock()
+        mock_return.rec_id = 1
+        mock_return.afgift_id = 1
+        mock_return.invoice_id = 1
+        mock_process_service.side_effect = [
+            PrismeException(250, "Debitorkonto findes ikke", {}),
+            mock_return,
+            mock_return,
+        ]
         self.form.submit()
         self.form.send_invoice()
         mock_process_service.assert_called()
@@ -188,3 +198,14 @@ class InvoiceTest(TestCase):
             sum([line.quantity * line.unit_price for line in invoice_request.lines]),
             Decimal("15570000.00"),
         )
+
+    @override_settings(PRISME={**settings.PRISME, "mock": False})
+    @patch.object(Prisme, "process_service")
+    def test_send_invoice_other_exception(self, mock_process_service):
+        mock_process_service.side_effect = (
+            PrismeException(250, "Prisme kan bare ikke lide dig i dag", {}),
+        )
+        self.form.submit()
+        self.form.send_invoice()
+        mock_process_service.assert_called()
+        self.assertEqual(self.form.status, Status.NEW)

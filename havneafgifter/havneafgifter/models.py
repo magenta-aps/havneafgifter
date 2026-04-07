@@ -29,6 +29,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django_countries import countries
 from django_fsm import FSMField, transition
+from prisme.exceptions import PrismeException
 from simple_history.models import HistoricalRecords
 from simple_history.signals import pre_create_historical_record
 from simple_history.utils import update_change_reason
@@ -36,6 +37,8 @@ from simple_history.utils import update_change_reason
 from havneafgifter.clients.prisme import (
     HavneafgiftInvoiceLine,
     HavneafgiftInvoiceRequest,
+    HavneafgiftInvoiceResponse,
+    InvoiceCustomTableRequest,
     PrismeClient,
 )
 from havneafgifter.data import DateTimeRange
@@ -693,6 +696,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         verbose_name=_("Agent reference"),
     )
 
+    prisme_recid = models.IntegerField(
+        null=True,
+        blank=True,
+    )
+
     @transition(
         field=status,
         source=[Status.DRAFT, Status.REJECTED],
@@ -1088,19 +1096,30 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     lines=self.invoice_lines,
                     cvr=self.shipping_agent.cvr,
                 )
-                prisme_request_2 = prisme_request_1.create_custom_table_request()
 
-                prisme = PrismeClient.from_settings()
-                prisme.process_service(prisme_request_1)
-                prisme.process_service(prisme_request_2)
-
+                client = PrismeClient.from_settings()
+                try:
+                    response = client.process_service(prisme_request_1)
+                except PrismeException as e:
+                    if "Debitorkonto findes ikke" in e.text:
+                        prisme_request_2: InvoiceCustomTableRequest = (
+                            prisme_request_1.create_custom_table_request()
+                        )
+                        # Create debitorkonto
+                        client.process_service(prisme_request_2)
+                        # Try again
+                        response = client.process_service(prisme_request_1)
+                    else:
+                        raise
             except Exception as e:  # pragma: no cover
                 print(e)
                 logger.exception(e)
                 # Couldn't send right now, keep in queue
             else:
+                if type(response) is HavneafgiftInvoiceResponse:
+                    self.prisme_recid = response.rec_id
                 self.invoice()
-                self.save(update_fields=("status",))
+                self.save(update_fields=("status", "prisme_recid"))
 
 
 class CruiseTaxForm(HarborDuesForm):
