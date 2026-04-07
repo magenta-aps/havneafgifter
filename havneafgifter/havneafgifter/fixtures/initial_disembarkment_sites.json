@@ -485,7 +485,7 @@
     "model": "havneafgifter.disembarkmentsite",
     "pk": 160,
     "fields": {
-        "name": "Unnartoq",
+        "name": "Uunartoq",
         "municipality": 955
     }
 },
