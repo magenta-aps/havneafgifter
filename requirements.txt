@@ -23,7 +23,7 @@ django-split-settings==1.3.2
 django-sql-utils==0.7.0
 django-stubs==4.2.7
 django-stubs-ext==5.2.9
-django-tables2==2.8.0
+django-tables2==2.9.0
 django-tempus-dominus==5.1.2.17
 django-weasyprint==2.4.0
 django_csp==3.8
