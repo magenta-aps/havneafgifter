@@ -8,7 +8,11 @@ from django.test import TestCase, override_settings
 from prisme.client import Prisme
 from prisme.exceptions import PrismeException
 
-from havneafgifter.clients.prisme import HavneafgiftInvoiceRequest, PrismeClient
+from havneafgifter.clients.prisme import (
+    HavneafgiftInvoiceRequest,
+    InvoiceCustomTableResponse,
+    PrismeClient,
+)
 from havneafgifter.models import (
     CruiseTaxForm,
     Disembarkment,
@@ -209,3 +213,16 @@ class InvoiceTest(TestCase):
         self.form.send_invoice()
         mock_process_service.assert_called()
         self.assertEqual(self.form.status, Status.NEW)
+
+    def test_custtable_response(self):
+        response = InvoiceCustomTableResponse(
+            None,
+            """
+            <CustTable><AccountNum>1234</AccountNum></CustTable>
+            """,
+        )
+        self.assertEqual(response.account_num, 1234)
+
+    def test_custtable_response_none(self):
+        response = InvoiceCustomTableResponse(None, None)
+        self.assertFalse(hasattr(response, "account_num"))
