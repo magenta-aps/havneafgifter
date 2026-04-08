@@ -108,8 +108,19 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
         return HavneafgiftInvoiceResponse  # pragma: no cover
 
 
+class InvoiceCustomTableResponse(InvoiceResponse):
+    def __init__(self, request: HavneafgiftInvoiceRequest, xml: str):
+        super().__init__(request, xml)
+        if self.data is not None:
+            self.account_num = int(self.data["CustTable"]["AccountNum"])
+
+
 class InvoiceCustomTableRequest(HavneafgiftInvoiceRequest):
     method = "CreateCustTable"
+
+    @classmethod
+    def response_class(cls) -> type[ResponseType]:
+        return InvoiceCustomTableResponse  # pragma: no cover
 
 
 class HavneafgiftInvoiceResponse(InvoiceResponse):
