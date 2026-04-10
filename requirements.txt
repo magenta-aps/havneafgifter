@@ -68,7 +68,7 @@ unittest-parametrize==1.8.0
 urllib3==2.6.3
 weasyprint==68.1
 webencodings==0.5.1
-whitenoise==6.11.0
+whitenoise==6.12.0
 xmlschema==2.5.1
 xmltodict==1.0.4
 zopfli==0.2.3.post1
