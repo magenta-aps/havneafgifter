@@ -46,7 +46,7 @@ pillow==11.3.0
 psycopg==3.3.3
 pycparser==2.23
 pydot==3.0.4
-pydyf==0.11.0
+pydyf==0.12.1
 pyOpenSSL==24.3.0
 pyparsing==3.3.2
 pyphen==0.17.2
