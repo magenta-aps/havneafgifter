@@ -825,7 +825,7 @@ msgstr "Redigér stamdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Edit user data"
-msgstr ""
+msgstr "Redigér stamdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "In need of help?"
