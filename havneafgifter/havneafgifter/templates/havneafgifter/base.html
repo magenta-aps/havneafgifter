@@ -60,7 +60,7 @@ SPDX-License-Identifier: MPL-2.0
                 </li>
                 {% endif %}
                 {% if user.can_view_edit_master_data %}
-                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:update_vessel' %}active{% endif %}">">
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:update_vessel' %}active{% endif %}">
                     <a href="{% url 'havneafgifter:update_vessel' %}" class="nav-link d-flex align-items-center">
                         <span class="material-icons">edit</span>
                         <span class="ms-1">{% translate 'Edit master data' %}</span>
