@@ -62,6 +62,7 @@ from havneafgifter.views import (
     TaxRateDetailView,
     TaxRateFormView,
     TaxRateListView,
+    UpdateUserView,
     UpdateVesselView,
 )
 
@@ -188,6 +189,7 @@ class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):
                 "owner": "Joakim von And",
                 "master": "Peder Dingo",
                 "gross_tonnage": 1234,
+                "ean": "1234567890123",
             },
         )
 
@@ -197,6 +199,55 @@ class TestUpdateVesselView(HarborDuesFormTestMixin, TestCase):
         self.assertEqual(vessel_form.owner, "Joakim von And")
         self.assertEqual(vessel_form.master, "Peder Dingo")
         self.assertEqual(vessel_form.gross_tonnage, 1234)
+        self.assertEqual(vessel_form.user.ean, "1234567890123")
+
+
+class TestUpdateUserView(HarborDuesFormTestMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request_factory = RequestFactory()
+        cls.instance = UpdateUserView()
+
+    def test_user_with_ship(self):
+        self.client.force_login(self.ship_user)
+        response = self.client.post(
+            reverse("havneafgifter:update_user"),
+        )
+        self.assertEqual(
+            response.headers["Location"], reverse("havneafgifter:harbor_dues_form_list")
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_without_ship(self):
+        self.client.force_login(self.shipping_agent_user)
+        response = self.client.post(
+            reverse("havneafgifter:update_user"),
+        )
+        self.assertEqual(
+            response.headers["Location"], reverse("havneafgifter:harbor_dues_form_list")
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_form_valid(self):
+        self.client.force_login(self.ship_user)
+
+        response = self.client.post(
+            reverse("havneafgifter:update_vessel"),
+            {
+                "cvr": "12345678",
+                "ean": "1234567890123",
+                "gln": "1234567890001",
+            },
+        )
+        self.assertEqual(
+            response.headers["Location"], reverse("havneafgifter:harbor_dues_form_list")
+        )
+        self.ship_user.refresh_from_db()
+
+        self.assertEqual(self.ship_user.cvr, "12345678")
+        self.assertEqual(self.ship_user.ean, "1234567890123")
+        self.assertEqual(self.ship_user.gln, "1234567890001")
 
 
 class TestRootView(TestCase):

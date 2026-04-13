@@ -120,9 +120,10 @@ class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
         return reverse("havneafgifter:harbor_dues_form_create")
 
 
-class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
+class UpdateVesselView(LoginRequiredMixin, HavneafgiftView, CSPViewMixin, UpdateView):
     template_name = "havneafgifter/update_vessel.html"
     form_class = UpdateVesselForm
+    success_url = reverse_lazy("havneafgifter:harbor_dues_form_list")
 
     def get_initial(self):
         initial = super().get_initial()
@@ -142,9 +143,6 @@ class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
         except Vessel.DoesNotExist:
             raise Http404(_("No vessel found"))
 
-    def get_success_url(self):
-        return reverse("havneafgifter:harbor_dues_form_list")
-
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         self.object: Vessel = form.save()
@@ -157,15 +155,13 @@ class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
         return super().form_valid(form)
 
 
-class UpdateUserView(HavneafgiftView, CSPViewMixin, UpdateView):
+class UpdateUserView(LoginRequiredMixin, HavneafgiftView, CSPViewMixin, UpdateView):
     template_name = "havneafgifter/update_user.html"
     form_class = UpdateUserForm
+    success_url = reverse_lazy("havneafgifter:harbor_dues_form_list")
 
     def get_object(self, queryset=None):
         return self.request.user
-
-    def get_success_url(self):
-        return reverse("havneafgifter:harbor_dues_form_list")
 
 
 class LoginView(HavneafgiftView, DjangoLoginView):

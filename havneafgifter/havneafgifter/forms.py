@@ -275,6 +275,7 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
             RegexValidator(r"\d{8}"),
         ],
         label=_("CVR"),
+        required=False,
     )
 
     ean = CharField(
@@ -284,6 +285,7 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
             RegexValidator(r"\d{13}"),
         ],
         label=_("EAN"),
+        required=False,
     )
 
     gln = CharField(
@@ -293,6 +295,7 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
             RegexValidator(r"\d{13}"),
         ],
         label=_("GLN"),
+        required=False,
     )
 
 
