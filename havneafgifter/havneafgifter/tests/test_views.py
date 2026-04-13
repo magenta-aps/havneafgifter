@@ -209,17 +209,14 @@ class TestUpdateUserView(HarborDuesFormTestMixin, TestCase):
         cls.request_factory = RequestFactory()
         cls.instance = UpdateUserView()
 
-    def test_user_with_ship(self):
+    def test_ship_user(self):
         self.client.force_login(self.ship_user)
         response = self.client.post(
             reverse("havneafgifter:update_user"),
         )
-        self.assertEqual(
-            response.headers["Location"], reverse("havneafgifter:harbor_dues_form_list")
-        )
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
 
-    def test_user_without_ship(self):
+    def test_agent_user(self):
         self.client.force_login(self.shipping_agent_user)
         response = self.client.post(
             reverse("havneafgifter:update_user"),

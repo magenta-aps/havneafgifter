@@ -23,7 +23,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.forms import inlineformset_factory, model_to_dict
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -128,7 +128,7 @@ class UpdateVesselView(LoginRequiredMixin, HavneafgiftView, CSPViewMixin, Update
     def get_initial(self):
         initial = super().get_initial()
         if not isinstance(self.request.user, User):
-            raise TypeError("User is not a havneafgifter User")
+            raise TypeError("User is not a havneafgifter User")  # pragma: no cover
         user: User = self.request.user
         initial["user"] = user
         initial["imo"] = self.request.user.username
@@ -159,6 +159,13 @@ class UpdateUserView(LoginRequiredMixin, HavneafgiftView, CSPViewMixin, UpdateVi
     template_name = "havneafgifter/update_user.html"
     form_class = UpdateUserForm
     success_url = reverse_lazy("havneafgifter:harbor_dues_form_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not isinstance(request.user, User) or not request.user.has_group_name(
+            "Shipping"
+        ):
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         return self.request.user
