@@ -268,6 +268,39 @@ class UpdateVesselForm(CSPFormMixin, ModelForm):
         label=_("Nationality"),
     )
 
+    cvr = CharField(
+        max_length=8,
+        min_length=8,
+        validators=[
+            RegexValidator(r"\d{8}"),
+        ],
+        label=_("CVR"),
+    )
+
+    ean = CharField(
+        max_length=13,
+        min_length=13,
+        validators=[
+            RegexValidator(r"\d{13}"),
+        ],
+        label=_("EAN"),
+    )
+
+    gln = CharField(
+        max_length=13,
+        min_length=13,
+        validators=[
+            RegexValidator(r"\d{13}"),
+        ],
+        label=_("GLN"),
+    )
+
+
+class UpdateUserForm(CSPFormMixin, ModelForm):
+    class Meta:
+        model = User
+        fields = ("cvr", "ean", "gln")
+
 
 class HarborDuesFormForm(DynamicFormMixin, CSPFormMixin, ValidateIMOMixin, ModelForm):
     class Meta:

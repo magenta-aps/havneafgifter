@@ -1,0 +1,30 @@
+{% extends "havneafgifter/base_default.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_modal %}
+
+{% block title %}
+{% translate "Edit user to report harbour dues" %}
+{% endblock %}
+
+{% block content %}
+<h1>{% translate "Edit user to report harbour dues" %}</h1>
+<form action="{% url 'havneafgifter:update_user' %}" method="post" class="form" id="main">
+    {% csrf_token %}
+    {{ form.media.css }}
+    {{ form.media.js }}
+
+    {% bootstrap_form_errors form %}
+
+    <h2>{% translate 'User details' %}</h2>
+    {% bootstrap_form form %}
+
+    <button type="submit" name="status" class="btn btn-primary d-flex align-items-center">
+        <span class="material-icons">send</span>
+        <span class="ms-1">{% translate "Save" %}</span>
+    </button>
+</form>
+
+{% endblock content %}

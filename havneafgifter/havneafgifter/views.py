@@ -44,6 +44,7 @@ from havneafgifter.forms import (
     SignupVesselForm,
     StatisticsForm,
     TaxRateForm,
+    UpdateUserForm,
     UpdateVesselForm,
 )
 from havneafgifter.mails import (
@@ -66,6 +67,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+    User,
     UserType,
     Vessel,
 )
@@ -124,8 +126,14 @@ class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["user"] = self.request.user
+        if not isinstance(self.request.user, User):
+            raise TypeError("User is not a havneafgifter User")
+        user: User = self.request.user
+        initial["user"] = user
         initial["imo"] = self.request.user.username
+        initial["cvr"] = user.cvr
+        initial["ean"] = user.ean
+        initial["gln"] = user.gln
         return initial
 
     def get_object(self, queryset=None):
@@ -133,6 +141,28 @@ class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
             return Vessel.objects.get(imo=self.request.user.username)
         except Vessel.DoesNotExist:
             raise Http404(_("No vessel found"))
+
+    def get_success_url(self):
+        return reverse("havneafgifter:harbor_dues_form_list")
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        self.object: Vessel = form.save()
+        user = self.object.user
+        if user:
+            user.cvr = form.cleaned_data["cvr"]
+            user.ean = form.cleaned_data["ean"]
+            user.gln = form.cleaned_data["gln"]
+            user.save(update_fields=("cvr", "ean", "gln"))
+        return super().form_valid(form)
+
+
+class UpdateUserView(HavneafgiftView, CSPViewMixin, UpdateView):
+    template_name = "havneafgifter/update_user.html"
+    form_class = UpdateUserForm
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
     def get_success_url(self):
         return reverse("havneafgifter:harbor_dues_form_list")

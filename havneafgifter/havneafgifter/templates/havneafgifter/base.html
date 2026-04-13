@@ -67,6 +67,17 @@ SPDX-License-Identifier: MPL-2.0
                     </a>
                 </li>
                 {% endif %}
+
+                {% if user.can_edit_own_data %}
+                <li class="nav-item ms-4 {% if current_view == 'havneafgifter:update_user' %}active{% endif %}">
+                    <a href="{% url 'havneafgifter:update_user' %}" class="nav-link d-flex align-items-center">
+                        <span class="material-icons">edit</span>
+                        <span class="ms-1">{% translate 'Edit user data' %}</span>
+                    </a>
+                </li>
+                {% endif %}
+
+
                 {% endif %}{# user.is_authenticated #}
             </ul>
             <ul class="navbar-nav d-flex align-items-center ms-auto">
