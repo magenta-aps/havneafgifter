@@ -69,6 +69,8 @@ class User(AbstractUser):
             RegexValidator(r"\d{8}"),
         ],
     )
+    ean = models.CharField(max_length=13, null=True, blank=True)
+    gln = models.CharField(max_length=13, null=True, blank=True)
     organization = models.CharField(
         max_length=100,
         null=True,
@@ -209,6 +211,15 @@ class User(AbstractUser):
         user_type: UserType | None = getattr(self, "user_type", None)
 
         if user_type is UserType.SHIP:
+            return True
+
+        return False
+
+    @property
+    def can_edit_own_data(self) -> bool:
+        user_type: UserType | None = getattr(self, "user_type", None)
+
+        if user_type is UserType.SHIPPING_AGENT:
             return True
 
         return False
