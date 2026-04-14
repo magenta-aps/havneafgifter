@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     "havneafgifter",
     "django_select2",
     "django_filters",
+    "csp",
     "csp_helpers",
     "metrics",
     "tempus_dominus",
