@@ -105,3 +105,5 @@ class VesselExportTable(tables.Table):
 
     vessel_name = tables.Column()
     cvr = tables.Column(accessor="user__cvr")
+    ean = tables.Column(accessor="user__ean")
+    gln = tables.Column(accessor="user__gln")
