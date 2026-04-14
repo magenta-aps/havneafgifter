@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 08:00-0200\n"
+"POT-Creation-Date: 2026-04-13 08:10-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -92,6 +92,18 @@ msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Nationality"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "CVR"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "EAN"
+msgstr ""
+
+#: havneafgifter/forms.py
+msgid "GLN"
 msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/models.py
@@ -792,6 +804,10 @@ msgid "Edit master data"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/base.html
+msgid "Edit user data"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/base.html
 msgid "In need of help?"
 msgstr ""
 
@@ -924,6 +940,7 @@ msgid "Close"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/bootstrap/modal.html
+#: havneafgifter/templates/havneafgifter/update_user.html
 #: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Save"
 msgstr ""
@@ -1254,6 +1271,14 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
 msgid "Harbor tax rate list"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/update_user.html
+msgid "Edit user to report harbour dues"
+msgstr ""
+
+#: havneafgifter/templates/havneafgifter/update_user.html
+msgid "User details"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/update_vessel.html

@@ -23,7 +23,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.forms import inlineformset_factory, model_to_dict
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -44,6 +44,7 @@ from havneafgifter.forms import (
     SignupVesselForm,
     StatisticsForm,
     TaxRateForm,
+    UpdateUserForm,
     UpdateVesselForm,
 )
 from havneafgifter.mails import (
@@ -66,6 +67,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+    User,
     UserType,
     Vessel,
 )
@@ -118,14 +120,21 @@ class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
         return reverse("havneafgifter:harbor_dues_form_create")
 
 
-class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
+class UpdateVesselView(LoginRequiredMixin, HavneafgiftView, CSPViewMixin, UpdateView):
     template_name = "havneafgifter/update_vessel.html"
     form_class = UpdateVesselForm
+    success_url = reverse_lazy("havneafgifter:harbor_dues_form_list")
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["user"] = self.request.user
+        if not isinstance(self.request.user, User):
+            raise TypeError("User is not a havneafgifter User")  # pragma: no cover
+        user: User = self.request.user
+        initial["user"] = user
         initial["imo"] = self.request.user.username
+        initial["cvr"] = user.cvr
+        initial["ean"] = user.ean
+        initial["gln"] = user.gln
         return initial
 
     def get_object(self, queryset=None):
@@ -134,8 +143,32 @@ class UpdateVesselView(HavneafgiftView, CSPViewMixin, UpdateView):
         except Vessel.DoesNotExist:
             raise Http404(_("No vessel found"))
 
-    def get_success_url(self):
-        return reverse("havneafgifter:harbor_dues_form_list")
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        self.object: Vessel = form.save()
+        user = self.object.user
+        if user:
+            user.cvr = form.cleaned_data["cvr"]
+            user.ean = form.cleaned_data["ean"]
+            user.gln = form.cleaned_data["gln"]
+            user.save(update_fields=("cvr", "ean", "gln"))
+        return super().form_valid(form)
+
+
+class UpdateUserView(LoginRequiredMixin, HavneafgiftView, CSPViewMixin, UpdateView):
+    template_name = "havneafgifter/update_user.html"
+    form_class = UpdateUserForm
+    success_url = reverse_lazy("havneafgifter:harbor_dues_form_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not isinstance(request.user, User) or not request.user.has_group_name(
+            "Shipping"
+        ):
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
 
 class LoginView(HavneafgiftView, DjangoLoginView):
