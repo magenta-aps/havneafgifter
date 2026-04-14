@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from havneafgifter.models import HarborDuesForm, Status, TaxRates
+from havneafgifter.models import HarborDuesForm, Status, TaxRates, Vessel
 
 
 class HarborDuesFormFilter(django_filters.FilterSet):
@@ -97,3 +97,11 @@ class TaxRateTable(tables.Table):
         model = TaxRates
         exclude = ("pax_tax_rate",)
         sequence = ("start_datetime", "end_datetime", "id")
+
+
+class VesselExportTable(tables.Table):
+    class Meta:
+        model = Vessel
+
+    vessel_name = tables.Column()
+    cvr = tables.Column(accessor="user__cvr")

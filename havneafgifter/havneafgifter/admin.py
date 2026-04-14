@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
+from django_tables2.export import TableExport
 from simple_history.admin import SimpleHistoryAdmin
 
 from havneafgifter.models import (
@@ -20,6 +21,7 @@ from havneafgifter.models import (
     User,
     Vessel,
 )
+from havneafgifter.tables import VesselExportTable
 
 
 @admin.register(HarborDuesForm)
@@ -299,3 +301,13 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(Vessel)
 class VesselAdmin(admin.ModelAdmin):
     list_display = ("imo", "user", "name", "type")
+
+    actions = [
+        "download_excel",
+    ]
+
+    @admin.action(description=_("Download regneark"))
+    def download_excel(self, request, queryset):
+        table = VesselExportTable(data=queryset)
+        export = TableExport(export_format="xlsx", table=table)
+        return export.response("vessels.xlsx")
