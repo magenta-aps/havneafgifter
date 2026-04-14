@@ -21,7 +21,7 @@ from havneafgifter.models import (
     User,
     Vessel,
 )
-from havneafgifter.tables import VesselExportTable
+from havneafgifter.tables import UserExportTable, VesselExportTable
 
 
 @admin.register(HarborDuesForm)
@@ -298,6 +298,16 @@ class CustomUserAdmin(UserAdmin):
 
     def group_list(self, obj):
         return ", ".join([group.name for group in obj.groups.all()])
+
+    actions = [
+        "download_excel",
+    ]
+
+    @admin.action(description=_("Download regneark"))
+    def download_excel(self, request, queryset):
+        table = UserExportTable(data=queryset)
+        export = TableExport(export_format="xlsx", table=table)
+        return export.response("users.xlsx")
 
 
 @admin.register(Vessel)
