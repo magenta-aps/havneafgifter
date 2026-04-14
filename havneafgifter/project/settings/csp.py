@@ -2,17 +2,20 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from csp.constants import NONCE, SELF
 from project.settings.base import DEBUG, HOST_DOMAIN
 
-# django-csp
-CSP_DEFAULT_SRC = (
-    "'self'",
-    "localhost:8000" if DEBUG else HOST_DOMAIN,
-)
-CSP_SCRIPT_SRC_ATTR = (
-    "'self'",
-    "localhost:8000" if DEBUG else HOST_DOMAIN,
-    "cdnjs.cloudflare.com",
-)
-CSP_STYLE_SRC_ATTR = ("'self'",)
-CSP_IMG_SRC = ("'self'", "data:")
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [SELF, "localhost:8050" if DEBUG else HOST_DOMAIN],
+        "script-src": [
+            SELF,
+            "localhost:8050" if DEBUG else HOST_DOMAIN,
+            "cdnjs.cloudflare.com",
+            NONCE,
+        ],
+        "img-src": [SELF, "data:"],
+        "style-src-attr": [SELF],
+    },
+    "EXCLUDE_URL_PREFIXES": ["/admin"],
+}
