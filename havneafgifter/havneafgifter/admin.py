@@ -210,6 +210,8 @@ class CustomUserAdmin(UserAdmin):
                     "cpr",
                     "cvr",
                     "organization",
+                    "ean",
+                    "gln",
                 )
             },
         ),
