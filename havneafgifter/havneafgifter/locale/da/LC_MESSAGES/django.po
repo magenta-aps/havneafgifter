@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 08:10-0100\n"
+"POT-Creation-Date: 2026-04-14 08:05-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,6 +45,10 @@ msgstr "Vigtige datoer"
 #: havneafgifter/admin.py
 msgid "This user belongs to"
 msgstr "Denne bruger tilhører"
+
+#: havneafgifter/admin.py
+msgid "Download regneark"
+msgstr ""
 
 #: havneafgifter/forms.py havneafgifter/templates/havneafgifter/login.html
 msgid "Username or IMO number"
