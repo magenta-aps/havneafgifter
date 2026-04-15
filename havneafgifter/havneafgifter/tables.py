@@ -16,10 +16,17 @@ from havneafgifter.models import HarborDuesForm, Port, Status, TaxRates, User, V
 
 
 class HarborDuesFormFilter(FilterSet):
+
+    class Meta:
+        model = HarborDuesForm
+        fields = ["id", "status", "vessel_name", "port_of_call"]
+
     id = NumberFilter(field_name="id")
     status = ChoiceFilter(choices=Status.choices, label=_("Status"))
     vessel_name = CharFilter(lookup_expr="icontains", label=_("Vessel name"))
-    port_of_call = ModelChoiceFilter(queryset=Port.objects.all())
+    port_of_call = ModelChoiceFilter(
+        field_name="port_of_call", queryset=Port.objects.all()
+    )
     arrival_after = DateTimeFilter(
         field_name="datetime_of_arrival",
         lookup_expr="gte",
@@ -68,6 +75,12 @@ class HarborDuesFormTable(tables.Table):
             "pdf",
         )
         attrs = {"class": "table table-light"}
+
+    def render_datetime_of_arrival(self, value):
+        return value.strftime("%Y-%m-%d %H:%M") if value else "-"
+
+    def render_datetime_of_departure(self, value):
+        return value.strftime("%Y-%m-%d %H:%M") if value else "-"
 
     def render_status(self, record):
         cls_map = {
