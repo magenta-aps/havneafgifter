@@ -1,6 +1,8 @@
 import os
+import zoneinfo
 from datetime import datetime, timezone
 
+from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.management import call_command
 
@@ -103,8 +105,8 @@ class HarborDuesFormTestMixin:
             "gross_tonnage": 0,
             "vessel_type": ShipType.FREIGHTER.value,
             "vessel_imo": "9074729",
-            "datetime_of_arrival": cls._utc_datetime(2020, 1, 1),
-            "datetime_of_departure": cls._utc_datetime(2020, 2, 1),
+            "datetime_of_arrival": cls._local_datetime(2020, 1, 1),
+            "datetime_of_departure": cls._local_datetime(2020, 2, 1),
         }
         cls.harbor_dues_form_form_data = {
             **cls.harbor_dues_form_data,
@@ -154,9 +156,15 @@ class HarborDuesFormTestMixin:
             },
         )
 
+    timezone = zoneinfo.ZoneInfo(settings.TIME_ZONE)
+
     @classmethod
-    def _utc_datetime(self, *args) -> datetime:
+    def _utc_datetime(cls, *args) -> datetime:
         return datetime(*args, tzinfo=timezone.utc)
+
+    @classmethod
+    def _local_datetime(cls, *args) -> datetime:
+        return datetime(*args, tzinfo=cls.timezone)
 
     @classmethod
     def _load_initial_disembarkment_sites(cls):

@@ -987,6 +987,109 @@ class TestHarborDuesFormListView(HarborDuesFormTestMixin, TestCase):
         self.view.get(request)
         self.assertNotIn(self.harbor_dues_form, self.view.get_queryset())
 
+    def search(self, query: dict, expected: bool):
+        request = self.request_factory.get("", query)
+        request.user = self.ship_user
+        self.view.setup(request)
+        self.view.get(request)
+        if expected:
+            self.assertIn(self.harbor_dues_form, self.view.get_queryset(), query)
+        else:
+            self.assertNotIn(self.harbor_dues_form, self.view.get_queryset(), query)
+
+    def test_search_status(self):
+        for status in Status:
+            self.search({"status": status}, status == Status.NEW)
+
+    def test_search_vessel_name(self):
+        self.search({"vessel_name": "Mary"}, True)
+        self.search({"vessel_name": "ma"}, True)
+        self.search({"vessel_name": "ry"}, True)
+        self.search({"vessel_name": "baljen"}, False)
+
+    def test_search_port_of_call(self):
+        other_port = Port.objects.create(name="other port")
+        self.search({"port_of_call": self.port.pk}, True)
+        self.search({"port_of_call": other_port.pk}, False)
+        self.search({"port_of_call": "abc"}, False)
+
+    def test_search_id(self):
+        self.search({"id": self.harbor_dues_form.pk}, True)
+        self.search({"id": self.harbor_dues_form.pk + 1}, False)
+        self.search({"id": "abc"}, False)
+
+    def test_search_arrival_after(self):
+        dt = self._local_datetime(2020, 1, 1)
+        format = "%Y-%m-%dT%H:%M"
+        self.search({"arrival_after": (dt).strftime(format)}, True)
+        self.search({"arrival_after": (dt - timedelta(days=30)).strftime(format)}, True)
+        self.search(
+            {"arrival_after": (dt - timedelta(minutes=1)).strftime(format)}, True
+        )
+        self.search(
+            {"arrival_after": (dt + timedelta(minutes=1)).strftime(format)}, False
+        )
+        self.search({"arrival_after": (dt + timedelta(days=1)).strftime(format)}, False)
+        self.search({"arrival_after": "abc"}, False)
+        self.search({"arrival_after": 123}, False)
+
+    def test_search_arrival_before(self):
+        dt = self._local_datetime(2020, 1, 1)
+        format = "%Y-%m-%dT%H:%M"
+        self.search({"arrival_before": (dt).strftime(format)}, True)
+        self.search(
+            {"arrival_before": (dt + timedelta(days=30)).strftime(format)}, True
+        )
+        self.search(
+            {"arrival_before": (dt + timedelta(minutes=1)).strftime(format)}, True
+        )
+        self.search(
+            {"arrival_before": (dt - timedelta(minutes=1)).strftime(format)}, False
+        )
+        self.search(
+            {"arrival_before": (dt - timedelta(days=1)).strftime(format)}, False
+        )
+        self.search({"arrival_before": "abc"}, False)
+        self.search({"arrival_before": 123}, False)
+
+    def test_search_departure_after(self):
+        dt = self._local_datetime(2020, 2, 1)
+        format = "%Y-%m-%dT%H:%M"
+        self.search({"departure_after": (dt).strftime(format)}, True)
+        self.search(
+            {"departure_after": (dt - timedelta(days=30)).strftime(format)}, True
+        )
+        self.search(
+            {"departure_after": (dt - timedelta(minutes=1)).strftime(format)}, True
+        )
+        self.search(
+            {"departure_after": (dt + timedelta(minutes=1)).strftime(format)}, False
+        )
+        self.search(
+            {"departure_after": (dt + timedelta(days=1)).strftime(format)}, False
+        )
+        self.search({"departure_after": "abc"}, False)
+        self.search({"departure_after": 123}, False)
+
+    def test_search_departure_before(self):
+        dt = self._local_datetime(2020, 2, 1)
+        format = "%Y-%m-%dT%H:%M"
+        self.search({"departure_before": (dt).strftime(format)}, True)
+        self.search(
+            {"departure_before": (dt + timedelta(days=30)).strftime(format)}, True
+        )
+        self.search(
+            {"departure_before": (dt + timedelta(minutes=1)).strftime(format)}, True
+        )
+        self.search(
+            {"departure_before": (dt - timedelta(minutes=1)).strftime(format)}, False
+        )
+        self.search(
+            {"departure_before": (dt - timedelta(days=1)).strftime(format)}, False
+        )
+        self.search({"departure_before": "abc"}, False)
+        self.search({"departure_before": 123}, False)
+
 
 class StatisticsTest(TestCase):
     url = reverse("havneafgifter:statistik")

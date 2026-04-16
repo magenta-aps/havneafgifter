@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-14 08:05-0100\n"
+"POT-Creation-Date: 2026-04-14 13:23-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,7 +78,7 @@ msgstr ""
 msgid "Vessel type"
 msgstr ""
 
-#: havneafgifter/forms.py havneafgifter/models.py
+#: havneafgifter/forms.py havneafgifter/models.py havneafgifter/tables.py
 msgid "Vessel name"
 msgstr ""
 
@@ -696,6 +696,22 @@ msgid "ethvert ilandsætningssted"
 msgstr ""
 
 #: havneafgifter/tables.py
+msgid "Arrival after"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Arrival before"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Departure after"
+msgstr ""
+
+#: havneafgifter/tables.py
+msgid "Departure before"
+msgstr ""
+
+#: havneafgifter/tables.py
 msgid "Total"
 msgstr ""
 
@@ -1036,7 +1052,8 @@ msgid "Search"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
-msgid "forms"
+#, python-format
+msgid "%(count)s forms"
 msgstr ""
 
 #: havneafgifter/templates/havneafgifter/logged_out.html

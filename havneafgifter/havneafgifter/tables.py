@@ -1,16 +1,56 @@
-import django_filters
 import django_tables2 as tables
 from django.urls import reverse_lazy
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django_filters import (
+    CharFilter,
+    ChoiceFilter,
+    DateTimeFilter,
+    FilterSet,
+    ModelChoiceFilter,
+    NumberFilter,
+)
 
-from havneafgifter.models import HarborDuesForm, Status, TaxRates, User, Vessel
+from havneafgifter.forms import HTML5DateWidget
+from havneafgifter.models import HarborDuesForm, Port, Status, TaxRates, User, Vessel
 
 
-class HarborDuesFormFilter(django_filters.FilterSet):
+class HarborDuesFormFilter(FilterSet):
+
     class Meta:
         model = HarborDuesForm
-        fields = {"status": ["exact"]}
+        fields = ["id", "status", "vessel_name", "port_of_call"]
+
+    id = NumberFilter(field_name="id")
+    status = ChoiceFilter(choices=Status.choices, label=_("Status"))
+    vessel_name = CharFilter(lookup_expr="icontains", label=_("Vessel name"))
+    port_of_call = ModelChoiceFilter(
+        field_name="port_of_call", queryset=Port.objects.all()
+    )
+    arrival_after = DateTimeFilter(
+        field_name="datetime_of_arrival",
+        lookup_expr="gte",
+        label=_("Arrival after"),
+        widget=HTML5DateWidget(),
+    )
+    arrival_before = DateTimeFilter(
+        field_name="datetime_of_arrival",
+        lookup_expr="lte",
+        label=_("Arrival before"),
+        widget=HTML5DateWidget(),
+    )
+    departure_after = DateTimeFilter(
+        field_name="datetime_of_departure",
+        lookup_expr="gte",
+        label=_("Departure after"),
+        widget=HTML5DateWidget(),
+    )
+    departure_before = DateTimeFilter(
+        field_name="datetime_of_departure",
+        lookup_expr="lte",
+        label=_("Departure before"),
+        widget=HTML5DateWidget(),
+    )
 
 
 class HarborDuesFormTable(tables.Table):
@@ -36,6 +76,12 @@ class HarborDuesFormTable(tables.Table):
         )
         attrs = {"class": "table table-light"}
 
+    def render_datetime_of_arrival(self, value):
+        return value.strftime("%Y-%m-%d %H:%M") if value else "-"
+
+    def render_datetime_of_departure(self, value):
+        return value.strftime("%Y-%m-%d %H:%M") if value else "-"
+
     def render_status(self, record):
         cls_map = {
             Status.DRAFT: "badge-draft",
@@ -46,9 +92,9 @@ class HarborDuesFormTable(tables.Table):
         }
         cls = cls_map[record.status]
         return format_html(
-            f"""<span class="badge rounded-pill {cls}">{
-                record.get_status_display()
-            }</span>"""
+            """<span class="badge rounded-pill {cls}">{status}</span>""",
+            cls=cls,
+            status=record.get_status_display(),
         )
 
 

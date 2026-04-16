@@ -573,8 +573,13 @@ class HarborDuesFormListView(LoginRequiredMixin, HavneafgiftView, SingleTableVie
         queryset = HarborDuesForm.filter_user_permissions(
             HarborDuesForm.objects.all(), self.request.user, "view"
         ).order_by(self.ordering_criteria, "-date")
-        self.filterset = HarborDuesFormFilter(self.request.GET, queryset=queryset)
-        return self.filterset.qs
+        self.filterset = HarborDuesFormFilter(
+            self.request.GET, queryset=HarborDuesForm.objects.all()
+        )
+        if self.filterset.form.is_valid():
+            return self.filterset.filter_queryset(queryset)
+        else:
+            return HarborDuesForm.objects.none()
 
     def get_context_data(self, **context):
         context = super().get_context_data(**context)
