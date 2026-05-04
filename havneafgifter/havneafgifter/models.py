@@ -1106,7 +1106,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         )
         if override_due_date:
             return datetime.strptime(override_due_date, "%Y-%m-%d").date()
-        return self.date
+        return self.date + timedelta(days=14)
 
     def send_invoice(self):
         if self.status == Status.NEW and self.shipping_agent.cvr is not None:
