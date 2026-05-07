@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-14 13:23-0100\n"
+"POT-Creation-Date: 2026-05-07 07:38-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -237,10 +237,6 @@ msgstr ""
 #: havneafgifter/forms.py
 msgid "Til og med"
 msgstr ""
-
-#: havneafgifter/mails.py
-msgid "Authority for vessels without port of call"
-msgstr "Havnemyndighed for skibe uden ankomsthavn"
 
 #: havneafgifter/mails.py
 msgid "Tax Authority"
