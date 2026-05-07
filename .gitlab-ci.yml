@@ -160,7 +160,6 @@ Lint Javascript:
     POSTGRES_DB: havneafgifter
     POSTGRES_HOST: havneafgifter-db
     ENVIRONMENT: development
-    EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL: test-ral@example.com
 
   image: ${IMAGE_SHA}
   before_script:

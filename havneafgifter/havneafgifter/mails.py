@@ -40,46 +40,6 @@ class NotificationMail:
             self.recipients.append(recipient)
         return None
 
-    def get_local_port_recipient(self) -> MailRecipient | None:
-        if self.form.port_of_call and self.form.port_of_call.users.exists():
-            port_user = self.form.port_of_call.users.all()[0]
-            return MailRecipient(
-                name=port_user.display_name, email=port_user.email, object=port_user
-            )
-
-        else:
-            logger.info(
-                "%r is not linked to a local port user, excluding from recipients",
-            )
-            return None
-
-    def get_port_authority_recipient(self) -> MailRecipient | None:
-        if (
-            self.form.port_of_call
-            and self.form.port_of_call.portauthority
-            and self.form.port_of_call.portauthority.email
-        ):
-            return MailRecipient(
-                name=self.form.port_of_call.portauthority.name,
-                email=self.form.port_of_call.portauthority.email,
-                object=self.form.port_of_call.portauthority,
-            )
-        elif (
-            not self.form.has_port_of_call
-            and settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL
-        ):
-            return MailRecipient(
-                name=gettext("Authority for vessels without port of call"),
-                email=settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
-                object=None,
-            )
-        else:
-            logger.info(
-                "%r is not linked to a port authority, excluding from mail recipients",
-                self,
-            )
-            return None
-
     def get_shipping_agent_recipient(self) -> MailRecipient | None:
         if self.form.shipping_agent and self.form.shipping_agent.email:
             return MailRecipient(
@@ -180,8 +140,6 @@ class NotificationMail:
 class OnSubmitForReviewMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         super().__init__(form, user)
-        self.add_recipient(self.get_port_authority_recipient())
-        self.add_recipient(self.get_local_port_recipient())
         self.add_recipient(self.get_shipping_agent_or_ship_recipient())
         self.add_recipient(self.get_tax_authority_recipient())
 

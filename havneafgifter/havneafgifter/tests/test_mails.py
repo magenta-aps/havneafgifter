@@ -91,17 +91,11 @@ class TestOnSubmitForReviewMail(
     ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
 ):
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
-    @patch(
-        "havneafgifter.mails.NotificationMail.get_local_port_recipient",
-        lambda self: User(),
-    )
     def test_mail_recipients(self):
         instance = self._get_instance()
         self.assertListEqual(
             instance.mail_recipients,
             [
-                instance.form.port_of_call.portauthority.email,
-                "",
                 instance.form.shipping_agent.email,
                 settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
             ],
@@ -109,37 +103,15 @@ class TestOnSubmitForReviewMail(
 
     @override_settings(
         EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org",
-        EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL="ral@example.org",
     )
     def test_mail_recipients_falls_back_if_no_port_of_call(self):
         instance = OnSubmitForReviewMail(self.cruise_tax_form_without_port_of_call)
         self.assertListEqual(
             instance.mail_recipients,
             [
-                settings.EMAIL_ADDRESS_AUTHORITY_NO_PORT_OF_CALL,
                 instance.form.shipping_agent.email,
                 settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
             ],
-        )
-
-    def test_mail_recipients_excludes_missing_port_authority(self):
-        def clear_port_authority(form):
-            form.port_of_call.portauthority = None
-            return form
-
-        self._assert_mail_recipients_property_logs_message(
-            "is not linked to a port authority, excluding from mail recipients",
-            clear_port_authority,
-        )
-
-    def test_mail_recipients_excludes_missing_port_user(self):
-        def clear_port_user(form):
-            form.port_of_call.users.all().delete()
-            return form
-
-        self._assert_mail_recipients_property_logs_message(
-            "is not linked to a local port user, excluding from recipients",
-            clear_port_user,
         )
 
     @override_settings(EMAIL_ADDRESS_SKATTESTYRELSEN="skattestyrelsen@example.org")
