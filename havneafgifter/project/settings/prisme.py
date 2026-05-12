@@ -36,4 +36,5 @@ PRISME = {
         "landing_tax": os.environ.get("PRISME_TYPE_ACCOUNT_LANDING_TAX", 0),
     },
     "override_due_date": os.environ.get("OVERRIDE_DUE_DATE", None),
+    "override_date": os.environ.get("OVERRIDE_DATE", None),
 }

@@ -1108,6 +1108,13 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             return datetime.strptime(override_due_date, "%Y-%m-%d").date()
         return self.date + timedelta(days=14)
 
+    @property
+    def invoice_date(self):
+        override_date = settings.PRISME.get("override_date")  # type: ignore[misc]
+        if override_date:
+            return datetime.strptime(override_date, "%Y-%m-%d").date()
+        return self.date
+
     def send_invoice(self):
         if (
             self.status == Status.NEW
@@ -1122,9 +1129,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             try:
                 prisme_request_1 = HavneafgiftInvoiceRequest(
                     afgift_id=self.pk,
-                    invoice_date=self.invoice_due_date,
-                    due_date=self.date,
-                    accounting_date=self.date,
+                    invoice_date=self.invoice_date,
+                    due_date=self.invoice_due_date,
+                    accounting_date=self.invoice_date,
                     text="Harbour taxes",
                     files=[self.pdf],
                     lines=self.invoice_lines,
