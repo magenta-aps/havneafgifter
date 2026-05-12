@@ -1109,7 +1109,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return self.date + timedelta(days=14)
 
     def send_invoice(self):
-        if self.status == Status.NEW and self.shipping_agent.cvr is not None:
+        if (
+            self.status == Status.NEW
+            and self.shipping_agent is not None
+            and self.shipping_agent.cvr is not None
+        ):
 
             receipt = self.get_receipt()
             self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
