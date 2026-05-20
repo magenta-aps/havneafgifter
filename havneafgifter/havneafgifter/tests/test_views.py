@@ -26,6 +26,7 @@ from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from havneafgifter.mails import (
     NotificationMail,
+    OnNewUserMail,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
     SendResult,
@@ -80,7 +81,15 @@ class TestSignupVesselView(HarborDuesFormTestMixin, TestCase):
         self.instance.setup(self.request_factory.get(""))
         with patch("havneafgifter.views.messages.success") as mock_success:
             # Act
-            response = self.instance.form_valid(form)
+            with patch(
+                "havneafgifter.view_mixins.messages.add_message"
+            ) as mock_add_message:
+                with patch("django.core.mail.EmailMessage.send") as mock_send:
+                    mock_send.return_value = True
+                    response = self.instance.form_valid(form)
+                    mock_add_message.assert_called_once_with(
+                        ANY, messages.SUCCESS, OnNewUserMail(Mock()).success_message
+                    )
             # Assert: new `User` object is member of `Ship` group
             self.assertIn("Ship", self.instance.object.group_names)
             # Assert: a message is displayed to the user
@@ -99,7 +108,15 @@ class TestSignupVesselView(HarborDuesFormTestMixin, TestCase):
         self.instance.setup(self.request_factory.get(""))
         with patch("havneafgifter.views.messages.success") as mock_success:
             # Act
-            response = self.instance.form_valid(form)
+            with patch(
+                "havneafgifter.view_mixins.messages.add_message"
+            ) as mock_add_message:
+                with patch("django.core.mail.EmailMessage.send") as mock_send:
+                    mock_send.return_value = True
+                    response = self.instance.form_valid(form)
+                    mock_add_message.assert_called_once_with(
+                        ANY, messages.SUCCESS, OnNewUserMail(Mock()).success_message
+                    )
             # Assert: new `User` object is member of `Ship` group
             self.assertIn("Ship", self.instance.object.group_names)
             # Assert: a message is displayed to the user

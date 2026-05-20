@@ -48,6 +48,7 @@ from havneafgifter.forms import (
     UpdateVesselForm,
 )
 from havneafgifter.mails import (
+    OnNewUserMail,
     OnSendToAgentMail,
     OnSubmitForReviewMail,
     OnSubmitForReviewReceipt,
@@ -97,7 +98,9 @@ class RootView(RedirectView):
         return reverse("havneafgifter:harbor_dues_form_list")
 
 
-class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
+class SignupVesselView(
+    HavneafgiftView, CSPViewMixin, CreateView, HandleNotificationMailMixin
+):
     template_name = "havneafgifter/signup_vessel.html"
     form_class = SignupVesselForm
 
@@ -114,6 +117,7 @@ class SignupVesselView(HavneafgiftView, CSPViewMixin, CreateView):
             self.request,
             _("Please sign in using the IMO number as username"),
         )
+        self.handle_notification_mail(OnNewUserMail, self.object)
         return response
 
     def get_success_url(self):

@@ -6,7 +6,7 @@ from django.utils.http import urlencode
 from django.views.generic import FormView
 
 from havneafgifter.mails import NotificationMail
-from havneafgifter.models import CruiseTaxForm, HarborDuesForm, UserType
+from havneafgifter.models import CruiseTaxForm, HarborDuesForm, User, UserType
 
 
 class HavneafgiftView:
@@ -40,9 +40,13 @@ class HandleNotificationMailMixin:
     def handle_notification_mail(
         self,
         mail_class: type[NotificationMail],
-        form: HarborDuesForm | CruiseTaxForm,
+        object: HarborDuesForm | CruiseTaxForm | User,
     ):
-        mail = mail_class(form, self.request.user)  # type: ignore
+        if isinstance(object, User):
+            mail = mail_class(object)  # type: ignore
+        else:
+            # This is a form
+            mail = mail_class(object, self.request.user)  # type: ignore
         result = mail.send_email()
         messages.add_message(
             self.request,  # type: ignore
