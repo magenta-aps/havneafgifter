@@ -55,7 +55,7 @@ class HavneafgiftInvoiceRequest(InvoiceRequest):
         prisme_settings = settings.PRISME  # type: ignore[misc]
         super().__init__(
             currency_code=prisme_settings["currency_code"],
-            department_recid=prisme_settings["department_recid"],
+            department_recid=prisme_settings["department_recid_ext"],
             invoice_ean=prisme_settings["invoice_ean"],
             order_form_num=prisme_settings["order_form_num"],
             contact_person_id=prisme_settings["contact_person_id"],
