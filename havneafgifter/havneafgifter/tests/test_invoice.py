@@ -3,6 +3,7 @@ from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from prisme.client import Prisme
@@ -26,6 +27,7 @@ from havneafgifter.models import (
     ShipType,
     Status,
     TaxRates,
+    User,
 )
 
 
@@ -39,6 +41,9 @@ class InvoiceTest(TestCase):
             email="smith@matrix.net",
             cvr=12345678,
         )
+        ship, _ = Group.objects.get_or_create(name="Ship")
+        cls.imo_owner = User.objects.create(username="1234567", cvr="11223344")
+        cls.imo_owner.groups.add(ship)
 
         cls.port_authority = PortAuthority.objects.create(
             name="Royal Arctic Line A/S", email="ral@ral.dk"
@@ -216,6 +221,33 @@ class InvoiceTest(TestCase):
             sum([line.quantity * line.unit_price for line in invoice_request.lines]),
             Decimal("15570000.00"),
         )
+
+    @override_settings(PRISME={**settings.PRISME, "mock": False})
+    @patch.object(Prisme, "process_service")
+    def test_send_invoice_user_by_imo(self, mock_process_service):
+        mock_return = MagicMock()
+        mock_return.rec_id = 1
+        mock_return.afgift_id = 1
+        mock_return.invoice_id = 1
+        mock_process_service.side_effect = [
+            PrismeException(250, "Debitorkonto findes ikke", {}),
+            mock_return,
+            mock_return,
+        ]
+        self.form.shipping_agent = None
+        self.form.submit()
+        self.form.send_invoice()
+        mock_process_service.assert_called()
+        invoice_request = mock_process_service.call_args[0][0]
+        self.assertIsInstance(invoice_request, HavneafgiftInvoiceRequest)
+        data = invoice_request.dict
+        self.assertEqual(data["HarborTaxIdFUJ"], self.form.pk)
+        self.assertEqual(len(invoice_request.lines), 3)
+        self.assertEqual(
+            sum([line.quantity * line.unit_price for line in invoice_request.lines]),
+            Decimal("15570000.00"),
+        )
+        self.assertEqual(data["custTable"]["IdentificationNumber"], "11223344")
 
     @override_settings(PRISME={**settings.PRISME, "mock": False})
     @patch.object(Prisme, "process_service")
