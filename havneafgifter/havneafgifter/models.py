@@ -1285,8 +1285,8 @@ class CruiseTaxForm(HarborDuesForm):
 
     @property
     def harbor_tax_type_account(self):
-        type_account: Dict[str, str | int] = settings.PRISME["type_account"]  # type: ignore[assignment, annotation-unchecked]  # noqa: E501
         if self.vessel_type == ShipType.CRUISE:
+            type_account: Dict[str, str | int] = settings.PRISME["type_account"]  # type: ignore[assignment, annotation-unchecked]  # noqa: E501
             if self.gross_tonnage < 30000:
                 return type_account["cruise_lt_30k"]
             else:
