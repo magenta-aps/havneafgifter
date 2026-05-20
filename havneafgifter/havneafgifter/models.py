@@ -843,6 +843,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                 email = None
         return email
 
+    def get_user_by_imo(self) -> User | None:
+        return User.objects.filter(
+            username=self.vessel_imo,
+            groups=Group.objects.get(name="Ship"),
+        ).first()
+
     def calculate_tax(self, save: bool = True, force_recalculation: bool = False):
         self.calculate_harbour_tax(save=save)
 
@@ -1061,6 +1067,8 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def harbor_tax_type_account(self):
+        if self.vessel_type == ShipType.CRUISE:
+            return self.cruisetaxform.harbor_tax_type_account
         owner = self.vessel_owner.strip().lower()
         for owner_key, owner_account in (
             settings.PRISME["type_account"].get("by_owner", {}).items()
@@ -1116,51 +1124,58 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         return self.date
 
     def send_invoice(self):
-        if (
-            self.status == Status.NEW
-            and self.shipping_agent is not None
-            and self.shipping_agent.cvr is not None
-        ):
+        if self.status == Status.NEW:
+            cvr = None
 
-            receipt = self.get_receipt()
-            self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
-            self.save(update_fields=["pdf"])
+            if self.shipping_agent is not None and self.shipping_agent.cvr is not None:
+                cvr = self.shipping_agent.cvr
 
-            try:
-                prisme_request_1 = HavneafgiftInvoiceRequest(
-                    afgift_id=self.pk,
-                    invoice_date=self.invoice_date,
-                    due_date=self.invoice_due_date,
-                    accounting_date=self.invoice_date,
-                    text="Harbour taxes",
-                    files=[self.pdf],
-                    lines=self.invoice_lines,
-                    cvr=self.shipping_agent.cvr,
-                )
-
-                client = PrismeClient.from_settings()
-                try:
-                    response = client.process_service(prisme_request_1)
-                except PrismeException as e:
-                    if "Debitorkonto findes ikke" in e.text:
-                        prisme_request_2: InvoiceCustomTableRequest = (
-                            prisme_request_1.create_custom_table_request()
-                        )
-                        # Create debitorkonto
-                        client.process_service(prisme_request_2)
-                        # Try again
-                        response = client.process_service(prisme_request_1)
-                    else:
-                        raise
-            except Exception as e:  # pragma: no cover
-                print(e)
-                logger.exception(e)
-                # Couldn't send right now, keep in queue
             else:
-                if type(response) is HavneafgiftInvoiceResponse:
-                    self.prisme_recid = response.rec_id
-                self.invoice()
-                self.save(update_fields=("status", "prisme_recid"))
+                user = self.get_user_by_imo()
+                if user:
+                    cvr = user.cvr
+
+            if cvr:
+
+                receipt = self.get_receipt()
+                self.pdf = File(BytesIO(receipt.pdf), name=self.get_pdf_filename())
+                self.save(update_fields=["pdf"])
+
+                try:
+                    prisme_request_1 = HavneafgiftInvoiceRequest(
+                        afgift_id=self.pk,
+                        invoice_date=self.invoice_date,
+                        due_date=self.invoice_due_date,
+                        accounting_date=self.invoice_date,
+                        text="Havneafgifter - Harbour taxes",
+                        files=[self.pdf],
+                        lines=self.invoice_lines,
+                        cvr=cvr,
+                    )
+
+                    client = PrismeClient.from_settings()
+                    try:
+                        response = client.process_service(prisme_request_1)
+                    except PrismeException as e:
+                        if "Debitorkonto findes ikke" in e.text:
+                            prisme_request_2: InvoiceCustomTableRequest = (
+                                prisme_request_1.create_custom_table_request()
+                            )
+                            # Create debitorkonto
+                            client.process_service(prisme_request_2)
+                            # Try again
+                            response = client.process_service(prisme_request_1)
+                        else:
+                            raise
+                except Exception as e:  # pragma: no cover
+                    print(e)
+                    logger.exception(e)
+                    # Couldn't send right now, keep in queue
+                else:
+                    if type(response) is HavneafgiftInvoiceResponse:
+                        self.prisme_recid = response.rec_id
+                    self.invoice()
+                    self.save(update_fields=("status", "prisme_recid"))
 
 
 class CruiseTaxForm(HarborDuesForm):
@@ -1270,8 +1285,8 @@ class CruiseTaxForm(HarborDuesForm):
 
     @property
     def harbor_tax_type_account(self):
-        type_account: Dict[str, str | int] = settings.PRISME["type_account"]  # type: ignore[assignment, annotation-unchecked]  # noqa: E501
         if self.vessel_type == ShipType.CRUISE:
+            type_account: Dict[str, str | int] = settings.PRISME["type_account"]  # type: ignore[assignment, annotation-unchecked]  # noqa: E501
             if self.gross_tonnage < 30000:
                 return type_account["cruise_lt_30k"]
             else:
