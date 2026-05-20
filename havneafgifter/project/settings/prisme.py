@@ -4,6 +4,7 @@ PRISME = {
     "customer_group": os.environ.get("PRISME_CUSTOMER_GROUP", "000000"),
     "currency_code": os.environ.get("PRISME_CURRENCY_CODE", "DKK"),
     "department_recid": os.environ.get("PRISME_DEPARTMENT_RECID"),
+    "department_recid_ext": os.environ.get("PRISME_DEPARTMENT_RECID_EXT"),
     "invoice_ean": os.environ.get("PRISME_INVOICE_EAN"),
     "order_form_num": os.environ.get("PRISME_ORDER_FORM_NUM"),
     "contact_person_id": os.environ.get("PRISME_CONTACT_PERSON_ID"),
