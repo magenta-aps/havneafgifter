@@ -29,6 +29,20 @@ class SendResult:
     msg: EmailMessage
 
 
+def get_tax_authority_recipient() -> MailRecipient | None:
+    if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
+        return MailRecipient(
+            name=gettext("Tax Authority"),
+            email=settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
+            object=None,
+        )
+    else:
+        logger.info(
+            "Skattestyrelsen email not configured, excluding from mail recipients",
+        )
+        return None
+
+
 class NotificationMail:
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         self.form: HarborDuesForm | CruiseTaxForm = form
@@ -81,19 +95,6 @@ class NotificationMail:
             # No agent - this form must have been submitted by a ship user
             return self.get_ship_recipient()
 
-    def get_tax_authority_recipient(self) -> MailRecipient | None:
-        if settings.EMAIL_ADDRESS_SKATTESTYRELSEN:
-            return MailRecipient(
-                name=gettext("Tax Authority"),
-                email=settings.EMAIL_ADDRESS_SKATTESTYRELSEN,
-                object=None,
-            )
-        else:
-            logger.info(
-                "Skattestyrelsen email not configured, excluding from mail recipients",
-            )
-            return None
-
     def send_email(self) -> SendResult:
         logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
         msg = EmailMessage(
@@ -141,7 +142,7 @@ class OnSubmitForReviewMail(NotificationMail):
     def __init__(self, form: HarborDuesForm | CruiseTaxForm, user: User | None = None):
         super().__init__(form, user)
         self.add_recipient(self.get_shipping_agent_or_ship_recipient())
-        self.add_recipient(self.get_tax_authority_recipient())
+        self.add_recipient(get_tax_authority_recipient())
 
     @property
     def mail_body(self):
@@ -246,3 +247,37 @@ class OnSendToAgentMail(NotificationMail):
     @property
     def success_message(self) -> str:
         return gettext("This form was successfully sent to your agent")
+
+
+class OnNewUserMail(NotificationMail):
+    def __init__(self, user: User):
+        self.user = user
+        self.recipients: list[MailRecipient] = []
+        self.add_recipient(get_tax_authority_recipient())
+
+    def send_email(self) -> SendResult:
+        logger.info("Sending email %r to %r", self.mail_subject, self.mail_recipients)
+        msg = EmailMessage(
+            self.mail_subject,
+            self.mail_body,
+            from_email=settings.EMAIL_SENDER,
+            bcc=self.mail_recipients,
+        )
+        result = msg.send(fail_silently=False)
+
+        return SendResult(mail=self, succeeded=result == 1, msg=msg)
+
+    @property
+    def mail_body(self):
+        return (
+            f"Ny skibsbruger oprettet: {self.user.username}"
+            + f" med email-adresse {self.user.email}"
+        )
+
+    @property
+    def mail_subject(self):
+        return f"Talippoq - ny bruger {self.user.username}"
+
+    @property
+    def success_message(self) -> str:
+        return "The Greenlandic Tax Authority has been notified of the new vessel"
