@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO
 from typing import Dict, List
@@ -23,7 +23,7 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import F, Q, QuerySet
 from django.db.models.signals import post_save
-from django.template.defaultfilters import date
+from django.template.defaultfilters import date as tmpl_date
 from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -806,7 +806,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         # "00001" is the primary key, "APR" is the month, and "2024" is the year.
         # Always use English locale to ensure consistent formatting of the month names.
         with translation.override("en"):
-            return f"{self.pk:05}{date(self.date, 'bY').upper()}"
+            return f"{self.pk:05}{tmpl_date(self.date, 'bY').upper()}"
 
     @property
     def has_port_of_call(self) -> bool:
@@ -1109,19 +1109,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def invoice_due_date(self):
-        override_due_date = settings.PRISME.get(  # type: ignore[misc]
-            "override_due_date"
-        )
-        if override_due_date:
-            return datetime.strptime(override_due_date, "%Y-%m-%d").date()
-        return self.date + timedelta(days=14)
+        return self.invoice_date + timedelta(days=14)
 
     @property
     def invoice_date(self):
-        override_date = settings.PRISME.get("override_date")  # type: ignore[misc]
-        if override_date:
-            return datetime.strptime(override_date, "%Y-%m-%d").date()
-        return self.date
+        return date.today()
+        # return self.date
 
     def send_invoice(self):
         if self.status == Status.NEW:
