@@ -1109,19 +1109,12 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     @property
     def invoice_due_date(self):
-        override_due_date = settings.PRISME.get(  # type: ignore[misc]
-            "override_due_date"
-        )
-        if override_due_date:
-            return datetime.strptime(override_due_date, "%Y-%m-%d").date()
-        return self.date + timedelta(days=14)
+        return self.invoice_date + timedelta(days=14)
 
     @property
     def invoice_date(self):
-        override_date = settings.PRISME.get("override_date")  # type: ignore[misc]
-        if override_date:
-            return datetime.strptime(override_date, "%Y-%m-%d").date()
-        return self.date
+        return date.today()
+        # return self.date
 
     def send_invoice(self):
         if self.status == Status.NEW:
