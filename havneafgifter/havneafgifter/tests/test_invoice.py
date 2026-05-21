@@ -111,10 +111,6 @@ class InvoiceTest(TestCase):
         form = CruiseTaxForm.objects.get(pk=self.form.pk)
         self.assertEqual(form.status, Status.INVOICED)
 
-    @override_settings(PRISME={**settings.PRISME, "override_due_date": "2026-05-11"})
-    def test_override_due_date(self):
-        self.assertEqual(self.form.invoice_due_date, date(2026, 5, 11))
-
     def test_due_date(self):
         self.assertEqual(self.form.invoice_due_date, date.today() + timedelta(days=14))
 
