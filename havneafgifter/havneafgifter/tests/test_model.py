@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
@@ -700,6 +701,153 @@ class TestHarborDuesForm(ParametrizedTestCase, HarborDuesFormTestMixin, TestCase
             **{**self.harbor_dues_form_data, "vessel_owner": "testcompany1"}
         )
         self.assertEqual(harbor_tax_form.harbor_tax_type_account, "0004")
+
+    def test_update_missing_cvr_on_username_change(self):
+        form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.assertEqual(form.status, Status.NEW)
+
+        # Change username so we can't find him by IMO
+        self.ship_user.username = "something_else"
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.ship_user.save()
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.MISSING_CVR)
+
+        # Change username back so we can find him by IMO
+        self.ship_user.username = form.vessel_imo
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.ship_user.save()
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.NEW)
+
+    def test_update_missing_cvr_on_user_delete(self):
+        form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.assertEqual(form.status, Status.NEW)
+
+        # Delete user so we can't find him by IMO
+        user_pk = self.ship_user.pk
+        user_username = self.ship_user.username
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.ship_user.delete()
+            self.assertFalse(User.objects.filter(pk=user_pk).exists())
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.MISSING_CVR)
+
+        # Recreate user so we can find him by IMO
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.ship_user = User.objects.create(
+                username=user_username, organization="Mary", cvr="12345678"
+            )
+            self.ship_user.groups.add(Group.objects.get(name="Ship"))
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.NEW)
+
+    def test_update_missing_cvr_on_user_change_group(self):
+        form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.assertEqual(form.status, Status.NEW)
+        ship_group = Group.objects.get(name="Ship")
+
+        # Remove user from Ship group so we can't find him by IMO
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.ship_user.groups.remove(ship_group)
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.MISSING_CVR)
+
+        # Re-add user to Ship group so we can find him by IMO
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.ship_user.groups.add(ship_group)
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.NEW)
+
+    def test_update_missing_cvr_on_shippingagent_change_cvr(self):
+        form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.shipping_agent.cvr = "12345678"
+        self.shipping_agent.save()
+        self.ship_user.cvr = None
+        self.ship_user.save()
+        self.assertEqual(form.status, Status.NEW)
+
+        # Remove shipping agent cvr so ship doesn't find it
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.shipping_agent.cvr = None
+            self.shipping_agent.save()
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.MISSING_CVR)
+
+        # Re-add user to Ship group so we can find him by IMO
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.shipping_agent.cvr = "12345678"
+            self.shipping_agent.save()
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.NEW)
+
+    def test_update_missing_cvr_on_shippingagent_delete(self):
+        form = HarborDuesForm.objects.create(
+            **{**self.harbor_dues_form_data, "gross_tonnage": 20000}
+        )
+        self.shipping_agent.cvr = "12345678"
+        self.shipping_agent.save()
+        self.ship_user.cvr = None
+        self.ship_user.save()
+        self.assertEqual(form.status, Status.NEW)
+
+        # Delete shipping agent so we can't find him by IMO
+        shipping_agent_pk = self.shipping_agent.pk
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.shipping_agent.delete()
+            self.assertFalse(
+                ShippingAgent.objects.filter(pk=shipping_agent_pk).exists()
+            )
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.MISSING_CVR)
+
+        # Recreate shipping agent so we can find him by IMO
+        with patch.object(
+            HarborDuesForm, "check_cvr", wraps=HarborDuesForm.check_cvr
+        ) as mock_check_cvr:
+            self.shipping_agent = ShippingAgent.objects.create(
+                name="Agent", email="shipping@example.org", cvr="12345678"
+            )
+            form.shipping_agent = self.shipping_agent
+            form.save()
+            mock_check_cvr.assert_called()
+        form = HarborDuesForm.objects.get(pk=form.pk)
+        self.assertEqual(form.status, Status.NEW)
 
 
 class TestCruiseTaxForm(HarborDuesFormTestMixin, TestCase):
