@@ -849,6 +849,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         # This is called when:
         # - a User updates its username or cvr
         # - a User with an imo-number as username changes Group
+        # - a User is deleted
         # - a ShippingAgent changes cvr
         # - a ShippingAgent is deleted
         # - a HarborDuesForm changes shipping_agent or vessel_imo
