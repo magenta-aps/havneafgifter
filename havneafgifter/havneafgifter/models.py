@@ -53,10 +53,10 @@ def get_changed_fields(new: models.Model) -> Set[str]:
     cls = new.__class__
     old = None
     if new.pk:
-        old = cls.objects.filter(pk=new.pk).first()
+        old = cls.objects.filter(pk=new.pk).first()  # type: ignore[attr-defined]
     if old is None:
         old = cls()
-    for field in cls._meta._get_fields(reverse=False):
+    for field in cls._meta._get_fields(reverse=False):  # type: ignore[attr-defined]
         if not new.pk and (field.many_to_many or field.one_to_many):
             continue
         field_name = field.name
@@ -834,7 +834,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     def get_cvr(self) -> str | None:
         if self.shipping_agent is not None and self.shipping_agent.cvr is not None:
-            return self.shipping_agent.cvr
+            return str(self.shipping_agent.cvr).zfill(8)
         else:
             user = self.get_user_by_imo()
             if user:
