@@ -375,7 +375,7 @@ class Nationality(models.TextChoices):
 class Status(models.TextChoices):
     DRAFT = ("DRAFT", _("Draft"))
     NEW = ("NEW", _("Awaiting"))  # NEW is kept to align with other products
-    MISSING_CVR = ("NEED_CVR", _("Missing CVR"))
+    MISSING_CVR = ("MISSING_CVR", _("Missing CVR"))
     APPROVED = ("APPROVED", _("Approved"))
     REJECTED = ("REJECTED", _("Rejected"))
     # TODO: DONE or something similar will be introduced when the system
