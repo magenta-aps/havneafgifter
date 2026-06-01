@@ -55,7 +55,7 @@ pytz==2024.2
 requests==2.33.1
 setuptools==80.10.2
 six==1.17.0
-soupsieve==2.8.3
+soupsieve==2.8.4
 sqlparse==0.5.5
 tablib==3.9.0
 tinycss2==1.5.1
