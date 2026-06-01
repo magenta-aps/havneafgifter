@@ -34,7 +34,7 @@ fonttools==4.63.0
 gl-prisme==0.2.5
 gunicorn==22.0.0
 html5lib==1.1
-idna==3.11
+idna==3.17
 Jinja2==3.1.6
 lxml==5.4.0
 MarkupSafe==3.0.3
