@@ -22,6 +22,8 @@ $rejected: darken($tertiary, 30); //#4d2111;
 $rejected-light: #eea78e;
 $invoiced: #233915;
 $invoiced-light: #b9dfa3;
+$missing-cvr: #800000;
+$missing-cvr-light: #ff8080;
 
 // Alert levels
 $success: $approved-light;
@@ -242,6 +244,10 @@ footer a .material-icons {
 .badge-invoiced {
   background-color: $invoiced-light;
   color: $invoiced;
+}
+.badge-missing-cvr {
+  background-color: $missing-cvr-light;
+  color: $missing-cvr;
 }
 
 // Tables
