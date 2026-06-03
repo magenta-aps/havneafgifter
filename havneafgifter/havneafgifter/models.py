@@ -5,7 +5,7 @@ import re
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group
@@ -22,7 +22,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import F, Q, QuerySet
-from django.db.models.signals import post_save
+from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.template.defaultfilters import date as tmpl_date
 from django.utils import translation
 from django.utils.functional import cached_property
@@ -46,6 +46,26 @@ from havneafgifter.data import DateTimeRange
 logger = logging.getLogger(__name__)
 
 pdf_storage = FileSystemStorage(location=settings.STORAGE_PDF)
+
+
+def get_changed_fields(new: models.Model) -> Set[str]:
+    changed = set()
+    cls = new.__class__
+    old = None
+    if new.pk:
+        old = cls.objects.filter(pk=new.pk).first()  # type: ignore[attr-defined]
+    if old is None:
+        old = cls()
+    for field in cls._meta._get_fields(reverse=False):  # type: ignore[attr-defined]
+        if not new.pk and (field.many_to_many or field.one_to_many):
+            continue
+        field_name = field.name
+        try:
+            if getattr(old, field_name) != getattr(new, field_name):
+                changed.add(field_name)
+        except AttributeError:
+            pass
+    return changed
 
 
 class User(AbstractUser):
@@ -224,6 +244,32 @@ class User(AbstractUser):
 
         return False
 
+    def save(self, *args, **kwargs):
+        changed = get_changed_fields(self)
+        super().save(*args, **kwargs)
+        if "username" in changed or "cvr" in changed:
+            HarborDuesForm.check_cvr()
+
+    @staticmethod
+    def on_m2m_change(sender, instance, model, action, *args, **kwargs):
+        if (
+            model == Group
+            and imo_validator_bool(instance.username)
+            and action in ("post_add", "post_remove", "post_clear")
+        ):
+            # If there's a chance that the User was added or removed
+            # from the group "Ship", associated HarborDuesForms may be affected
+            HarborDuesForm.check_cvr()
+
+    @staticmethod
+    def on_delete(sender, instance, *args, **kwargs):
+        if imo_validator_bool(instance.username):
+            HarborDuesForm.check_cvr()
+
+
+m2m_changed.connect(User.on_m2m_change, sender=User.groups.through)
+post_delete.connect(User.on_delete, sender=User)
+
 
 class PermissionsMixin(models.Model):
     class Meta:
@@ -329,6 +375,7 @@ class Nationality(models.TextChoices):
 class Status(models.TextChoices):
     DRAFT = ("DRAFT", _("Draft"))
     NEW = ("NEW", _("Awaiting"))  # NEW is kept to align with other products
+    MISSING_CVR = ("MISSING_CVR", _("Missing CVR"))
     APPROVED = ("APPROVED", _("Approved"))
     REJECTED = ("REJECTED", _("Rejected"))
     # TODO: DONE or something similar will be introduced when the system
@@ -408,6 +455,19 @@ class ShippingAgent(PermissionsMixin, models.Model):
 
     def _has_permission(self, user: User, action: str, from_group: bool) -> bool:
         return action == "change" and not from_group and user.shipping_agent == self
+
+    def save(self, *args, **kwargs):
+        changed = get_changed_fields(self)
+        super().save(*args, **kwargs)
+        if "cvr" in changed:
+            HarborDuesForm.check_cvr()
+
+    @staticmethod
+    def on_delete(sender, instance, *args, **kwargs):
+        HarborDuesForm.check_cvr()
+
+
+post_delete.connect(ShippingAgent.on_delete)
 
 
 def imo_validator(value: str):
@@ -756,11 +816,62 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         self._rejection_reason = reason
         self._change_reason = Status.REJECTED.label
 
+    @transition(
+        field=status,
+        source=Status.NEW,
+        target=Status.MISSING_CVR,
+    )
+    def need_cvr(self):
+        self._change_reason = Status.MISSING_CVR.label
+
+    @transition(
+        field=status,
+        source=Status.MISSING_CVR,
+        target=Status.NEW,
+    )
+    def found_cvr(self):
+        self._change_reason = Status.NEW.label
+
+    def get_cvr(self) -> str | None:
+        if self.shipping_agent is not None and self.shipping_agent.cvr is not None:
+            return str(self.shipping_agent.cvr).zfill(8)
+        else:
+            user = self.get_user_by_imo()
+            if user:
+                return user.cvr
+        return None
+
+    @staticmethod
+    def check_cvr():
+        # Checks all forms that need a CVR
+        # (either they have it or don't, but they do need it for invoicing)
+        # Make sure their state reflects the presence or absence of a CVR
+        # This is called when:
+        # - a User updates its username or cvr
+        # - a User with an imo-number as username changes Group
+        # - a User is deleted
+        # - a ShippingAgent changes cvr
+        # - a ShippingAgent is deleted
+        # - a HarborDuesForm changes shipping_agent or vessel_imo
+        for form in HarborDuesForm.objects.filter(
+            status__in=(Status.NEW, Status.MISSING_CVR)
+        ):
+            cvr = form.get_cvr()
+            if form.status == Status.NEW and cvr is None:
+                form.need_cvr()
+                form.save(update_fields=("status",))
+            elif form.status == Status.MISSING_CVR and cvr is not None:
+                form.found_cvr()
+                form.save(update_fields=("status",))
+
     def save(self, *args, **kwargs):
         initial = self.pk is None
+        changed = get_changed_fields(self)
         super().save(*args, **kwargs)
         if initial:
             update_change_reason(self, Status.DRAFT.label)
+        if "shipping_agent" in changed or "vessel_imo" in changed:
+            HarborDuesForm.check_cvr()
 
     def __str__(self) -> str:
         port_of_call = self.port_of_call or _("no port of call")
@@ -1118,15 +1229,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
     def send_invoice(self):
         if self.status == Status.NEW:
-            cvr = None
-
-            if self.shipping_agent is not None and self.shipping_agent.cvr is not None:
-                cvr = self.shipping_agent.cvr
-
-            else:
-                user = self.get_user_by_imo()
-                if user:
-                    cvr = user.cvr
+            cvr = self.get_cvr()
 
             if cvr:
 

@@ -66,7 +66,9 @@ class HarborDuesFormTestMixin:
             username="shipping_agent", shipping_agent=cls.shipping_agent
         )
         cls.shipping_agent_user.groups.add(Group.objects.get(name="Shipping"))
-        cls.ship_user = User.objects.create(username="9074729", organization="Mary")
+        cls.ship_user = User.objects.create(
+            username="9074729", organization="Mary", cvr="12345678"
+        )
         cls.ship_user.groups.add(Group.objects.get(name="Ship"))
         cls.unprivileged_user = User.objects.create(username="unprivileged")
 
