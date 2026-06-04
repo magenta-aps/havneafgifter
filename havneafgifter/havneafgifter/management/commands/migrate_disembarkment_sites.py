@@ -41,6 +41,7 @@ class Command(BaseCommand):
             "nutaarmiut": 10779,
             "udenfor kommuneinddeling": 19000,
             "pituffik": 19078,
+            "disembarkation outside of populated area": 10700,
         },
         955: {
             "kommune kujalleq fælles": 10300,
@@ -77,6 +78,20 @@ class Command(BaseCommand):
             "igaliku": 10332,
             "narsarsuaq": 10333,
             "qassiarsuk": 10335,
+            "narsarmijit": 10300,
+            "itilleq": 10300,
+            "qanisartuut": 10300,
+            "qaqortukulooq": 10300,
+            "sissarluttoq": 10300,
+            "tasermiut fjord": 10300,
+            "uunartoq": 10300,
+            "akilliit": 10300,
+            "silasiorfik ikerasassuaq (prins christians sund)": 10311,
+            "kangikitsoq nanortalik": 10300,
+            "qajiitaq": 10300,
+            "qaleralliit imaat": 10300,
+            "kangikitsoq aappilattoq": 10300,
+            "disembarkation outside of populated area": 10300,
         },
         956: {
             "kommuneqarfik sermersooq fælles": 10400,
@@ -116,6 +131,7 @@ class Command(BaseCommand):
             "kangerlussuaq": 10582,
             "sarfannguaq": 10583,
             "sarfannguit": 10583,
+            "attamik": 10500,
         },
         959: {
             "kommune qeqertalik fælles": 10600,
@@ -132,6 +148,7 @@ class Command(BaseCommand):
             "niaqornaarsuk": 10696,
             "ikerasarrsuk": 10698,
             "ikerasaarsuk": 10698,
+            "disembarkation outside of populated area": 10600,
         },
     }
 
