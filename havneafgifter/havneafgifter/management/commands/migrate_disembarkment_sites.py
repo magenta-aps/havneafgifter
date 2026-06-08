@@ -84,7 +84,7 @@ class Command(BaseCommand):
             "qaqortukulooq": 10300,
             "sissarluttoq": 10300,
             "tasermiut fjord": 10300,
-            "uunartoq": 10300,
+            "uun artoq": 10300,
             "akilliit": 10300,
             "silasiorfik ikerasassuaq (prins christians sund)": 10311,
             "kangikitsoq nanortalik": 10300,
