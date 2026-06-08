@@ -525,7 +525,7 @@
     "model": "havneafgifter.disembarkmentsite",
     "pk": 165,
     "fields": {
-        "name": "Qlerallit Imaat",
+        "name": "Qaleralliit Imaat",
         "municipality": 955
     }
 },
