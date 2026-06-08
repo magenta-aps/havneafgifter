@@ -38,22 +38,22 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='harborduesform',
-            constraint=models.CheckConstraint(check=models.Q(('vessel_type', 'CRUISE'), ('port_of_call__isnull', False), _connector='OR'), name='port_of_call_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
+            constraint=models.CheckConstraint(condition=models.Q(('vessel_type', 'CRUISE'), ('port_of_call__isnull', False), _connector='OR'), name='port_of_call_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
         ),
         migrations.AddConstraint(
             model_name='harborduesform',
-            constraint=models.CheckConstraint(check=models.Q(('vessel_type', 'CRUISE'), ('gross_tonnage__isnull', False), _connector='OR'), name='gross_tonnage_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
+            constraint=models.CheckConstraint(condition=models.Q(('vessel_type', 'CRUISE'), ('gross_tonnage__isnull', False), _connector='OR'), name='gross_tonnage_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
         ),
         migrations.AddConstraint(
             model_name='harborduesform',
-            constraint=models.CheckConstraint(check=models.Q(('vessel_type', 'CRUISE'), ('datetime_of_arrival__isnull', False), _connector='OR'), name='datetime_of_arrival_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
+            constraint=models.CheckConstraint(condition=models.Q(('vessel_type', 'CRUISE'), ('datetime_of_arrival__isnull', False), _connector='OR'), name='datetime_of_arrival_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
         ),
         migrations.AddConstraint(
             model_name='harborduesform',
-            constraint=models.CheckConstraint(check=models.Q(('vessel_type', 'CRUISE'), ('datetime_of_departure__isnull', False), _connector='OR'), name='datetime_of_departure_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
+            constraint=models.CheckConstraint(condition=models.Q(('vessel_type', 'CRUISE'), ('datetime_of_departure__isnull', False), _connector='OR'), name='datetime_of_departure_cannot_be_null_for_non_cruise_ships', violation_error_code='constraint_violated'),
         ),
         migrations.AddConstraint(
             model_name='harborduesform',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('datetime_of_arrival__isnull', False), ('datetime_of_departure__isnull', False)), models.Q(('datetime_of_arrival__isnull', True), ('datetime_of_departure__isnull', True)), _connector='OR'), name='datetime_of_arrival_and_departure_must_both_be_present_or_both_be_null', violation_error_code='constraint_violated'),
+            constraint=models.CheckConstraint(condition=models.Q(models.Q(('datetime_of_arrival__isnull', False), ('datetime_of_departure__isnull', False)), models.Q(('datetime_of_arrival__isnull', True), ('datetime_of_departure__isnull', True)), _connector='OR'), name='datetime_of_arrival_and_departure_must_both_be_present_or_both_be_null', violation_error_code='constraint_violated'),
         ),
     ]

@@ -590,7 +590,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(status=Status.DRAFT)
                     | (Q(vessel_type=ShipType.CRUISE) | Q(nationality__isnull=False))
                 ),
@@ -599,7 +599,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             ),
             # `port_of_call` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(status=Status.DRAFT)
                     | (Q(vessel_type=ShipType.CRUISE) | Q(port_of_call__isnull=False))
                 ),
@@ -608,7 +608,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             ),
             # `gross_tonnage` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(status=Status.DRAFT)
                     | (Q(vessel_type=ShipType.CRUISE) | Q(gross_tonnage__isnull=False))
                 ),
@@ -617,13 +617,15 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             ),
             # `datetime_of_arrival` can only be left blank/NULL for drafts
             models.CheckConstraint(
-                check=(Q(status=Status.DRAFT) | Q(datetime_of_arrival__isnull=False)),
+                condition=(
+                    Q(status=Status.DRAFT) | Q(datetime_of_arrival__isnull=False)
+                ),
                 name="datetime_of_arrival_cannot_be_null_for_non_drafts",
                 violation_error_code="constraint_violated",  # type: ignore
             ),
             # `datetime_of_departure` can only be left blank/NULL for cruise ships
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(status=Status.DRAFT)
                     | (
                         Q(vessel_type=ShipType.CRUISE)
@@ -636,7 +638,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
             # `datetime_of_departure` must either be present, or must be attached to a
             # no_port_of_call form
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(status=Status.DRAFT)
                     | (
                         # Both present
