@@ -25,7 +25,7 @@ django-stubs==4.2.7
 django-stubs-ext==5.2.9
 django-tables2==2.9.0
 django-tempus-dominus==5.1.2.17
-django-weasyprint==2.4.0
+django-weasyprint==2.5.0
 django_csp==4.0
 django_compressor==4.6.0
 django-libsass==0.9
