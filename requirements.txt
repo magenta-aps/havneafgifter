@@ -57,7 +57,7 @@ setuptools==80.10.2
 six==1.17.0
 soupsieve==2.9.1
 sqlparse==0.5.5
-tablib==3.9.0
+tablib==3.10.0
 tinycss2==1.5.1
 types-pytz==2024.2.0.20241221
 types-PyYAML==6.0.12.20260724
