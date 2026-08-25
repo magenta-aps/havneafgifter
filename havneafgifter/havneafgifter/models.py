@@ -587,6 +587,8 @@ class Reason(models.Model):
 
 
 class HarborDuesForm(PermissionsMixin, models.Model):
+    # Beware of footguns: If you mean to process something as a CruiseTaxForm,
+    # make sure to work on self.cruisetaxform
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -1179,7 +1181,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     @property
     def harbor_tax_type_account(self):
         if self.vessel_type == ShipType.CRUISE:
-            return self.cruisetaxform.harbor_tax_type_account
+            return self.cruisetaxform.harbor_tax_type_account  # pragma: no cover
         owner = self.vessel_owner.strip().lower()
         for owner_key, owner_account in (
             settings.PRISME["type_account"].get("by_owner", {}).items()
@@ -1228,6 +1230,9 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         # return self.date
 
     def send_invoice(self):
+        if self.vessel_type == ShipType.CRUISE and type(self) is HarborDuesForm:
+            return self.cruisetaxform.send_invoice()
+
         if self.status == Status.NEW:
             cvr = self.get_cvr()
 
