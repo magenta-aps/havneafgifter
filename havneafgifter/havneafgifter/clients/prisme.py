@@ -166,25 +166,27 @@ class PrismeClient(Prisme):
     @staticmethod
     def mock_service(
         request_object: HavneafgiftInvoiceRequest, debug_context: Any = None
-    ) -> HavneafgiftInvoiceResponse:  # pragma: no cover
+    ) -> List[HavneafgiftInvoiceResponse]:  # pragma: no cover
         print("Mock call to Prisme:")
         print(request_object.xml)
 
         PrismeClient.mock_recid_counter += 1
-        return HavneafgiftInvoiceResponse(
-            request_object,
-            f"""
+        return [
+            HavneafgiftInvoiceResponse(
+                request_object,
+                f"""
                 <CustInvoiceTable>
                 <RecId>{PrismeClient.mock_recid_counter}</RecId>
                 <HarborTaxIdFUJ>{request_object.afgift_id}</HarborTaxIdFUJ>
                 <InvoiceId>{PrismeClient.mock_recid_counter}</InvoiceId>
                 </CustInvoiceTable>
                 """,
-        )
+            )
+        ]
 
     def process_service(
         self, request_object: HavneafgiftInvoiceRequest, debug_context: Any = None
-    ):
+    ) -> List[ResponseType]:
         if self.mock:
             return self.mock_service(request_object, debug_context)
         else:
