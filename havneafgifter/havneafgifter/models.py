@@ -783,6 +783,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
         null=True,
         blank=True,
     )
+    prisme_rec_id = models.BigIntegerField(null=True, blank=True)
 
     @transition(
         field=status,
@@ -1256,7 +1257,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
 
                     client = PrismeClient.from_settings()
                     try:
-                        response = client.process_service(prisme_request_1)
+                        responses = client.process_service(prisme_request_1)
                     except PrismeException as e:
                         if "Debitorkonto findes ikke" in e.text:
                             prisme_request_2: InvoiceCustomTableRequest = (
@@ -1265,7 +1266,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                             # Create debitorkonto
                             client.process_service(prisme_request_2)
                             # Try again
-                            response = client.process_service(prisme_request_1)
+                            responses = client.process_service(prisme_request_1)
                         else:
                             raise
                 except Exception as e:  # pragma: no cover
@@ -1273,10 +1274,11 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                     logger.exception(e)
                     # Couldn't send right now, keep in queue
                 else:
-                    if type(response) is HavneafgiftInvoiceResponse:
-                        self.prisme_recid = response.rec_id
+                    for response in responses:
+                        if type(response) is HavneafgiftInvoiceResponse:
+                            self.prisme_rec_id = response.rec_id
                     self.invoice()
-                    self.save(update_fields=("status", "prisme_recid"))
+                    self.save(update_fields=("status", "prisme_rec_id"))
 
 
 class CruiseTaxForm(HarborDuesForm):
