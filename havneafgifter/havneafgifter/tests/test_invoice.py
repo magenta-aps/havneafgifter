@@ -19,6 +19,7 @@ from havneafgifter.models import (
     Disembarkment,
     DisembarkmentSite,
     DisembarkmentTaxRate,
+    HarborDuesForm,
     Nationality,
     Port,
     PortAuthority,
@@ -203,6 +204,33 @@ class InvoiceTest(TestCase):
         ]
         self.form.submit()
         self.form.send_invoice()
+        mock_process_service.assert_called()
+        invoice_request = mock_process_service.call_args[0][0]
+        self.assertIsInstance(invoice_request, HavneafgiftInvoiceRequest)
+        data = invoice_request.dict
+        self.assertEqual(data["HarborTaxIdFUJ"], self.form.pk)
+        self.assertEqual(len(invoice_request.lines), 3)
+        self.assertEqual(
+            sum([line.quantity * line.unit_price for line in invoice_request.lines]),
+            Decimal("15570000.00"),
+        )
+
+    @override_settings(PRISME={**settings.PRISME, "mock": False})
+    @patch.object(Prisme, "process_service")
+    def test_send_invoice_2(self, mock_process_service):
+        mock_return = MagicMock()
+        mock_return.rec_id = 1
+        mock_return.afgift_id = 1
+        mock_return.invoice_id = 1
+        mock_process_service.side_effect = [
+            PrismeException(250, "Debitorkonto findes ikke", {}),
+            mock_return,
+            mock_return,
+        ]
+        self.form.submit()
+        self.form.save()
+        form = HarborDuesForm.objects.get(pk=self.form.pk)
+        form.send_invoice()
         mock_process_service.assert_called()
         invoice_request = mock_process_service.call_args[0][0]
         self.assertIsInstance(invoice_request, HavneafgiftInvoiceRequest)
