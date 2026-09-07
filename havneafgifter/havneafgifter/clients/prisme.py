@@ -20,6 +20,7 @@ class HavneafgiftInvoiceLine(InvoiceLine):
         text: str,
         locality_code: int | str,
         type_account: int | str,
+        beneficiary: int | str,
     ):
         prisme_settings = settings.PRISME  # type: ignore[misc]
         super().__init__(
@@ -34,7 +35,7 @@ class HavneafgiftInvoiceLine(InvoiceLine):
                 "ArtsKontoplan": str(type_account).zfill(9),
                 "Sted": str(locality_code).zfill(6),
             },
-            beneficiary=prisme_settings["beneficiary"],
+            beneficiary=beneficiary,
             project=prisme_settings["project_name"],
             project_category=prisme_settings["project_category_id"],
         )
