@@ -1202,6 +1202,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
     def invoice_lines(self) -> List[HavneafgiftInvoiceLine]:
         tax: dict = self.calculate_harbour_tax(True)
         lines: List[HavneafgiftInvoiceLine] = []
+        cvr: str = self.get_cvr() or ""
         if self.port_of_call is not None:
             date_format = "%Y.%m.%d %H:%M"
             for item in tax["details"]:
@@ -1217,7 +1218,7 @@ class HarborDuesForm(PermissionsMixin, models.Model):
                         f"{end_date.strftime(date_format)}",
                         locality_code=self.port_of_call.prisme_code_str,
                         type_account=self.harbor_tax_type_account,
-                        beneficiary=self.get_cvr(),
+                        beneficiary=cvr,
                     )
                 )
         return lines
@@ -1404,7 +1405,7 @@ class CruiseTaxForm(HarborDuesForm):
         type_account: Dict[str, str | int] = settings.PRISME[
             "type_account"
         ]  # type: ignore[assignment]
-        cvr = self.get_cvr()
+        cvr: str = self.get_cvr() or ""
 
         passenger_tax = self.calculate_passenger_tax(True)
         if passenger_tax["passenger_tax"] is not None and self.port_of_call is not None:
