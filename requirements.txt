@@ -31,7 +31,7 @@ django_compressor==4.6.0
 django-libsass==0.9
 elementpath==4.8.0
 fonttools==4.63.0
-gl-prisme==0.2.5
+gl-prisme==0.2.6
 gunicorn==22.0.0
 html5lib==1.1
 idna==3.18
