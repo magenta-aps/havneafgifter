@@ -24,7 +24,4 @@ INSTALLED_APPS = [
     "compressor",
 ]
 if not TESTING:
-    INSTALLED_APPS = [
-        *INSTALLED_APPS,
-        "debug_toolbar",
-    ]
+    INSTALLED_APPS.append("debug_toolbar")
