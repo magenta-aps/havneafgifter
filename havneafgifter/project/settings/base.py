@@ -45,3 +45,12 @@ APPROVER_NO_PORT_OF_CALL = os.environ.get(
 
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
+
+if DEBUG:
+    import socket
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+        "127.0.0.1",
+        "10.0.2.2",
+    ]

@@ -1,5 +1,6 @@
 from typing import List
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import URLPattern, URLResolver, include, path
@@ -47,3 +48,7 @@ urlpatterns: List[URLResolver | URLPattern] = [
         name="password_reset_complete",
     ),
 ]
+if not settings.TESTING:  # type: ignore[misc]
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()
