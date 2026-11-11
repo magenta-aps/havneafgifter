@@ -54,7 +54,7 @@ COPY --chown=havneafgifter:havneafgifter ./havneafgifter /app
 RUN chown -R havneafgifter:havneafgifter /app
 COPY ./docker/entrypoint.sh /entrypoint.sh
 EXPOSE 8000
-USER havneafgifter
+USER 75170
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
 RUN django-admin compilemessages --locale=kl --locale=da --locale=en
@@ -63,7 +63,7 @@ RUN django-admin compilemessages --locale=kl --locale=da --locale=en
 COPY --chown=havneafgifter:havneafgifter ./dev-environment/havneafgifter.env havneafgifter.env
 # hadolint ignore=SC1091
 RUN set -a && \
-    source havneafgifter.env && \
+    . havneafgifter.env && \
     export DJANGO_DEBUG=False && \
     set +a && \
     python manage.py collectstatic --verbosity=0 --no-input --clear && \
