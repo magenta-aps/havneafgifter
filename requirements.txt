@@ -1,4 +1,4 @@
-asgiref==3.12.1
+asgiref==3.13.0
 beautifulsoup4==4.15.0
 Brotli==1.2.1
 certifi==2026.10.23
