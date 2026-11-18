@@ -28,7 +28,7 @@ django-tables2==2.9.0
 django-tempus-dominus==5.1.2.17
 django-weasyprint==2.4.0
 django_csp==4.0
-django_compressor==4.6.0
+django_compressor==4.7.0
 django-libsass==0.9
 elementpath==4.8.0
 fonttools==4.63.0
