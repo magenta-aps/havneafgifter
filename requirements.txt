@@ -50,7 +50,7 @@ pydot==3.0.4
 pydyf==0.12.1
 pyOpenSSL==24.3.0
 pyparsing==3.3.3
-pyphen==0.17.2
+pyphen==0.18.1
 python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.34.2
