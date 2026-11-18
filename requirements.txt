@@ -4,7 +4,7 @@ Brotli==1.2.1
 certifi==2026.10.23
 cffi==1.17.1
 charset-normalizer==3.5.2
-coverage==7.15.2
+coverage==7.17.3
 cryptography==43.0.3
 cssselect2==0.10.1
 defusedxml==0.7.1
