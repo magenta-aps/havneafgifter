@@ -33,7 +33,7 @@ django-libsass==0.9
 elementpath==4.8.0
 fonttools==4.68.0
 gl-prisme==0.2.7
-gunicorn==22.0.0
+gunicorn==27.0.1
 html5lib==1.1
 idna==3.20
 Jinja2==3.1.6
