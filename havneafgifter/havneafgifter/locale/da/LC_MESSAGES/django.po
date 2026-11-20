@@ -124,19 +124,19 @@ msgstr "Shippingagent"
 
 #: havneafgifter/forms.py
 msgid "Arrival date/time"
-msgstr ""
+msgstr "Ankomst dato/tid"
 
 #: havneafgifter/forms.py
 msgid "Departure date/time"
-msgstr ""
+msgstr "Afgang dato/tid"
 
 #: havneafgifter/forms.py havneafgifter/models.py
 msgid "Agent reference"
-msgstr ""
+msgstr "Agentreference"
 
 #: havneafgifter/forms.py
 msgid "Only Cruise ships can have No Port of Call"
-msgstr ""
+msgstr "Kun krydstogtsskibe kan være uden ankomsthavn"
 
 #: havneafgifter/forms.py
 msgid "Date of departure cannot be before date of arrival"
@@ -159,7 +159,7 @@ msgstr "Samlet antal passagerer"
 
 #: havneafgifter/forms.py
 msgid "The total number of passengers must be provided"
-msgstr ""
+msgstr "Det samlede antal passagerer skal angives"
 
 #: havneafgifter/forms.py
 msgid ""
@@ -627,7 +627,7 @@ msgstr "Anden landsætning uden for befolkede områder"
 
 #: havneafgifter/models.py
 msgid "Number of passengers at time of disembarkment"
-msgstr ""
+msgstr "Antal passagerer ved landgangstidspunkt"
 
 #: havneafgifter/models.py
 msgid "Tallet er for lille"
@@ -643,7 +643,7 @@ msgstr ""
 
 #: havneafgifter/models.py
 msgid "Tax rate used for existing calculation"
-msgstr ""
+msgstr "Afgiftsrate brugt i eksisterende beregning"
 
 #: havneafgifter/models.py
 #, fuzzy
@@ -717,19 +717,19 @@ msgstr ""
 
 #: havneafgifter/tables.py
 msgid "Arrival after"
-msgstr ""
+msgstr "Ankomst efter"
 
 #: havneafgifter/tables.py
 msgid "Arrival before"
-msgstr ""
+msgstr "Ankomst før"
 
 #: havneafgifter/tables.py
 msgid "Departure after"
-msgstr ""
+msgstr "Afgang efter"
 
 #: havneafgifter/tables.py
 msgid "Departure before"
-msgstr ""
+msgstr "Afgang før"
 
 #: havneafgifter/tables.py
 msgid "Total"
@@ -832,7 +832,7 @@ msgstr "Statistikker"
 #: havneafgifter/templates/havneafgifter/base.html
 #: havneafgifter/templates/havneafgifter/passengerstatistics.html
 msgid "Passengerdata"
-msgstr ""
+msgstr "Passagerdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
 #: havneafgifter/templates/havneafgifter/taxrates_list.html
@@ -849,23 +849,23 @@ msgstr "Redigér stamdata"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "In need of help?"
-msgstr ""
+msgstr "Brug for hjælp?"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "User guide - Cruise ship"
-msgstr ""
+msgstr "Brugermanual - Krydstogstsskib"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "User guide - Freighter ship"
-msgstr ""
+msgstr "Brugermanual - Fragtskib"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "User guide - Foreign fishing vessel"
-msgstr ""
+msgstr "Brugermanual - Udenlandsk fiskerifartøj"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "User guide - Other ships"
-msgstr ""
+msgstr "Brugermanual - Andre skibe"
 
 #: havneafgifter/templates/havneafgifter/base.html
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
@@ -874,7 +874,7 @@ msgstr "Opret ny"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "About Talippoq"
-msgstr ""
+msgstr "Om Talippoq"
 
 #: havneafgifter/templates/havneafgifter/base.html
 msgid "Version"
@@ -1076,7 +1076,7 @@ msgstr "IMO-numre skal være på 7 cifre"
 
 #: havneafgifter/templates/havneafgifter/form_create.html
 msgid "You cannot delete the last item"
-msgstr ""
+msgstr "Du kan ikke slette det sidste element"
 
 #: havneafgifter/templates/havneafgifter/harborduesform_list.html
 msgid "Filters"
@@ -1345,7 +1345,7 @@ msgstr ""
 
 #: havneafgifter/templates/havneafgifter/update_user.html
 msgid "User details"
-msgstr ""
+msgstr "Brugerdetaljer"
 
 #: havneafgifter/templates/havneafgifter/update_vessel.html
 msgid "Edit vessel to report harbour dues"
@@ -1462,6 +1462,7 @@ msgid ""
 "When there is a port of call, it must be included in the list of "
 "disembarkments"
 msgstr ""
+"Når der er en ankomsthavn, skal den inkluderes i listen af landgangssteder"
 
 #: havneafgifter/views.py
 msgid ""
@@ -1487,7 +1488,7 @@ msgstr "Du har ikke de fornødne rettigheder til at se statistik"
 
 #: havneafgifter/views.py
 msgid "You do not have the required permissions to view passenger statistics"
-msgstr ""
+msgstr "Du har ikke de fornødne rettigheder til at se passagerstatistikker"
 
 #: havneafgifter/views.py
 msgid "Du har ikke rettighed til at se denne side."
