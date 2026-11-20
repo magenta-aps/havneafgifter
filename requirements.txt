@@ -30,7 +30,7 @@ django-weasyprint==2.4.0
 django_csp==4.0
 django_compressor==4.7.0
 django-libsass==0.9
-elementpath==4.8.0
+elementpath==5.1.4
 fonttools==4.68.0
 gl-prisme==0.2.7
 gunicorn==22.0.0
